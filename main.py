@@ -263,7 +263,11 @@ class StatusBar(BoxLayout):
         self.add_widget(self.country_input)
         self.country_selected_text = Label(text="", size_hint=(0.2, 1))
         self.add_widget(self.country_selected_text)
-        self.add_widget(Label(text="", size_hint=(0.2, 1)))
+
+        self.add_widget(Label(text="", size_hint=(0.1, 1)))
+
+        self.add_widget(Label(text="Difficulty", size_hint=(0.05, 1)))
+        self.add_widget(Button(text="Normal", size_hint=(0.05, 1)))
 
         self.add_widget(Label(text="Year", size_hint=(0.05, 1)))
         self.year_input = TextInput(text=str(DEFAULT_YEAR), size_hint=(0.05, 1))
