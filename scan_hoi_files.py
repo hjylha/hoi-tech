@@ -27,6 +27,19 @@ def get_tech_team_files(tech_path):
     tech_team_path = tech_path / "teams"
     return tech_team_path.glob("teams*.csv")
 
+def get_scenario_paths():
+    aod_path = get_aod_path()
+    scenario33_path = aod_path / "scenarios" / "1933"
+    scenario34_path = aod_path / "scenarios" / "1934"
+    return [scenario33_path, scenario34_path]
+
+def get_scenario_path_for_country(country_code):
+    scenario_directories = get_scenario_paths()
+    for sd_path in scenario_directories:
+        possible_path = sd_path / f"{country_code.lower()}_{sd_path.stem[-2:]}.inc"
+        if possible_path.exists():
+            return possible_path
+
 
 def get_tech_names():
     aod_path = get_aod_path()
@@ -213,8 +226,59 @@ def scan_tech_teams():
 
 def get_tech_teams(country_code):
     # tech_teams = []
-    team_filepath = get_tech_path() / "teams" / f"teams_{country_code}.csv"
+    team_filepath = get_tech_path() / "teams" / f"teams_{country_code.lower()}.csv"
     return scan_tech_team_file(team_filepath)
+
+def scan_scenario_file(filepath):
+    if filepath is None:
+        return None
+    results = dict()
+    deactivated_tech = []
+    researched_tech = []
+    blueprints = []
+    mode = None
+    stages = "={"
+    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            textline = line.split("#")[0].strip()
+            if not textline:
+                continue
+            if "deactivate" in textline:
+                mode = ["deactivated", 0]
+                current_list = deactivated_tech
+            if "techapps" in textline:
+                mode = ["researched", 0]
+                current_list = researched_tech
+            if "blueprints" in textline:
+                mode = ["blueprints", 0]
+                current_list = blueprints
+            
+            if mode is not None:
+                if mode[1] < 2:
+                    for char in stages[mode[1]:]:
+                        if char in textline:
+                            textline = textline.split(char)[1].strip()
+                            mode[1] += 1
+                if mode[1] == 2:
+                    if "}" in textline:
+                        textline = textline.split("}")[0].strip()
+                        mode = None
+                    additions = [int(item.strip()) for item in textline.split(" ") if item]
+                    current_list += additions
+
+            # if mode[0] == "deactivated":
+            #     textline.split(stages[mode[1]])
+            
+            if "research_mod" in textline:
+                results["research_speed"] = float(textline.split("=")[1].strip()) * 100
+    results["deactivated"] = deactivated_tech
+    results["researched"] = researched_tech
+    results["blueprints"] = blueprints
+    return results
+
+def scan_scenario_file_for_country(country_code):
+    filepath = get_scenario_path_for_country(country_code)
+    return scan_scenario_file(filepath)
 
 
 def find_tech(tech_id, list_of_techs):
