@@ -1,7 +1,7 @@
 
 from collections import namedtuple
 
-
+# should this be read from game files?
 RESEARCH_SPEED_CONSTANT = 2.8
 
 Component = namedtuple("Component", ["type", "difficulty"])
