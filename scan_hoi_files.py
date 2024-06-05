@@ -86,6 +86,8 @@ def scan_tech_file(filepath, tech_names):
 
             tech_name_key = tech_text.split("Name =")[1].split("\n")[0].strip(" =")
             tech_name = tech_names[tech_name_key]
+            short_tech_name_key = f"SHORT_{tech_name_key}"
+            short_tech_name = tech_names[short_tech_name_key]
 
             requirements = []
             if "required =" in tech_text:
@@ -158,7 +160,7 @@ def scan_tech_file(filepath, tech_names):
                     raise e
                 effects.append(effect_tuple)
 
-            techs.append(Tech(tech_id, tech_name, tech_category, requirements, components, effects))
+            techs.append(Tech(tech_id, tech_name, short_tech_name, tech_category, requirements, components, effects))
     
     return techs
 

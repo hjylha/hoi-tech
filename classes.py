@@ -17,9 +17,10 @@ class Tech:
     COMPONENT_SIZE = 20
     NUM_OF_COMPONENTS = 5
 
-    def __init__(self, tech_id, tech_name, tech_category, requirements, components, effects):
+    def __init__(self, tech_id, tech_name, short_name, tech_category, requirements, components, effects):
         self.tech_id = tech_id
         self.name = tech_name
+        self.short_name = short_name
         self.category = tech_category
         self.requirements = requirements
         self.components = components
