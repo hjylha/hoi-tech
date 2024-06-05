@@ -10,13 +10,22 @@ class Research:
         for req in self.techs[tech_id].requirements:
             if isinstance(req, int):
                 if req in self.completed_techs:
-                    return True
+                    continue
                 return False
             if isinstance(req, list):
                 for r in req:
                     if r in self.completed_techs:
-                        return True
+                        continue
                 return False
+        return True
+
+    def filter_teams(self):
+        filtered_teams = []
+        for team in self.all_teams:
+            if team.start_year <= self.year and team.end_year >= self.year:
+                filtered_teams.append(team)
+        self.teams = filtered_teams
+
 
     def clear_all_tech(self):
         self.completed_techs = set()
@@ -62,25 +71,28 @@ class Research:
             self.research_speed = research_speed
         self.countries = [] if countries is None else countries
 
-        self.teams = []
+        self.all_teams = []
         for country_code in self.countries:
-            self.teams += get_tech_teams(country_code)
+            self.all_teams += get_tech_teams(country_code)
+        self.filter_teams()
         # difficulty does nothing for now, 0 = normal
         self.difficulty = difficulty
 
     def add_country(self, country_code):
         self.countries.append(country_code)
-        self.teams += get_tech_teams(country_code)
+        self.all_teams += get_tech_teams(country_code)
         if self.primary_country is None:
             self.choose_primary_country(country_code)
+        self.filter_teams()
 
     
     def remove_country(self, country_code):
         self.countries.remove(country_code)
-        self.teams = [team for team in self.teams if team.nation != country_code]
+        self.all_teams = [team for team in self.all_teams if team.nation != country_code]
         if self.primary_country == country_code:
             self.primary_country = None
             self.clear_all_tech()
+        self.filter_teams()
 
     def find_tech(self, search_term):
         results = []
@@ -124,15 +136,18 @@ class Research:
         for tech_id in self.techs[completed_tech_id].get_deactivated_tech():
             self.deactivate_tech(tech_id)
         
-        for tech in self.techs:
-            if not(tech.tech_id in self.completed_techs or tech.tech_id in self.deactivated_techs):
-                self.activate_tech(tech.tech_id)
+        for tech_id in self.techs:
+            if self.are_tech_requirements_completed(tech_id):
+                if not(tech_id in self.completed_techs or tech_id in self.deactivated_techs):
+                    self.activate_tech(tech_id)
     
     def undo_completed_tech(self, tech_id):
         self.completed_techs.remove(tech_id)
         self.techs[tech_id].researched = 0
         self.research_speed -= self.techs[tech_id].get_research_speed_change() 
         # OTHER STUFF????????
+        if self.are_tech_requirements_completed(tech_id):
+            self.activate_tech(tech_id)
     
     def sort_teams_for_researching_tech(self, tech):
         # check blueprint
