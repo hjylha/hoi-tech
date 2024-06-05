@@ -100,11 +100,12 @@ def scan_tech_file(filepath, tech_names):
                 except IndexError:
                     pass
                 
-                for text in first_split:
+                for text0 in first_split:
                     try:
-                        reqs = text.split("required =")[1].split("\n")[0].strip(" ={}").split(" ")
-                        reqs = [int(req) for req in reqs if req]
-                        requirements = requirements + reqs
+                        for text in text0.split("required =")[1:]:
+                            reqs = text.split("\n")[0].strip(" ={}").split(" ")
+                            reqs = [int(req) for req in reqs if req]
+                            requirements = requirements + reqs
                     except IndexError:
                         pass
                 # reqs = tech_text.split("required =")[1].split("\n")[0].strip(" ={}").split(" ")
