@@ -3,6 +3,9 @@ from scan_hoi_files import get_country_names, scan_techs, get_tech_teams, scan_s
 
 
 class Research:
+    DEFAULT_YEAR = 1933
+    DEFAULT_RESEARCH_SPEED = 100
+    DEFAULT_DIFFICULTY = 0
 
     def are_tech_requirements_completed(self, tech_id):
         if not self.techs[tech_id].requirements:
@@ -49,7 +52,7 @@ class Research:
                 self.active_techs.add(tech_id)
 
 
-    def __init__(self, research_speed=None, difficulty=0, list_of_techs=None, countries=None, year=1933) -> None:
+    def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
         if list_of_techs is None:
             list_of_techs = scan_techs()
         self.techs = {tech.tech_id: tech for tech in list_of_techs}
@@ -59,7 +62,7 @@ class Research:
         self.clear_all_tech()
 
         self.year = year
-        self.research_speed = 100
+        self.research_speed = self.DEFAULT_RESEARCH_SPEED
 
         if countries:
             country_code = countries[0]
@@ -92,6 +95,10 @@ class Research:
         if self.primary_country == country_code:
             self.primary_country = None
             self.clear_all_tech()
+        self.filter_teams()
+    
+    def change_year(self, new_year):
+        self.year = new_year
         self.filter_teams()
 
     def find_tech(self, search_term):
