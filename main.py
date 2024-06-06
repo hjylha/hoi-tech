@@ -29,17 +29,22 @@ DIFFICULTY_DICT = {
 }
 
 TECH_CATEGORIES = (
-            "Infantry",
-            "Armor & Artillery",
-            "Naval",
-            "Aircraft",
-            "Overview",
-            "Industrial",
-            "Land Doctrine",
-            "Secret Weapons",
-            "Naval Docrine",
-            "Air Doctrine"
+            ("infantry", "Infantry"),
+            ("armor", "Armor & Artillery"),
+            ("naval", "Naval"),
+            ("aircraft", "Aircraft"),
+            (None, "Overview"),
+            ("industry", "Industrial"),
+            ("land_doctrines", "Land Doctrine"),
+            ("secret_weapons", "Secret Weapons"),
+            ("naval_doctrines", "Naval Docrine"),
+            ("air_doctrines", "Air Doctrine")
 )
+
+def get_the_other_category(category):
+    for c1, c2 in TECH_CATEGORIES:
+        if c2 == category:
+            return c1
 
 
 the_research = Research()
@@ -89,19 +94,34 @@ class CountryButton(BoxLayout):
 
 
 class TechnologyButton(BoxLayout):
-    SIZE_HINT = (0.175, 0.04)
+    SIZE_HINT = (0.16, 0.035)
+    
     # COLORS
+
+    def add_blueprint(self):
+        self.blueprint_label.text = "B"
+    
+    def remove_blueprint(self):
+        self.blueprint_label.text = ""
+
+    def show_as_requirement(self):
+        self.requirement_label.text = "R"
+    
+    def hide_requirement(self):
+        self.requirement_label.text = ""
 
     def __init__(self, tech_short_name, has_blueprint=False, **kwargs):
         super().__init__(**kwargs)
 
         self.orientation = "horizontal"
 
+        self.size_hint = self.SIZE_HINT
+
         requirement_box = BoxLayout(size_hint=(0.1, 1))
         self.requirement_label = Label(text="")
         requirement_box.add_widget(self.requirement_label)
 
-        self.technology = Button(text=tech_short_name, size_hint=(0.8, 1), background_color=(0, 0.8, 0.2, 0.7))
+        self.technology = Button(text=tech_short_name, size_hint=(0.8, 1), background_color=(0.4, 0.8, 0.2, 0.7))
 
         blueprint_box = BoxLayout(size_hint=(0.1, 1))
         self.blueprint_label = Label(text="", color=(0, 0, 1, 1))
@@ -130,6 +150,8 @@ class UpperTeamScreen(BoxLayout):
 
 
 class TeamComparisonTable(GridLayout):
+    NUM_OF_ROWS = 10
+
     def row_color(self, row_num):
         if row_num % 2 == 0:
             return (0.2, 0.2, 0.2, 1)
@@ -138,12 +160,21 @@ class TeamComparisonTable(GridLayout):
     def update_boxlayout(self, widget, value):
         widget.rect.pos = widget.pos
         widget.rect.size = widget.size
+    
+    def fill_comparison_table(self, teams_and_times):
+        for i, team_and_time in enumerate(teams_and_times[:self.NUM_OF_ROWS]):
+            self.labels[2*i].text = team_and_time[0].name
+            self.labels[2*i+1].text = str(team_and_time[1])
+        if len(teams_and_times) < self.NUM_OF_ROWS:
+            for i in range(len(teams_and_times), self.NUM_OF_ROWS):
+                self.labels[2*i].text = ""
+                self.labels[2*i+1].text = ""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_widget(Label(text="Team", size_hint=(0.5, 0.1)))
-        self.add_widget(Label(text="Time to complete", size_hint=(0.5, 0.1)))
-        self.table = [BoxLayout(size_hint=(0.5, 0.1)) for _ in range(20)]
+        self.add_widget(Label(text="Days to complete", size_hint=(0.5, 0.1)))
+        self.table = [BoxLayout(size_hint=(0.5, 0.1)) for _ in range(2 * self.NUM_OF_ROWS)]
         for i, layout in enumerate(self.table):
             self.add_widget(layout)
             with layout.canvas.before:
@@ -164,27 +195,46 @@ class TeamComparisonTable(GridLayout):
 class TeamScreen(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(UpperTeamScreen(orientation="vertical", size_hint=(1, 0.5)))
-        self.add_widget(TeamComparisonTable(cols=2, size_hint=(1, 0.5)))
+        self.upperteamscreen = UpperTeamScreen(orientation="vertical", size_hint=(1, 0.5))
+        self.add_widget(self.upperteamscreen)
+
+        self.comparisontable = TeamComparisonTable(cols=2, size_hint=(1, 0.5))
+        self.add_widget(self.comparisontable)
         
 
 
 class TechCategories(GridLayout):
+    def select_category(self, widget):
+        # print(widget.text)
+        self.parent.select_category(widget.text)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         
         # category_buttons = [ToggleButton(text=category) for category in categories]
-        category_buttons = [Button(text=category) for category in TECH_CATEGORIES]
-        for category_button in category_buttons:
+        self.category_buttons = [Button(text=category[1]) for category in TECH_CATEGORIES]
+        for category_button in self.category_buttons:
             self.add_widget(category_button)
+            category_button.bind(on_release=self.select_category)
 
 
 class TechInfoPanel(BoxLayout):
+    def update_info(self, tech_id, tech_name, tech_components, has_blueprint):
+        self.technology_name.text = f"{tech_id} {tech_name}"
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(Label(text="Technology name", size_hint=(1, 0.4)))
-        self.add_widget(Label(text="Tech components go here", size_hint=(1, 0.4)))
-        self.add_widget(Label(text="blueprint checkbox maybe", size_hint=(1, 0.2)))
+
+        self.technology_name = Label(text="Technology name", size_hint=(1, 0.4))
+        self.add_widget(self.technology_name)
+
+        # TODO
+        self.tech_components = Label(text="Tech components go here", size_hint=(1, 0.4))
+        self.add_widget(self.tech_components)
+
+        # TODO
+        self.blueprint_checkbox = Label(text="blueprint checkbox maybe", size_hint=(1, 0.2))
+        self.add_widget(self.blueprint_checkbox)
     
 
 class RequirementPanel(BoxLayout):
@@ -231,72 +281,137 @@ class ResearchButtonsPanel(GridLayout):
 
 
 class MainTechScreen(FloatLayout):
-    def __init__(self, **kwargs):
-        self.TECHNOLOGYBUTTON_SIZE = (0.175, 0.04)
-        super().__init__(**kwargs)
-        self.add_widget(Label(text="MainTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+    def select_technology(self, widget):
+        self.parent.parent.select_technology_by_short_name(widget.text)
 
-        self.add_widget(TechnologyButton("Prioritize Infantry", has_blueprint=True, size_hint=self.TECHNOLOGYBUTTON_SIZE, pos_hint={"x": 0.05, "y": 0.05}))
-        self.add_widget(TechnologyButton("Prioritize Quality", size_hint=self.TECHNOLOGYBUTTON_SIZE, pos_hint={"x": 0.05, "y": 0.1}))
-        self.add_widget(TechnologyButton("Int./Fighter Prototypes", size_hint=self.TECHNOLOGYBUTTON_SIZE, pos_hint={"x": 0.05, "y": 0.15}))
+    def __init__(self, **kwargs):
+        # self.TECHNOLOGYBUTTON_SIZE = (0.175, 0.04)
+        super().__init__(**kwargs)
+        # self.add_widget(Label(text="MainTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
+        # self.add_widget(TechnologyButton("Prioritize Infantry", has_blueprint=True, pos_hint={"x": 0.05, "y": 0.05}))
+        # self.add_widget(TechnologyButton("Prioritize Quality", pos_hint={"x": 0.05, "y": 0.1}))
+        # self.add_widget(TechnologyButton("Int./Fighter Prototypes", pos_hint={"x": 0.05, "y": 0.15}))
 
 
 class InfantryTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # placeholder text
+        self.add_widget(Label(text="InfantryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
+        self.technologies = [
+            TechnologyButton("Basic SMG", pos_hint={"x": 0.02, "y": 0.95}),
+            TechnologyButton("Improved SMG", pos_hint={"x": 0.02, "y": 0.90}),
+            TechnologyButton("Basic Machine Gun", pos_hint={"x": 0.02, "y": 0.85}),
+            TechnologyButton("Improved MG", pos_hint={"x": 0.02, "y": 0.8}),
+            TechnologyButton("Advanced MG", pos_hint={"x": 0.02, "y": 0.75}),
+            TechnologyButton("Modern MG", pos_hint={"x": 0.02, "y": 0.7})
+        ]
+
+        for tb in self.technologies:
+            self.add_widget(tb)
+            tb.technology.bind(on_release=self.select_technology)
+
 
 class ArmorTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # placeholder text
+        self.add_widget(Label(text="ArmorTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class NavalTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # placeholder text
+        self.add_widget(Label(text="NavalTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
 
 class AircraftTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # placeholder text
+        self.add_widget(Label(text="AircraftTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class OverviewTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # placeholder text
+        self.add_widget(Label(text="OverviewTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
 
 class IndustryTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # placeholder text
+        self.add_widget(Label(text="IndustryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class LandDoctrineTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # placeholder text
+        self.add_widget(Label(text="LandDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
 
 class SecretWeaponTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        # placeholder text
+        self.add_widget(Label(text="SecretWeaponTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class NavalDoctrineTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # placeholder text
+        self.add_widget(Label(text="NavalDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
 
 class AirDoctrineTechScreen(MainTechScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # placeholder text
+        self.add_widget(Label(text="AirDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
 
 class MainTechScreen_BoxLayout(BoxLayout):
+    def change_layout(self, category):
+        self.remove_widget(self.current_layout)
+        self.current_layout = self.category_layouts[category]
+        self.add_widget(self.current_layout)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.add_widget(Label(text="MainTechScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
         self.tech_buttons = dict()
-        self.add_widget(MainTechScreen())
+
+        self.category_layouts = {
+            TECH_CATEGORIES[0][1]: InfantryTechScreen(),
+            TECH_CATEGORIES[1][1]: ArmorTechScreen(),
+            TECH_CATEGORIES[2][1]: NavalTechScreen(),
+            TECH_CATEGORIES[3][1]: AircraftTechScreen(),
+            TECH_CATEGORIES[4][1]: OverviewTechScreen(),
+            TECH_CATEGORIES[5][1]: IndustryTechScreen(),
+            TECH_CATEGORIES[6][1]: LandDoctrineTechScreen(),
+            TECH_CATEGORIES[7][1]: SecretWeaponTechScreen(),
+            TECH_CATEGORIES[8][1]: NavalDoctrineTechScreen(),
+            TECH_CATEGORIES[9][1]: AirDoctrineTechScreen()
+        }
+        self.current_layout = self.category_layouts["Infantry"]
+        self.add_widget(self.current_layout)
 
 
 class TechInfoPanels(BoxLayout):
@@ -348,10 +463,30 @@ class TechInfoPanels(BoxLayout):
 
 
 class TechScreen(BoxLayout):
+
+    def select_category(self, category):
+        if category == self.active_category:
+            return
+        self.active_category = category
+        self.maintechscreen.change_layout(category)
+    
+    def select_technology_by_short_name(self, short_name):
+        category = get_the_other_category(self.active_category)
+        tech = self.parent.parent.research.get_tech_by_short_name_and_category(short_name, category)
+        # print(f"{tech.tech_id} {tech.name}")
+        # self.parent
+
+        sorted_teams = self.parent.parent.research.sort_teams_for_researching_tech(tech)
+        self.parent.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
+
+        # TODO: update infopanels
+        has_blueprint = tech.tech_id in self.parent.parent.research.blueprints
+        self.techinfopanel.techinfopanel.update_info(tech.tech_id, tech.name, tech.components, has_blueprint)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.active_category = TECH_CATEGORIES[0]
+        self.active_category = TECH_CATEGORIES[0][1]
 
         self.techcategories = TechCategories(cols=5, size_hint=(1, 0.05))
         self.maintechscreen = MainTechScreen_BoxLayout(size_hint=(1, 0.80))
@@ -403,9 +538,9 @@ class StatusBar(BoxLayout):
 
     def on_checkbox_active_placeholder(self, checkbox, value):
         if value:
-            print(f"Values are locked by checkbox {checkbox}")
+            print(f"Values are locked by checkbox {checkbox} (NOT REALLY, THIS DOES NOTHING)")
         else:
-            print(f"Values are not locked by checkbox {checkbox}")
+            print(f"Values are not locked by checkbox {checkbox} (THIS DOES NOTHING)")
     
 
     def select_country(self, widget, value):
@@ -515,13 +650,13 @@ class MainFullScreen(BoxLayout):
     def update_statusbar(self):
         self.statusbar.research_speed_input.text = str(self.research.research_speed)
 
-    def set_year(self, year):
+    def change_year(self, year):
         self.research.year = year
         self.statusbar.year_input.text = str(self.research.year)
     
     # in case of not knowing what to do
     def reset_year(self):
-        self.set_year(self.research.DEFAULT_YEAR)
+        self.change_year(self.research.DEFAULT_YEAR)
     
 
     def set_research_speed(self, research_speed):
