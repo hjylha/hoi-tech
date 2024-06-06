@@ -28,22 +28,41 @@ DIFFICULTY_DICT = {
     "Very Hard": 2
 }
 
+TECH_CATEGORIES = (
+            "Infantry",
+            "Armor & Artillery",
+            "Naval",
+            "Aircraft",
+            "Overview",
+            "Industrial",
+            "Land Doctrine",
+            "Secret Weapons",
+            "Naval Docrine",
+            "Air Doctrine"
+)
+
+
+the_research = Research()
+
 
 def suggest_countries(input_text, country_names, max_num_of_suggestions):
     # suggestions = []
     matches = []
+    starts = []
     others = []
     search_text = input_text.lower()
     for country_code, country_name in country_names.items():
         code = country_code.lower()
         name = country_name.lower()
         if code == search_text or name == search_text:
-            matches.insert(0, f"{country_code} {country_name}")
+            matches.append(f"[{country_code}] {country_name}")
+        elif code.startswith(search_text) or name.startswith(search_text):
+            starts.append(f"[{country_code}] {country_name}")
         elif (search_text in code or search_text in name) and len(others) < max_num_of_suggestions:
-            others.append(f"{country_code} {country_name}")
-    suggestions = matches + others
-    if len(suggestions) <= max_num_of_suggestions:
-        return suggestions
+            others.append(f"[{country_code}] {country_name}")
+    suggestions = matches + starts + others
+    # if len(suggestions) <= max_num_of_suggestions:
+    #     return suggestions
     return suggestions[:max_num_of_suggestions]
 
 
@@ -153,20 +172,9 @@ class TeamScreen(BoxLayout):
 class TechCategories(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        categories = [
-            "Infantry",
-            "Armor & Artillery",
-            "Naval",
-            "Aircraft",
-            "Overview",
-            "Industrial",
-            "Land Doctrine",
-            "Secret Weapons",
-            "Naval Docrine",
-            "Air Doctrine"
-        ]
+        
         # category_buttons = [ToggleButton(text=category) for category in categories]
-        category_buttons = [Button(text=category) for category in categories]
+        category_buttons = [Button(text=category) for category in TECH_CATEGORIES]
         for category_button in category_buttons:
             self.add_widget(category_button)
 
@@ -233,10 +241,61 @@ class MainTechScreen(FloatLayout):
         self.add_widget(TechnologyButton("Int./Fighter Prototypes", size_hint=self.TECHNOLOGYBUTTON_SIZE, pos_hint={"x": 0.05, "y": 0.15}))
 
 
+class InfantryTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class ArmorTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class NavalTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class AircraftTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class OverviewTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class IndustryTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class LandDoctrineTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class SecretWeaponTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class NavalDoctrineTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class AirDoctrineTechScreen(MainTechScreen):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
 class MainTechScreen_BoxLayout(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.add_widget(Label(text="MainTechScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        self.tech_buttons = dict()
         self.add_widget(MainTechScreen())
 
 
@@ -291,8 +350,9 @@ class TechInfoPanels(BoxLayout):
 class TechScreen(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # self.add_widget(Button(text="TechScreen"))
-        # padding=(dp(10), dp(10), dp(10), dp(10))
+
+        self.active_category = TECH_CATEGORIES[0]
+
         self.techcategories = TechCategories(cols=5, size_hint=(1, 0.05))
         self.maintechscreen = MainTechScreen_BoxLayout(size_hint=(1, 0.80))
         self.techinfopanel = TechInfoPanels(orientation="horizontal", size_hint=(1, 0.15))
@@ -312,10 +372,18 @@ class MainScreen(BoxLayout):
 
 
 class StatusBar(BoxLayout):
-    def select_year(self, widget, value):
+    def select_difficulty(self, widget, value):
         # setattr(self.difficulty_button, "text", value)
         self.difficulty_button.text = value
         # self.year_selection_dropdown.close()
+
+    def select_year(self, widget, value):
+        # previous_year = self.year_input.select_all()
+        try:
+            self.parent.change_year(int(value))
+            self.year_input.text = value
+        except ValueError:
+            self.year_input.text = str(self.parent.research.year)
 
     
     def add_country(self, country_code):
@@ -361,7 +429,7 @@ class StatusBar(BoxLayout):
 
     def make_country_selection(self, widget, value):
         self.country_input.text = ""
-        country_code = value[:3]
+        country_code = value.split("[")[1].split("]")[0]
         self.add_country(country_code)
 
     def open_year_selection_dropdown(self, widget, text):
@@ -382,7 +450,7 @@ class StatusBar(BoxLayout):
         # country selection
         self.add_widget(Label(text="Country/Countries", size_hint=(0.12, 1)))
         self.country_selection_dropdown = DropDown()
-        self.country_input = TextInput(size_hint=(0.13, 1))
+        self.country_input = TextInput(size_hint=(0.13, 1), multiline=False, write_tab=False)
         self.add_widget(self.country_input)
 
         self.max_num_of_country_suggestions = 10
@@ -410,7 +478,7 @@ class StatusBar(BoxLayout):
         self.difficulty_button = Button(text="Normal", size_hint=(0.05, 1))
         self.difficulty_button.bind(on_release=self.difficulty_dropdown.open)
         # self.difficulty_dropdown.bind(on_select=lambda instance, value: setattr(self.difficulty_button, "text", value))
-        self.difficulty_dropdown.bind(on_select=self.select_year)
+        self.difficulty_dropdown.bind(on_select=self.select_difficulty)
 
         self.add_widget(self.difficulty_button)
 
@@ -423,15 +491,15 @@ class StatusBar(BoxLayout):
             label.bind(focus=lambda w, v: self.year_selection_dropdown.select(w.text))
             # label.bind(focus=test_printer)
             self.year_selection_dropdown.add_widget(label)
-        self.year_input = TextInput(text="this should not be visible", size_hint=(0.05, 1))
+        self.year_input = TextInput(text="this should not be visible", size_hint=(0.05, 1), multiline=False, write_tab=False)
         # self.year_input.bind(text=lambda w, v: self.year_selection_dropdown.open(w))
         self.year_input.bind(focus=self.open_year_selection_dropdown)
-        self.year_selection_dropdown.bind(on_select=lambda instance, value: setattr(self.year_input, "text", value))
+        self.year_selection_dropdown.bind(on_select=self.select_year)
         self.add_widget(self.year_input)
 
         # research speed selection
         self.add_widget(Label(text="Research Speed", size_hint=(0.1, 1)))
-        self.research_speed_input = TextInput(size_hint=(0.05, 1))
+        self.research_speed_input = TextInput(size_hint=(0.05, 1), multiline=False, write_tab=False)
         self.add_widget(self.research_speed_input)
 
         # lock values checkbox
@@ -476,7 +544,8 @@ class MainFullScreen(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.research = Research()
+        # self.research = Research()
+        self.research = the_research
 
         self.mainscreen = MainScreen(orientation="horizontal", size_hint=(1, 0.96))
         self.statusbar = StatusBar(orientation="horizontal", size_hint=(1, 0.04))
