@@ -9,8 +9,8 @@ EFFECT_ATTRIBUTES = ["type", "which", "value", "when", "where"]
 Effect = namedtuple("Effect", EFFECT_ATTRIBUTES)
 
 
-def calculate_components_difficulty_multiplier(component, research_speed_modifier):
-    return max(1 / 20, 9 * research_speed_modifier / (component.difficulty + 2) / 200)
+def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty):
+    return max(1 , (1 - game_difficulty / 10) * research_speed_modifier / (component.difficulty + 2) ) / 20
 
 
 class Tech:
@@ -80,13 +80,13 @@ class Tech:
                 deactivated_tech.append(int(effect.which))
         return deactivated_tech
     
-    def calculate_component_difficulty_multiplier(self, component_index, research_speed_modifier):
+    def calculate_component_difficulty_multiplier(self, component_index, research_speed_modifier, game_difficulty):
         # return max(1 / 20, 9 * research_speed_modifier / (self.components[component_index].difficulty + 2) / 200)
-        return calculate_components_difficulty_multiplier(self.components[component_index], research_speed_modifier)
+        return calculate_components_difficulty_multiplier(self.components[component_index], research_speed_modifier, game_difficulty)
     
-    def calculate_current_difficulty_multiplier(self, research_speed_modifier):
+    def calculate_current_difficulty_multiplier(self, research_speed_modifier, game_difficulty):
         # return max(1 / 20, 9 * research_speed_modifier / (self.components[self.current_component].difficulty + 2) / 9)
-        return self.calculate_component_difficulty_multiplier(self.current_component, research_speed_modifier)
+        return self.calculate_component_difficulty_multiplier(self.current_component, research_speed_modifier, game_difficulty)
 
 
 class TechTeam:
@@ -119,21 +119,21 @@ class TechTeam:
             self.pic_path
                 )
     
-    def calculate_1_day_progress_for_component(self, component, research_speed_modifier, has_blueprint=0):
+    def calculate_1_day_progress_for_component(self, component, research_speed_modifier, game_difficulty, has_blueprint=0):
         has_speciality = 0
         component_type = component.type
         if component_type in self.specialities:
             has_speciality = 1
-        difficulty_modifier = calculate_components_difficulty_multiplier(component, research_speed_modifier)
+        difficulty_modifier = calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty)
         return 0.2 * RESEARCH_SPEED_CONSTANT * 0.1 * (self.skill + 6) * (has_speciality + 1) * (0.7 * has_blueprint + 1) * difficulty_modifier
 
-    def calculate_how_many_days_to_complete(self, tech, research_speed_modifier, has_blueprint=0):
+    def calculate_how_many_days_to_complete(self, tech, research_speed_modifier, game_difficulty, has_blueprint=0):
         days_gone = 0
         for component in tech.components:
-            daily_progress = self.calculate_1_day_progress_for_component(component, research_speed_modifier, has_blueprint)
+            daily_progress = self.calculate_1_day_progress_for_component(component, research_speed_modifier, game_difficulty, has_blueprint)
             days_to_complete_component = int(20 // daily_progress + 1)
             days_gone += days_to_complete_component
         return days_gone
     
-    def calculate_1_day_progress_for_tech(self, tech, research_speed_modifier, has_blueprint=0):
-        return self.calculate_1_day_progress_for_component(tech.components[tech.current_component, research_speed_modifier, has_blueprint])
+    def calculate_1_day_progress_for_tech(self, tech, research_speed_modifier, game_difficulty, has_blueprint=0):
+        return self.calculate_1_day_progress_for_component(tech.components[tech.current_component, research_speed_modifier, game_difficulty, has_blueprint])
