@@ -116,6 +116,11 @@ class Research:
                 if key == tech.name:
                     return tech
     
+    def get_tech_by_short_name_and_category(self, short_name, category):
+        for tech in self.techs.values():
+            if tech.short_name == short_name and tech.category == category:
+                return tech
+    
     def print_active_tech(self):
         for tech_id in self.active_techs:
             print(self.techs[tech_id])
