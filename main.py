@@ -250,6 +250,19 @@ class TechInfoPanel(BoxLayout):
     
 
 class RequirementPanel(BoxLayout):
+    # requirement_header = 
+    def show_reqs_and_deacts(self, requirements, deactivations):
+        self.clear_widgets()
+        num_of_rows = 2 + len(requirements) + len(deactivations)
+
+        self.add_widget(Label(text="Requirements", size_hint=(1, 1 / num_of_rows)))
+        for requirement in requirements:
+            self.add_widget(Label(text=requirement, size_hint=(1, 1 / num_of_rows)))
+
+        self.add_widget(Label(text="Deactivates", size_hint=(1, 1 / num_of_rows)))
+        for deactivation in deactivations:
+            self.add_widget(Label(text=deactivation, size_hint=(1, 1 / num_of_rows)))
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_widget(Label(text="Requirements", size_hint=(1, 0.25)))
@@ -429,9 +442,16 @@ class MainTechScreen_BoxLayout(BoxLayout):
 class TechInfoPanels(BoxLayout):
     BACKGROUND_COLOR2 = (0.1, 0.1, 0.1, 1)
 
-    def update_panel(self, widget, value):
-        widget.rect.pos = widget.pos
-        widget.rect.size = widget.size
+    # def update_panel(self, widget, value):
+    #     widget.rect.pos = widget.pos
+    #     widget.rect.size = widget.size
+
+    def update_tech_info(self, tech, has_blueprint, requirements, deactivations):
+        self.techinfopanel.update_info(tech.tech_id, tech.name, tech.components, has_blueprint)
+
+        self.requirement_panel.show_reqs_and_deacts(requirements, deactivations)
+
+        # self.effects_panel
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -441,7 +461,7 @@ class TechInfoPanels(BoxLayout):
         with self.techinfopanel.canvas.before:
             Color(*self.BACKGROUND_COLOR2)
             self.techinfopanel.rect = Rectangle(size=self.techinfopanel.size, pos=self.techinfopanel.pos)
-        self.techinfopanel.bind(pos=self.update_panel, size=self.update_panel)
+        self.techinfopanel.bind(pos=update_layout, size=update_layout)
 
         self.requirement_scrollview = ScrollView(size_hint=(0.25, None))
         self.requirement_panel = RequirementPanel(orientation="vertical", size_hint=(1, None))
@@ -467,7 +487,7 @@ class TechInfoPanels(BoxLayout):
         with self.extra_layout.canvas.before:
             Color(*self.BACKGROUND_COLOR2)
             self.extra_layout.rect = Rectangle(size=self.extra_layout.size, pos=self.extra_layout.pos)
-        self.extra_layout.bind(pos=self.update_panel, size=self.update_panel)
+        self.extra_layout.bind(pos=update_layout, size=update_layout)
 
         self.add_widget(ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.25, 1)))
         # for i in range(4):
@@ -486,14 +506,16 @@ class TechScreen(BoxLayout):
         category = get_the_other_category(self.active_category)
         tech = self.parent.parent.research.get_tech_by_short_name_and_category(short_name, category)
         # print(f"{tech.tech_id} {tech.name}")
-        # self.parent
 
+        # sort teams based on who is fastest
         sorted_teams = self.parent.parent.research.sort_teams_for_researching_tech(tech)
         self.parent.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
 
-        # TODO: update infopanels
+        # update infopanels
+        requirements = self.parent.parent.research.list_requirements(tech)
+        deactivations = self.parent.parent.research.list_deactivations(tech)
         has_blueprint = tech.tech_id in self.parent.parent.research.blueprints
-        self.techinfopanel.techinfopanel.update_info(tech.tech_id, tech.name, tech.components, has_blueprint)
+        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
