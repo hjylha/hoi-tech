@@ -21,11 +21,11 @@ from scan_hoi_files import get_country_names
 
 
 DIFFICULTY_DICT = {
-    "Very Easy": -2,
-    "Easy": -1,
-    "Normal": 0,
-    "Hard": 1,
-    "Very Hard": 2
+    "Very Easy": -1,
+    "Easy": 0,
+    "Normal": 1,
+    "Hard": 2,
+    "Very Hard": 3
 }
 
 TECH_CATEGORIES = (
@@ -149,7 +149,8 @@ class UpperTeamScreen(BoxLayout):
         self.add_widget(Label(text="UpperTeamScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
-class TeamComparisonTable(GridLayout):
+# class TeamComparisonTable(GridLayout):
+class TeamComparisonTable(BoxLayout):
     NUM_OF_ROWS = 10
 
     def row_color(self, row_num):
@@ -172,11 +173,21 @@ class TeamComparisonTable(GridLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(Label(text="Team", size_hint=(0.5, 0.1)))
-        self.add_widget(Label(text="Days to complete", size_hint=(0.5, 0.1)))
-        self.table = [BoxLayout(size_hint=(0.5, 0.1)) for _ in range(2 * self.NUM_OF_ROWS)]
+
+        self.orientation = "vertical"
+
+        header_line = BoxLayout(size_hint=(1, 0.09))
+        header_line.add_widget(Label(text="Team", size_hint=(0.8, 1)))
+        header_line.add_widget(Label(text="Days", size_hint=(0.2, 1)))
+        self.add_widget(header_line)
+
+        lines = [BoxLayout(size_hint=(1, 0.09)) for _ in range(self.NUM_OF_ROWS)]
+        for line in lines:
+            self.add_widget(line)
+
+        self.table = [BoxLayout(size_hint=(0.5 + (-1)**(i) * 0.3, 1)) for i in range(2 * self.NUM_OF_ROWS)]
         for i, layout in enumerate(self.table):
-            self.add_widget(layout)
+            lines[i // 2].add_widget(layout)
             with layout.canvas.before:
                 Color(*self.row_color(i // 2))
                 layout.rect = Rectangle(size=layout.size, pos=layout.pos)
@@ -198,7 +209,8 @@ class TeamScreen(BoxLayout):
         self.upperteamscreen = UpperTeamScreen(orientation="vertical", size_hint=(1, 0.5))
         self.add_widget(self.upperteamscreen)
 
-        self.comparisontable = TeamComparisonTable(cols=2, size_hint=(1, 0.5))
+        # self.comparisontable = TeamComparisonTable(cols=2, size_hint=(1, 0.5))
+        self.comparisontable = TeamComparisonTable(size_hint=(1, 0.5))
         self.add_widget(self.comparisontable)
         
 
@@ -510,7 +522,7 @@ class StatusBar(BoxLayout):
     def select_difficulty(self, widget, value):
         # setattr(self.difficulty_button, "text", value)
         self.difficulty_button.text = value
-        # self.year_selection_dropdown.close()
+        self.parent.research.difficulty = DIFFICULTY_DICT[value]
 
     def select_year(self, widget, value):
         # previous_year = self.year_input.select_all()
@@ -575,6 +587,18 @@ class StatusBar(BoxLayout):
         # print("self.get_parent_window() is not None:", self.get_parent_window() is not None)
         if self.year_selection_dropdown.parent is None and self.get_parent_window() is not None:
             self.year_selection_dropdown.open(widget)
+    
+    def validate_research_speed(self, widget, text):
+        if not text:
+            return
+        if self.parent is None:
+            return
+        previous_research_speed = self.parent.research.research_speed
+        try:
+            new_research_speed = float(text)
+            self.parent.research.research_speed = new_research_speed
+        except ValueError:
+            widget.text = str(previous_research_speed)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -610,7 +634,7 @@ class StatusBar(BoxLayout):
             self.difficulty_dropdown.add_widget(btn)
 
         self.add_widget(Label(text="Difficulty", size_hint=(0.05, 1)))
-        self.difficulty_button = Button(text="Normal", size_hint=(0.05, 1))
+        self.difficulty_button = Button(text="Easy", size_hint=(0.05, 1))
         self.difficulty_button.bind(on_release=self.difficulty_dropdown.open)
         # self.difficulty_dropdown.bind(on_select=lambda instance, value: setattr(self.difficulty_button, "text", value))
         self.difficulty_dropdown.bind(on_select=self.select_difficulty)
@@ -636,6 +660,7 @@ class StatusBar(BoxLayout):
         self.add_widget(Label(text="Research Speed", size_hint=(0.1, 1)))
         self.research_speed_input = TextInput(size_hint=(0.05, 1), multiline=False, write_tab=False)
         self.add_widget(self.research_speed_input)
+        self.research_speed_input.bind(text=self.validate_research_speed)
 
         # lock values checkbox
         self.add_widget(Label(text="Lock values", size_hint=(0.1, 1)))
