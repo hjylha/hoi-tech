@@ -116,6 +116,7 @@ class Research:
                 if key == tech.name:
                     return tech
     
+    # this is not going to work
     def get_tech_by_short_name_and_category(self, short_name, category):
         for tech in self.techs.values():
             if tech.short_name == short_name and tech.category == category:
@@ -136,6 +137,19 @@ class Research:
     def list_deactivations(self, tech):
         deactivation_ids = tech.get_deactivated_tech()
         return [f"{self.techs[t_id]}" for t_id in deactivation_ids]
+
+    def list_effects(self, tech):
+        # TODO: improve this
+        effects = []
+        for effect in tech.effects:
+            type_part = effect.type if effect.type is not None else ""
+            which_part = effect.which if effect.which is not None else ""
+            value_part = effect.value if effect.value is not None else ""
+            when_part = effect.when if effect.when is not None else ""
+            where_part = effect.where if effect.where is not None else ""
+            effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
+            effects.append(effect_line.lower())
+        return effects
 
     def print_active_tech(self):
         for tech_id in self.active_techs:
@@ -183,7 +197,7 @@ class Research:
 
         team_results = []
         for team in self.teams:
-            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint)
+            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint)
             team_results.append([team, days])
         return sorted(team_results, key=lambda x: x[1])
     
