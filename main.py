@@ -110,12 +110,14 @@ class TechnologyButton(BoxLayout):
     def hide_requirement(self):
         self.requirement_label.text = ""
 
-    def __init__(self, tech_short_name, has_blueprint=False, **kwargs):
+    def __init__(self, tech_short_name, tech_id, has_blueprint=False, **kwargs):
         super().__init__(**kwargs)
 
         self.orientation = "horizontal"
 
         self.size_hint = self.SIZE_HINT
+
+        self.tech_id = tech_id
 
         requirement_box = BoxLayout(size_hint=(0.1, 1))
         self.requirement_label = Label(text="")
@@ -253,15 +255,14 @@ class RequirementPanel(BoxLayout):
     # requirement_header = 
     def show_reqs_and_deacts(self, requirements, deactivations):
         self.clear_widgets()
-        num_of_rows = 2 + len(requirements) + len(deactivations)
 
-        self.add_widget(Label(text="Requirements", size_hint=(1, 1 / num_of_rows)))
+        self.add_widget(Label(text="Requirements", size_hint=(1, None), height=dp(20)))
         for requirement in requirements:
-            self.add_widget(Label(text=requirement, size_hint=(1, 1 / num_of_rows)))
+            self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(20)))
 
-        self.add_widget(Label(text="Deactivates", size_hint=(1, 1 / num_of_rows)))
+        self.add_widget(Label(text="Deactivates", size_hint=(1, None), height=dp(20)))
         for deactivation in deactivations:
-            self.add_widget(Label(text=deactivation, size_hint=(1, 1 / num_of_rows)))
+            self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(20)))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -272,6 +273,14 @@ class RequirementPanel(BoxLayout):
 
 
 class EffectsPanel(BoxLayout):
+    def show_effects(self, effects):
+        self.clear_widgets()
+
+        self.add_widget(Label(text="Effects", size_hint=(1, None), height=dp(20)))
+        for effect in effects:
+            self.add_widget(Label(text=effect, size_hint=(1, None), height=dp(20)))
+
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_widget(Label(text="Effects", size_hint=(1, None), height=dp(20)))
@@ -307,7 +316,8 @@ class ResearchButtonsPanel(GridLayout):
 
 class MainTechScreen(FloatLayout):
     def select_technology(self, widget):
-        self.parent.parent.select_technology_by_short_name(widget.text)
+        self.parent.parent.select_technology_by_id(widget.parent.tech_id)
+        # print(widget.parent.tech_id)
 
     def __init__(self, **kwargs):
         # self.TECHNOLOGYBUTTON_SIZE = (0.175, 0.04)
@@ -326,13 +336,47 @@ class InfantryTechScreen(MainTechScreen):
         # placeholder text
         self.add_widget(Label(text="InfantryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
+
+        sg_x = 0
+        inf_x = 0.18
+
         self.technologies = [
-            TechnologyButton("Basic SMG", pos_hint={"x": 0.02, "y": 0.95}),
-            TechnologyButton("Improved SMG", pos_hint={"x": 0.02, "y": 0.90}),
-            TechnologyButton("Basic Machine Gun", pos_hint={"x": 0.02, "y": 0.85}),
-            TechnologyButton("Improved MG", pos_hint={"x": 0.02, "y": 0.8}),
-            TechnologyButton("Advanced MG", pos_hint={"x": 0.02, "y": 0.75}),
-            TechnologyButton("Modern MG", pos_hint={"x": 0.02, "y": 0.7})
+            # small guns
+            TechnologyButton("Basic SMG", 1010, pos_hint={"x": sg_x, "y": 0.91}),
+            TechnologyButton("Improved SMG", 1020, pos_hint={"x": sg_x, "y": 0.875}),
+            TechnologyButton("Basic Machine Gun", 1030, pos_hint={"x": sg_x, "y": 0.84}),
+            TechnologyButton("Improved MG", 1040, pos_hint={"x": sg_x, "y": 0.805}),
+            TechnologyButton("Advanced MG", 1050, pos_hint={"x": sg_x, "y": 0.77}),
+            TechnologyButton("Modern MG", 1060, pos_hint={"x": sg_x, "y": 0.735}),
+
+            # infantry
+            TechnologyButton("WWI Infantry", 1070, pos_hint={"x": inf_x, "y": 0.96}),
+            TechnologyButton("Post-WWI", 1080, pos_hint={"x": inf_x, "y": 0.925}),
+            TechnologyButton("Basic", 1090, pos_hint={"x": inf_x, "y": 0.885}),
+            TechnologyButton("Improved", 1100, pos_hint={"x": inf_x, "y": 0.845}),
+            TechnologyButton("Advanced", 1110, pos_hint={"x": inf_x, "y": 0.805}),
+            TechnologyButton("Semi-Professional", 1120, pos_hint={"x": inf_x, "y": 0.765}),
+            TechnologyButton("Professional", 1130, pos_hint={"x": inf_x, "y": 0.725}),
+            TechnologyButton("Modern", 1140, pos_hint={"x": inf_x, "y": 0.685}),
+
+            # cavalry
+            TechnologyButton("Basic Cavalry", 1260, pos_hint={"x": sg_x, "y": 0.665}),
+            TechnologyButton("Semi-Motorized I", 1270, pos_hint={"x": sg_x + 0.01, "y": 0.63}),
+            TechnologyButton("Semi-Motorized II", 1280, pos_hint={"x": sg_x + 0.01, "y": 0.595}),
+            TechnologyButton("Semi-Mechanized I", 1290, pos_hint={"x": sg_x + 0.01, "y": 0.56}),
+            TechnologyButton("Semi-Mechanized II", 1760, pos_hint={"x": sg_x + 0.01, "y": 0.525}),
+
+            # mechanized
+            TechnologyButton("Basic Mechanized", 1440, pos_hint={"x": sg_x, "y": 0.205}),
+            TechnologyButton("Average", 1450, pos_hint={"x": sg_x, "y": 0.17}),
+            TechnologyButton("Advanced", 1460, pos_hint={"x": sg_x, "y": 0.135}),
+            TechnologyButton("Semi-Modern", 1470, pos_hint={"x": sg_x, "y": 0.1}),
+
+            # motorized
+            TechnologyButton("Basic Motorized", 1400, pos_hint={"x": inf_x, "y": 0.205}),
+            TechnologyButton("Average", 1410, pos_hint={"x": inf_x, "y": 0.17}),
+            TechnologyButton("Advanced", 1420, pos_hint={"x": inf_x, "y": 0.135}),
+            TechnologyButton("Semi-Modern", 1430, pos_hint={"x": inf_x, "y": 0.1}),
         ]
 
         for tb in self.technologies:
@@ -446,12 +490,12 @@ class TechInfoPanels(BoxLayout):
     #     widget.rect.pos = widget.pos
     #     widget.rect.size = widget.size
 
-    def update_tech_info(self, tech, has_blueprint, requirements, deactivations):
+    def update_tech_info(self, tech, has_blueprint, requirements, deactivations, effects):
         self.techinfopanel.update_info(tech.tech_id, tech.name, tech.components, has_blueprint)
 
         self.requirement_panel.show_reqs_and_deacts(requirements, deactivations)
 
-        # self.effects_panel
+        self.effects_panel.show_effects(effects)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -502,9 +546,9 @@ class TechScreen(BoxLayout):
         self.active_category = category
         self.maintechscreen.change_layout(category)
     
-    def select_technology_by_short_name(self, short_name):
-        category = get_the_other_category(self.active_category)
-        tech = self.parent.parent.research.get_tech_by_short_name_and_category(short_name, category)
+    def select_technology_by_id(self, tech_id):
+        # category = get_the_other_category(self.active_category)
+        tech = self.parent.parent.research.get_tech(tech_id)
         # print(f"{tech.tech_id} {tech.name}")
 
         # sort teams based on who is fastest
@@ -514,8 +558,9 @@ class TechScreen(BoxLayout):
         # update infopanels
         requirements = self.parent.parent.research.list_requirements(tech)
         deactivations = self.parent.parent.research.list_deactivations(tech)
+        effects = self.parent.parent.research.list_effects(tech)
         has_blueprint = tech.tech_id in self.parent.parent.research.blueprints
-        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations)
+        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
