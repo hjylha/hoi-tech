@@ -120,7 +120,23 @@ class Research:
         for tech in self.techs.values():
             if tech.short_name == short_name and tech.category == category:
                 return tech
+            
+    def list_requirements(self, tech):
+        reqs = []
+        for req in tech.requirements:
+            if isinstance(req, int):
+                reqs.append(f"{self.techs[req]}")
+            elif isinstance(req, list):
+                for t_id in req:
+                    reqs.append(f"*{self.techs[t_id]}")
+            else:
+                raise Exception(f"Invalid type in requirements: {req}")
+        return reqs
     
+    def list_deactivations(self, tech):
+        deactivation_ids = tech.get_deactivated_tech()
+        return [f"{self.techs[t_id]}" for t_id in deactivation_ids]
+
     def print_active_tech(self):
         for tech_id in self.active_techs:
             print(self.techs[tech_id])
