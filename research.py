@@ -167,7 +167,7 @@ class Research:
 
         team_results = []
         for team in self.teams:
-            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, has_blueprint)
+            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint)
             team_results.append([team, days])
         return sorted(team_results, key=lambda x: x[1])
     
