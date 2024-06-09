@@ -264,6 +264,21 @@ class TechInfoPanel(BoxLayout):
     def update_info(self, tech_id, tech_name, tech_components, has_blueprint):
         self.technology_name.text = f"{tech_id} {tech_name}"
 
+        self.blueprint_checkbox.active = has_blueprint
+    
+    def on_blueprint_checkbox_active(self, widget, value):
+        tech_id = self.parent.parent.parent.parent.current_tech.tech_id
+        if value:
+            self.parent.parent.parent.parent.research.blueprints.add(tech_id)
+            self.parent.parent.maintechscreen.technologies[tech_id].add_blueprint()
+        else:
+            if tech_id in self.parent.parent.parent.parent.research.blueprints:
+                self.parent.parent.parent.parent.research.blueprints.remove(tech_id)
+                self.parent.parent.maintechscreen.technologies[tech_id].remove_blueprint()
+        # redo the calculations
+        self.parent.parent.parent.show_fastest_teams(self.parent.parent.parent.parent.current_tech)
+
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -282,6 +297,7 @@ class TechInfoPanel(BoxLayout):
         checkbox_box.add_widget(Label(text="has blueprint", size_hint=(0.3, 1)))
         checkbox_box.add_widget(Label(text="", size_hint=(0.2, 1)))
         self.add_widget(checkbox_box)
+        self.blueprint_checkbox.bind(active=self.on_blueprint_checkbox_active)
     
 
 class RequirementPanel(BoxLayout):
@@ -326,25 +342,38 @@ class EffectsPanel(BoxLayout):
 
 
 class ResearchButtonsPanel(GridLayout):
+    def complete_button_pressed(self, widget):
+        print("Complete button does nothing at the moment. Well except for this...")
+        print("Research speed is", self.parent.parent.parent.parent.research.research_speed)
+
+    def force_complete_button_pressed(self, widget):
+        self.parent.parent.complete_tech()
+
+    def undo_button_pressed(self, widget):
+        self.parent.parent.undo_tech()
+
+    def clear_button_pressed(self, widget):
+        print("Clear button does nothing at the moment")
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.complete_button = Button(text="Complete Tech", size_hint=(0.4, 0.4))
+        self.complete_button = Button(text="Complete Tech", on_release=self.complete_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.complete_button)
 
         # empty
         # self.add_widget(Label(text=" "))
         
-        self.undo_button = Button(text="Undo Tech", size_hint=(0.4, 0.4))
+        self.undo_button = Button(text="Undo Tech", on_release=self.undo_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.undo_button)
 
-        self.force_complete_button = Button(text="Force Complete Tech", size_hint=(0.4, 0.4))
+        self.force_complete_button = Button(text="Force Complete Tech", on_release=self.force_complete_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.force_complete_button)
 
         # empty
         # self.add_widget(Label(text=" "))
 
-        self.clear_button = Button(text="Clear everything", size_hint=(0.4, 0.4))
+        self.clear_button = Button(text="Clear everything", on_release=self.clear_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.clear_button)
 
 
@@ -724,11 +753,13 @@ class TechScreen(BoxLayout):
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
         tech = self.parent.parent.research.get_tech(tech_id)
+        self.parent.parent.current_tech = tech
         # print(f"{tech.tech_id} {tech.name}")
 
         # sort teams based on who is fastest
-        sorted_teams = self.parent.parent.research.sort_teams_for_researching_tech(tech)
-        self.parent.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
+        self.parent.show_fastest_teams(tech)
+        # sorted_teams = self.parent.parent.research.sort_teams_for_researching_tech(tech)
+        # self.parent.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
 
         # update infopanels
         requirements = self.parent.parent.research.list_requirements(tech)
@@ -746,6 +777,26 @@ class TechScreen(BoxLayout):
         self.maintechscreen.show_requirements(req_ids)
         self.maintechscreen.show_deactivation_warnings(deact_ids)
 
+    def complete_tech(self):
+        tech_id = self.parent.parent.current_tech.tech_id
+        if tech_id in self.parent.parent.research.completed_techs:
+            return
+        self.parent.parent.research.complete_tech(tech_id)
+        # update tech buttons
+        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        # update research speed
+        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+    
+    def undo_tech(self):
+        tech_id = self.parent.parent.current_tech.tech_id
+        if tech_id not in self.parent.parent.research.completed_techs:
+            return
+        self.parent.parent.research.undo_completed_tech(tech_id)
+        # update tech buttons
+        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        # update research speed
+        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -760,6 +811,11 @@ class TechScreen(BoxLayout):
 
 
 class MainScreen(BoxLayout):
+
+    def show_fastest_teams(self, tech):
+        sorted_teams = self.parent.research.sort_teams_for_researching_tech(tech)
+        self.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.add_widget(Button(text="MainScreen", size_hint=(1, 1)))
@@ -960,6 +1016,8 @@ class MainFullScreen(BoxLayout):
 
         # self.research = Research()
         self.research = the_research
+
+        self.current_tech = None
 
         self.mainscreen = MainScreen(orientation="horizontal", size_hint=(1, 0.96))
         self.statusbar = StatusBar(orientation="horizontal", size_hint=(1, 0.04))
