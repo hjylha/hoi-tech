@@ -45,6 +45,8 @@ def get_the_other_category(category):
     for c1, c2 in TECH_CATEGORIES:
         if c2 == category:
             return c1
+        if c1 == category:
+            return c2
 
 
 the_research = Research()
@@ -94,7 +96,7 @@ class CountryButton(BoxLayout):
 
 
 class TechnologyButton(BoxLayout):
-    SIZE_HINT = (0.16, 0.035)
+    SIZE_HINT = (0.15, 0.035)
     
     # COLORS
 
@@ -110,6 +112,12 @@ class TechnologyButton(BoxLayout):
     def hide_requirement(self):
         self.requirement_label.text = ""
 
+    def show_deactivation_warning(self):
+        self.deactivation_label.text = "D"
+    
+    def hide_deactivation_warning(self):
+        self.deactivation_label.text = ""
+
     def __init__(self, tech_short_name, tech_id, has_blueprint=False, **kwargs):
         super().__init__(**kwargs)
 
@@ -119,21 +127,24 @@ class TechnologyButton(BoxLayout):
 
         self.tech_id = tech_id
 
-        requirement_box = BoxLayout(size_hint=(0.1, 1))
-        self.requirement_label = Label(text="")
+        requirement_box = BoxLayout(size_hint=(0.05, 1))
+        self.requirement_label = Label(text="", color=(1, 1, 0, 1))
         requirement_box.add_widget(self.requirement_label)
 
-        self.technology = Button(text=tech_short_name, size_hint=(0.8, 1), background_color=(0.4, 0.8, 0.2, 0.7))
+        self.technology = Button(text=tech_short_name, size_hint=(0.85, 1), background_color=(0.4, 0.8, 0.2, 0.7))
 
-        blueprint_box = BoxLayout(size_hint=(0.1, 1))
+        blueprint_box = BoxLayout(size_hint=(0.04, 1))
         self.blueprint_label = Label(text="", color=(0, 0, 1, 1))
         if has_blueprint:
             self.blueprint_label.text = "B"
         blueprint_box.add_widget(self.blueprint_label)
 
+        self.deactivation_label = Label(text="", size_hint=(0.06, 1), color=(1, 0, 0, 1))
+
         self.add_widget(requirement_box)
         self.add_widget(self.technology)
         self.add_widget(blueprint_box)
+        self.add_widget(self.deactivation_label)
 
         with requirement_box.canvas.before:
             Color(0, 0, 0, 0)
@@ -247,28 +258,34 @@ class TechInfoPanel(BoxLayout):
         self.add_widget(self.tech_components)
 
         # TODO
-        self.blueprint_checkbox = Label(text="blueprint checkbox maybe", size_hint=(1, 0.2))
-        self.add_widget(self.blueprint_checkbox)
+        checkbox_box = BoxLayout(orientation="horizontal", size_hint=(1, 0.2))
+        self.blueprint_checkbox = CheckBox(size_hint=(0.3, 1))
+        checkbox_box.add_widget(Label(text="", size_hint=(0.2, 1)))
+        checkbox_box.add_widget(self.blueprint_checkbox)
+        checkbox_box.add_widget(Label(text="has blueprint", size_hint=(0.3, 1)))
+        checkbox_box.add_widget(Label(text="", size_hint=(0.2, 1)))
+        self.add_widget(checkbox_box)
     
 
 class RequirementPanel(BoxLayout):
     # requirement_header = 
     def show_reqs_and_deacts(self, requirements, deactivations):
         self.clear_widgets()
+        if requirements:
+            self.add_widget(Label(text="Requirements:", size_hint=(1, None), height=dp(20), color=(1, 1, 0, 1)))
+            for requirement in requirements:
+                self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(20)))
 
-        self.add_widget(Label(text="Requirements", size_hint=(1, None), height=dp(20)))
-        for requirement in requirements:
-            self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(20)))
-
-        self.add_widget(Label(text="Deactivates", size_hint=(1, None), height=dp(20)))
-        for deactivation in deactivations:
-            self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(20)))
+        if deactivations:
+            self.add_widget(Label(text="Deactivates:", size_hint=(1, None), height=dp(20), color=(1, 0, 0, 1)))
+            for deactivation in deactivations:
+                self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(20)))
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(Label(text="Requirements", size_hint=(1, 0.25)))
+        self.add_widget(Label(text="Requirements:", size_hint=(1, 0.25), color=(1, 1, 0, 1)))
         self.add_widget(Label(text="...", size_hint=(1, 0.25)))
-        self.add_widget(Label(text="Deactivates", size_hint=(1, 0.25)))
+        self.add_widget(Label(text="Deactivates:", size_hint=(1, 0.25), color=(1, 0, 0, 1)))
         self.add_widget(Label(text="...", size_hint=(1, 0.25)))
 
 
@@ -276,14 +293,14 @@ class EffectsPanel(BoxLayout):
     def show_effects(self, effects):
         self.clear_widgets()
 
-        self.add_widget(Label(text="Effects", size_hint=(1, None), height=dp(20)))
+        self.add_widget(Label(text="Effects:", size_hint=(1, None), height=dp(20)))
         for effect in effects:
             self.add_widget(Label(text=effect, size_hint=(1, None), height=dp(20)))
 
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(Label(text="Effects", size_hint=(1, None), height=dp(20)))
+        self.add_widget(Label(text="Effects:", size_hint=(1, None), height=dp(20)))
         for i in range(20):
             self.add_widget(Label(text=f"... {i+1}", size_hint=(1, None), height=dp(20)))
         # self.add_widget(Label(text="...", size_hint=(1, 0.25)))
@@ -334,54 +351,11 @@ class InfantryTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="InfantryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="InfantryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
-
-        sg_x = 0
-        inf_x = 0.18
-
-        self.technologies = [
-            # small guns
-            TechnologyButton("Basic SMG", 1010, pos_hint={"x": sg_x, "y": 0.91}),
-            TechnologyButton("Improved SMG", 1020, pos_hint={"x": sg_x, "y": 0.875}),
-            TechnologyButton("Basic Machine Gun", 1030, pos_hint={"x": sg_x, "y": 0.84}),
-            TechnologyButton("Improved MG", 1040, pos_hint={"x": sg_x, "y": 0.805}),
-            TechnologyButton("Advanced MG", 1050, pos_hint={"x": sg_x, "y": 0.77}),
-            TechnologyButton("Modern MG", 1060, pos_hint={"x": sg_x, "y": 0.735}),
-
-            # infantry
-            TechnologyButton("WWI Infantry", 1070, pos_hint={"x": inf_x, "y": 0.96}),
-            TechnologyButton("Post-WWI", 1080, pos_hint={"x": inf_x, "y": 0.925}),
-            TechnologyButton("Basic", 1090, pos_hint={"x": inf_x, "y": 0.885}),
-            TechnologyButton("Improved", 1100, pos_hint={"x": inf_x, "y": 0.845}),
-            TechnologyButton("Advanced", 1110, pos_hint={"x": inf_x, "y": 0.805}),
-            TechnologyButton("Semi-Professional", 1120, pos_hint={"x": inf_x, "y": 0.765}),
-            TechnologyButton("Professional", 1130, pos_hint={"x": inf_x, "y": 0.725}),
-            TechnologyButton("Modern", 1140, pos_hint={"x": inf_x, "y": 0.685}),
-
-            # cavalry
-            TechnologyButton("Basic Cavalry", 1260, pos_hint={"x": sg_x, "y": 0.665}),
-            TechnologyButton("Semi-Motorized I", 1270, pos_hint={"x": sg_x + 0.01, "y": 0.63}),
-            TechnologyButton("Semi-Motorized II", 1280, pos_hint={"x": sg_x + 0.01, "y": 0.595}),
-            TechnologyButton("Semi-Mechanized I", 1290, pos_hint={"x": sg_x + 0.01, "y": 0.56}),
-            TechnologyButton("Semi-Mechanized II", 1760, pos_hint={"x": sg_x + 0.01, "y": 0.525}),
-
-            # mechanized
-            TechnologyButton("Basic Mechanized", 1440, pos_hint={"x": sg_x, "y": 0.205}),
-            TechnologyButton("Average", 1450, pos_hint={"x": sg_x, "y": 0.17}),
-            TechnologyButton("Advanced", 1460, pos_hint={"x": sg_x, "y": 0.135}),
-            TechnologyButton("Semi-Modern", 1470, pos_hint={"x": sg_x, "y": 0.1}),
-
-            # motorized
-            TechnologyButton("Basic Motorized", 1400, pos_hint={"x": inf_x, "y": 0.205}),
-            TechnologyButton("Average", 1410, pos_hint={"x": inf_x, "y": 0.17}),
-            TechnologyButton("Advanced", 1420, pos_hint={"x": inf_x, "y": 0.135}),
-            TechnologyButton("Semi-Modern", 1430, pos_hint={"x": inf_x, "y": 0.1}),
-        ]
-
-        for tb in self.technologies:
-            self.add_widget(tb)
-            tb.technology.bind(on_release=self.select_technology)
+        # for tb in self.technologies.values():
+        #     self.add_widget(tb)
+        #     tb.technology.bind(on_release=self.select_technology)
 
 
 class ArmorTechScreen(MainTechScreen):
@@ -457,15 +431,179 @@ class AirDoctrineTechScreen(MainTechScreen):
 
 
 class MainTechScreen_BoxLayout(BoxLayout):
+    def select_technology(self, widget):
+        self.parent.select_technology_by_id(widget.parent.tech_id)
+
+    def show_requirements(self, required_tech_ids):
+        for tech_id in required_tech_ids:
+            tech_btn = self.technologies.get(tech_id)
+            if tech_btn is not None:
+                tech_btn.show_as_requirement()
+            # self.technologies[tech_id].show_as_requirement()
+        self.old_requirements = required_tech_ids
+    
+    def hide_old_requirements(self):
+        for tech_id in self.old_requirements:
+            tech_btn = self.technologies.get(tech_id)
+            if tech_btn is not None:
+                tech_btn.hide_requirement()
+    
+    def show_deactivation_warnings(self, deactivated_tech_ids):
+        for tech_id in deactivated_tech_ids:
+            tech_btn = self.technologies.get(tech_id)
+            if tech_btn is not None:
+                tech_btn.show_deactivation_warning()
+            # self.technologies[tech_id].show_deactivation_warning()
+        self.old_deactivations = deactivated_tech_ids
+    
+    def hide_old_deactivation_warnings(self):
+        for tech_id in self.old_deactivations:
+            tech_btn = self.technologies.get(tech_id)
+            if tech_btn is not None:
+                tech_btn.hide_deactivation_warning()
+    
     def change_layout(self, category):
         self.remove_widget(self.current_layout)
         self.current_layout = self.category_layouts[category]
         self.add_widget(self.current_layout)
+    
+    def add_technology_buttons(self, i, layout):
+        if i == 4:
+            return
+        lower_id = (i + 1) * 1000 if i < 4 else i * 1000
+        for tech_id, tech_btn in self.technologies.items():
+            if tech_id >= lower_id and tech_id < lower_id + 1000:
+                layout.add_widget(tech_btn)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.add_widget(Label(text="MainTechScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
-        self.tech_buttons = dict()
+
+        self.old_requirements = []
+        self.old_deactivations = []
+
+        # self.tech_buttons = dict()
+        sg_x = 0
+        inf_x = 0.18
+        third_x = 0.38
+        mnt_x = 0.58
+        fifth_x = 0.8
+        self.technologies = {
+            # small guns
+            1010: TechnologyButton("Basic SMG", 1010, pos_hint={"x": sg_x, "y": 0.91}),
+            1020: TechnologyButton("Improved SMG", 1020, pos_hint={"x": sg_x, "y": 0.875}),
+            1030: TechnologyButton("Basic Machine Gun", 1030, pos_hint={"x": sg_x, "y": 0.84}),
+            1040: TechnologyButton("Improved MG", 1040, pos_hint={"x": sg_x, "y": 0.805}),
+            1050: TechnologyButton("Advanced MG", 1050, pos_hint={"x": sg_x, "y": 0.77}),
+            1060: TechnologyButton("Modern MG", 1060, pos_hint={"x": sg_x, "y": 0.735}),
+
+            # infantry
+            1070: TechnologyButton("WWI Infantry", 1070, pos_hint={"x": inf_x, "y": 0.96}),
+            1080: TechnologyButton("Post-WWI", 1080, pos_hint={"x": inf_x, "y": 0.925}),
+            1090: TechnologyButton("Basic", 1090, pos_hint={"x": inf_x, "y": 0.885}),
+            1100: TechnologyButton("Improved", 1100, pos_hint={"x": inf_x, "y": 0.845}),
+            1110: TechnologyButton("Advanced", 1110, pos_hint={"x": inf_x, "y": 0.805}),
+            1120: TechnologyButton("Semi-Professional", 1120, pos_hint={"x": inf_x, "y": 0.765}),
+            1130: TechnologyButton("Professional", 1130, pos_hint={"x": inf_x, "y": 0.725}),
+            1140: TechnologyButton("Modern", 1140, pos_hint={"x": inf_x, "y": 0.685}),
+
+            # cavalry
+            1260: TechnologyButton("Basic Cavalry", 1260, pos_hint={"x": sg_x, "y": 0.665}),
+            1270: TechnologyButton("Semi-Motorized I", 1270, pos_hint={"x": sg_x + 0.01, "y": 0.63}),
+            1280: TechnologyButton("Semi-Motorized II", 1280, pos_hint={"x": sg_x + 0.01, "y": 0.595}),
+            1290: TechnologyButton("Semi-Mechanized I", 1290, pos_hint={"x": sg_x + 0.01, "y": 0.56}),
+            1760: TechnologyButton("Semi-Mechanized II", 1760, pos_hint={"x": sg_x + 0.01, "y": 0.525}),
+			
+			# light vehicle
+			1390: TechnologyButton("Light Vehicle", 1390, pos_hint={"x": sg_x, "y": 0.26}),
+
+            # mechanized
+            1440: TechnologyButton("Basic Mechanized", 1440, pos_hint={"x": sg_x, "y": 0.205}),
+            1450: TechnologyButton("Average", 1450, pos_hint={"x": sg_x, "y": 0.17}),
+            1460: TechnologyButton("Advanced", 1460, pos_hint={"x": sg_x, "y": 0.135}),
+            1470: TechnologyButton("Semi-Modern", 1470, pos_hint={"x": sg_x, "y": 0.1}),
+
+            # motorized
+            1400: TechnologyButton("Basic Motorized", 1400, pos_hint={"x": inf_x, "y": 0.205}),
+            1410: TechnologyButton("Average", 1410, pos_hint={"x": inf_x, "y": 0.17}),
+            1420: TechnologyButton("Advanced", 1420, pos_hint={"x": inf_x, "y": 0.135}),
+            1430: TechnologyButton("Semi-Modern", 1430, pos_hint={"x": inf_x, "y": 0.1}),
+			
+			# marines
+			1300: TechnologyButton("Pre-war Marine", 1300, pos_hint={"x": inf_x, "y": 0.6}),
+			1310: TechnologyButton("Basic", 1310, pos_hint={"x": inf_x, "y": 0.565}),
+			1320: TechnologyButton("Average", 1410, pos_hint={"x": inf_x, "y": 0.53}),
+			1330: TechnologyButton("Improved", 1410, pos_hint={"x": inf_x, "y": 0.495}),
+			1340: TechnologyButton("Advanced", 1410, pos_hint={"x": inf_x, "y": 0.46}),
+			
+			# specialiation and equipment
+			1150: TechnologyButton("Specialized Units", 1150, pos_hint={"x": third_x, "y": 0.91}),
+
+			1160: TechnologyButton("Winter I", 1160, pos_hint={"x": third_x, "y": 0.85}),
+			1170: TechnologyButton("Winter II", 1170, pos_hint={"x": third_x + 0.02, "y": 0.815}),
+
+			1180: TechnologyButton("Desert I", 1180, pos_hint={"x": third_x, "y": 0.765}),
+			1190: TechnologyButton("Desert II", 1190, pos_hint={"x": third_x + 0.02, "y": 0.73}),
+
+			1200: TechnologyButton("Jungle I", 1200, pos_hint={"x": third_x, "y": 0.68}),
+			1210: TechnologyButton("Jungle II", 1210, pos_hint={"x": third_x + 0.02, "y": 0.645}),
+			
+			# mountain
+			1220: TechnologyButton("Mountain I", 1220, pos_hint={"x": mnt_x, "y": 0.96}),
+			1230: TechnologyButton("Mountain II", 1230, pos_hint={"x": mnt_x, "y": 0.925}),
+			1240: TechnologyButton("Mountain III", 1240, pos_hint={"x": mnt_x, "y": 0.89}),
+			1250: TechnologyButton("Mountain IV", 1250, pos_hint={"x": mnt_x, "y": 0.855}),
+			
+			# paratroopers
+			1350: TechnologyButton("Paratrooper studies", 1350, pos_hint={"x": mnt_x, "y": 0.8}),
+			1360: TechnologyButton("Paratrooper I", 1360, pos_hint={"x": mnt_x, "y": 0.765}),
+			1370: TechnologyButton("Paratrooper II", 1370, pos_hint={"x": mnt_x, "y": 0.73}),
+			1380: TechnologyButton("Paratrooper III", 1380, pos_hint={"x": mnt_x, "y": 0.695}),
+			
+			# logistics
+			1490: TechnologyButton("Supply Logistics", 1490, pos_hint={"x": third_x, "y": 0.5}),
+			1500: TechnologyButton("Concentrated", 1500, pos_hint={"x": third_x, "y": 0.45}),
+			1510: TechnologyButton("Logistics Planning", 1510, pos_hint={"x": third_x, "y": 0.415}),
+			1520: TechnologyButton("Classification", 1520, pos_hint={"x": third_x, "y": 0.375}),
+			1530: TechnologyButton("Logistical savings", 1530, pos_hint={"x": third_x, "y": 0.34}),
+			
+			1480: TechnologyButton("Arsenal Logistics", 1480, pos_hint={"x": mnt_x, "y": 0.5}),
+			1540: TechnologyButton("Dispersed logistics", 1540, pos_hint={"x": mnt_x, "y": 0.45}),
+			1550: TechnologyButton("Small warehouses", 1550, pos_hint={"x": mnt_x, "y": 0.415}),
+			1560: TechnologyButton("Supply Vehicles", 1560, pos_hint={"x": mnt_x, "y": 0.375}),
+			1570: TechnologyButton("Frontline Supply", 1570, pos_hint={"x": mnt_x, "y": 0.34}),
+			
+			1580: TechnologyButton("Management Expert", 1580, pos_hint={"x": third_x + 0.1, "y": 0.29}),
+
+            # priorization
+
+            1590: TechnologyButton("Prioritize Quality", 1590, pos_hint={"x": inf_x + 0.02, "y": 0.37}),
+            1600: TechnologyButton("Prioritize Quantity", 1600, pos_hint={"x": inf_x + 0.02, "y": 0.33}),
+
+            1610: TechnologyButton("Prioritize Mobility", 1610, pos_hint={"x": sg_x + 0.02, "y": 0.37}),
+            1620: TechnologyButton("Prioritize Infantry", 1620, pos_hint={"x": sg_x + 0.02, "y": 0.33}),
+
+            # commandos
+            1630: TechnologyButton("Commando Units", 1630, pos_hint={"x": fifth_x, "y": 0.90}),
+            1640: TechnologyButton("Basic", 1640, pos_hint={"x": fifth_x, "y": 0.86}),
+            1650: TechnologyButton("Improved", 1650, pos_hint={"x": fifth_x, "y": 0.82}),
+            1660: TechnologyButton("Advanced", 1660, pos_hint={"x": fifth_x, "y": 0.78}),
+
+            # electronic warfare
+            1670: TechnologyButton("Electronic Warfare", 1670, pos_hint={"x": fifth_x, "y": 0.5}),
+            1680: TechnologyButton("Jamming Enemy", 1680, pos_hint={"x": fifth_x, "y": 0.45}),
+            1690: TechnologyButton("Intercept Radio", 1690, pos_hint={"x": fifth_x, "y": 0.4}),
+            1700: TechnologyButton("False Decoys", 1700, pos_hint={"x": fifth_x, "y": 0.35}),
+            1710: TechnologyButton("Signal Detection", 1710, pos_hint={"x": fifth_x, "y": 0.3}),
+            1720: TechnologyButton("High Frequency", 1720, pos_hint={"x": fifth_x, "y": 0.25}),
+            1730: TechnologyButton("Detection", 1730, pos_hint={"x": fifth_x, "y": 0.2}),
+            1740: TechnologyButton("Triangulation", 1740, pos_hint={"x": fifth_x, "y": 0.15}),
+            1750: TechnologyButton("Advanced Jamming", 1750, pos_hint={"x": fifth_x, "y": 0.1})
+		}
+
+        for tb in self.technologies.values():
+            # self.add_widget(tb)
+            tb.technology.bind(on_release=self.select_technology)
 
         self.category_layouts = {
             TECH_CATEGORIES[0][1]: InfantryTechScreen(),
@@ -479,6 +617,10 @@ class MainTechScreen_BoxLayout(BoxLayout):
             TECH_CATEGORIES[8][1]: NavalDoctrineTechScreen(),
             TECH_CATEGORIES[9][1]: AirDoctrineTechScreen()
         }
+
+        for i, layout in enumerate(self.category_layouts.values()):
+            self.add_technology_buttons(i, layout)
+
         self.current_layout = self.category_layouts["Infantry"]
         self.add_widget(self.current_layout)
 
@@ -561,6 +703,15 @@ class TechScreen(BoxLayout):
         effects = self.parent.parent.research.list_effects(tech)
         has_blueprint = tech.tech_id in self.parent.parent.research.blueprints
         self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
+
+        # update tech buttons
+        self.maintechscreen.hide_old_requirements()
+        self.maintechscreen.hide_old_deactivation_warnings()
+
+        req_ids = [int(line.split(" ")[0].strip("*")) for line in requirements]
+        deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
+        self.maintechscreen.show_requirements(req_ids)
+        self.maintechscreen.show_deactivation_warnings(deact_ids)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
