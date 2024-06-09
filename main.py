@@ -99,6 +99,11 @@ class TechnologyButton(BoxLayout):
     SIZE_HINT = (0.15, 0.035)
     
     # COLORS
+    DEFAULT_COLOR = (0.4, 0.4, 0.4, 1)
+    RANDOM_COLOR = (0.4, 0.8, 0.2, 0.7)
+    COMPLETED_COLOR = (0.2, 0.7, 0.3, 1)
+    ACTIVE_COLOR = (0.6, 1, 0.1, 1)
+    DEACTIVATE_COLOR = (1, 0.1, 0.1, 1)
 
     def add_blueprint(self):
         self.blueprint_label.text = "B"
@@ -118,6 +123,18 @@ class TechnologyButton(BoxLayout):
     def hide_deactivation_warning(self):
         self.deactivation_label.text = ""
 
+    def reset_color(self):
+        self.technology.background_color = self.DEFAULT_COLOR
+    
+    def complete(self):
+        self.technology.background_color = self.COMPLETED_COLOR
+    
+    def activate(self):
+        self.technology.background_color = self.ACTIVE_COLOR
+    
+    def deactivate(self):
+        self.technology.background_color = self.DEACTIVATE_COLOR
+
     def __init__(self, tech_short_name, tech_id, has_blueprint=False, **kwargs):
         super().__init__(**kwargs)
 
@@ -131,7 +148,7 @@ class TechnologyButton(BoxLayout):
         self.requirement_label = Label(text="", color=(1, 1, 0, 1))
         requirement_box.add_widget(self.requirement_label)
 
-        self.technology = Button(text=tech_short_name, size_hint=(0.85, 1), background_color=(0.4, 0.8, 0.2, 0.7))
+        self.technology = Button(text=tech_short_name, size_hint=(0.85, 1), background_color=self.DEFAULT_COLOR)
 
         blueprint_box = BoxLayout(size_hint=(0.04, 1))
         self.blueprint_label = Label(text="", color=(0, 0, 1, 1))
@@ -474,6 +491,22 @@ class MainTechScreen_BoxLayout(BoxLayout):
         for tech_id, tech_btn in self.technologies.items():
             if tech_id >= lower_id and tech_id < lower_id + 1000:
                 layout.add_widget(tech_btn)
+    
+    def update_technology_buttons(self, research_object):
+        for tech_id, tech_button in self.technologies.items():
+            if tech_id in research_object.blueprints:
+                tech_button.add_blueprint()
+            if tech_id in research_object.completed_techs:
+                tech_button.complete()
+                continue
+            if tech_id in research_object.active_techs:
+                tech_button.activate()
+                continue
+            if tech_id in research_object.deactivated_techs:
+                tech_button.deactivate()
+                continue
+            tech_button.reset_color()
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -912,9 +945,12 @@ class MainFullScreen(BoxLayout):
 
 
     def add_country(self, country_code):
+        update_tech = self.research.primary_country is None
         self.research.add_country(country_code)
         # self.statusbar.add_country(country_code)
         self.update_statusbar()
+        if update_tech:
+            self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
 
     def remove_country(self, country_code):
         self.research.remove_country(country_code)
