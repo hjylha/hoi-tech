@@ -7,6 +7,14 @@ class Research:
     DEFAULT_RESEARCH_SPEED = 100
     DEFAULT_DIFFICULTY = 0
 
+    def activate_tech(self, tech_id):
+        self.active_techs.add(tech_id)
+        self.techs[tech_id].active = 1
+
+    def deactivate_tech(self, tech_id):
+        self.deactivated_techs.add(tech_id)
+        self.techs[tech_id].deactivate()
+
     def are_tech_requirements_completed(self, tech_id):
         if not self.techs[tech_id].requirements:
             return True
@@ -28,6 +36,16 @@ class Research:
             if team.start_year <= self.year and team.end_year >= self.year:
                 filtered_teams.append(team)
         self.teams = filtered_teams
+    
+    def update_active_techs(self):
+        self.active_techs = set()
+        for tech_id in self.techs.keys():
+            if tech_id in self.completed_techs:
+                continue
+            if tech_id in self.deactivated_techs:
+                continue
+            if self.are_tech_requirements_completed(tech_id):
+                self.activate_tech(tech_id)
 
 
     def clear_all_tech(self):
@@ -45,11 +63,18 @@ class Research:
         self.completed_techs = set(scenario_data["researched"])
         self.deactivated_techs = set(scenario_data["deactivated"])
         self.blueprints = set(scenario_data["blueprints"])
-        self.research_speed = scenario_data["research_speed"]
+        if scenario_data.get("research_speed") is not None:
+            self.research_speed = scenario_data["research_speed"]
 
-        for tech_id in self.techs:
-            if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
-                self.active_techs.add(tech_id)
+        for tech_id in self.completed_techs:
+            deactivations = self.techs[tech_id].get_deactivated_tech()
+            for t_id in deactivations:
+                self.deactivated_techs.add(t_id)
+
+        self.update_active_techs()
+        # for tech_id in self.techs:
+        #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
+        #         self.active_techs.add(tech_id)
 
 
     def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
@@ -155,14 +180,6 @@ class Research:
         for tech_id in self.active_techs:
             print(self.techs[tech_id])
 
-    def activate_tech(self, tech_id):
-        self.active_techs.add(tech_id)
-        self.techs[tech_id].active = 1
-
-    def deactivate_tech(self, tech_id):
-        self.deactivated_techs.add(tech_id)
-        self.techs[tech_id].deactivate()
-
     def complete_tech(self, completed_tech_id):
         self.completed_techs.add(completed_tech_id)
         self.techs[completed_tech_id].researched = 1
@@ -178,10 +195,11 @@ class Research:
         for tech_id in self.techs[completed_tech_id].get_deactivated_tech():
             self.deactivate_tech(tech_id)
         
-        for tech_id in self.techs:
-            if self.are_tech_requirements_completed(tech_id):
-                if not(tech_id in self.completed_techs or tech_id in self.deactivated_techs):
-                    self.activate_tech(tech_id)
+        self.update_active_techs()
+        # for tech_id in self.techs:
+        #     if self.are_tech_requirements_completed(tech_id):
+        #         if not(tech_id in self.completed_techs or tech_id in self.deactivated_techs):
+        #             self.activate_tech(tech_id)
     
     def undo_completed_tech(self, tech_id):
         self.completed_techs.remove(tech_id)
