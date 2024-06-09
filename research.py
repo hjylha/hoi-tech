@@ -51,9 +51,10 @@ class Research:
     def clear_all_tech(self):
         self.completed_techs = set()
         self.techs_researching = set()
-        self.active_techs = set()
+        # self.active_techs = set()
         self.deactivated_techs = set()
         self.blueprints = set()
+        self.update_active_techs()
 
     def choose_primary_country(self, country_code):
         self.primary_country = country_code
@@ -206,8 +207,9 @@ class Research:
         self.techs[tech_id].researched = 0
         self.research_speed -= self.techs[tech_id].get_research_speed_change() 
         # OTHER STUFF????????
-        if self.are_tech_requirements_completed(tech_id):
-            self.activate_tech(tech_id)
+        # if self.are_tech_requirements_completed(tech_id):
+        #     self.activate_tech(tech_id)
+        self.update_active_techs()
     
     def sort_teams_for_researching_tech(self, tech):
         # check blueprint
