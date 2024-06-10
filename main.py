@@ -17,6 +17,7 @@ from kivy.metrics import dp
 
 from research import Research
 from scan_hoi_files import get_country_names
+from tech_positions import tech_positions
 
 
 
@@ -544,123 +545,11 @@ class MainTechScreen_BoxLayout(BoxLayout):
         self.old_deactivations = []
 
         # self.tech_buttons = dict()
-        sg_x = 0
-        inf_x = 0.18
-        third_x = 0.38
-        mnt_x = 0.58
-        fifth_x = 0.8
-        self.technologies = {
-            # small guns
-            1010: TechnologyButton("Basic SMG", 1010, pos_hint={"x": sg_x, "y": 0.91}),
-            1020: TechnologyButton("Improved SMG", 1020, pos_hint={"x": sg_x, "y": 0.875}),
-            1030: TechnologyButton("Basic Machine Gun", 1030, pos_hint={"x": sg_x, "y": 0.84}),
-            1040: TechnologyButton("Improved MG", 1040, pos_hint={"x": sg_x, "y": 0.805}),
-            1050: TechnologyButton("Advanced MG", 1050, pos_hint={"x": sg_x, "y": 0.77}),
-            1060: TechnologyButton("Modern MG", 1060, pos_hint={"x": sg_x, "y": 0.735}),
 
-            # infantry
-            1070: TechnologyButton("WWI Infantry", 1070, pos_hint={"x": inf_x, "y": 0.96}),
-            1080: TechnologyButton("Post-WWI", 1080, pos_hint={"x": inf_x, "y": 0.925}),
-            1090: TechnologyButton("Basic", 1090, pos_hint={"x": inf_x, "y": 0.885}),
-            1100: TechnologyButton("Improved", 1100, pos_hint={"x": inf_x, "y": 0.845}),
-            1110: TechnologyButton("Advanced", 1110, pos_hint={"x": inf_x, "y": 0.805}),
-            1120: TechnologyButton("Semi-Professional", 1120, pos_hint={"x": inf_x, "y": 0.765}),
-            1130: TechnologyButton("Professional", 1130, pos_hint={"x": inf_x, "y": 0.725}),
-            1140: TechnologyButton("Modern", 1140, pos_hint={"x": inf_x, "y": 0.685}),
-
-            # cavalry
-            1260: TechnologyButton("Basic Cavalry", 1260, pos_hint={"x": sg_x, "y": 0.665}),
-            1270: TechnologyButton("Semi-Motorized I", 1270, pos_hint={"x": sg_x + 0.01, "y": 0.63}),
-            1280: TechnologyButton("Semi-Motorized II", 1280, pos_hint={"x": sg_x + 0.01, "y": 0.595}),
-            1290: TechnologyButton("Semi-Mechanized I", 1290, pos_hint={"x": sg_x + 0.01, "y": 0.56}),
-            1760: TechnologyButton("Semi-Mechanized II", 1760, pos_hint={"x": sg_x + 0.01, "y": 0.525}),
-			
-			# light vehicle
-			1390: TechnologyButton("Light Vehicle", 1390, pos_hint={"x": sg_x, "y": 0.26}),
-
-            # mechanized
-            1440: TechnologyButton("Basic Mechanized", 1440, pos_hint={"x": sg_x, "y": 0.205}),
-            1450: TechnologyButton("Average", 1450, pos_hint={"x": sg_x, "y": 0.17}),
-            1460: TechnologyButton("Advanced", 1460, pos_hint={"x": sg_x, "y": 0.135}),
-            1470: TechnologyButton("Semi-Modern", 1470, pos_hint={"x": sg_x, "y": 0.1}),
-
-            # motorized
-            1400: TechnologyButton("Basic Motorized", 1400, pos_hint={"x": inf_x, "y": 0.205}),
-            1410: TechnologyButton("Average", 1410, pos_hint={"x": inf_x, "y": 0.17}),
-            1420: TechnologyButton("Advanced", 1420, pos_hint={"x": inf_x, "y": 0.135}),
-            1430: TechnologyButton("Semi-Modern", 1430, pos_hint={"x": inf_x, "y": 0.1}),
-			
-			# marines
-			1300: TechnologyButton("Pre-war Marine", 1300, pos_hint={"x": inf_x, "y": 0.6}),
-			1310: TechnologyButton("Basic", 1310, pos_hint={"x": inf_x, "y": 0.565}),
-			1320: TechnologyButton("Average", 1410, pos_hint={"x": inf_x, "y": 0.53}),
-			1330: TechnologyButton("Improved", 1410, pos_hint={"x": inf_x, "y": 0.495}),
-			1340: TechnologyButton("Advanced", 1410, pos_hint={"x": inf_x, "y": 0.46}),
-			
-			# specialiation and equipment
-			1150: TechnologyButton("Specialized Units", 1150, pos_hint={"x": third_x, "y": 0.91}),
-
-			1160: TechnologyButton("Winter I", 1160, pos_hint={"x": third_x, "y": 0.85}),
-			1170: TechnologyButton("Winter II", 1170, pos_hint={"x": third_x + 0.02, "y": 0.815}),
-
-			1180: TechnologyButton("Desert I", 1180, pos_hint={"x": third_x, "y": 0.765}),
-			1190: TechnologyButton("Desert II", 1190, pos_hint={"x": third_x + 0.02, "y": 0.73}),
-
-			1200: TechnologyButton("Jungle I", 1200, pos_hint={"x": third_x, "y": 0.68}),
-			1210: TechnologyButton("Jungle II", 1210, pos_hint={"x": third_x + 0.02, "y": 0.645}),
-			
-			# mountain
-			1220: TechnologyButton("Mountain I", 1220, pos_hint={"x": mnt_x, "y": 0.96}),
-			1230: TechnologyButton("Mountain II", 1230, pos_hint={"x": mnt_x, "y": 0.925}),
-			1240: TechnologyButton("Mountain III", 1240, pos_hint={"x": mnt_x, "y": 0.89}),
-			1250: TechnologyButton("Mountain IV", 1250, pos_hint={"x": mnt_x, "y": 0.855}),
-			
-			# paratroopers
-			1350: TechnologyButton("Paratrooper studies", 1350, pos_hint={"x": mnt_x, "y": 0.8}),
-			1360: TechnologyButton("Paratrooper I", 1360, pos_hint={"x": mnt_x, "y": 0.765}),
-			1370: TechnologyButton("Paratrooper II", 1370, pos_hint={"x": mnt_x, "y": 0.73}),
-			1380: TechnologyButton("Paratrooper III", 1380, pos_hint={"x": mnt_x, "y": 0.695}),
-			
-			# logistics
-			1490: TechnologyButton("Supply Logistics", 1490, pos_hint={"x": third_x, "y": 0.5}),
-			1500: TechnologyButton("Concentrated", 1500, pos_hint={"x": third_x, "y": 0.45}),
-			1510: TechnologyButton("Logistics Planning", 1510, pos_hint={"x": third_x, "y": 0.415}),
-			1520: TechnologyButton("Classification", 1520, pos_hint={"x": third_x, "y": 0.375}),
-			1530: TechnologyButton("Logistical savings", 1530, pos_hint={"x": third_x, "y": 0.34}),
-			
-			1480: TechnologyButton("Arsenal Logistics", 1480, pos_hint={"x": mnt_x, "y": 0.5}),
-			1540: TechnologyButton("Dispersed logistics", 1540, pos_hint={"x": mnt_x, "y": 0.45}),
-			1550: TechnologyButton("Small warehouses", 1550, pos_hint={"x": mnt_x, "y": 0.415}),
-			1560: TechnologyButton("Supply Vehicles", 1560, pos_hint={"x": mnt_x, "y": 0.375}),
-			1570: TechnologyButton("Frontline Supply", 1570, pos_hint={"x": mnt_x, "y": 0.34}),
-			
-			1580: TechnologyButton("Management Expert", 1580, pos_hint={"x": third_x + 0.1, "y": 0.29}),
-
-            # priorization
-
-            1590: TechnologyButton("Prioritize Quality", 1590, pos_hint={"x": inf_x + 0.02, "y": 0.37}),
-            1600: TechnologyButton("Prioritize Quantity", 1600, pos_hint={"x": inf_x + 0.02, "y": 0.33}),
-
-            1610: TechnologyButton("Prioritize Mobility", 1610, pos_hint={"x": sg_x + 0.02, "y": 0.37}),
-            1620: TechnologyButton("Prioritize Infantry", 1620, pos_hint={"x": sg_x + 0.02, "y": 0.33}),
-
-            # commandos
-            1630: TechnologyButton("Commando Units", 1630, pos_hint={"x": fifth_x, "y": 0.90}),
-            1640: TechnologyButton("Basic", 1640, pos_hint={"x": fifth_x, "y": 0.86}),
-            1650: TechnologyButton("Improved", 1650, pos_hint={"x": fifth_x, "y": 0.82}),
-            1660: TechnologyButton("Advanced", 1660, pos_hint={"x": fifth_x, "y": 0.78}),
-
-            # electronic warfare
-            1670: TechnologyButton("Electronic Warfare", 1670, pos_hint={"x": fifth_x, "y": 0.5}),
-            1680: TechnologyButton("Jamming Enemy", 1680, pos_hint={"x": fifth_x, "y": 0.45}),
-            1690: TechnologyButton("Intercept Radio", 1690, pos_hint={"x": fifth_x, "y": 0.4}),
-            1700: TechnologyButton("False Decoys", 1700, pos_hint={"x": fifth_x, "y": 0.35}),
-            1710: TechnologyButton("Signal Detection", 1710, pos_hint={"x": fifth_x, "y": 0.3}),
-            1720: TechnologyButton("High Frequency", 1720, pos_hint={"x": fifth_x, "y": 0.25}),
-            1730: TechnologyButton("Detection", 1730, pos_hint={"x": fifth_x, "y": 0.2}),
-            1740: TechnologyButton("Triangulation", 1740, pos_hint={"x": fifth_x, "y": 0.15}),
-            1750: TechnologyButton("Advanced Jamming", 1750, pos_hint={"x": fifth_x, "y": 0.1})
-		}
+        self.technologies = dict()
+        for key, value in tech_positions.items():
+            name = the_research.techs[key].short_name
+            self.technologies[key] = TechnologyButton(name, key, pos_hint={"x": value[0], "y": value[1]})
 
         for tb in self.technologies.values():
             # self.add_widget(tb)
