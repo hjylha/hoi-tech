@@ -1,5 +1,4 @@
 
-from classes import Tech
 from scan_hoi_files import get_country_names, scan_techs, get_tech_teams, scan_scenario_file_for_country
 
 
@@ -21,14 +20,16 @@ class Research:
             return True
         for req in self.techs[tech_id].requirements:
             if isinstance(req, int):
-                if req in list_of_tech_ids:
-                    continue
-                return False
+                if req not in list_of_tech_ids:
+                    return False
             if isinstance(req, list):
+                found = False
                 for r in req:
                     if r in list_of_tech_ids:
-                        continue
-                return False
+                        found = True
+                        break
+                if not found:
+                    return False
         return True
 
     def are_tech_requirements_completed(self, tech_id):
@@ -36,14 +37,15 @@ class Research:
             return True
         for req in self.techs[tech_id].requirements:
             if isinstance(req, int):
-                if req in self.completed_techs:
-                    continue
-                return False
+                if req not in self.completed_techs:
+                    return False
             if isinstance(req, list):
+                found = False
                 for r in req:
                     if r in self.completed_techs:
-                        continue
-                return False
+                        found = True
+                if not found:
+                    return False
         return True
 
     def filter_teams(self):
@@ -229,10 +231,6 @@ class Research:
         
         if update_active:
             self.update_active_techs()
-        # for tech_id in self.techs:
-        #     if self.are_tech_requirements_completed(tech_id):
-        #         if not(tech_id in self.completed_techs or tech_id in self.deactivated_techs):
-        #             self.activate_tech(tech_id)
 
     def complete_until_tech(self, tech_id):
         if tech_id in self.completed_techs or tech_id in self.deactivated_techs:
@@ -242,14 +240,13 @@ class Research:
         # new_requirements = self.get_techs_from_ids(self.techs[tech_id].requirements)
         techs_to_complete = [tech_id]
         new_requirements = self.techs[tech_id].requirements
-        # new_requirements = [r for r in new_requirements if]
         while new_requirements:
             new_new_requirements = []
             for t_id in new_requirements:
                 if isinstance(t_id, int):
                     if t_id in self.deactivated_techs:
                         return
-                    if t_id in self.completed_techs:
+                    if t_id in self.completed_techs or t_id in techs_to_complete:
                         continue
                     techs_to_complete.append(t_id)
                     new_new_requirements += self.techs[t_id].requirements
@@ -263,8 +260,9 @@ class Research:
                         if te_id in self.deactivated_techs:
                             continue
                         # TODO: improve this and check more maybe
-                        techs_to_complete.append(te_id)
-                        new_new_requirements += self.techs[te_id].requirements
+                        if te_id not in techs_to_complete:
+                            techs_to_complete.append(te_id)
+                            new_new_requirements += self.techs[te_id].requirements
                         ready = True
                         break
                     if not ready:
@@ -282,9 +280,6 @@ class Research:
         self.research_speed -= self.techs[tech_id].get_research_speed_change()
         # just in case
         self.research_speed = round(self.research_speed, 1)
-        # OTHER STUFF????????
-        # if self.are_tech_requirements_completed(tech_id):
-        #     self.activate_tech(tech_id)
         self.update_active_techs()
     
     def sort_teams_for_researching_tech(self, tech):
