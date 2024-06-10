@@ -1,4 +1,5 @@
 
+from classes import Tech
 from scan_hoi_files import get_country_names, scan_techs, get_tech_teams, scan_scenario_file_for_country
 
 
@@ -14,6 +15,21 @@ class Research:
     def deactivate_tech(self, tech_id):
         self.deactivated_techs.add(tech_id)
         self.techs[tech_id].deactivate()
+
+    def are_tech_requirements_in_list(self, tech_id, list_of_tech_ids):
+        if not self.techs[tech_id].requirements:
+            return True
+        for req in self.techs[tech_id].requirements:
+            if isinstance(req, int):
+                if req in list_of_tech_ids:
+                    continue
+                return False
+            if isinstance(req, list):
+                for r in req:
+                    if r in list_of_tech_ids:
+                        continue
+                return False
+        return True
 
     def are_tech_requirements_completed(self, tech_id):
         if not self.techs[tech_id].requirements:
@@ -142,6 +158,19 @@ class Research:
                 if key == tech.name:
                     return tech
     
+    def get_techs_from_ids(self, tech_ids):
+        techs = []
+        for t_id in tech_ids:
+            if isinstance(t_id, int):
+                techs.append(self.techs[t_id])
+                continue
+            if isinstance(t_id, list):
+                techs.append([self.techs[tech_id] for tech_id in t_id])
+                continue
+            raise Exception(f"Weird item type on a list of techs: {type(t_id)}")
+        return techs
+            
+    
     # this is not going to work
     def get_tech_by_short_name_and_category(self, short_name, category):
         for tech in self.techs.values():
@@ -181,10 +210,12 @@ class Research:
         for tech_id in self.active_techs:
             print(self.techs[tech_id])
 
-    def complete_tech(self, completed_tech_id):
+    def complete_tech(self, completed_tech_id, update_active=True):
         self.completed_techs.add(completed_tech_id)
         self.techs[completed_tech_id].researched = 1
         self.research_speed += self.techs[completed_tech_id].get_research_speed_change()
+        # just in case
+        self.research_speed = round(self.research_speed, 1)
 
         if completed_tech_id in self.techs_researching:
             self.techs_researching.remove(completed_tech_id)
@@ -196,16 +227,61 @@ class Research:
         for tech_id in self.techs[completed_tech_id].get_deactivated_tech():
             self.deactivate_tech(tech_id)
         
-        self.update_active_techs()
+        if update_active:
+            self.update_active_techs()
         # for tech_id in self.techs:
         #     if self.are_tech_requirements_completed(tech_id):
         #         if not(tech_id in self.completed_techs or tech_id in self.deactivated_techs):
         #             self.activate_tech(tech_id)
-    
+
+    def complete_until_tech(self, tech_id):
+        if tech_id in self.completed_techs or tech_id in self.deactivated_techs:
+            return
+        # techs_to_complete = [self.techs[tech_id]]
+        # new_requirements = [self.techs[t_id] for t_id in self.techs[tech_id].requirements]
+        # new_requirements = self.get_techs_from_ids(self.techs[tech_id].requirements)
+        techs_to_complete = [tech_id]
+        new_requirements = self.techs[tech_id].requirements
+        # new_requirements = [r for r in new_requirements if]
+        while new_requirements:
+            new_new_requirements = []
+            for t_id in new_requirements:
+                if isinstance(t_id, int):
+                    if t_id in self.deactivated_techs:
+                        return
+                    if t_id in self.completed_techs:
+                        continue
+                    techs_to_complete.append(t_id)
+                    new_new_requirements += self.techs[t_id].requirements
+                    continue
+                if isinstance(t_id, list):
+                    ready = False
+                    for te_id in t_id:
+                        if te_id in self.completed_techs:
+                            ready = True
+                            break
+                        if te_id in self.deactivated_techs:
+                            continue
+                        # TODO: improve this and check more maybe
+                        techs_to_complete.append(te_id)
+                        new_new_requirements += self.techs[te_id].requirements
+                        ready = True
+                        break
+                    if not ready:
+                        return
+            new_requirements = new_new_requirements
+        techs_to_complete.reverse()
+        # print(techs_to_complete)
+        for t_id in techs_to_complete:
+            self.complete_tech(t_id, update_active=False)
+        self.update_active_techs()
+
     def undo_completed_tech(self, tech_id):
         self.completed_techs.remove(tech_id)
         self.techs[tech_id].researched = 0
-        self.research_speed -= self.techs[tech_id].get_research_speed_change() 
+        self.research_speed -= self.techs[tech_id].get_research_speed_change()
+        # just in case
+        self.research_speed = round(self.research_speed, 1)
         # OTHER STUFF????????
         # if self.are_tech_requirements_completed(tech_id):
         #     self.activate_tech(tech_id)
