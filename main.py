@@ -343,8 +343,7 @@ class EffectsPanel(BoxLayout):
 
 class ResearchButtonsPanel(GridLayout):
     def complete_button_pressed(self, widget):
-        print("Complete button does nothing at the moment. Well except for this...")
-        print("Research speed is", self.parent.parent.parent.parent.research.research_speed)
+        self.parent.parent.complete_until_tech()
 
     def force_complete_button_pressed(self, widget):
         self.parent.parent.complete_tech()
@@ -353,7 +352,7 @@ class ResearchButtonsPanel(GridLayout):
         self.parent.parent.undo_tech()
 
     def clear_button_pressed(self, widget):
-        print("Clear button does nothing at the moment")
+        self.parent.parent.clear_tech()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -776,6 +775,14 @@ class TechScreen(BoxLayout):
         deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
         self.maintechscreen.show_requirements(req_ids)
         self.maintechscreen.show_deactivation_warnings(deact_ids)
+    
+    def complete_until_tech(self):
+        tech_id = self.parent.parent.current_tech.tech_id
+        self.parent.parent.research.complete_until_tech(tech_id)
+        # update tech buttons
+        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        # update research speed
+        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
 
     def complete_tech(self):
         tech_id = self.parent.parent.current_tech.tech_id
@@ -792,6 +799,13 @@ class TechScreen(BoxLayout):
         if tech_id not in self.parent.parent.research.completed_techs:
             return
         self.parent.parent.research.undo_completed_tech(tech_id)
+        # update tech buttons
+        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        # update research speed
+        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+
+    def clear_tech(self):
+        self.parent.parent.research.clear_all_tech()
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.parent.parent.research)
         # update research speed
