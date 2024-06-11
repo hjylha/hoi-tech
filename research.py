@@ -213,26 +213,29 @@ class Research:
         for tech_id in self.active_techs:
             print(self.techs[tech_id])
 
-    def complete_tech(self, completed_tech_id, update_active=True):
-        self.completed_techs.add(completed_tech_id)
-        self.techs[completed_tech_id].researched = 1
-        self.research_speed += self.techs[completed_tech_id].get_research_speed_change()
+    def complete_tech(self, tech_id, update_active=True, check_requirements=False):
+        if check_requirements and (not self.are_tech_requirements_completed(tech_id) or tech_id in self.deactivated_techs):
+            return
+        self.completed_techs.add(tech_id)
+        self.techs[tech_id].researched = 1
+        self.research_speed += self.techs[tech_id].get_research_speed_change()
         # just in case
         self.research_speed = round(self.research_speed, 1)
 
-        if completed_tech_id in self.techs_researching:
-            self.techs_researching.remove(completed_tech_id)
-        if completed_tech_id in self.active_techs:
-            self.active_techs.remove(completed_tech_id)
-        if completed_tech_id in self.deactivated_techs:
-            self.deactivated_techs.remove(completed_tech_id)
+        if tech_id in self.techs_researching:
+            self.techs_researching.remove(tech_id)
+        if tech_id in self.active_techs:
+            self.active_techs.remove(tech_id)
+        if tech_id in self.deactivated_techs:
+            self.deactivated_techs.remove(tech_id)
 
-        for tech_id in self.techs[completed_tech_id].get_deactivated_tech():
+        for tech_id in self.techs[tech_id].get_deactivated_tech():
             self.deactivate_tech(tech_id)
         
         if update_active:
             self.update_active_techs()
     
+    # TODO: fix this
     def find_necessary_requirements(self, tech_id, techs_to_complete=None, multiple_choice=None):
         if tech_id in self.completed_techs:
             return techs_to_complete
@@ -271,10 +274,13 @@ class Research:
         js = [0 for _ in multiple_choice]
         # for i, choice in enumerate(multiple_choice):
         #     for j, t_id in enumerate()
+        print(multiple_choice)
         while i < len(multiple_choice):
             go_back = True
+            # old_techs_to_complete = techs_to_complete.copy()
             while js[i] < len(multiple_choice[i]):
             # for t_id in multiple_choice[i]:
+                # techs_to_complete = old_techs_to_complete.copy()
                 techs = self.find_necessary_requirements(multiple_choice[i][js[i]], techs_to_complete, multiple_choice)
                 # print(f"{multiple_choice[i][js[i]]}: {techs=}")
                 if techs is not None:
@@ -294,14 +300,58 @@ class Research:
 
         return techs_to_complete
 
+    def find_sufficient_requirements(self, tech_id):
+        if tech_id in self.completed_techs or tech_id in self.deactivated_techs:
+            return
+        techs_to_complete = set([tech_id])
+        new_requirements = self.techs[tech_id].requirements
+        while new_requirements:
+            new_new_requirements = []
+            for t_id in new_requirements:
+                if isinstance(t_id, int):
+                    if t_id not in self.completed_techs and t_id not in self.deactivated_techs:
+                        techs_to_complete.add(t_id)
+                        new_new_requirements += self.techs[t_id].requirements
+                if isinstance(t_id, list):
+                    for te_id in t_id:
+                        if te_id not in self.completed_techs and te_id not in self.deactivated_techs:
+                            techs_to_complete.add(te_id)
+                            new_new_requirements += self.techs[te_id].requirements
+            new_requirements = new_new_requirements
+        return techs_to_complete
+
     def complete_until_tech(self, tech_id):
-        techs_to_complete = self.find_necessary_requirements(tech_id)
+        # techs_to_complete = self.find_necessary_requirements(tech_id)
+        techs_to_complete = self.find_sufficient_requirements(tech_id)
         if techs_to_complete is None:
             return
-        techs_to_complete.reverse()
+        # techs_to_complete.reverse()
+        # techs_to_complete = set(techs_to_complete)
         # print(techs_to_complete)
-        for t_id in techs_to_complete:
-            self.complete_tech(t_id, update_active=False)
+        steps = [t_id for t_id in techs_to_complete if self.are_tech_requirements_completed(t_id)]
+        for t_id in steps:
+            techs_to_complete.remove(t_id)
+        # step_num = 1
+        # reached_goal = False
+        while tech_id not in steps:
+            found_some = False
+            tech_ids_to_remove = []
+            for t_id in techs_to_complete:
+                if self.are_tech_requirements_in_list(t_id, list(self.completed_techs) + steps):
+                    steps.append(t_id)
+                    # techs_to_complete.remove(t_id)
+                    tech_ids_to_remove.append(t_id)
+                    found_some = True
+            if not found_some:
+                print(f"Cannot research tech {self.techs[tech_id]}")
+                # print(f"{steps=}")
+                # print(f"{techs_to_complete=}")
+                return
+                # raise Exception("Cannot complete tech for some reason")
+            for t_id in tech_ids_to_remove:
+                techs_to_complete.remove(t_id)
+        for t_id in steps:
+            self.complete_tech(t_id, update_active=False, check_requirements=True)
         self.update_active_techs()
 
     def undo_completed_tech(self, tech_id):
