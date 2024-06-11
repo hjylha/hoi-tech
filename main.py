@@ -367,7 +367,7 @@ class ResearchButtonsPanel(GridLayout):
         self.undo_button = Button(text="Undo Tech", on_release=self.undo_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.undo_button)
 
-        self.force_complete_button = Button(text="Force Complete Tech", on_release=self.force_complete_button_pressed, size_hint=(0.4, 0.4))
+        self.force_complete_button = Button(text="       Force  \nComplete Tech", on_release=self.force_complete_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.force_complete_button)
 
         # empty
@@ -409,7 +409,7 @@ class ArmorTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="ArmorTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="ArmorTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class NavalTechScreen(MainTechScreen):
@@ -417,7 +417,7 @@ class NavalTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="NavalTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="NavalTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class AircraftTechScreen(MainTechScreen):
@@ -425,7 +425,7 @@ class AircraftTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="AircraftTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="AircraftTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class OverviewTechScreen(MainTechScreen):
@@ -433,7 +433,7 @@ class OverviewTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="OverviewTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        self.add_widget(Label(text="OverviewTechScreen\nThis will probably remain empty", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class IndustryTechScreen(MainTechScreen):
@@ -441,7 +441,7 @@ class IndustryTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="IndustryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="IndustryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class LandDoctrineTechScreen(MainTechScreen):
@@ -449,7 +449,7 @@ class LandDoctrineTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="LandDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="LandDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class SecretWeaponTechScreen(MainTechScreen):
@@ -457,7 +457,7 @@ class SecretWeaponTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="SecretWeaponTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="SecretWeaponTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class NavalDoctrineTechScreen(MainTechScreen):
@@ -465,7 +465,7 @@ class NavalDoctrineTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="NavalDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="NavalDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class AirDoctrineTechScreen(MainTechScreen):
@@ -473,7 +473,7 @@ class AirDoctrineTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="AirDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="AirDoctrineTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class MainTechScreen_BoxLayout(BoxLayout):
@@ -592,14 +592,14 @@ class TechInfoPanels(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.techinfopanel = TechInfoPanel(orientation="vertical", size_hint=(0.25, 1))
+        self.techinfopanel = TechInfoPanel(orientation="vertical", size_hint=(0.34, 1))
         self.add_widget(self.techinfopanel)
         with self.techinfopanel.canvas.before:
             Color(*self.BACKGROUND_COLOR2)
             self.techinfopanel.rect = Rectangle(size=self.techinfopanel.size, pos=self.techinfopanel.pos)
         self.techinfopanel.bind(pos=update_layout, size=update_layout)
 
-        self.requirement_scrollview = ScrollView(size_hint=(0.25, None))
+        self.requirement_scrollview = ScrollView(size_hint=(0.22, None))
         self.requirement_panel = RequirementPanel(orientation="vertical", size_hint=(1, None))
         # self.requirement_panel.height = self.requirement_panel.minimum_height + 50
         self.requirement_panel.bind(minimum_height=self.requirement_panel.setter("height"))
@@ -607,7 +607,7 @@ class TechInfoPanels(BoxLayout):
         # self.add_widget(RequirementPanel(orientation="vertical", size_hint=(0.25, 1)))
         self.add_widget(self.requirement_scrollview)
 
-        self.extra_layout = BoxLayout(size_hint=(0.25, 1))
+        self.extra_layout = BoxLayout(size_hint=(0.22, 1))
         self.effects_scrollview = ScrollView(size_hint=(1, None))
         # self.effects_scrollview = ScrollView(size_hint=(0.25, None))
         self.effects_panel = EffectsPanel(orientation="vertical", size_hint=(1, None))
@@ -625,7 +625,7 @@ class TechInfoPanels(BoxLayout):
             self.extra_layout.rect = Rectangle(size=self.extra_layout.size, pos=self.extra_layout.pos)
         self.extra_layout.bind(pos=update_layout, size=update_layout)
 
-        self.add_widget(ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.25, 1)))
+        self.add_widget(ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.22, 1)))
         # for i in range(4):
         #     self.add_widget(Button(text=f"InfoPanel {i+1}", size_hint=(0.25, 1)))
 
@@ -666,35 +666,44 @@ class TechScreen(BoxLayout):
         self.maintechscreen.show_deactivation_warnings(deact_ids)
     
     def complete_until_tech(self):
-        tech_id = self.parent.parent.current_tech.tech_id
-        self.parent.parent.research.complete_until_tech(tech_id)
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
+        self.research.complete_until_tech(tech_id)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.parent.parent.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
 
     def complete_tech(self):
-        tech_id = self.parent.parent.current_tech.tech_id
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
         if tech_id in self.parent.parent.research.completed_techs:
             return
-        self.parent.parent.research.complete_tech(tech_id)
+        self.research.complete_tech(tech_id)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.parent.parent.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
     
     def undo_tech(self):
-        tech_id = self.parent.parent.current_tech.tech_id
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
         if tech_id not in self.parent.parent.research.completed_techs:
             return
-        self.parent.parent.research.undo_completed_tech(tech_id)
+        self.research.undo_completed_tech(tech_id)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.parent.parent.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
 
     def clear_tech(self):
-        self.parent.parent.research.clear_all_tech()
+        self.research.clear_all_tech()
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.parent.parent.research)
         # update research speed
@@ -702,6 +711,8 @@ class TechScreen(BoxLayout):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.research = None
 
         self.active_category = TECH_CATEGORIES[0][1]
 
@@ -756,6 +767,13 @@ class StatusBar(BoxLayout):
         self.countries_selected.remove_widget(self.country_buttons[country_code])
         del self.country_buttons[country_code]
         self.parent.remove_country(country_code)
+    
+    def reload_countries(self, widget):
+        country_codes = list(self.country_buttons.keys())
+        for country_code in country_codes:
+            self.remove_country(country_code)
+        for country_code in country_codes:
+            self.add_country(country_code)
 
 
     def on_checkbox_active_placeholder(self, checkbox, value):
@@ -832,7 +850,12 @@ class StatusBar(BoxLayout):
         self.country_buttons = dict()
         self.add_widget(self.countries_selected)
 
-        self.add_widget(Label(text="", size_hint=(0.2, 1)))
+        self.add_widget(Label(text="", size_hint=(0.05, 1)))
+
+        btn_text = "Reload countries" if len(self.country_buttons) > 1 else "Reload country"
+        self.add_widget(Button(text=btn_text, on_release=self.reload_countries, size_hint=(0.1, 1)))
+
+        self.add_widget(Label(text="", size_hint=(0.05, 1)))
 
         # difficulty selection
         self.difficulty_suggestions = list(DIFFICULTY_DICT.keys())
@@ -935,6 +958,8 @@ class MainFullScreen(BoxLayout):
             Color(*self.statusbar_BACKGROUND_COLOR)
             self.statusbar.rect = Rectangle(size=self.statusbar.size, pos=self.statusbar.pos)
         self.statusbar.bind(pos=update_layout, size=update_layout)
+
+        self.mainscreen.techscreen.research = self.research
 
 
 # class MainWidget(Widget):
