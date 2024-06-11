@@ -231,18 +231,29 @@ class Research:
         
         if update_active:
             self.update_active_techs()
-
-    def complete_until_tech(self, tech_id):
-        if tech_id in self.completed_techs or tech_id in self.deactivated_techs:
+    
+    def find_necessary_requirements(self, tech_id, techs_to_complete=None, multiple_choice=None):
+        if tech_id in self.completed_techs:
+            return techs_to_complete
+        if tech_id in self.deactivated_techs:
             return
-        # techs_to_complete = [self.techs[tech_id]]
-        # new_requirements = [self.techs[t_id] for t_id in self.techs[tech_id].requirements]
-        # new_requirements = self.get_techs_from_ids(self.techs[tech_id].requirements)
-        techs_to_complete = [tech_id]
+        if techs_to_complete is not None and tech_id in techs_to_complete:
+            return techs_to_complete
+        
+        if techs_to_complete is None:
+            techs_to_complete = [tech_id]
+        elif tech_id not in techs_to_complete:
+            techs_to_complete.append(tech_id)
+        # techs_to_complete = [tech_id] if techs_to_complete is None else
+        multiple_choice = [] if multiple_choice is None else multiple_choice
+
         new_requirements = self.techs[tech_id].requirements
         while new_requirements:
             new_new_requirements = []
             for t_id in new_requirements:
+                if isinstance(t_id, list):
+                    multiple_choice.append(t_id)
+                    continue
                 if isinstance(t_id, int):
                     if t_id in self.deactivated_techs:
                         return
@@ -250,24 +261,42 @@ class Research:
                         continue
                     techs_to_complete.append(t_id)
                     new_new_requirements += self.techs[t_id].requirements
-                    continue
-                if isinstance(t_id, list):
-                    ready = False
-                    for te_id in t_id:
-                        if te_id in self.completed_techs:
-                            ready = True
-                            break
-                        if te_id in self.deactivated_techs:
-                            continue
-                        # TODO: improve this and check more maybe
-                        if te_id not in techs_to_complete:
-                            techs_to_complete.append(te_id)
-                            new_new_requirements += self.techs[te_id].requirements
-                        ready = True
-                        break
-                    if not ready:
-                        return
             new_requirements = new_new_requirements
+        
+        if not multiple_choice:
+            return techs_to_complete
+        
+        i = 0
+        js = [0 for _ in multiple_choice]
+        # for i, choice in enumerate(multiple_choice):
+        #     for j, t_id in enumerate()
+        while i < len(multiple_choice):
+            go_back = True
+            while js[i] < len(multiple_choice[i]):
+            # for t_id in multiple_choice[i]:
+                techs = self.find_necessary_requirements(multiple_choice[i][js[i]], techs_to_complete, multiple_choice)
+                # print(f"{multiple_choice[i][js[i]]}: {techs=}")
+                if techs is not None:
+                    techs_to_complete = techs
+                    go_back = False
+                    i += 1
+                    if d := (len(multiple_choice) - len(js)) > 0:
+                        for _ in range(d):
+                            js.append(0)
+                    break
+                js[i] += 1
+            if go_back:
+                js[i] = 0
+                i -= 1
+            if i < 0:
+                return
+
+        return techs_to_complete
+
+    def complete_until_tech(self, tech_id):
+        techs_to_complete = self.find_necessary_requirements(tech_id)
+        if techs_to_complete is None:
+            return
         techs_to_complete.reverse()
         # print(techs_to_complete)
         for t_id in techs_to_complete:
