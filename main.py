@@ -729,6 +729,7 @@ class MainScreen(BoxLayout):
     def show_fastest_teams(self, tech):
         sorted_teams = self.parent.research.sort_teams_for_researching_tech(tech)
         self.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
+        self.parent.change_year(self.parent.research.year)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -740,20 +741,15 @@ class MainScreen(BoxLayout):
 
 
 class StatusBar(BoxLayout):
-    def select_difficulty(self, widget, value):
-        # setattr(self.difficulty_button, "text", value)
-        self.difficulty_button.text = value
-        self.parent.research.difficulty = DIFFICULTY_DICT[value]
+    save_file = "save.data"
 
-    def select_year(self, widget, value):
-        # previous_year = self.year_input.select_all()
-        try:
-            self.parent.change_year(int(value))
-            self.year_input.text = value
-        except ValueError:
-            self.year_input.text = str(self.parent.research.year)
+    def save_country_difficulty_and_year(self):
+        with open(self.save_file, "w") as f:
+            country_line = f"country={','.join(self.country_buttons.keys())}"
+            difficulty_line = f"difficulty={self.difficulty_button.text}"
+            year_line = f"year={self.parent.research.year}"
+            f.write(f"{country_line}\n{difficulty_line}\n{year_line}")
 
-    
     def add_country(self, country_code):
         if country_code in self.country_buttons.keys():
             return
@@ -762,11 +758,13 @@ class StatusBar(BoxLayout):
         self.country_buttons[country_code].remove_button.bind(on_release=lambda *args: self.remove_country(country_code))
         # print(f"{self.parent=}")
         self.parent.add_country(country_code)
+        self.save_country_difficulty_and_year()
     
     def remove_country(self, country_code):
         self.countries_selected.remove_widget(self.country_buttons[country_code])
         del self.country_buttons[country_code]
         self.parent.remove_country(country_code)
+        self.save_country_difficulty_and_year()
     
     def reload_countries(self, widget):
         country_codes = list(self.country_buttons.keys())
@@ -774,6 +772,50 @@ class StatusBar(BoxLayout):
             self.remove_country(country_code)
         for country_code in country_codes:
             self.add_country(country_code)
+
+    def load_country_difficulty_and_year(self):
+        with open(self.save_file, "r") as f:
+            lines = f.read().split("\n")
+            for line in lines:
+                if "country" in line:
+                    # print(line.split("=")[1].strip())
+                    country_codes = line.split("=")[1].strip().split(",")
+                elif "difficulty" in line:
+                    difficulty = line.split("=")[1].strip()
+                elif "year" in line:
+                    year = line.split("=")[1].strip()
+        if country_codes:
+            for country_code in country_codes:
+                self.add_country(country_code)
+        if difficulty:
+            self.difficulty_button.text = difficulty
+            self.parent.research.difficulty = DIFFICULTY_DICT[difficulty]
+        if year:
+            try:
+                self.parent.change_year(int(year))
+                self.year_input.text = year
+            except ValueError:
+                pass
+
+    def select_difficulty(self, widget, value):
+        # setattr(self.difficulty_button, "text", value)
+        self.difficulty_button.text = value
+        self.parent.research.difficulty = DIFFICULTY_DICT[value]
+        if self.parent.current_tech is not None:
+            self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+        self.save_country_difficulty_and_year()
+
+    def select_year(self, widget, value):
+        # previous_year = self.year_input.select_all()
+        try:
+            self.parent.change_year(int(value))
+            self.year_input.text = value
+            if self.parent.current_tech is not None:
+                self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+
+            self.save_country_difficulty_and_year()
+        except ValueError:
+            self.year_input.text = str(self.parent.research.year)
 
 
     def on_checkbox_active_placeholder(self, checkbox, value):
@@ -815,6 +857,19 @@ class StatusBar(BoxLayout):
         # print("self.get_parent_window() is not None:", self.get_parent_window() is not None)
         if self.year_selection_dropdown.parent is None and self.get_parent_window() is not None:
             self.year_selection_dropdown.open(widget)
+
+    def validate_year(self, widget, text):
+        if not text:
+            return
+        if self.parent is None:
+            return
+        # previous_year = self.parent.year
+        if text in self.years:
+            self.year_selection_dropdown.dismiss()
+            self.parent.research.change_year(int(text))
+            if self.parent.current_tech is not None:
+                self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+            self.save_country_difficulty_and_year()
     
     def validate_research_speed(self, widget, text):
         if not text:
@@ -832,7 +887,7 @@ class StatusBar(BoxLayout):
         super().__init__(**kwargs)
 
         self.country_names = get_country_names()
-        self.years = list(range(1933, 1953))
+        self.years = [str(year) for year in range(1933, 1953)]
 
         # country selection
         self.add_widget(Label(text="Country/Countries", size_hint=(0.12, 1)))
@@ -879,13 +934,14 @@ class StatusBar(BoxLayout):
         self.year_selection_dropdown = DropDown()
         for year in self.years:
             # label = Label(text=str(year), size_hint=(1, None), height=dp(20))
-            label = TextInput(text=str(year), readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(25))
+            label = TextInput(text=year, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(25))
             label.bind(focus=lambda w, v: self.year_selection_dropdown.select(w.text))
             # label.bind(focus=test_printer)
             self.year_selection_dropdown.add_widget(label)
         self.year_input = TextInput(text="this should not be visible", size_hint=(0.05, 1), multiline=False, write_tab=False)
         # self.year_input.bind(text=lambda w, v: self.year_selection_dropdown.open(w))
         self.year_input.bind(focus=self.open_year_selection_dropdown)
+        self.year_input.bind(text=self.validate_year)
         self.year_selection_dropdown.bind(on_select=self.select_year)
         self.add_widget(self.year_input)
 
@@ -960,6 +1016,8 @@ class MainFullScreen(BoxLayout):
         self.statusbar.bind(pos=update_layout, size=update_layout)
 
         self.mainscreen.techscreen.research = self.research
+
+        self.statusbar.load_country_difficulty_and_year()
 
 
 # class MainWidget(Widget):
