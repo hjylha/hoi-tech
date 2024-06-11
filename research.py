@@ -126,8 +126,9 @@ class Research:
         self.difficulty = difficulty
 
     def add_country(self, country_code):
-        self.countries.append(country_code)
-        self.all_teams += get_tech_teams(country_code)
+        if country_code not in self.countries:
+            self.countries.append(country_code)
+            self.all_teams += get_tech_teams(country_code)
         if self.primary_country is None:
             self.choose_primary_country(country_code)
         self.filter_teams()
