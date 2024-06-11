@@ -18,6 +18,7 @@ from kivy.metrics import dp
 from research import Research
 from scan_hoi_files import get_country_names
 from tech_positions import tech_positions
+from component_types import component_types
 
 
 
@@ -262,19 +263,27 @@ class TechCategories(GridLayout):
 
 
 class TechInfoPanel(BoxLayout):
-    def update_info(self, tech_id, tech_name, tech_components, has_blueprint):
+    def update_components(self, components):
+        for i, component in enumerate(components):
+            self.tech_components[2*i].text = component_types[component.type]
+            self.tech_components[2*i + 1].text = str(component.difficulty)
+            
+    def update_info(self, tech_id, tech_name, components, has_blueprint):
         self.technology_name.text = f"{tech_id} {tech_name}"
-
+        self.update_components(components)
         self.blueprint_checkbox.active = has_blueprint
     
     def on_blueprint_checkbox_active(self, widget, value):
-        tech_id = self.parent.parent.parent.parent.current_tech.tech_id
+        try:
+            tech_id = self.parent.parent.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
         if value:
-            self.parent.parent.parent.parent.research.blueprints.add(tech_id)
+            self.parent.parent.research.blueprints.add(tech_id)
             self.parent.parent.maintechscreen.technologies[tech_id].add_blueprint()
         else:
-            if tech_id in self.parent.parent.parent.parent.research.blueprints:
-                self.parent.parent.parent.parent.research.blueprints.remove(tech_id)
+            if tech_id in self.parent.parent.research.blueprints:
+                self.parent.parent.research.blueprints.remove(tech_id)
                 self.parent.parent.maintechscreen.technologies[tech_id].remove_blueprint()
         # redo the calculations
         self.parent.parent.parent.show_fastest_teams(self.parent.parent.parent.parent.current_tech)
@@ -283,14 +292,24 @@ class TechInfoPanel(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.technology_name = Label(text="Technology name", size_hint=(1, 0.4))
+        self.technology_name = Label(text="Technology name", size_hint=(1, 0.3))
         self.add_widget(self.technology_name)
 
         # TODO
-        self.tech_components = Label(text="Tech components go here", size_hint=(1, 0.4))
-        self.add_widget(self.tech_components)
-
-        # TODO
+        components_box = BoxLayout(orientation="horizontal", size_hint=(1, 0.5))
+        self.add_widget(components_box)
+        component_boxes = [BoxLayout(orientation="vertical") for _ in range(5)]
+        self.tech_components = []
+        for i, comp_box in enumerate(component_boxes):
+            components_box.add_widget(comp_box)
+            self.tech_components.append(Label(text=f"comp type {i+1}"))
+            self.tech_components.append(Label(text=f"difficulty {i+1}"))
+            comp_box.add_widget(self.tech_components[2*i])
+            comp_box.add_widget(self.tech_components[2*i + 1])
+        # self.tech_components = Label(text="Tech components go here", size_hint=(1, 0.5))
+        # self.add_widget(self.tech_components)
+        # for comp_box in component_boxes:
+            
         checkbox_box = BoxLayout(orientation="horizontal", size_hint=(1, 0.2))
         self.blueprint_checkbox = CheckBox(size_hint=(0.3, 1))
         checkbox_box.add_widget(Label(text="", size_hint=(0.2, 1)))
@@ -640,7 +659,7 @@ class TechScreen(BoxLayout):
     
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
-        tech = self.parent.parent.research.get_tech(tech_id)
+        tech = self.research.get_tech(tech_id)
         self.parent.parent.current_tech = tech
         # print(f"{tech.tech_id} {tech.name}")
 
@@ -650,10 +669,10 @@ class TechScreen(BoxLayout):
         # self.parent.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
 
         # update infopanels
-        requirements = self.parent.parent.research.list_requirements(tech)
-        deactivations = self.parent.parent.research.list_deactivations(tech)
-        effects = self.parent.parent.research.list_effects(tech)
-        has_blueprint = tech.tech_id in self.parent.parent.research.blueprints
+        requirements = self.research.list_requirements(tech)
+        deactivations = self.research.list_deactivations(tech)
+        effects = self.research.list_effects(tech)
+        has_blueprint = tech.tech_id in self.research.blueprints
         self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
 
         # update tech buttons
@@ -672,42 +691,42 @@ class TechScreen(BoxLayout):
             return
         self.research.complete_until_tech(tech_id)
         # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
 
     def complete_tech(self):
         try:
             tech_id = self.parent.parent.current_tech.tech_id
         except AttributeError:
             return
-        if tech_id in self.parent.parent.research.completed_techs:
+        if tech_id in self.research.completed_techs:
             return
         self.research.complete_tech(tech_id)
         # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
     
     def undo_tech(self):
         try:
             tech_id = self.parent.parent.current_tech.tech_id
         except AttributeError:
             return
-        if tech_id not in self.parent.parent.research.completed_techs:
+        if tech_id not in self.research.completed_techs:
             return
         self.research.undo_completed_tech(tech_id)
         # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
 
     def clear_tech(self):
         self.research.clear_all_tech()
         # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.parent.parent.research)
+        self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.parent.parent.research.research_speed)
+        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
