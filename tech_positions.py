@@ -76,25 +76,28 @@ tech_positions = {
     1380: (left3_x, 0.615),
 
     # logistics
+    # supply logistics
     1490: (left2_x, 0.5),
+    # concentrated
     1500: (left2_x, 0.45),
     1510: (left2_x, 0.415),
     1520: (left2_x, 0.375),
     1530: (left2_x, 0.34),
-
+    # arsenal logistics
     1480: (left3_x, 0.5),
+    # dispersed
     1540: (left3_x, 0.45),
     1550: (left3_x, 0.415),
     1560: (left3_x, 0.375),
     1570: (left3_x, 0.34),
-
-    1580: (left2_x + 0.1, 0.29),
+    # logistic management expert
+    1580: (left2_x + 0.1, 0.28),
 
     # priorization
-    1590: (left1_x + 0.02, 0.37),
+    1590: (left1_x + 0.02, 0.38),
     1600: (left1_x + 0.02, 0.33),
 
-    1610: (left0_x + 0.02, 0.37),
+    1610: (left0_x + 0.02, 0.38),
     1620: (left0_x + 0.02, 0.33),
 
     # commandos
@@ -104,15 +107,18 @@ tech_positions = {
     1660: (left4_x, 0.78),
 
     # electronic warfare
-    1670: (left4_x, 0.5),
-    1680: (left4_x, 0.45),
-    1690: (left4_x, 0.4),
-    1700: (left4_x, 0.35),
-    1710: (left4_x, 0.3),
-    1720: (left4_x, 0.25),
-    1730: (left4_x, 0.2),
-    1740: (left4_x, 0.15),
-    1750: (left4_x, 0.1),
+    1670: (left2_x + 0.01, 0.15),
+    # jamming
+    1680: (left3_x, 0.12),
+    1690: (left3_x + 0.01, 0.085),
+    1700: (left3_x + 0.02, 0.05),
+    # basic signal detection
+    1710: (left3_x, 0.21),
+    1720: (left3_x + 0.01, 0.175),
+    # detection of communications
+    1730: (left4_x, 0.15),
+    1740: (left4_x + 0.01, 0.115),
+    1750: (left4_x + 0.01, 0.08),
 
     # ARMOR & ARTILLERY
     # light tanks
