@@ -23,12 +23,10 @@ class Research:
                 if req not in list_of_tech_ids:
                     return False
             if isinstance(req, list):
-                found = False
                 for r in req:
                     if r in list_of_tech_ids:
-                        found = True
                         break
-                if not found:
+                else:
                     return False
         return True
 
@@ -40,11 +38,10 @@ class Research:
                 if req not in self.completed_techs:
                     return False
             if isinstance(req, list):
-                found = False
                 for r in req:
                     if r in self.completed_techs:
-                        found = True
-                if not found:
+                        break
+                else:
                     return False
         return True
 
