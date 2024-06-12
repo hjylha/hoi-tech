@@ -14,7 +14,7 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Line, Rectangle
 from kivy.metrics import dp
 
 from research import Research
@@ -79,7 +79,7 @@ def suggest_countries(input_text, country_names, max_num_of_suggestions):
 
 def test_printer(*args):
     for arg in args:
-        print(arg)
+        print(f"{arg=}")
 
 
 def update_layout(widget, value):
@@ -402,30 +402,63 @@ class MainTechScreen(FloatLayout):
     def select_technology(self, widget):
         self.parent.parent.select_technology_by_id(widget.parent.tech_id)
         # print(widget.parent.tech_id)
+    
+    def draw_lines(self):
+        pass
+
+    def update_lines(self, widget, value):
+        # test_printer (widget, value)
+        pass
 
     def __init__(self, **kwargs):
         # self.TECHNOLOGYBUTTON_SIZE = (0.175, 0.04)
         super().__init__(**kwargs)
         # self.add_widget(Label(text="MainTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
-        # self.add_widget(TechnologyButton("Prioritize Infantry", has_blueprint=True, pos_hint={"x": 0.05, "y": 0.05}))
-        # self.add_widget(TechnologyButton("Prioritize Quality", pos_hint={"x": 0.05, "y": 0.1}))
-        # self.add_widget(TechnologyButton("Int./Fighter Prototypes", pos_hint={"x": 0.05, "y": 0.15}))
+        self.line = None
+
+        self.bind(size=self.update_lines, pos=self.update_lines)
 
 
 class InfantryTechScreen(MainTechScreen):
+    def update_lines(self, widget, value):
+        X, Y = self.size
+        x0, y0 = self.pos
+        self.line.points = [x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9]
+        self.arrow.points = [x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105]
+        # self.test_arrow.points = [x0+X*0.21, y0+Y*0.9, x0+X*0.2, y0+Y*0.9825, x0+X*0.15, y0+Y*0.8425, x0+X*0.21, y0+Y*0.9]
+    
+
+    def draw_lines(self):
+        super().draw_lines()
+        # print("trying to draw lines")
+
+        with self.canvas.before:
+            X, Y = self.size
+            # print(X, Y)
+            x0, y0 = self.pos
+            # print(x0, y0)
+            Color(0.7, 0.7, 0.7, 1)
+            # print("drawing line")
+            self.line = Line(points=[x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9], width=1)
+            self.arrow = Line(points=[x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105], width=1.5)
+            # self.test_arrow = Line(points=[x0+X*0.21, y0+Y*0.9, x0+X*0.2, y0+Y*0.9825, x0+X*0.15, y0+Y*0.8425, x0+X*0.21, y0+Y*0.9], width=1)
+            # self.line.bind(points=update_line)
+            # print("drawing rectangle")
+            # Rectangle(size_hint=())
+
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         # placeholder text
         # self.add_widget(Label(text="InfantryTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
-        # for tb in self.technologies.values():
-        #     self.add_widget(tb)
-        #     tb.technology.bind(on_release=self.select_technology)
-
 
 class ArmorTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -434,6 +467,9 @@ class ArmorTechScreen(MainTechScreen):
 
 
 class NavalTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -442,6 +478,9 @@ class NavalTechScreen(MainTechScreen):
 
 
 class AircraftTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -450,6 +489,9 @@ class AircraftTechScreen(MainTechScreen):
 
 
 class OverviewTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -458,6 +500,9 @@ class OverviewTechScreen(MainTechScreen):
 
 
 class IndustryTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -466,6 +511,9 @@ class IndustryTechScreen(MainTechScreen):
 
 
 class LandDoctrineTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -474,6 +522,9 @@ class LandDoctrineTechScreen(MainTechScreen):
 
 
 class SecretWeaponTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -482,6 +533,9 @@ class SecretWeaponTechScreen(MainTechScreen):
 
 
 class NavalDoctrineTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -490,6 +544,9 @@ class NavalDoctrineTechScreen(MainTechScreen):
 
 
 class AirDoctrineTechScreen(MainTechScreen):
+    def draw_lines(self):
+        return super().draw_lines()
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -591,6 +648,7 @@ class MainTechScreen_BoxLayout(BoxLayout):
 
         for i, layout in enumerate(self.category_layouts.values()):
             self.add_technology_buttons(i, layout)
+            layout.draw_lines()
 
         self.current_layout = self.category_layouts["Infantry"]
         self.add_widget(self.current_layout)
