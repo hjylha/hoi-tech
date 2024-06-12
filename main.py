@@ -1,4 +1,6 @@
 
+from pathlib import Path
+
 from kivy.app import App
 from kivy.core.window import Window
 # from kivy.uix.widget import Widget
@@ -793,6 +795,11 @@ class StatusBar(BoxLayout):
             self.add_country(country_code)
 
     def load_country_difficulty_and_year(self):
+        if not Path(self.save_file).exists():
+            return
+        country_codes = None
+        difficulty = None
+        year = None
         with open(self.save_file, "r") as f:
             lines = f.read().split("\n")
             for line in lines:
