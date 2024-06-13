@@ -1,6 +1,6 @@
 import math
 
-def get_arrow_points(x1, y1, x2, y2, length=0.02):
+def get_arrow_points(x1, y1, x2, y2, length=5):
     if x1 == x2 and y1 == y2:
         return (x1, y1, x1, y1, x1, y1)
     mid_point = ((x1 + x2) / 2, (y1 + y2) / 2)
@@ -34,7 +34,7 @@ def scale_arrows(size, origin, points):
     x0, y0 = origin
     scaled_points = []
     for i, point in enumerate(points):
-        if i & 2 == 1:
+        if i % 2 == 0:
             scaled_points.append(x0 + x_multiplier * point)
         else:
             scaled_points.append(y0 + y_multiplier * point)
