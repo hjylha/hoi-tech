@@ -141,25 +141,25 @@ tech_positions = {
     2190: (left0_x, 0.475),
     2200: (left0_x, 0.44),
 
-    # priorizations
-    2650: (left0_x, 0.35),
+    # prioritizations
+    2650: (left0_x, 0.36),
     2660: (left0_x, 0.3),
-    2670: (left0_x, 0.25),
+    2670: (left0_x, 0.24),
 
     # mechanical parts
-    2680: (left0_x, 0.2),
-    2690: (left0_x + 0.01, 0.13),
-    2700: (left0_x + 0.01, 0.095),
-    2710: (left0_x + 0.01, 0.06),
+    2680: (left0_x, 0.165),
+    2690: (left0_x + 0.02, 0.13),
+    2700: (left0_x + 0.02, 0.095),
+    2710: (left0_x + 0.02, 0.06),
 
     2720: (left1_x, 0.15),
     2730: (left1_x, 0.1),
     2740: (left1_x, 0.05),
 
     # fuses
-    2040: (left1_x, 0.88),
-    2050: (left1_x, 0.845),
-    2060: (left1_x, 0.81),
+    2040: (left1_x, 0.92),
+    2050: (left1_x, 0.885),
+    2060: (left1_x, 0.85),
 
     # guns
     2010: (left1_x, 0.75),
@@ -237,9 +237,9 @@ tech_positions = {
     2770: (left2_x + 0.01, 0.05),
 
     2780: (left3_x, 0.15),
-    2790: (left3_x, 0.115),
-    2800: (left3_x, 0.08),
-    2810: (left3_x, 0.045),
+    2790: (left3_x + 0.01, 0.115),
+    2800: (left3_x + 0.02, 0.08),
+    2810: (left3_x + 0.03, 0.045),
 
     # special purpose vehicles
     2820: (left4_x - 0.01, 0.95),
@@ -269,13 +269,13 @@ tech_positions = {
     3190: (left0_x, 0.68),
 
     # destroyers
-    3200: (left0_x, 0.63),
-    3210: (left0_x, 0.595),
-    3220: (left0_x, 0.56),
-    3230: (left0_x, 0.525),
-    3240: (left0_x, 0.49),
-    3250: (left0_x, 0.455),
-    3260: (left0_x, 0.42),
+    3200: (left0_x, 0.61),
+    3210: (left0_x, 0.575),
+    3220: (left0_x, 0.54),
+    3230: (left0_x, 0.505),
+    3240: (left0_x, 0.47),
+    3250: (left0_x, 0.435),
+    3260: (left0_x, 0.40),
 
     # transports
     3270: (left0_x, 0.33),
@@ -286,9 +286,9 @@ tech_positions = {
 
     # landing craft
     3720: (left0_x, 0.13),
-    3730: (left1_x, 0.13),
-    3740: (left1_x, 0.095),
-    3750: (left1_x, 0.6),
+    3730: (left0_x + 0.01, 0.095),
+    3740: (left0_x + 0.01, 0.06),
+    3750: (left0_x + 0.02, 0.025),
 
     # naval guns
     3060: (left1_x, 0.96),
@@ -299,11 +299,11 @@ tech_positions = {
     3110: (left1_x, 0.785),
 
     # naval engines
-    3010: (left1_x, 0.665),
-    3020: (left1_x, 0.63),
-    3030: (left1_x, 0.595),
-    3040: (left1_x, 0.56),
-    3050: (left1_x, 0.525),
+    3010: (left1_x, 0.61),
+    3020: (left1_x, 0.575),
+    3030: (left1_x, 0.54),
+    3040: (left1_x, 0.505),
+    3050: (left1_x, 0.47),
 
     # submarines
     3320: (left1_x, 0.365),
@@ -331,20 +331,20 @@ tech_positions = {
     3490: (left2_x, 0.455),
 
     # carriers
-    3500: (left2_x, 0.35),
-    3510: (left2_x, 0.315),
-    3520: (left2_x, 0.28),
-    3530: (left2_x, 0.245),
-    3540: (left2_x, 0.21),
-    3550: (left2_x, 0.175),
-    3560: (left2_x, 0.14),
+    3500: (left2_x, 0.365),
+    3510: (left2_x, 0.33),
+    3520: (left2_x, 0.295),
+    3530: (left2_x, 0.26),
+    3540: (left2_x, 0.225),
+    3550: (left2_x, 0.19),
+    3560: (left2_x, 0.155),
 
     # patrol boats
-    3760: (left2_x, 0.08),
-    3770: (left3_x, 0.15),
-    3780: (left3_x, 0.115),
-    3790: (left3_x, 0.08),
-    3800: (left3_x, 0.045),
+    3760: (left3_x, 0.17),
+    3770: (left3_x + 0.01, 0.135),
+    3780: (left3_x + 0.02, 0.1),
+    3790: (left3_x + 0.03, 0.065),
+    3800: (left3_x + 0.04, 0.03),
 
     # battlecruisers
     3630: (left3_x, 0.925),
@@ -360,9 +360,9 @@ tech_positions = {
     3710: (left3_x, 0.575),
 
     # carrier air groups
-    3570: (left3_x, 0.35),
-    3580: (left3_x, 0.315),
-    3590: (left3_x, 0.28),
+    3570: (left3_x, 0.365),
+    3580: (left3_x, 0.33),
+    3590: (left3_x, 0.295),
 
     # escort carriers
     3600: (left4_x, 0.92),
@@ -380,11 +380,11 @@ tech_positions = {
 
     # fighter firepower or long range
     4560: (left0_x, 0.8),
-    4570: (left0_x, 0.75),
+    4570: (left0_x, 0.74),
 
     # bomber plans
-    4220: (left0_x, 0.59),
-    4230: (left0_x, 0.555),
+    4220: (left0_x, 0.63),
+    4230: (left0_x, 0.595),
 
     # close air support
     4240: (left0_x, 0.5),
@@ -394,11 +394,11 @@ tech_positions = {
 
     # bombs
     4610: (left0_x, 0.28),
-    4620: (left0_x, 0.23),
-    4630: (left0_x, 0.195),
-    4640: (left0_x, 0.16),
-    4650: (left1_x, 0.28),
-    4660: (left1_x, 0.245),
+    4620: (left0_x, 0.20),
+    4630: (left0_x, 0.165),
+    4640: (left0_x + 0.01, 0.13),
+    4650: (left1_x - 0.01, 0.28),
+    4660: (left1_x - 0.01, 0.245),
 
     # fighters
     4030: (left1_x, 0.95),
@@ -408,11 +408,11 @@ tech_positions = {
     4070: (left1_x, 0.81),
 
     # interceptors
-    4120: (left1_x, 0.75),
-    4130: (left1_x, 0.715),
-    4140: (left1_x, 0.68),
-    4150: (left1_x, 0.645),
-    4160: (left1_x, 0.61),
+    4120: (left1_x, 0.74),
+    4130: (left1_x, 0.705),
+    4140: (left1_x, 0.67),
+    4150: (left1_x, 0.635),
+    4160: (left1_x, 0.60),
 
     # tactical bombers
     4320: (left1_x, 0.5),
@@ -428,11 +428,11 @@ tech_positions = {
     4110: (left2_x, 0.81),
 
     # escort fighters
-    4170: (left2_x, 0.75),
-    4180: (left2_x, 0.715),
-    4190: (left2_x, 0.68),
-    4200: (left2_x, 0.645),
-    4210: (left2_x, 0.61),
+    4170: (left2_x, 0.74),
+    4180: (left2_x, 0.705),
+    4190: (left2_x, 0.67),
+    4200: (left2_x, 0.635),
+    4210: (left2_x, 0.60),
 
     # strategic bombers
     4370: (left2_x, 0.5),
@@ -443,8 +443,10 @@ tech_positions = {
 
     # surveillance
     4670: (left2_x, 0.28),
-    4680: (left2_x, 0.23),
-    4690: (left2_x, 0.195),
+    # hydroplanes
+    4680: (left2_x, 0.20),
+    4690: (left2_x, 0.165),
+    # more surveillance
     4700: (left3_x, 0.28),
     4710: (left3_x, 0.245),
     4720: (left3_x, 0.21),

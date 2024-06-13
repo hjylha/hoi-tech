@@ -22,7 +22,8 @@ from scan_hoi_files import get_country_names
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from component_types import component_types
-from lines import infantry_lines, infantry_deact_lines
+from lines import infantry_lines, infantry_deact_lines, armor_lines, armor_deact_lines, naval_lines
+from lines import aircraft_lines, aircraft_deact_lines
 
 
 
@@ -401,9 +402,28 @@ class ResearchButtonsPanel(GridLayout):
 
 
 class MainTechScreen(FloatLayout):
+    LINE_COLOR = (0.7, 0.7, 0.7, 1)
+    DEACT_LINE_COLOR = (0.8, 0.1, 0.1, 0.9)
+
     def select_technology(self, widget):
         self.parent.parent.select_technology_by_id(widget.parent.tech_id)
         # print(widget.parent.tech_id)
+    
+    def draw_lines_from_points(self, line_points, deact_line_points):
+        with self.canvas.before:
+            Color(*self.LINE_COLOR)
+            # print("drawing line")
+            self.lines = []
+            for point_tuple, draw_arrow in line_points:
+                scaled_points = scale_arrows(self.size, self.pos, point_tuple)
+                self.lines.append(Line(points=scaled_points, width=1))
+                if draw_arrow:
+                    self.lines.append(Line(points=get_arrow_points(*scaled_points), width=1.5))
+            Color(*self.DEACT_LINE_COLOR)
+            self.deact_lines = []
+            for point_tuple in deact_line_points:
+                scaled_points = scale_arrows(self.size, self.pos, point_tuple)
+                self.deact_lines.append(Line(points=scaled_points, width=2))
     
     def draw_lines(self):
         pass
@@ -411,6 +431,18 @@ class MainTechScreen(FloatLayout):
     def update_lines(self, widget, value):
         # test_printer (widget, value)
         pass
+
+    def update_lines_from_points(self, line_points, deact_line_points):
+        i = 0
+        for point_tuple, draw_arrow in line_points:
+            scaled_points = scale_arrows(self.size, self.pos, point_tuple)
+            self.lines[i].points = scaled_points
+            i += 1
+            if draw_arrow:
+                self.lines[i].points = get_arrow_points(*scaled_points)
+                i += 1
+        for line, point_tuple in zip(self.deact_lines, deact_line_points):
+            line.points = scale_arrows(self.size, self.pos, point_tuple)
 
     def __init__(self, **kwargs):
         # self.TECHNOLOGYBUTTON_SIZE = (0.175, 0.04)
@@ -424,50 +456,11 @@ class MainTechScreen(FloatLayout):
 
 
 class InfantryTechScreen(MainTechScreen):
-    def update_lines(self, widget, value):
-        # X, Y = self.size
-        # x0, y0 = self.pos
-        i = 0
-        for point_tuple, draw_arrow in infantry_lines:
-            scaled_points = scale_arrows(self.size, self.pos, point_tuple)
-            self.lines[i].points = scaled_points
-            i += 1
-            if draw_arrow:
-                self.lines[i].points = get_arrow_points(*scaled_points)
-                i += 1
-        for line, point_tuple in zip(self.deact_lines, infantry_deact_lines):
-            line.points = scale_arrows(self.size, self.pos, point_tuple)
-        # self.line.points = [x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9]
-        # self.arrow.points = [x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105]
-        # self.test_arrow.points = [x0+X*0.21, y0+Y*0.9, x0+X*0.2, y0+Y*0.9825, x0+X*0.15, y0+Y*0.8425, x0+X*0.21, y0+Y*0.9]
-    
-
     def draw_lines(self):
-        super().draw_lines()
-        # print("trying to draw lines")
+        self.draw_lines_from_points(infantry_lines, infantry_deact_lines)
 
-        with self.canvas.before:
-            # X, Y = self.size
-            # print(X, Y)
-            # x0, y0 = self.pos
-            # print(x0, y0)
-            Color(0.7, 0.7, 0.7, 1)
-            # print("drawing line")
-            self.lines = []
-            for point_tuple, draw_arrow in infantry_lines:
-                scaled_points = scale_arrows(self.size, self.pos, point_tuple)
-                self.lines.append(Line(points=scaled_points, width=1))
-                if draw_arrow:
-                    self.lines.append(Line(points=get_arrow_points(*scaled_points), width=1.5))
-            # self.line = Line(points=[x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9], width=1)
-            # self.arrow = Line(points=[x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105], width=1.5)
-            # self.test_arrow = Line(points=[x0+X*0.21, y0+Y*0.9, x0+X*0.2, y0+Y*0.9825, x0+X*0.15, y0+Y*0.8425, x0+X*0.21, y0+Y*0.9], width=1)
-            Color(0.8, 0.1, 0.1, 0.9)
-            self.deact_lines = []
-            for point_tuple in infantry_deact_lines:
-                scaled_points = scale_arrows(self.size, self.pos, point_tuple)
-                self.deact_lines.append(Line(points=scaled_points, width=2))
-
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(infantry_lines, infantry_deact_lines)    
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -478,7 +471,10 @@ class InfantryTechScreen(MainTechScreen):
 
 class ArmorTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(armor_lines, armor_deact_lines)
+
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(armor_lines, armor_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -489,7 +485,10 @@ class ArmorTechScreen(MainTechScreen):
 
 class NavalTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(naval_lines, [])
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(naval_lines, [])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -500,7 +499,10 @@ class NavalTechScreen(MainTechScreen):
 
 class AircraftTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(aircraft_lines, aircraft_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(aircraft_lines, aircraft_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
