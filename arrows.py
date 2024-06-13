@@ -1,6 +1,6 @@
 import math
 
-def get_arrow_points(x1, y1, x2, y2, length=5):
+def get_arrow_points(x1, y1, x2, y2, length=4):
     if x1 == x2 and y1 == y2:
         return (x1, y1, x1, y1, x1, y1)
     mid_point = ((x1 + x2) / 2, (y1 + y2) / 2)
