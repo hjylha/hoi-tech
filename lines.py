@@ -151,3 +151,104 @@ aircraft_deact_lines = [
     # bonber defence/range/firepower
     (0.88, 0.75, 0.88, 0.685)
 ]
+
+industry_lines = [
+    # rf -> radar
+    ((right2_x, 0.315, left2_x, 0.315), True),
+    ((right2_x, 0.28, left2_x, 0.28), True),
+    ((right2_x, 0.245, left2_x, 0.245), True)
+]
+
+industry_deact_lines = [
+    # industry/mining/conquest
+    (0.09, 0.3, 0.09, 0.235),
+    # liberal/military/marxist
+    (left1_x + 0.05, 0.17, left1_x + 0.05, 0.105),
+    # keynesian/self-sustainable
+    (left2_x - 0.01, 0.16, left2_x - 0.01, 0.095),
+    # peacetime/wartime
+    (left4_x + 0.06, 0.6, left4_x + 0.06, 0.58)
+]
+
+land_doct_lines = [
+    # WW1 doct -> all things
+    ((left1_x + 0.08, 0.96, left1_x + 0.08, 0.93), True),
+    ((0.08, 0.915, 0.08, 0.93, left1_x + 0.06, 0.93), False),
+    ((left1_x + 0.06, 0.915, left1_x + 0.06, 0.93, left2_x + 0.06, 0.93), False),
+    ((left2_x + 0.06, 0.915, left2_x + 0.06, 0.93, left3_x + 0.06, 0.93), False),
+    ((left3_x + 0.06, 0.915, left3_x + 0.06, 0.93, left4_x + 0.06, 0.93, left4_x + 0.06, 0.915), False),
+    # def principles -> deep ops
+    ((0.09, 0.6, 0.09, 0.585), False),
+    # def principles -> elastic/static
+    ((right1_x + 0.01, 0.615, left1_x - 0.02, 0.615), True),
+    ((left1_x, 0.615, left1_x - 0.02, 0.615, left1_x - 0.02, 0.57, left1_x, 0.57), False),
+    # levels -> decisive/op art
+    ((right1_x + 0.02, 0.365, right1_x + 0.03, 0.365, right1_x + 0.03, 0.33), False),
+    ((right1_x + 0.02, 0.33, right1_x + 0.03, 0.33, right1_x + 0.03, 0.295, right1_x + 0.02, 0.295), False),
+    ((right1_x + 0.03, 0.355, left1_x + 0.01, 0.355), True),
+    ((right1_x + 0.03, 0.305, left1_x + 0.01, 0.305), True),
+    # kampfgruppen/motorized -> mechanized
+    ((right1_x, 0.685, left1_x, 0.685), True),
+    ((left1_x + 0.06, 0.74, left1_x + 0.06, 0.705), True),
+    # large unit/inf assault -> armoured ops
+    ((right3_x - 0.02, 0.775, right3_x - 0.01, 0.735), True),
+    ((left3_x + 0.02, 0.775, left3_x + 0.01, 0.735), True),
+    # WW1 thought -> centralized planning
+    ((0.02, 0.39, 0.02, 0.265), True),
+    # massive forces -> conc art, auftrags -> c3i, foreign -> guerrilla
+    ((right1_x + 0.02, 0.22, left1_x, 0.22), True),
+    ((right1_x + 0.02, 0.135, left1_x, 0.135), True),
+    ((right1_x + 0.02, 0.05, left1_x, 0.05), True),
+    # elastic -> fire&retreat + defindepth
+    ((right2_x, 0.615, left2_x - 0.02, 0.615), True),
+    ((left2_x, 0.645, left2_x - 0.02, 0.645, left2_x - 0.02, 0.595, left2_x, 0.595), False),
+    # static -> planning, trench
+    ((right2_x, 0.565, right2_x + 0.05, 0.565), True),
+    ((right2_x, 0.51, left2_x, 0.51), False),
+    ((right2_x + 0.05, 0.565, right2_x + 0.05, 0.51), False),
+    # defindepth -> counterattack
+    ((right3_x, 0.595, left3_x, 0.595), True),
+    # fire&retreat -> strategic demo
+    ((right3_x, 0.645, left4_x + 0.06, 0.645), True),
+    ((left4_x + 0.06, 0.645, left4_x + 0.06, 0.615), False),
+    # rapid react/central def -> start withdraw
+    ((right4_x - 0.02, 0.51, right4_x - 0.01, 0.475), True),
+    ((left4_x + 0.02, 0.51, left4_x + 0.01, 0.475), True),
+    # einheit -> patrols & ambush
+    ((left2_x, 0.215, left2_x, 0.17), True),
+    ((left2_x + 0.01, 0.17, left2_x, 0.17, left2_x, 0.1, left2_x + 0.01, 0.1), False),
+    # einheit -> inf tactics & shoot&escape
+    ((right3_x, 0.23, left3_x + 0.06, 0.23), True),
+    ((left3_x + 0.06, 0.19, left3_x + 0.06, 0.23, left4_x + 0.06, 0.23, left4_x + 0.06, 0.19), False)
+]
+
+land_doct_deact_lines = [
+    # bewegungskrieg/rapid/deep/pre-planned/envelopment
+    (right1_x, 0.895, left4_x, 0.895),
+    # centralized/truppenführung/revisionist
+    (0.02, 0.23, 0.02, 0.095),
+    # elastic/static defence
+    (left1_x + 0.06, 0.6, left1_x + 0.06, 0.585),
+    # decisive/op art
+    (left1_x + 0.07, 0.34, left1_x + 0.07, 0.325),
+    # counterfire/scorched
+    (right4_x, 0.56, left4_x, 0.56),
+    # officer/subordinate
+    (left3_x + 0.07, 0.12, left3_x + 0.07, 0.105)
+]
+
+naval_doct_lines = [
+
+]
+
+naval_doct_deact_lines = [
+
+]
+
+air_doct_lines = [
+
+]
+
+air_doct_deact_lines = [
+
+]

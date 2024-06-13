@@ -621,13 +621,13 @@ tech_positions = {
 
     # LAND DOCTRINES
     # bewegungskrieg
-    6020: (left0_x, 0.9),
-    6030: (left0_x, 0.865),
-    6040: (left0_x, 0.83),
-    6050: (left0_x, 0.795),
-    6060: (left0_x, 0.76),
-    6070: (left0_x, 0.725),
-    6080: (left0_x, 0.69),
+    6020: (left0_x, 0.88),
+    6030: (left0_x, 0.845),
+    6040: (left0_x, 0.81),
+    6050: (left0_x, 0.775),
+    6060: (left0_x, 0.74),
+    6070: (left0_x, 0.705),
+    6080: (left0_x, 0.67),
 
     # defence principles
     6280: (left0_x + 0.01, 0.6),
@@ -636,117 +636,118 @@ tech_positions = {
     6310: (left0_x + 0.01, 0.48),
 
     # WW1 thought
-    6500: (left0_x, 0.4),
+    6500: (left0_x, 0.39),
     # levels
-    6510: (left0_x + 0.01, 0.35),
-    6520: (left0_x + 0.01, 0.315),
-    6530: (left0_x + 0.01, 0.28),
+    6510: (left0_x + 0.02, 0.35),
+    6520: (left0_x + 0.02, 0.315),
+    6530: (left0_x + 0.02, 0.28),
 
     # centralized
     6560: (left0_x, 0.23),
-    6570: (left0_x + 0.01, 0.195),
+    6570: (left0_x + 0.02, 0.195),
     # truppenführung
     6580: (left0_x, 0.145),
-    6590: (left0_x + 0.01, 0.11),
+    6590: (left0_x + 0.02, 0.11),
     # revisionist
     6600: (left0_x, 0.06),
-    6610: (left0_x + 0.01, 0.025),
+    6610: (left0_x + 0.02, 0.025),
 
     # WW1 Doctrine
     6010: (left1_x + 0.02, 0.96),
 
     # rapid deployment
-    6090: (left1_x, 0.9),
-    6100: (left1_x, 0.865),
-    6110: (left1_x, 0.83),
-    6120: (left1_x, 0.795),
-    6130: (left1_x, 0.76),
-    6140: (left1_x, 0.725),
+    6090: (left1_x, 0.88),
+    6100: (left1_x, 0.845),
+    6110: (left1_x, 0.81),
+    6120: (left1_x, 0.775),
+    6130: (left1_x, 0.74),
+    # mechanized ops
+    6140: (left1_x, 0.67),
 
     # elastic/static defence
     6320: (left1_x, 0.6),
     6420: (left1_x, 0.55),
     # planning, fortifications
     6430: (left1_x, 0.49),
-    6440: (left1_x, 0.455),
+    6440: (left1_x + 0.01, 0.455),
 
     # decisive battle / operational art
-    6540: (left1_x, 0.34),
-    6550: (left1_x, 0.29),
+    6540: (left1_x + 0.01, 0.34),
+    6550: (left1_x + 0.01, 0.29),
 
     # concentrated
     6620: (left1_x, 0.205),
-    6630: (left1_x, 0.17),
+    6630: (left1_x + 0.01, 0.17),
     # C3I
     6640: (left1_x, 0.12),
-    6650: (left1_x, 0.085),
+    6650: (left1_x + 0.01, 0.085),
     # guerrilla
     6660: (left1_x, 0.035),
-    6670: (left1_x, 0),
+    6670: (left1_x + 0.01, 0),
 
     # deep attack
-    6150: (left2_x, 0.9),
-    6160: (left2_x, 0.865),
-    6170: (left2_x, 0.83),
-    6180: (left2_x, 0.795),
+    6150: (left2_x, 0.88),
+    6160: (left2_x, 0.845),
+    6170: (left2_x, 0.81),
+    6180: (left2_x, 0.775),
 
     # pre-planned attack
-    6190: (left3_x, 0.9),
-    6200: (left3_x, 0.865),
-    6210: (left3_x, 0.83),
-    6220: (left3_x, 0.795),
+    6190: (left3_x, 0.88),
+    6200: (left3_x, 0.845),
+    6210: (left3_x, 0.81),
+    6220: (left3_x, 0.775),
 
     # armoured ops
-    6270: (left2_x + 0.1, 0.74),
+    6270: (left2_x + 0.1, 0.70),
 
     # strategic envelopment
-    6230: (left4_x, 0.9),
-    6240: (left4_x, 0.865),
-    6250: (left4_x, 0.83),
-    6260: (left4_x, 0.795),
+    6230: (left4_x, 0.88),
+    6240: (left4_x, 0.845),
+    6250: (left4_x, 0.81),
+    6260: (left4_x, 0.775),
 
     # fire & retreat, defence in depth
     6330: (left2_x, 0.63),
     6370: (left2_x, 0.58),
     # strategic demo
-    6340: (left3_x, 0.63),
-    6350: (left3_x, 0.595),
-    6360: (left3_x, 0.56),
+    6340: (left4_x, 0.58),
+    6350: (left4_x, 0.545),
+    6360: (left4_x, 0.51),
     # counterattack
-    6380: (left4_x, 0.63),
-    6390: (left4_x, 0.595),
-    6400: (left4_x, 0.56),
+    6380: (left3_x, 0.58),
+    6390: (left3_x, 0.545),
+    6400: (left3_x, 0.51),
     # strategic withdrawal
-    6410: (left3_x + 0.1, 0.5),
+    6410: (left3_x + 0.1, 0.44),
 
     # trench warfare
     6450: (left2_x, 0.49),
-    6460: (left2_x, 0.455),
-    6470: (left2_x, 0.42),
-    6480: (left2_x + 0.01, 0.37),
+    6460: (left2_x + 0.01, 0.455),
+    6470: (left2_x + 0.02, 0.42),
+    6480: (left2_x + 0.02, 0.385),
     # sturmtruppen
-    6490: (left3_x, 0.37),
+    6490: (left2_x + 0.03, 0.35),
 
     # small units
     6680: (left2_x - 0.01, 0.25),
     6690: (left2_x, 0.215),
     # patrols
-    6770: (left2_x, 0.165),
-    6780: (left2_x, 0.13),
+    6770: (left2_x + 0.01, 0.155),
+    6780: (left2_x + 0.02, 0.12),
     # ambush
-    6790: (left2_x, 0.08),
-    6800: (left2_x + 0.01, 0.045),
+    6790: (left2_x + 0.01, 0.08),
+    6800: (left2_x + 0.02, 0.045),
 
     # infantry tactics
-    6700: (left3_x, 0.25),
-    6710: (left3_x + 0.01, 0.215),
-    6720: (left3_x + 0.01, 0.18),
+    6700: (left3_x, 0.155),
+    6710: (left3_x + 0.01, 0.12),
+    6720: (left3_x + 0.01, 0.07),
     # penetration/contact
-    6730: (left3_x, 0.14),
+    6730: (left3_x + 0.02, 0.03),
     # shoot and escape
-    6740: (left3_x, 0.1),
-    6750: (left3_x + 0.01, 0.065),
-    6760: (left3_x + 0.01, 0.03),
+    6740: (left4_x, 0.155),
+    6750: (left4_x + 0.01, 0.12),
+    6760: (left4_x + 0.02, 0.085),
 
     # NAVAL DOCTRINES
     # sea control
