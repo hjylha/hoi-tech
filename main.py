@@ -23,7 +23,8 @@ from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from component_types import component_types
 from lines import infantry_lines, infantry_deact_lines, armor_lines, armor_deact_lines, naval_lines
-from lines import aircraft_lines, aircraft_deact_lines
+from lines import aircraft_lines, aircraft_deact_lines, industry_lines, industry_deact_lines
+from lines import land_doct_lines, land_doct_deact_lines, naval_doct_lines, naval_doct_deact_lines, air_doct_lines, air_doct_deact_lines
 
 
 
@@ -524,7 +525,10 @@ class OverviewTechScreen(MainTechScreen):
 
 class IndustryTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(industry_lines, industry_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(industry_lines, industry_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -535,7 +539,10 @@ class IndustryTechScreen(MainTechScreen):
 
 class LandDoctrineTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(land_doct_lines, land_doct_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(land_doct_lines, land_doct_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -557,7 +564,10 @@ class SecretWeaponTechScreen(MainTechScreen):
 
 class NavalDoctrineTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(naval_doct_lines, naval_doct_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(naval_doct_lines, naval_doct_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -568,7 +578,10 @@ class NavalDoctrineTechScreen(MainTechScreen):
 
 class AirDoctrineTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(air_doct_lines, air_doct_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(air_doct_lines, air_doct_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
