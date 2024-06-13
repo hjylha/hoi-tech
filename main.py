@@ -19,8 +19,10 @@ from kivy.metrics import dp
 
 from research import Research
 from scan_hoi_files import get_country_names
+from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from component_types import component_types
+from lines import infantry_lines
 
 
 
@@ -415,7 +417,7 @@ class MainTechScreen(FloatLayout):
         super().__init__(**kwargs)
         # self.add_widget(Label(text="MainTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
-        self.line = None
+        self.lines = None
 
         self.bind(size=self.update_lines, pos=self.update_lines)
 
@@ -424,8 +426,17 @@ class InfantryTechScreen(MainTechScreen):
     def update_lines(self, widget, value):
         X, Y = self.size
         x0, y0 = self.pos
-        self.line.points = [x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9]
-        self.arrow.points = [x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105]
+        for i, point_tuple in enumerate(infantry_lines):
+            scaled_points = scale_arrows(self.size, self.pos, point_tuple)
+            x1, y1, x2, y2 = point_tuple
+            scaled_points2 = [x0 + X * x1, y0 + Y * y1, x0 + X * x2, y0 + Y * y2]
+            if scaled_points != scaled_points2:
+                print(scaled_points)
+                print(scaled_points2)
+            self.lines[2*i].points = scaled_points
+            self.lines[2*i + 1].points = get_arrow_points(*scaled_points)
+        # self.line.points = [x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9]
+        # self.arrow.points = [x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105]
         # self.test_arrow.points = [x0+X*0.21, y0+Y*0.9, x0+X*0.2, y0+Y*0.9825, x0+X*0.15, y0+Y*0.8425, x0+X*0.21, y0+Y*0.9]
     
 
@@ -434,14 +445,19 @@ class InfantryTechScreen(MainTechScreen):
         # print("trying to draw lines")
 
         with self.canvas.before:
-            X, Y = self.size
+            # X, Y = self.size
             # print(X, Y)
-            x0, y0 = self.pos
+            # x0, y0 = self.pos
             # print(x0, y0)
             Color(0.7, 0.7, 0.7, 1)
             # print("drawing line")
-            self.line = Line(points=[x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9], width=1)
-            self.arrow = Line(points=[x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105], width=1.5)
+            self.lines = []
+            for point_tuple in infantry_lines:
+                scaled_points = scale_arrows(self.size, self.pos, point_tuple)
+                self.lines.append(Line(points=scaled_points, width=1))
+                self.lines.append(Line(points=get_arrow_points(*scaled_points)))
+            # self.line = Line(points=[x0 + X * 0.14, y0 + Y * 0.925, x0 + X * 0.21, y0 + Y * 0.9], width=1)
+            # self.arrow = Line(points=[x0+X*0.1807, y0+Y*0.9105, x0+X*0.177, y0+Y*0.9182, x0+X*0.173, y0+Y*0.9068, x0+X*0.1807, y0+Y*0.9105], width=1.5)
             # self.test_arrow = Line(points=[x0+X*0.21, y0+Y*0.9, x0+X*0.2, y0+Y*0.9825, x0+X*0.15, y0+Y*0.8425, x0+X*0.21, y0+Y*0.9], width=1)
             # self.line.bind(points=update_line)
             # print("drawing rectangle")
