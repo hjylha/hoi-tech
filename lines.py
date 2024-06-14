@@ -1,8 +1,8 @@
 
 right1_x = 0.14
-left1_x = 0.2
+left1_x = 0.21
 
-right2_x = 0.32
+right2_x = 0.33
 left2_x = 0.41
 
 right3_x = 0.53
@@ -117,7 +117,7 @@ naval_lines = [
     ((left1_x, 0.8, right1_x, 0.73), True),
     # guns -> ca
     ((right2_x, 0.94, left2_x, 0.94), True),
-    ((right1_x, 0.905, left2_x, 0.905), True)
+    ((right2_x, 0.905, left2_x, 0.905), True)
 
 ]
 
@@ -318,9 +318,44 @@ naval_doct_deact_lines = [
 ]
 
 air_doct_lines = [
+    # air power -> air superiority
+    ((0.02, 0.67, 0.02, 0.95), True),
+    # air superiority -> kette, bomber intercept, air patrol, night attack
+    ((right1_x, 0.965, left1_x + 0.07, 0.965), True),
+    ((left1_x + 0.07, 0.95, left1_x + 0.07, 0.965, left2_x + 0.07, 0.965), False),
+    ((left2_x + 0.07, 0.95, left2_x + 0.07, 0.965, left3_x + 0.07, 0.965), False),
+    ((left3_x + 0.07, 0.95, left3_x + 0.07, 0.965, left4_x + 0.07, 0.965, left4_x + 0.07, 0.95), False),
+    # air power -> independent/tactical
+    ((right1_x - 0.01, 0.65, left1_x - 0.02, 0.65), True),
+    ((left1_x - 0.01, 0.665, left1_x - 0.02, 0.665, left1_x - 0.02, 0.62, left1_x - 0.01, 0.62), False),
+    # independent/tactical -> battlemana, centralc&c, himmelbett
+    ((right2_x - 0.01, 0.665, right2_x, 0.665, right2_x, 0.62, right2_x - 0.01, 0.62), False),
+    ((right2_x, 0.66, left2_x - 0.02, 0.675), True),
+    ((right2_x, 0.64, left2_x - 0.02, 0.64), True),
+    ((right2_x, 0.62, left2_x - 0.02, 0.61), True),
+    # air power -> bombing
+    ((0.07, 0.635, 0.07, 0.585), True),
+    # bombing -> strategic, vertical, tactical
+    ((0.07, 0.55, 0.07, 0.53), True),
+    ((0.07, 0.515, 0.07, 0.53, left1_x + 0.08, 0.53), False),
+    ((left1_x + 0.08, 0.515, left1_x + 0.08, 0.53, left2_x + 0.08, 0.53, left2_x + 0.08, 0.515), False),
+    # support ground ops -> nearby intercept, dive bombing
+    ((right3_x + 0.04, 0.46, left3_x + 0.07, 0.46), True),
+    ((left3_x + 0.07, 0.435, left3_x + 0.07, 0.46, left4_x, 0.46), False),
+    # nearby intercept, predefined -> harassment
+    ((right4_x + 0.02, 0.43, left4_x + 0.01, 0.31), True),
+    ((left4_x + 0.01, 0.375, left4_x + 0.01, 0.325), True),
+    # hedgehog, harassment -> offesive corridor
+    ((left3_x + 0.08, 0.365, left3_x + 0.08, 0.325), True),
+    ((left4_x + 0.01, 0.305, right4_x + 0.03, 0.305), True),
+    # strategic, supp ground, air interdict -> ombined forces
+    ((right1_x + 0.01, 0.5, left1_x + 0.05, 0.365), True),
+    ((left2_x + 0.04, 0.46, left2_x + 0.03, 0.46, left2_x + 0.03, 0.43, left2_x + 0.04, 0.43), False),
+    ((left2_x + 0.03, 0.445, right2_x + 0.03, 0.365), True)
 
 ]
 
 air_doct_deact_lines = [
-
+    # independent / tactical
+    (left1_x + 0.06, 0.65, left1_x + 0.06, 0.635)
 ]

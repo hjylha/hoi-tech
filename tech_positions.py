@@ -1,6 +1,6 @@
 
 left0_x = 0.01
-left1_x = 0.19
+left1_x = 0.2
 left2_x = 0.4
 left3_x = 0.61
 left4_x = 0.81
@@ -884,127 +884,124 @@ tech_positions = {
     8760: (left4_x - 0.01, 0.06),
 
     # AIR DOCTRINES
-    # kette formation
-    9030: (left0_x, 0.95),
-    9040: (left0_x + 0.01, 0.915),
-    9050: (left0_x + 0.01, 0.88),
-    # air defence
-    9060: (left0_x + 0.01, 0.8),
-    9070: (left0_x + 0.02, 0.765),
-
     # air superiority
-    9020: (left0_x, 0.66),
-
-    # air power
-    9010: (left0_x - 0.01, 0.6),
-
-    # bombing doctrine
-    9250: (left0_x, 0.54),
-    # strategic bombing
-    9260: (left0_x + 0.01, 0.48),
-    # vertical envelopment
-    9380: (left0_x + 0.01, 0.4),
-    9390: (left0_x + 0.02, 0.365),
-    9400: (left0_x + 0.03, 0.33),
-    # tactical air support
-    9410: (left0_x +0.01, 0.23),
-    # air interdiction
-    9420: (left0_x + 0.02, 0.18),
-    # installation attack
-    9430: (left0_x + 0.02, 0.13),
-    # jackpot
-    9440: (left0_x + 0.03, 0.08),
-    9450: (left0_x + 0.03, 0.045),
-
-    # vic zigzag
-    9080: (left1_x, 0.91),
-    9090: (left1_x + 0.01, 0.875),
+    9020: (left0_x, 0.95),
+    # air defence
+    9060: (left0_x + 0.02, 0.915),
+    9070: (left0_x + 0.03, 0.88),
     # luftbery circle
-    9100: (left1_x, 0.825),
-    9110: (left1_x + 0.01, 0.79),
+    9100: (left0_x + 0.03, 0.845),
+    9110: (left0_x + 0.04, 0.81),
+    # frontal attack
+    9190: (left0_x + 0.02, 0.77),
+    # abschwung
+    9200: (left0_x + 0.03, 0.735),
+    # kette formation
+    9030: (left1_x, 0.915),
+    9040: (left1_x + 0.01, 0.88),
+    9050: (left1_x + 0.02, 0.845),
+    # vic zigzag
+    9080: (left1_x + 0.03, 0.81),
+    9090: (left1_x + 0.04, 0.775),
+    # bomber interception
+    9120: (left2_x, 0.915),
+    # schräge musik
+    9130: (left2_x + 0.01, 0.88),
+    9140: (left2_x + 0.02, 0.845),
+    # air patrol
+    9210: (left3_x, 0.915),
+    # freie jagd
+    9230: (left3_x + 0.01, 0.88),
+    # aerial intruder
+    9240: (left3_x + 0.01, 0.845),
+    # okhotniki
+    9220: (left3_x + 0.01, 0.81),
+    # night attack
+    9150: (left4_x, 0.915),
+    # flare use
+    9180: (left4_x + 0.01, 0.88),
+    # wilde sau
+    9160: (left4_x + 0.01, 0.845),
+    9170: (left4_x + 0.02, 0.81),
+    
+    # air power
+    9010: (left0_x - 0.01, 0.635),
 
     # independent / tactical
-    9600: (left1_x - 0.01, 0.625),
-    9610: (left1_x - 0.01, 0.575),
-
-    # close formation
-    9270: (left1_x, 0.48),
-    # strategic level
-    9310: (left1_x, 0.43),
-    9320: (left1_x + 0.01, 0.395),
-    # level flight
-    9360: (left1_x, 0.34),
-    # combined forces
-    9580: (left1_x, 0.29),
-    # support ground operations
-    9490: (left1_x, 0.23),
-    # naval patrols
-    9460: (left1_x, 0.13),
-    # long range
-    9470: (left1_x + 0.01, 0.075),
-    9480: (left1_x + 0.02, 0.04),
-
-    # bomber interception
-    9120: (left2_x, 0.95),
-    # night attack
-    9150: (left2_x, 0.83),
-    # frontal attack
-    9190: (left2_x, 0.75),
-    # air patrol
-    9210: (left2_x, 0.7),
-
+    9600: (left1_x - 0.01, 0.65),
+    9610: (left1_x - 0.01, 0.6),
     # battle management, central c&c, himmelbett
-    9620: (left2_x - 0.02, 0.617),
-    9630: (left2_x - 0.02, 0.582),
-    9640: (left2_x - 0.02, 0.547),
+    9620: (left2_x - 0.02, 0.66),
+    9630: (left2_x - 0.02, 0.625),
+    9640: (left2_x - 0.02, 0.59),
 
+    # bombing doctrine
+    9250: (left0_x, 0.55),
+
+    # strategic bombing
+    9260: (left0_x + 0.01, 0.48),
+    # close formation
+    9270: (left0_x + 0.02, 0.445),
     # concentrated fire
-    9280: (left2_x + 0.01, 0.48),
-    # concrete objectives
-    9330: (left2_x + 0.01, 0.395),
-    # differing altitude
-    9370: (left2_x, 0.34),
-    # deep operations
-    9590: (left2_x + 0.01, 0.29),
-    # dive bomb
-    9500: (left2_x, 0.25),
-    9510: (left2_x + 0.01, 0.215),
-    # nearby interception
-    9540: (left2_x, 0.15),
-    # hedgehog
-    9550: (left2_x + 0.01, 0.08),
-
-    # schräge musik
-    9130: (left3_x, 0.95),
-    9140: (left3_x + 0.01, 0.915),
-    # wilde sau
-    9160: (left3_x, 0.865),
-    9170: (left3_x + 0.01, 0.83),
-    # flare use
-    9180: (left3_x, 0.785),
-    # abschwung
-    9200: (left3_x, 0.74),
-    # okhotniki
-    9220: (left3_x, 0.69),
-    # freie jagd
-    9230: (left3_x, 0.65),
-    # aerial intruder
-    9240: (left3_x, 0.61),
-
+    9280: (left0_x + 0.03, 0.41),
     # escort fighter
-    9290: (left3_x, 0.48),
-    9300: (left3_x + 0.01, 0.445),
+    9290: (left0_x + 0.04, 0.375),
+    9300: (left0_x + 0.05, 0.34),
+    # strategic level
+    9310: (left0_x + 0.02, 0.305),
+    9320: (left0_x + 0.03, 0.27),
+    # concrete objectives
+    9330: (left0_x + 0.04, 0.235),
     # carpet bombing
-    9340: (left3_x, 0.395),
-    9350: (left3_x, 0.36),
+    9340: (left0_x + 0.05, 0.2),
+    9350: (left0_x + 0.05, 0.165),
+    # level flight
+    9360: (left0_x + 0.02, 0.13),
+    # differing altitude
+    9370: (left0_x + 0.03, 0.095),
     
+
+    # vertical envelopment
+    9380: (left1_x + 0.03, 0.48),
+    9390: (left1_x + 0.04, 0.445),
+    9400: (left1_x + 0.05, 0.41),
+
+    # combined forces
+    9580: (left1_x + 0.03, 0.33),
+    # deep operations
+    9590: (left1_x + 0.04, 0.295),
+
+    # tactical air support
+    9410: (left2_x + 0.03, 0.48),
+    # support ground operations
+    9490: (left2_x + 0.04, 0.445),
+    # air interdiction
+    9420: (left2_x + 0.04, 0.41),
+    # installation attack
+    9430: (left2_x + 0.05, 0.375),
+    # jackpot
+    9440: (left2_x + 0.06, 0.34),
+    9450: (left2_x + 0.06, 0.305),
+    # naval patrols
+    9460: (left2_x + 0.05, 0.27),
+    # long range
+    9470: (left2_x + 0.06, 0.235),
+    9480: (left2_x + 0.06, 0.2),
+
+    # dive bomb
+    9500: (left4_x, 0.445),
+    9510: (left4_x + 0.01, 0.41),
     # predefined objectives
-    9520: (left3_x, 0.25),
-    9530: (left3_x + 0.01, 0.215),
+    9520: (left4_x + 0.01, 0.375),
+    9530: (left4_x + 0.02, 0.34),
+    # nearby interception
+    9540: (left3_x + 0.02, 0.4),
+    # hedgehog
+    9550: (left3_x + 0.03, 0.365),
     # harrassment
-    9560: (left3_x, 0.15),
+    9560: (left4_x + 0.01, 0.29),
     # offensive corridor
-    9570: (left3_x, 0.05),
+    9570: (left3_x + 0.03, 0.29),
 
     # SECRET WEAPONS
     # atomic theories
