@@ -750,142 +750,138 @@ tech_positions = {
     6760: (left4_x + 0.02, 0.085),
 
     # NAVAL DOCTRINES
+    # 19th century
+    8010: (left1_x + 0.02, 0.95),
+
     # sea control
     8020: (left0_x, 0.95),
     8030: (left0_x, 0.915),
-    8040: (left0_x, 0.88),
-    # port protection/invasion op
-    8050: (left0_x + 0.01, 0.83),
-    8060: (left0_x + 0.01, 0.78),
-    # maritime patrol
-    8070: (left0_x, 0.73),
-    8080: (left0_x, 0.695),
-
-    # fleet-in-being
-    8270: (left0_x, 0.6),
-    # decisive/block enemy ships
-    8280: (left0_x + 0.01, 0.56),
-    8290: (left0_x + 0.01, 0.47),
-
-    # combined army-navy / warfare manouver
-    8300: (left0_x + 0.01, 0.37),
-    8310: (left0_x + 0.01, 0.28),
-
-    # power projection
-    8550: (left0_x, 0.19),
-    8560: (left0_x + 0.01, 0.155),
-    8570: (left0_x + 0.01, 0.12),
-
-    # amphibious operations
-    8580: (left0_x, 0.05),
-    8590: (left0_x + 0.01, 0.015),
-
-    # 19th century
-    8010: (left1_x, 0.95),
-
     # naval diplomacy
-    8090: (left1_x, 0.9),
+    8090: (left0_x + 0.01, 0.88),
+    # commerce defence
+    8040: (left0_x + 0.01, 0.845),
     # convoy sailing
-    8100: (left1_x, 0.86),
+    8100: (left1_x, 0.845),
+    # port protection/invasion op
+    8050: (left0_x + 0.02, 0.81),
+    8060: (left0_x + 0.02, 0.76),
     # antisub patrols / naval participation
     8110: (left1_x + 0.01, 0.81),
     8120: (left1_x + 0.01, 0.76),
-
-    # naval firepower
-    8320: (left1_x, 0.68),
-    8330: (left1_x + 0.01, 0.645),
-    8340: (left1_x + 0.01, 0.61),
-
-    # decoy fleet
-    8390: (left1_x, 0.5),
-    8400: (left1_x + 0.01, 0.465),
-
-    # overseas expansion
-    8430: (left1_x, 0.42),
-    8440: (left1_x, 0.385),
-    8450: (left1_x, 0.35),
-
-    # air-naval supremacy
-    8600: (left1_x, 0.28),
-    # fleet defence
-    8610: (left1_x + 0.01, 0.23),
-    # amphibious combined arms
-    8620: (left1_x + 0.01, 0.18),
-    8630: (left1_x + 0.02, 0.145),
-    # indirect approach
-    8640: (left1_x, 0.1),
-    # naval power
-    8650: (left1_x + 0.02, 0.015),
+    # maritime patrol
+    8070: (left0_x + 0.01, 0.725),
+    8080: (left0_x + 0.01, 0.69),
 
     # commerce raiding
     8130: (left2_x, 0.95),
-    8140: (left2_x + 0.01, 0.915),
+    8140: (left2_x, 0.915),
+    # convoy harassment
     8150: (left2_x + 0.01, 0.88),
-
     # diversion force
-    8160: (left2_x, 0.83),
+    8160: (left2_x + 0.01, 0.845),
     # naval minelaying
-    8170: (left2_x + 0.01, 0.78),
-    8180: (left2_x + 0.01, 0.745),
-
-    # command of the sea
-    8350: (left2_x, 0.68),
-    # large taskforce / balanced fleet
-    8360: (left2_x + 0.01, 0.63),
-    8370: (left2_x + 0.01, 0.58),
-
-    # encounter group
-    8410: (left2_x, 0.5),
-    8420: (left2_x + 0.01, 0.465),
-
-    # air-naval supremacy / fleet auxiliary carrier
-    8460: (left2_x, 0.41),
-    8500: (left2_x, 0.35),
-
-    # enemy deployments interdiction
-    8660: (left2_x, 0.23),
-    8670: (left2_x + 0.01, 0.195),
-
+    8170: (left2_x + 0.02, 0.81),
+    8180: (left2_x + 0.02, 0.775),
     # emphasis on navigation training
-    8190: (left3_x, 0.95),
-    8200: (left3_x + 0.01, 0.915),
-    8210: (left3_x + 0.01, 0.88),
+    8190: (left4_x, 0.95),
+    8200: (left4_x + 0.01, 0.915),
+    8210: (left4_x + 0.02, 0.88),
     # limited offensive fleet / submarine fleet
-    8220: (left3_x, 0.8),
-    8230: (left3_x + 0.01, 0.765),
-    8240: (left3_x, 0.715),
-    8250: (left3_x + 0.01, 0.68),
-    8260: (left3_x + 0.01, 0.645),
+    8220: (left3_x, 0.915),
+    8230: (left3_x + 0.02, 0.88),
+    8240: (left3_x, 0.825),
+    8250: (left3_x + 0.02, 0.79),
+    8260: (left3_x + 0.02, 0.755),
 
+    # decisive/block enemy ships
+    8280: (left0_x + 0.02, 0.62),
+    8290: (left0_x + 0.02, 0.56),
+
+    # fleet-in-being
+    8270: (left0_x, 0.47),
+
+    # naval firepower
+    8320: (left1_x + 0.01, 0.62),
+    # escort sub & naval attrition
+    8330: (left2_x, 0.655),
+    8340: (left2_x, 0.62),
+    # command of the sea
+    8350: (left3_x, 0.655),
+    # large taskforce / balanced fleet
+    8360: (left3_x + 0.01, 0.62),
+    8370: (left3_x + 0.01, 0.57),
     # naval presence
-    8380: (left3_x, 0.59),
+    8380: (left4_x, 0.595),
 
+    # decoy fleet
+    8390: (left1_x + 0.01, 0.56),
+    # battlefleet concentration
+    8400: (left2_x, 0.56),
+    # encounter group
+    8410: (left2_x, 0.525),
+    8420: (left2_x + 0.01, 0.49),
+
+    # combined army-navy / warfare manouver
+    8300: (left0_x + 0.02, 0.40),
+    8310: (left0_x + 0.02, 0.28),
+
+    # overseas expansion
+    8430: (left1_x + 0.01, 0.42),
+    # invasion force, base strike
+    8440: (left1_x + 0.02, 0.385),
+    8450: (left1_x + 0.02, 0.35),
+    # air-naval supremacy / fleet auxiliary carrier
+    8460: (left2_x + 0.01, 0.42),
+    8500: (left2_x + 0.01, 0.37),
     # fleet auxiliary force
-    8470: (left3_x, 0.45),
-    8480: (left3_x + 0.01, 0.415),
-    8490: (left3_x + 0.02, 0.38),
+    8470: (left3_x, 0.47),
+    8480: (left3_x + 0.01, 0.435),
+    8490: (left3_x + 0.02, 0.40),
     # naval superiority
-    8510: (left3_x, 0.33),
-    8520: (left3_x + 0.01, 0.295),
-    8530: (left3_x + 0.02, 0.26),
+    8510: (left3_x, 0.34),
+    8520: (left3_x + 0.01, 0.305),
+    8530: (left3_x + 0.02, 0.27),
     # national protection
     8540: (left4_x, 0.355),
 
+    # power projection
+    8550: (left0_x, 0.21),
+    # rapid decision
+    8560: (left0_x + 0.01, 0.175),
+    8570: (left0_x + 0.01, 0.14),
+    # amphibious operations
+    8580: (left0_x + 0.01, 0.105),
+    8590: (left0_x + 0.02, 0.07),
+    # air-naval supremacy
+    8600: (left1_x + 0.01, 0.28),
+    # enemy deployments interdiction
+    8660: (left2_x - 0.01, 0.28),
+    8670: (left2_x, 0.245),
+    # fleet defence
+    8610: (left1_x + 0.02, 0.21),
+    # indirect approach
+    8640: (left1_x + 0.02, 0.175),
+    # amphibious combined arms
+    8620: (left2_x - 0.01, 0.20),
+    8630: (left2_x, 0.165),
+    # naval power
+    8650: (left1_x + 0.02, 0.07),
+
     # naval intelligence
-    8680: (left4_x - 0.01, 0.9),
+    8680: (left3_x - 0.03, 0.17),
     # levels
-    8690: (left4_x + 0.01, 0.865),
-    8700: (left4_x + 0.01, 0.83),
-    8710: (left4_x + 0.01, 0.795),
+    8690: (left3_x - 0.02, 0.135),
+    8700: (left3_x - 0.02, 0.1),
+    8710: (left3_x - 0.02, 0.065),
 
     # naval logistic support
-    8720: (left4_x - 0.01, 0.72),
+    8720: (left4_x - 0.03, 0.21),
     # naval superiority / area of influence
-    8730: (left4_x, 0.67),
-    8740: (left4_x, 0.62),
+    8730: (left4_x - 0.02, 0.175),
+    8740: (left4_x - 0.02, 0.13),
     # long range operations, continuous navigation
-    8750: (left4_x + 0.01, 0.57),
-    8760: (left4_x + 0.01, 0.535),
+    8750: (left4_x - 0.01, 0.095),
+    8760: (left4_x - 0.01, 0.06),
 
     # AIR DOCTRINES
     # kette formation

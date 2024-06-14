@@ -238,11 +238,83 @@ land_doct_deact_lines = [
 ]
 
 naval_doct_lines = [
-
+    # 19th century -> sea control & ommerce raiding
+    ((left1_x + 0.02, 0.965, right1_x, 0.965), True),
+    ((right2_x + 0.02, 0.965, left2_x, 0.965), True),
+    # commerce def -> convoy sailing
+    ((right1_x + 0.01, 0.86, left1_x, 0.86), True),
+    # commerce raiding -> emphasis on nav
+    ((right3_x, 0.965, left4_x, 0.965), True),
+    # sealane interdiction -> lin off / submarine
+    ((right3_x, 0.93, left3_x - 0.01, 0.93), True),
+    ((left3_x, 0.93, left3_x - 0.01, 0.93, left3_x - 0.01, 0.845, left3_x, 0.845), False),
+    # decisive battle -> naval firepower
+    ((right1_x + 0.02, 0.635, left1_x + 0.01, 0.635), True),
+    # naval firepower -> escort sub + naval attrition
+    ((right2_x + 0.01, 0.635, left2_x - 0.01, 0.635), True),
+    ((left2_x, 0.67, left2_x - 0.01, 0.67, left2_x - 0.01, 0.635, left2_x, 0.635), False),
+    # escort sub + naval attrition -> command of the sea
+    ((right3_x, 0.67, right3_x + 0.01, 0.67, right3_x + 0.01, 0.635, right3_x, 0.635), False),
+    ((right3_x + 0.01, 0.67, left3_x, 0.67), True),
+    # large taskforce / balanced -> naval presence
+    ((right4_x + 0.01, 0.635, right4_x + 0.02, 0.635, right4_x + 0.02, 0.58, right4_x + 0.01, 0.58), False),
+    ((right4_x + 0.02, 0.61, left4_x, 0.61), True),
+    # block enemy ships -> decoy fleet
+    ((right1_x + 0.02, 0.575, left1_x + 0.01, 0.575), True),
+    # decoy fleet -> battlefleet concentration
+    ((right2_x + 0.01, 0.575, left2_x, 0.575), True),
+    # fleet-in-being -> decisive/block
+    ((0.02, 0.505, 0.02, 0.605), True),
+    ((0.04, 0.635, 0.02, 0.635, 0.02, 0.575, 0.04, 0.575), False),
+    # fleet-in-being -> combined army-navy / warfare manoeuvres
+    ((0.02, 0.47, 0.02, 0.4), True),
+    ((0.04, 0.415, 0.02, 0.415, 0.02, 0.3, 0.04, 0.3), False),
+    # comb army-navy -> overseas exp
+    ((right1_x + 0.02, 0.425, left1_x + 0.01, 0.425), True),
+    # overseas exp -> air naval / fleet aux
+    ((right2_x + 0.01, 0.435, left2_x, 0.435), True),
+    ((left2_x + 0.01, 0.435, left2_x, .435, left2_x, 0.385, left2_x + 0.01, 0.385), False),
+    # air naval supr -> fleet aux force
+    ((right3_x + 0.01, 0.435, left3_x, 0.485), True),
+    # fleet aux cv -> naval superiority
+    ((right3_x + 0.01, 0.39, left3_x, 0.355), True),
+    # small taskforce, concentrated forces -> national protection
+    ((right4_x + 0.02, 0.415, left4_x, 0.375), True),
+    ((right4_x + 0.02, 0.29, left4_x, 0.37), True),
+    # warfare manoeuvres -> power projection, air-naval supr
+    ((0.1, 0.28, 0.1, 0.245), True),
+    ((right1_x + 0.02, 0.295, left1_x + 0.01, 0.295), True),
+    # air-naval supr -> enemy deployments
+    ((right2_x + 0.01, 0.295, left2_x - 0.01, 0.295), True),
+    # power projection, air-naval -> fleet def, indirect approach
+    ((right1_x, 0.23, left1_x + 0.01, 0.23), True),
+    ((left1_x + 0.01, 0.28, left1_x + 0.01, 0.23), True),
+    ((left1_x + 0.02, 0.23, left1_x + 0.01, 0.23, left1_x + 0.01, 0.195, left1_x + 0.02, 0.195), False),
+    # fleet def -> amphibious comb arms
+    ((right2_x + 0.02, 0.22, left2_x, 0.22), True),
+    # mass amp op, inderct app, naval av -> naval power
+    ((right1_x + 0.02, 0.09, left1_x + 0.02, 0.09), True),
+    ((left1_x + 0.08, 0.175, left1_x + 0.08, 0.105), True),
+    ((left2_x + 0.03, 0.165, right2_x, 0.105), True)
 ]
 
 naval_doct_deact_lines = [
-
+    # port prot / invasion ops
+    (0.1, 0.81, 0.1, 0.795),
+    # antisub patrols / naval participation
+    (left1_x + 0.07, 0.81, left1_x + 0.07, 0.795),
+    # lim off fleet / submarine fleet
+    (left3_x, 0.915, left3_x, 0.86),
+    # decisive battle / block enemy ships
+    (0.1, 0.62, 0.1, 0.595),
+    # large taskforce / balanced
+    (left3_x + 0.07, 0.62, left3_x + 0.07, 0.605),
+    # air-naval supr / fleet aux cv
+    (left2_x + 0.07, 0.42, left2_x + 0.07   , 0.405),
+    # comb army-navy / warfare man
+    (0.1, 0.4, 0.1, 0.315),
+    # naval superiority / area of influence
+    (left4_x + 0.05, 0.175, left4_x + 0.05, 0.165)
 ]
 
 air_doct_lines = [
