@@ -1085,7 +1085,7 @@ class MainFullScreen(BoxLayout):
         self.statusbar.research_speed_input.text = str(self.research.research_speed)
 
     def change_year(self, year):
-        self.research.year = year
+        self.research.change_year(year)
         self.statusbar.year_input.text = str(self.research.year)
     
     # in case of not knowing what to do
