@@ -75,7 +75,9 @@ def scan_tech_file(filepath, tech_names):
     tech_category = filepath.stem[:filepath.stem.index("_tech")]
 
     with open(filepath, "r", encoding = "ISO-8859-1") as f:
-        for tech_text in f.read().split("application =")[1:]:
+        filtered_full_text = "\n".join([text.split("#")[0] for text in f.read().split("\n")])
+        # for tech_text in f.read().split("application =")[1:]:
+        for tech_text in filtered_full_text.split("application =")[1:]:
             try:
                 tech_id = int(tech_text.split("id =")[1].split("\n")[0].strip(" ="))
             except ValueError as e:
