@@ -91,6 +91,7 @@ class Research:
         # for tech_id in self.techs:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
+        self.num_of_rocket_sites = 0
 
 
     def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
@@ -119,8 +120,11 @@ class Research:
         for country_code in self.countries:
             self.all_teams += get_tech_teams(country_code)
         self.filter_teams()
-        # difficulty does nothing for now, 0 = normal
+        # difficulty -1, 0, 1, 2, 3
         self.difficulty = difficulty
+        # TODO: more rocket sites
+        self.num_of_rocket_sites = 0
+
 
     def add_country(self, country_code):
         if country_code not in self.countries:
@@ -212,6 +216,7 @@ class Research:
 
     def complete_tech(self, tech_id, update_active=True, check_requirements=False):
         if check_requirements and (not self.are_tech_requirements_completed(tech_id) or tech_id in self.deactivated_techs):
+            print(f"tech {tech_id} cannot be researched")
             return
         self.completed_techs.add(tech_id)
         self.techs[tech_id].researched = 1
@@ -365,7 +370,7 @@ class Research:
 
         team_results = []
         for team in self.teams:
-            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint)
+            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
             team_results.append([team, days])
         return sorted(team_results, key=lambda x: x[1])
     
