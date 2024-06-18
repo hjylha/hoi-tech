@@ -72,6 +72,7 @@ class Tech:
         for effect in self.effects:
             if effect.type == "research_mod":
                 return float(effect.value)
+        return 0
             
     def get_deactivated_tech(self):
         deactivated_tech = []
