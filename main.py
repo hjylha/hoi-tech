@@ -936,6 +936,16 @@ class StatusBar(BoxLayout):
             self.save_country_difficulty_and_year()
         except ValueError:
             self.year_input.text = str(self.parent.research.year)
+        
+    def select_num_of_rocket_sites(self, widget, value):
+        try:
+            self.parent.research.num_of_rocket_sites = int(value)
+            self.rocket_site_button.text = value
+            if self.parent.current_tech is not None:
+                self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+        except ValueError as e:
+            print(f"Bad number of rocket sites: {value}")
+            raise e
 
 
     def on_checkbox_active_placeholder(self, checkbox, value):
@@ -1037,7 +1047,7 @@ class StatusBar(BoxLayout):
 
         self.difficulty_dropdown = DropDown()
         for diff in self.difficulty_suggestions:
-            btn = Button(text=diff, size_hint=(1, None), height=dp(20))
+            btn = Button(text=diff, size_hint=(1, None), height=dp(25))
             btn.bind(on_release=lambda b: self.difficulty_dropdown.select(b.text))
             self.difficulty_dropdown.add_widget(btn)
 
@@ -1071,11 +1081,25 @@ class StatusBar(BoxLayout):
         self.add_widget(self.research_speed_input)
         self.research_speed_input.bind(text=self.validate_research_speed)
 
-        # lock values checkbox
-        self.add_widget(Label(text="Lock values", size_hint=(0.1, 1)))
-        self.value_lock_checkbox = CheckBox(size_hint=(0.04, 1))
-        self.value_lock_checkbox.bind(active=self.on_checkbox_active_placeholder)
-        self.add_widget(self.value_lock_checkbox)
+        # # lock values checkbox
+        # self.add_widget(Label(text="Lock values", size_hint=(0.1, 1)))
+        # self.value_lock_checkbox = CheckBox(size_hint=(0.04, 1))
+        # self.value_lock_checkbox.bind(active=self.on_checkbox_active_placeholder)
+        # self.add_widget(self.value_lock_checkbox)
+
+        # rocket sites
+        self.add_widget(Label(text="Number of rocket sites", size_hint=(0.11, 1)))
+
+        self.rocket_site_dropdown = DropDown()
+        for i in range(11):
+            btn = Button(text=str(i), size_hint=(1, None), height=dp(25))
+            btn.bind(on_release=lambda b: self.rocket_site_dropdown.select(b.text))
+            self.rocket_site_dropdown.add_widget(btn)
+
+        self.rocket_site_button = Button(text="infty", size_hint=(0.03, 1))
+        self.rocket_site_button.bind(on_release=self.rocket_site_dropdown.open)
+        self.rocket_site_dropdown.bind(on_select=self.select_num_of_rocket_sites)
+        self.add_widget(self.rocket_site_button)
 
 
 class MainFullScreen(BoxLayout):
@@ -1126,6 +1150,7 @@ class MainFullScreen(BoxLayout):
 
         self.statusbar.year_input.text = str(self.research.year)
         self.statusbar.research_speed_input.text = str(self.research.research_speed)
+        self.statusbar.rocket_site_button.text = str(self.research.num_of_rocket_sites)
         
         self.add_widget(self.mainscreen)
         self.add_widget(self.statusbar)
