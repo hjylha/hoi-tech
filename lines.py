@@ -153,21 +153,81 @@ aircraft_deact_lines = [
 ]
 
 industry_lines = [
+    # forced recruitment -> production planning
+    ((0.04, 0.86, 0.03, 0.86), False),
+    ((0.03, 0.86, 0.03, 0.795), True),
+    # production planning -> army, naval, air force planning
+    ((0.03, 0.76, 0.03, 0.74, 0.04, 0.74), False),
+    ((0.03, 0.74, 0.03, 0.62), True),
+    ((0.04, 0.62, 0.03, 0.62, 0.03, 0.5, 0.04, 0.5), False),
+    # public finance -> production planning
+    ((0.02, 0.115, 0.02, 0.765), True),
+    # basic - improved -> light -> average  industry
+    ((left1_x, 0.95, left1_x, 0.935), False),
+    ((left1_x, 0.9, left1_x, 0.85), True),
+    ((left1_x, 0.815, left1_x, 0.765), True),
+    # basic industry -> chemical industry
+    ((right2_x, 0.95, left2_x, 0.93), True),
+    # chemical industry -> boost mining
+    ((right3_x - 0.01, 0.92, right3_x + 0.01, 0.92), False),
+    ((right3_x + 0.01, 0.92, right3_x + 0.01, 0.95), True),
+    # study centers -> ind training inst -> laboratories -> investigation centers
+    ((right2_x, 0.505, left2_x, 0.505), True),
+    ((right3_x, 0.505, left3_x, 0.505), True),
+    ((right4_x, 0.505, left4_x, 0.505), True),
+    # adv vacuum tubes -> basic electronics
+    ((right2_x, 0.41, left2_x, 0.43), True),
+    # adv vacuum tubes -> rf
+    ((left1_x + 0.06, 0.385, left1_x + 0.06, 0.335), True),
     # rf -> radar
     ((right2_x, 0.315, left2_x, 0.315), True),
     ((right2_x, 0.28, left2_x, 0.28), True),
-    ((right2_x, 0.245, left2_x, 0.245), True)
+    ((right2_x, 0.245, left2_x, 0.245), True),
+    # basic electr -> calculators
+    ((right3_x, 0.44, left3_x, 0.44), True),
+    # calculators -> tabulating
+    ((right4_x, 0.45, left4_x, 0.45), True),
+    # average electr -> initial computers
+    ((right3_x, 0.4, left3_x, 0.4), True),
+    # initial computers -> decoding/encoding
+    ((right4_x, 0.4, left4_x, 0.4), True),
+    # adv electr -> basic computers
+    ((right3_x, 0.36, left3_x, 0.36), True),
+    # basic computers -> complex calculators
+    ((right4_x, 0.36, left4_x, 0.36), True),
+    # economic theory -> liberal/military/marxist
+    ((right1_x + 0.02, 0.165, left1_x - 0.02, 0.165), True),
+    ((left1_x - 0.01, 0.19, left1_x - 0.02, 0.19, left1_x - 0.02, 0.135), False),
+    ((left2_x - 0.01, 0.135, left1_x - 0.02, 0.135, left1_x - 0.02, 0.09, left1_x - 0.01, 0.09), False),
+    # liberal/military/marxist -> industry/mining/manpower
+    ((right1_x + 0.02, 0.355, right1_x + 0.03, 0.355, right1_x + 0.03, 0.305), False),
+    ((right1_x + 0.02, 0.305, right1_x + 0.03, 0.305, right1_x + 0.03, 0.26, right1_x + 0.02, 0.26), False),
+    ((left1_x - 0.02, 0.19, right1_x + 0.03, 0.3), True),
+    # liberal/military/marxist -> keynesian/self-sustainable
+    ((right2_x - 0.01, 0.185, right2_x, 0.185, right2_x, 0.135), False),
+    ((right2_x - 0.01, 0.135, right2_x, 0.135, right2_x, 0.09, right2_x - 0.01, 0.09), False),
+    ((right2_x, 0.175, left2_x - 0.01, 0.175), True),
+    ((right2_x, 0.09, left2_x - 0.01, 0.09), True),
+    # keynesian/self-sustainable -> implementation
+    ((left2_x, 0.16, left2_x, 0.125), True),
+    ((left2_x, 0.095, left2_x, 0.125), True),
+    ((left2_x, 0.125, left2_x + 0.01, 0.125), False),
+    # implementation -> state control
+    ((right3_x + 0.01, 0.125, left3_x - 0.02, 0.125), True),
+    # monetary -> employment
+    ((right4_x - 0.02, 0.09, left4_x - 0.03, 0.09), True)
+    
 ]
 
 industry_deact_lines = [
     # industry/mining/conquest
-    (0.09, 0.3, 0.09, 0.235),
+    (0.1, 0.34, 0.1, 0.275),
     # liberal/military/marxist
     (left1_x + 0.05, 0.17, left1_x + 0.05, 0.105),
     # keynesian/self-sustainable
     (left2_x - 0.01, 0.16, left2_x - 0.01, 0.095),
     # peacetime/wartime
-    (left4_x + 0.06, 0.6, left4_x + 0.06, 0.58)
+    (left4_x + 0.06, 0.7, left4_x + 0.06, 0.68)
 ]
 
 land_doct_lines = [

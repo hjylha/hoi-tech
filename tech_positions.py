@@ -487,106 +487,77 @@ tech_positions = {
     # war industry
     5200: (left0_x, 0.95),
     # mobilization
-    5210: (left0_x + 0.01, 0.9),
-    5220: (left0_x + 0.01, 0.865),
-    5230: (left0_x + 0.01, 0.83),
-    5240: (left0_x + 0.01, 0.795),
+    5210: (left0_x + 0.02, 0.915),
+    5220: (left0_x + 0.02, 0.88),
+    5230: (left0_x + 0.02, 0.845),
+    5240: (left0_x + 0.02, 0.81),
     # production planning
-    5250: (left0_x, 0.75),
+    5250: (left0_x, 0.76),
     # army planning
-    5260: (left0_x + 0.01, 0.7),
-    5270: (left0_x + 0.01, 0.665),
-    5280: (left0_x + 0.01, 0.63),
+    5260: (left0_x + 0.02, 0.725),
+    5270: (left0_x + 0.02, 0.69),
+    5280: (left0_x + 0.02, 0.655),
     # naval planning
-    5290: (left0_x + 0.01, 0.58),
-    5300: (left0_x + 0.01, 0.545),
-    5310: (left0_x + 0.01, 0.51),
+    5290: (left0_x + 0.02, 0.605),
+    5300: (left0_x + 0.02, 0.57),
+    5310: (left0_x + 0.02, 0.535),
     # air force planning
-    5320: (left0_x + 0.01, 0.46),
-    5330: (left0_x + 0.01, 0.425),
-    5340: (left0_x + 0.01, 0.39),
+    5320: (left0_x + 0.02, 0.485),
+    5330: (left0_x + 0.02, 0.45),
+    5340: (left0_x + 0.02, 0.415),
 
     # policy conquest
-    5680: (left0_x + 0.01, 0.3),
-    5690: (left0_x + 0.01, 0.25),
-    5700: (left0_x + 0.01, 0.2),
-
+    5680: (left0_x + 0.02, 0.34),
+    5690: (left0_x + 0.02, 0.29),
+    5700: (left0_x + 0.02, 0.24),
     # economic theory, taxes, public finance
-    5710: (left0_x, 0.15),
-    5720: (left0_x + 0.01, 0.1),
-    5730: (left0_x + 0.01, 0.065),
-
-    # industry
-    5010: (left1_x, 0.95),
-    5020: (left1_x, 0.9),
-    5030: (left1_x, 0.865),
-    # light industry
-    5040: (left1_x, 0.815),
-    5050: (left1_x, 0.78),
-    # average industry
-    5060: (left1_x, 0.73),
-    5070: (left1_x, 0.695),
-    # heavy industry
-    5080: (left1_x, 0.645),
-    5090: (left1_x, 0.61),
-    5100: (left1_x, 0.575),
-
-    # study centers
-    5440: (left1_x, 0.525),
-    5450: (left1_x, 0.49),
-
-    # circuits theory and vacuum tubes
-    5480: (left1_x, 0.4),
-    5490: (left1_x, 0.365),
-
-    # radio frequency
-    5590: (left1_x, 0.3),
-    5600: (left1_x, 0.265),
-    5610: (left1_x, 0.23),
-
+    5710: (left0_x + 0.02, 0.15),
+    5720: (left0_x + 0.01, 0.115),
+    5730: (left0_x, 0.08),
     # economy choices
     5740: (left1_x - 0.01, 0.17),
     5750: (left1_x - 0.01, 0.12),
     5760: (left1_x - 0.01, 0.07),
-
-    # boost mining
-    5350: (left2_x, 0.95),
-
-    # chemical industry
-    5110: (left2_x, 0.9),
-    5120: (left2_x, 0.865),
-    5130: (left2_x, 0.83),
-    5140: (left2_x, 0.795),
-
-    # special materials
-    5150: (left2_x, 0.73),
-    5160: (left2_x, 0.695),
-    5170: (left2_x, 0.66),
-
-    # new compounds
-    5180: (left2_x, 0.61),
-    5190: (left2_x, 0.575),
-
-    # laboratories
-    5460: (left2_x, 0.525),
-    5470: (left2_x, 0.49),
-
-    # electronics
-    5500: (left2_x, 0.42),
-    5510: (left2_x, 0.385),
-    5520: (left2_x, 0.35),
-
-    # radar
-    5620: (left2_x, 0.3),
-    5630: (left2_x, 0.265),
-    5640: (left2_x, 0.23),
-
     # keynesian/self-sustainable
     5770: (left2_x - 0.01, 0.16),
     5780: (left2_x - 0.01, 0.06),
     # implementation
     5790: (left2_x + 0.01, 0.11),
+    # state control, monetary system
+    5800: (left3_x - 0.02, 0.11),
+    5810: (left3_x - 0.01, 0.075),
+    # employment system, foreign trade
+    5820: (left4_x - 0.03, 0.075),
+    5830: (left4_x - 0.02, 0.04),
 
+    # industry
+    5010: (left1_x, 0.95),
+    5020: (left1_x, 0.9),
+    5030: (left1_x + 0.01, 0.865),
+    # light industry
+    5040: (left1_x, 0.815),
+    5050: (left1_x + 0.01, 0.78),
+    # average industry
+    5060: (left1_x, 0.73),
+    5070: (left1_x + 0.01, 0.695),
+    # heavy industry
+    5080: (left1_x, 0.645),
+    5090: (left1_x + 0.01, 0.61),
+    5100: (left1_x + 0.01, 0.575),
+    # chemical industry
+    5110: (left2_x - 0.01, 0.9),
+    5120: (left2_x, 0.865),
+    5130: (left2_x, 0.83),
+    5140: (left2_x, 0.795),
+    # special materials
+    5150: (left2_x - 0.01, 0.73),
+    5160: (left2_x, 0.695),
+    5170: (left2_x, 0.66),
+    # new compounds
+    5180: (left2_x, 0.61),
+    5190: (left2_x, 0.575),
+    # boost mining
+    5350: (left2_x + 0.01, 0.95),
     # mining and materials
     5360: (left3_x, 0.95),
     5370: (left3_x + 0.01, 0.915),
@@ -597,27 +568,45 @@ tech_positions = {
     5420: (left3_x, 0.695),
     5430: (left3_x + 0.01, 0.66),
 
+    # study centers
+    5440: (left1_x, 0.49),
+    # ind training inst
+    5450: (left2_x, 0.49),
+    # laboratories
+    5460: (left3_x, 0.49),
+    # investigation centers
+    5470: (left4_x, 0.49),
+
+    # circuits theory and vacuum tubes
+    5480: (left1_x, 0.42),
+    5490: (left1_x, 0.385),
+    # radio frequency
+    5590: (left1_x, 0.3),
+    5600: (left1_x, 0.265),
+    5610: (left1_x, 0.23),
+    # electronics
+    5500: (left2_x, 0.42),
+    5510: (left2_x, 0.385),
+    5520: (left2_x, 0.35),
+    # radar
+    5620: (left2_x, 0.3),
+    5630: (left2_x, 0.265),
+    5640: (left2_x, 0.23),
     # calculators
-    5530: (left3_x, 0.525),
-    5540: (left3_x, 0.49),
+    5530: (left3_x, 0.43),
+    5540: (left4_x, 0.43),
     # initial computers
-    5550: (left3_x, 0.42),
-    5560: (left3_x, 0.385),
+    5550: (left3_x, 0.385),
+    5560: (left4_x, 0.385),
     # basic computers
-    5570: (left3_x, 0.335),
-    5580: (left3_x, 0.3),
+    5570: (left3_x, 0.34),
+    5580: (left4_x, 0.34),
     # long range radar
     5650: (left3_x, 0.23),
 
-    # more economic stuff
-    5800: (left3_x, 0.18),
-    5810: (left3_x, 0.145),
-    5820: (left3_x, 0.11),
-    5830: (left3_x, 0.075),
-
     # wartime or peacetime
-    5660: (left4_x, 0.6),
-    5670: (left4_x, 0.55),
+    5660: (left4_x, 0.7),
+    5670: (left4_x, 0.65),
 
     # LAND DOCTRINES
     # bewegungskrieg
