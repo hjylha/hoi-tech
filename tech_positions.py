@@ -340,11 +340,11 @@ tech_positions = {
     3560: (left2_x, 0.155),
 
     # patrol boats
-    3760: (left3_x, 0.17),
-    3770: (left3_x + 0.01, 0.135),
-    3780: (left3_x + 0.02, 0.1),
-    3790: (left3_x + 0.03, 0.065),
-    3800: (left3_x + 0.04, 0.03),
+    3760: (left4_x, 0.45),
+    3770: (left4_x, 0.415),
+    3780: (left4_x, 0.38),
+    3790: (left4_x, 0.345),
+    3800: (left4_x, 0.31),
 
     # battlecruisers
     3630: (left3_x, 0.925),
@@ -356,8 +356,8 @@ tech_positions = {
     3690: (left3_x, 0.715),
 
     # pocket battleships
-    3700: (left3_x, 0.61),
-    3710: (left3_x, 0.575),
+    3700: (left3_x, 0.63),
+    3710: (left3_x, 0.595),
 
     # carrier air groups
     3570: (left3_x, 0.365),
