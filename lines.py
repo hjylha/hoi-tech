@@ -166,15 +166,54 @@ industry_lines = [
     ((left1_x, 0.95, left1_x, 0.935), False),
     ((left1_x, 0.9, left1_x, 0.85), True),
     ((left1_x, 0.815, left1_x, 0.765), True),
+    # average industry -> special materials
+    ((right2_x, 0.745, left2_x - 0.01, 0.745), True),
+    # consumer goods -> adv parts
+    ((right2_x + 0.01, 0.78, right2_x + 0.01, 0.73), True),
+    # special materials -> adv parts
+    ((left2_x - 0.01, 0.74, right2_x + 0.01, 0.715), True),
+    # adv parts -> heavy ind
+    ((left1_x + 0.07, 0.695, left1_x + 0.07, 0.665), True),
+    # thermo -> heavy ind
+    ((left2_x, 0.675, right2_x, 0.65), True),
     # basic industry -> chemical industry
-    ((right2_x, 0.95, left2_x, 0.93), True),
+    ((right2_x, 0.965, left2_x, 0.93), True),
     # chemical industry -> boost mining
     ((right3_x - 0.01, 0.92, right3_x + 0.01, 0.92), False),
     ((right3_x + 0.01, 0.92, right3_x + 0.01, 0.95), True),
+    # chemical industry -> special materials
+    ((left2_x - 0.01, 0.9, left2_x - 0.01, 0.765), True),
+    # boost mining -> energy, metal, rares, oil
+    ((right3_x + 0.01, 0.965, left3_x - 0.01, 0.965), True),
+    ((left3_x, 0.965, left3_x - 0.01, 0.965, left3_x - 0.01, 0.88), False),
+    ((left3_x, 0.88, left3_x - 0.01, 0.88, left3_x - 0.01, 0.795), False),
+    ((left3_x, 0.795, left3_x - 0.01, 0.795, left3_x- 0.01, 0.715, left3_x, 0.715), False),
+    # resources -> refined fuel
+    ((left3_x, 0.88, right3_x, 0.88), True),
+    # selective ind proc -> refined fuel
+    ((right2_x + 0.01, 0.88, left2_x, 0.88), True),
+    # oil -> thermo
+    ((left3_x, 0.71, right3_x, 0.675), True),
+    # special materials -> new compounds
+    ((left2_x - 0.01, 0.73, left2_x - 0.01, 0.63), True),
+    # imp synth -> processed fuel
+    ((right3_x, 0.72, right3_x + 0.01, 0.72), False),
+    ((right3_x + 0.01, 0.72, right3_x + 0.01, 0.845), True),
+    ((right3_x + 0.01, 0.845, right3_x, 0.845), False),
+    # high q -> light alloys
+    ((right2_x + 0.02, 0.575, left2_x, 0.575), True),
     # study centers -> ind training inst -> laboratories -> investigation centers
     ((right2_x, 0.505, left2_x, 0.505), True),
     ((right3_x, 0.505, left3_x, 0.505), True),
     ((right4_x, 0.505, left4_x, 0.505), True),
+    # ind training inst -> production planning
+    ((left2_x + 0.01, 0.525, left2_x + 0.01, 0.54), False),
+    ((left2_x + 0.01, 0.54, left1_x - 0.02, 0.54), True),
+    ((left1_x - 0.02, 0.54, left1_x - 0.02, 0.775, right1_x - 0.02, 0.775), False),
+    # labs -> new comp, imp synth
+    ((left3_x + 0.05, 0.525, left3_x + 0.05, 0.61), True),
+    ((left3_x + 0.05, 0.61, right3_x - 0.01, 0.61), False),
+    ((right3_x + 0.01, 0.61, right3_x + 0.01, 0.71, right3_x, 0.71), False),
     # adv vacuum tubes -> basic electronics
     ((right2_x, 0.41, left2_x, 0.43), True),
     # adv vacuum tubes -> rf
@@ -187,14 +226,35 @@ industry_lines = [
     ((right3_x, 0.44, left3_x, 0.44), True),
     # calculators -> tabulating
     ((right4_x, 0.45, left4_x, 0.45), True),
+    # average electr -> laboratories
+    # ((right3_x, 0.405, left3_x, 0.5), True),
+    ((left3_x - 0.015, 0.4, left3_x - 0.015, 0.5), False),
+    ((left3_x - 0.015, 0.5, left3_x, 0.5), False),
     # average electr -> initial computers
     ((right3_x, 0.4, left3_x, 0.4), True),
     # initial computers -> decoding/encoding
     ((right4_x, 0.4, left4_x, 0.4), True),
+    # tabulating -> initial comp
+    ((left4_x, 0.445, right4_x, 0.405), True),
     # adv electr -> basic computers
     ((right3_x, 0.36, left3_x, 0.36), True),
-    # basic computers -> complex calculators
-    ((right4_x, 0.36, left4_x, 0.36), True),
+    # basic computers -> complex calculator
+    ((right4_x, 0.355, left4_x, 0.355), True),
+    # basic computers -> investigation
+    # ((right4_x, 0.36, left4_x - 0.015, 0.36), True),
+    ((left4_x - 0.015, 0.355, left4_x - 0.015, 0.50), False),
+    ((left4_x - 0.015, 0.50, left4_x, 0.50), False),
+    # decoding/encodign -> basic comp
+    ((left4_x, 0.395, right4_x, 0.365), True),
+    # adv radar -> long range radar
+    ((right3_x, 0.245, left3_x + 0.05, 0.245), True),
+    # complex calculator -> long range radar
+    ((left4_x + 0.01, 0.34, right4_x + 0.05, 0.265), True),
+    # basic computers -> state control
+    ((left3_x + 0.03, 0.34, left3_x + 0.03, 0.2), True),
+    ((left3_x + 0.03, 0.2, left3_x + 0.03, 0.145), False),
+    # complex calculator -> foreign trade
+    ((left4_x + 0.11, 0.34, left4_x + 0.11, 0.07), True),
     # economic theory -> liberal/military/marxist
     ((right1_x + 0.02, 0.165, left1_x - 0.02, 0.165), True),
     ((left1_x - 0.01, 0.19, left1_x - 0.02, 0.19, left1_x - 0.02, 0.135), False),
@@ -227,7 +287,9 @@ industry_deact_lines = [
     # keynesian/self-sustainable
     (left2_x - 0.01, 0.16, left2_x - 0.01, 0.095),
     # peacetime/wartime
-    (left4_x + 0.06, 0.7, left4_x + 0.06, 0.68)
+    (left4_x + 0.06, 0.7, left4_x + 0.06, 0.68),
+    # energy, metal, rares, oil II
+    (right4_x + 0.02, 0.915, right4_x + 0.02, 0.69)
 ]
 
 land_doct_lines = [

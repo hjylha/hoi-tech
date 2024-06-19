@@ -528,45 +528,46 @@ tech_positions = {
     5810: (left3_x - 0.01, 0.075),
     # employment system, foreign trade
     5820: (left4_x - 0.03, 0.075),
-    5830: (left4_x - 0.02, 0.04),
+    5830: (left4_x - 0.01, 0.04),
 
-    # industry
+    # basic industry, imp ind, selective
     5010: (left1_x, 0.95),
     5020: (left1_x, 0.9),
     5030: (left1_x + 0.01, 0.865),
-    # light industry
+    # light industry, consumer
     5040: (left1_x, 0.815),
     5050: (left1_x + 0.01, 0.78),
-    # average industry
+    # average industry, adv parts
     5060: (left1_x, 0.73),
     5070: (left1_x + 0.01, 0.695),
-    # heavy industry
-    5080: (left1_x, 0.645),
-    5090: (left1_x + 0.01, 0.61),
-    5100: (left1_x + 0.01, 0.575),
+    # heavy industry, mass prod, high q
+    5080: (left1_x, 0.63),
+    5090: (left1_x + 0.01, 0.595),
+    5100: (left1_x + 0.02, 0.56),
     # chemical industry
     5110: (left2_x - 0.01, 0.9),
+    # refined fuel, processed, post-ref
     5120: (left2_x, 0.865),
     5130: (left2_x, 0.83),
     5140: (left2_x, 0.795),
-    # special materials
+    # special materials, imp synth, thermo
     5150: (left2_x - 0.01, 0.73),
     5160: (left2_x, 0.695),
     5170: (left2_x, 0.66),
-    # new compounds
-    5180: (left2_x, 0.61),
-    5190: (left2_x, 0.575),
+    # new compounds, light alloys
+    5180: (left2_x - 0.01, 0.595),
+    5190: (left2_x, 0.56),
     # boost mining
     5350: (left2_x + 0.01, 0.95),
     # mining and materials
     5360: (left3_x, 0.95),
-    5370: (left3_x + 0.01, 0.915),
+    5370: (left3_x + 0.02, 0.915),
     5380: (left3_x, 0.865),
-    5390: (left3_x + 0.01, 0.83),
+    5390: (left3_x + 0.02, 0.83),
     5400: (left3_x, 0.78),
-    5410: (left3_x + 0.01, 0.745),
+    5410: (left3_x + 0.02, 0.745),
     5420: (left3_x, 0.695),
-    5430: (left3_x + 0.01, 0.66),
+    5430: (left3_x + 0.02, 0.66),
 
     # study centers
     5440: (left1_x, 0.49),
@@ -577,7 +578,7 @@ tech_positions = {
     # investigation centers
     5470: (left4_x, 0.49),
 
-    # circuits theory and vacuum tubes
+    # circuits theory, vacuum tubes
     5480: (left1_x, 0.42),
     5490: (left1_x, 0.385),
     # radio frequency
@@ -592,17 +593,17 @@ tech_positions = {
     5620: (left2_x, 0.3),
     5630: (left2_x, 0.265),
     5640: (left2_x, 0.23),
-    # calculators
+    # calculators, tabulating
     5530: (left3_x, 0.43),
     5540: (left4_x, 0.43),
-    # initial computers
+    # initial computers, decoding/encoding
     5550: (left3_x, 0.385),
     5560: (left4_x, 0.385),
-    # basic computers
+    # basic computers, complex calc
     5570: (left3_x, 0.34),
     5580: (left4_x, 0.34),
     # long range radar
-    5650: (left3_x, 0.23),
+    5650: (left3_x + 0.05, 0.23),
 
     # wartime or peacetime
     5660: (left4_x, 0.7),
