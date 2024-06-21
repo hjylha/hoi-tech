@@ -117,7 +117,16 @@ naval_lines = [
     ((left1_x, 0.8, right1_x, 0.73), True),
     # guns -> ca
     ((right2_x, 0.94, left2_x, 0.94), True),
-    ((right2_x, 0.905, left2_x, 0.905), True)
+    ((right2_x, 0.905, left2_x, 0.905), True),
+    # 203mm gun -> early bc
+    ((left2_x - 0.02, 0.905, left2_x - 0.02, 0.975, left3_x + 0.05, 0.975, left3_x + 0.05, 0.96), False),
+    # 10000t ca -> pocket bb
+    ((right3_x, 0.87, right3_x + 0.03, 0.87), True),
+    ((right3_x + 0.03, 0.87, right3_x + 0.03, 0.65, left3_x, 0.65), False),
+    # 6000t cl -> exper cve
+    ((right3_x, 0.575, left3_x, 0.575), True),
+    ((left3_x, 0.575, left4_x - 0.02, 0.575), False),
+    ((left4_x - 0.02, 0.575, left4_x - 0.02, 0.935, left4_x, 0.935), False)
 
 ]
 
@@ -222,6 +231,9 @@ industry_lines = [
     ((right2_x, 0.315, left2_x, 0.315), True),
     ((right2_x, 0.28, left2_x, 0.28), True),
     ((right2_x, 0.245, left2_x, 0.245), True),
+    # high q -> adv electr
+    ((right2_x + 0.02, 0.56, right2_x + 0.02, 0.37), True),
+    ((right2_x + 0.02, 0.37, left2_x, 0.37), False),
     # basic electr -> calculators
     ((right3_x, 0.44, left3_x, 0.44), True),
     # calculators -> tabulating
