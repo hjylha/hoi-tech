@@ -62,6 +62,17 @@ infantry_deact_lines = [
 ]
 
 armor_lines = [
+    # guns -> tanks
+    # 20/47 -> light protos
+    ((left1_x, 0.77, left1_x - 0.04, 0.77), True),
+    ((left1_x - 0.04, 0.77, left1_x - 0.04, 0.965, right1_x, 0.965), False),
+    # 47/88 -> 47mm medium
+    ((left1_x, 0.725, right1_x, 0.725), True),
+    # 88/380 -> 105 heavy
+    ((left1_x, 0.665, left1_x - 0.04, 0.665), True),
+    ((left1_x - 0.04, 0.665, left1_x - 0.04, 0.53, right1_x, 0.53), False),
+    # 20/47 -> heavy aa
+    ((right2_x, 0.77, left2_x, 0.77), True),
     # at guns -> tds
     ((left3_x, 0.965, right3_x, 0.965), True),
     ((left3_x, 0.93, right3_x, 0.93), True),
@@ -85,12 +96,18 @@ armor_lines = [
     ((right1_x + 0.03, 0.145, left1_x, 0.165), True),
     ((right1_x + 0.03, 0.11, left1_x, 0.11), True),
     ((right1_x + 0.03, 0.075, left1_x, 0.065), True),
+    # arm car -> special vehicles
+    ((left3_x, 0.35, left3_x, 0.305), True),
+    # basic arm car -> heavy transport
+    ((right4_x + 0.013, 0.315, right4_x + 0.013, 0.27), True),
     # welded armor -> heavy/light armor
     ((left2_x, 0.15, left2_x, 0.12), True),
     ((left2_x + 0.01, 0.12, left2_x, 0.12, left2_x, 0.07, left2_x + 0.01, 0.07), False),
     # light/heavy -> light sloped armor
     ((right3_x + 0.01, 0.12, right3_x + 0.02, 0.12, right3_x + 0.02, 0.07, right3_x + 0.01, 0.07), False),
-    ((right3_x + 0.02, 0.095, left3_x, 0.165), True)
+    ((right3_x + 0.02, 0.095, left3_x, 0.165), True),
+    # chains -> advanced
+    ((left4_x + 0.142, 0.525, left4_x + 0.142, 0.455), True)
 ]
 
 armor_deact_lines = [
