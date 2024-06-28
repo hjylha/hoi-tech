@@ -894,6 +894,10 @@ class MainScreen(BoxLayout):
 class StatusBar(BoxLayout):
     save_file = "save.data"
 
+    def update_fastest_teams(self):
+        if self.parent.current_tech is not None:
+            self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+
     def save_country_difficulty_and_year(self):
         with open(self.save_file, "w") as f:
             country_line = f"country={','.join(self.country_buttons.keys())}"
@@ -923,6 +927,7 @@ class StatusBar(BoxLayout):
         
         # print(f"{self.parent=}")
         self.parent.add_country(country_code)
+        self.update_fastest_teams()
         self.save_country_difficulty_and_year()
 
         num_of_countries = len(self.country_buttons)
@@ -950,6 +955,7 @@ class StatusBar(BoxLayout):
             self.active_countries_dropdown.remove_widget(self.country_buttons[country_code])
         del self.country_buttons[country_code]
         self.parent.remove_country(country_code)
+        self.update_fastest_teams()
         self.save_country_difficulty_and_year()
 
         if not self.country_buttons:
@@ -977,6 +983,7 @@ class StatusBar(BoxLayout):
         self.country_buttons = dict()
         self.active_countries_dropdown.clear_widgets()
         self.show_no_country_selected()
+        self.update_fastest_teams()
         self.save_country_difficulty_and_year()
 
     def reload_countries(self, widget):
@@ -1019,8 +1026,9 @@ class StatusBar(BoxLayout):
         # setattr(self.difficulty_button, "text", value)
         self.difficulty_button.text = value
         self.parent.research.difficulty = DIFFICULTY_DICT[value]
-        if self.parent.current_tech is not None:
-            self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+        # if self.parent.current_tech is not None:
+        #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+        self.update_fastest_teams()
         self.save_country_difficulty_and_year()
 
     def select_year(self, widget, value):
@@ -1028,9 +1036,9 @@ class StatusBar(BoxLayout):
         try:
             self.parent.change_year(int(value))
             self.year_input.text = value
-            if self.parent.current_tech is not None:
-                self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
-
+            # if self.parent.current_tech is not None:
+            #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+            self.update_fastest_teams()
             self.save_country_difficulty_and_year()
         except ValueError:
             self.year_input.text = str(self.parent.research.year)
@@ -1039,8 +1047,9 @@ class StatusBar(BoxLayout):
         try:
             self.parent.research.num_of_rocket_sites = int(value)
             self.rocket_site_button.text = value
-            if self.parent.current_tech is not None:
-                self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+            # if self.parent.current_tech is not None:
+            #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+            self.update_fastest_teams()
         except ValueError as e:
             print(f"Bad number of rocket sites: {value}")
             raise e
@@ -1110,8 +1119,9 @@ class StatusBar(BoxLayout):
         if text in self.years:
             self.year_selection_dropdown.dismiss()
             self.parent.research.change_year(int(text))
-            if self.parent.current_tech is not None:
-                self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+            # if self.parent.current_tech is not None:
+            #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+            self.update_fastest_teams()
             self.save_country_difficulty_and_year()
     
     def validate_research_speed(self, widget, text):
@@ -1123,6 +1133,7 @@ class StatusBar(BoxLayout):
         try:
             new_research_speed = float(text)
             self.parent.research.research_speed = new_research_speed
+            self.update_fastest_teams()
         except ValueError:
             widget.text = str(previous_research_speed)
 
