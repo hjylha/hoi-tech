@@ -92,14 +92,23 @@ def update_layout(widget, value):
 
 
 class CountryButton(BoxLayout):
-    def __init__(self, country_code, **kwargs):
+    def __init__(self, country_code, bg_color, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "horizontal"
 
+        # country_label_box = BoxLayout(size_hint=(0.8, 1))
         self.country_label = Label(text=country_code, size_hint=(0.8, 1))
+        self.country_label = Label(text=country_code)
         self.remove_button = Button(text="X", size_hint=(0.2, 1))
 
+        with self.country_label.canvas.before:
+            Color(*bg_color)
+            self.country_label.rect = Rectangle(size=self.country_label.size, pos=self.country_label.pos)
+        self.country_label.bind(pos=update_layout, size=update_layout)
+
+        # country_label_box.add_widget(self.country_label)
         self.add_widget(self.country_label)
+        # self.add_widget(country_label_box)
         self.add_widget(self.remove_button)
 
 
@@ -403,7 +412,7 @@ class ResearchButtonsPanel(GridLayout):
 
 
 class MainTechScreen(FloatLayout):
-    LINE_COLOR = (0.7, 0.7, 0.7, 1)
+    LINE_COLOR = (0.7, 0.7, 0.7, 0.8)
     DEACT_LINE_COLOR = (0.8, 0.1, 0.1, 0.9)
 
     def select_technology(self, widget):
@@ -417,9 +426,9 @@ class MainTechScreen(FloatLayout):
             self.lines = []
             for point_tuple, draw_arrow in line_points:
                 scaled_points = scale_arrows(self.size, self.pos, point_tuple)
-                self.lines.append(Line(points=scaled_points, width=1))
+                self.lines.append(Line(points=scaled_points, width=2))
                 if draw_arrow:
-                    self.lines.append(Line(points=get_arrow_points(*scaled_points), width=1.5))
+                    self.lines.append(Line(points=get_arrow_points(*scaled_points), width=2))
             Color(*self.DEACT_LINE_COLOR)
             self.deact_lines = []
             for point_tuple in deact_line_points:
@@ -864,27 +873,88 @@ class StatusBar(BoxLayout):
             difficulty_line = f"difficulty={self.difficulty_button.text}"
             year_line = f"year={self.parent.research.year}"
             f.write(f"{country_line}\n{difficulty_line}\n{year_line}")
+    
+    def show_no_country_selected(self):
+        self.countries_selected.clear_widgets()
+        self.countries_selected.add_widget(Label(text="No country selected"))
+    
+    def add_only_primary_country(self):
+        primary_country = self.parent.research.primary_country
+        self.countries_selected.clear_widgets()
+        self.country_buttons[primary_country].size_hint_y = 1
+        self.country_buttons[primary_country].size_hint_x = 0.5
+        self.countries_selected.add_widget(self.country_buttons[primary_country])
+        self.countries_selected.add_widget(self.reload_countries_button)
 
     def add_country(self, country_code):
         if country_code in self.country_buttons.keys():
             return
-        self.country_buttons[country_code] = CountryButton(country_code)
-        self.countries_selected.add_widget(self.country_buttons[country_code])
+        # we need a scrollview
+        # self.country_buttons[country_code] = CountryButton(country_code, size_hint=(None, 1), width=dp(100))
+        self.country_buttons[country_code] = CountryButton(country_code, self.bg_color)
         self.country_buttons[country_code].remove_button.bind(on_release=lambda *args: self.remove_country(country_code))
+        
         # print(f"{self.parent=}")
         self.parent.add_country(country_code)
         self.save_country_difficulty_and_year()
+
+        num_of_countries = len(self.country_buttons)
+        btn_text = "Reload countries" if num_of_countries > 1 else "Reload country"
+        self.reload_countries_button.text = btn_text
+
+        if num_of_countries == 1:
+            self.add_only_primary_country()
+            return
+        self.active_countries_button.text = f"{self.parent.research.primary_country} +{num_of_countries - 1}"
+        if num_of_countries == 2:
+            self.countries_selected.clear_widgets()
+            self.countries_selected.add_widget(self.active_countries_button)
+            self.countries_selected.add_widget(self.reload_countries_button)
+            self.countries_selected.add_widget(self.clear_countries_button)
+            
     
     def remove_country(self, country_code):
-        self.countries_selected.remove_widget(self.country_buttons[country_code])
+        num_of_countries = len(self.country_buttons)
+        if not num_of_countries:
+            return
+        if num_of_countries == 1:
+            self.countries_selected.remove_widget(self.country_buttons[country_code])
+        elif num_of_countries > 1:
+            self.active_countries_dropdown.remove_widget(self.country_buttons[country_code])
         del self.country_buttons[country_code]
         self.parent.remove_country(country_code)
         self.save_country_difficulty_and_year()
-    
+
+        if not self.country_buttons:
+            if self.active_countries_dropdown.parent is not None:
+                self.active_countries_dropdown.dismiss()
+            self.show_no_country_selected()
+            return
+        
+        num_of_countries = len(self.country_buttons)
+        btn_text = "Reload countries" if num_of_countries > 1 else "Reload country"
+        self.reload_countries_button.text = btn_text
+        primary_country = self.parent.research.primary_country
+        if num_of_countries == 1:
+            if self.active_countries_dropdown.parent is not None:
+                self.active_countries_dropdown.clear_widgets()
+                self.active_countries_dropdown.dismiss()
+            self.add_only_primary_country()
+            return
+        self.active_countries_button.text = f"{primary_country} +{num_of_countries - 1}"
+        
+
+    def clear_countries(self):
+        for country_code in self.country_buttons.keys():
+            self.parent.remove_country(country_code)
+        self.country_buttons = dict()
+        self.active_countries_dropdown.clear_widgets()
+        self.show_no_country_selected()
+        self.save_country_difficulty_and_year()
+
     def reload_countries(self, widget):
         country_codes = list(self.country_buttons.keys())
-        for country_code in country_codes:
-            self.remove_country(country_code)
+        self.clear_countries()
         for country_code in country_codes:
             self.add_country(country_code)
 
@@ -906,7 +976,8 @@ class StatusBar(BoxLayout):
                     year = line.split("=")[1].strip()
         if country_codes:
             for country_code in country_codes:
-                self.add_country(country_code)
+                if country_code:
+                    self.add_country(country_code)
         if difficulty:
             self.difficulty_button.text = difficulty
             self.parent.research.difficulty = DIFFICULTY_DICT[difficulty]
@@ -954,6 +1025,21 @@ class StatusBar(BoxLayout):
         else:
             print(f"Values are not locked by checkbox {checkbox} (THIS DOES NOTHING)")
     
+    def on_active_countries_button_release(self, widget):
+        if self.active_countries_dropdown.parent is not None:
+            print("dismissing country dropdown")
+            self.active_countries_dropdown.dismiss()
+            return
+        # print("should open something")
+        self.active_countries_dropdown.clear_widgets()
+        for country_code, country_btn in self.country_buttons.items():
+            country_btn.size_hint = (1, None)
+            country_btn.height = dp(25)
+            self.active_countries_dropdown.add_widget(country_btn)
+        self.active_countries_dropdown.open(widget)
+
+    def on_clear_countries_button_release(self, widget):
+        self.clear_countries()
 
     def select_country(self, widget, value):
         if value:
@@ -1013,14 +1099,16 @@ class StatusBar(BoxLayout):
         except ValueError:
             widget.text = str(previous_research_speed)
 
-    def __init__(self, **kwargs):
+    def __init__(self, bg_color=(0, 0, 0, 0), **kwargs):
         super().__init__(**kwargs)
+
+        self.bg_color = bg_color
 
         self.country_names = get_country_names()
         self.years = [str(year) for year in range(1933, 1953)]
 
         # country selection
-        self.add_widget(Label(text="Country/Countries", size_hint=(0.12, 1)))
+        self.add_widget(Label(text="Country/Countries", size_hint=(0.08, 1)))
         self.country_selection_dropdown = DropDown()
         self.country_input = TextInput(size_hint=(0.13, 1), multiline=False, write_tab=False)
         self.add_widget(self.country_input)
@@ -1030,17 +1118,34 @@ class StatusBar(BoxLayout):
         self.country_selection_dropdown.bind(on_select=self.make_country_selection)
         self.country_input.bind(text=self.suggest_country_names)
 
+        # self.primary_country = None
+
         # self.country_selected_text = Label(text="", size_hint=(0.1, 1))
-        self.countries_selected = BoxLayout(orientation="horizontal", size_hint=(0.1, 1))
+        self.active_countries_dropdown = DropDown()
+        # this should do nothing
+        self.active_countries_dropdown.bind(on_select=test_printer)
+        # country_selection_box = BoxLayout(size_hint=(0.15, 1))
+        # country_selection_scrollview = ScrollView(size_hint=(None, 1), do_scroll_x=True, do_scroll_y=False)
+        # self.countries_selected = BoxLayout(orientation="horizontal", size_hint=(None, 1))
+        self.countries_selected = BoxLayout(orientation="horizontal", size_hint=(0.15, 1))
         self.country_buttons = dict()
+        # self.active_countries_button = Button(text="", on_release=self.on_active_countries_button_release, size_hint=(0.3, 1))
+        self.active_countries_button = Button(text="", on_release=self.on_active_countries_button_release, size_hint=(0.3, 1))
+        self.clear_countries_button = Button(text="Clear", on_release=self.on_clear_countries_button_release, size_hint=(0.2, 1))
+        self.reload_countries_button = Button(text="", on_release=self.reload_countries, size_hint=(0.5, 1))
+        # self.countries_selected.bind(minimum_width=self.countries_selected.setter("width"))
+        # country_selection_scrollview.add_widget(self.countries_selected)
+        # country_selection_box.add_widget(country_selection_scrollview)
+        # self.add_widget(country_selection_box)
         self.add_widget(self.countries_selected)
 
-        self.add_widget(Label(text="", size_hint=(0.05, 1)))
+        # self.add_widget(Label(text="", size_hint=(0.01, 1)))
 
-        btn_text = "Reload countries" if len(self.country_buttons) > 1 else "Reload country"
-        self.add_widget(Button(text=btn_text, on_release=self.reload_countries, size_hint=(0.1, 1)))
+        
 
-        self.add_widget(Label(text="", size_hint=(0.05, 1)))
+        self.add_widget(Label(text="", size_hint=(0.02, 1)))
+        self.extra_bonus_button = Button(text="Ministers & Culture", size_hint=(0.1, 1))
+        self.add_widget(self.extra_bonus_button)
 
         # difficulty selection
         self.difficulty_suggestions = list(DIFFICULTY_DICT.keys())
@@ -1051,7 +1156,7 @@ class StatusBar(BoxLayout):
             btn.bind(on_release=lambda b: self.difficulty_dropdown.select(b.text))
             self.difficulty_dropdown.add_widget(btn)
 
-        self.add_widget(Label(text="Difficulty", size_hint=(0.05, 1)))
+        self.add_widget(Label(text="Difficulty", size_hint=(0.04, 1)))
         self.difficulty_button = Button(text="Easy", size_hint=(0.05, 1))
         self.difficulty_button.bind(on_release=self.difficulty_dropdown.open)
         # self.difficulty_dropdown.bind(on_select=lambda instance, value: setattr(self.difficulty_button, "text", value))
@@ -1060,7 +1165,7 @@ class StatusBar(BoxLayout):
         self.add_widget(self.difficulty_button)
 
         # year selection
-        self.add_widget(Label(text="Year", size_hint=(0.05, 1)))
+        self.add_widget(Label(text="Year", size_hint=(0.04, 1)))
         self.year_selection_dropdown = DropDown()
         for year in self.years:
             # label = Label(text=str(year), size_hint=(1, None), height=dp(20))
@@ -1068,7 +1173,7 @@ class StatusBar(BoxLayout):
             label.bind(focus=lambda w, v: self.year_selection_dropdown.select(w.text))
             # label.bind(focus=test_printer)
             self.year_selection_dropdown.add_widget(label)
-        self.year_input = TextInput(text="this should not be visible", size_hint=(0.05, 1), multiline=False, write_tab=False)
+        self.year_input = TextInput(text="this should not be visible", size_hint=(0.04, 1), multiline=False, write_tab=False)
         # self.year_input.bind(text=lambda w, v: self.year_selection_dropdown.open(w))
         self.year_input.bind(focus=self.open_year_selection_dropdown)
         self.year_input.bind(text=self.validate_year)
@@ -1076,8 +1181,8 @@ class StatusBar(BoxLayout):
         self.add_widget(self.year_input)
 
         # research speed selection
-        self.add_widget(Label(text="Research Speed", size_hint=(0.1, 1)))
-        self.research_speed_input = TextInput(size_hint=(0.05, 1), multiline=False, write_tab=False)
+        self.add_widget(Label(text="Research Speed", size_hint=(0.08, 1)))
+        self.research_speed_input = TextInput(size_hint=(0.04, 1), multiline=False, write_tab=False)
         self.add_widget(self.research_speed_input)
         self.research_speed_input.bind(text=self.validate_research_speed)
 
@@ -1103,7 +1208,7 @@ class StatusBar(BoxLayout):
 
 
 class MainFullScreen(BoxLayout):
-    statusbar_BACKGROUND_COLOR = (0, 0.3, 0.1, 0.7)
+    statusbar_BACKGROUND_COLOR = (0, 0.3, 0.1, 0.9)
 
     def update_statusbar(self):
         self.statusbar.research_speed_input.text = str(self.research.research_speed)
@@ -1146,7 +1251,7 @@ class MainFullScreen(BoxLayout):
         self.current_tech = None
 
         self.mainscreen = MainScreen(orientation="horizontal", size_hint=(1, 0.96))
-        self.statusbar = StatusBar(orientation="horizontal", size_hint=(1, 0.04))
+        self.statusbar = StatusBar(orientation="horizontal", size_hint=(1, 0.04), bg_color=self.statusbar_BACKGROUND_COLOR)
 
         self.statusbar.year_input.text = str(self.research.year)
         self.statusbar.research_speed_input.text = str(self.research.research_speed)
