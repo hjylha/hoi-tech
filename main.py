@@ -151,6 +151,22 @@ class TechnologyButton(BoxLayout):
     
     def deactivate(self):
         self.technology.background_color = self.DEACTIVATE_COLOR
+    
+    def update_status(self, research_object):
+        if self.tech_id in research_object.blueprints:
+            self.add_blueprint()
+        else:
+            self.remove_blueprint()
+        if self.tech_id in research_object.completed_techs:
+            self.complete()
+            return
+        if self.tech_id in research_object.active_techs:
+            self.activate()
+            return
+        if self.tech_id in research_object.deactivated_techs:
+            self.deactivate()
+            return
+        self.reset_color()
 
     def __init__(self, tech_short_name, tech_id, has_blueprint=False, **kwargs):
         super().__init__(**kwargs)
@@ -646,19 +662,7 @@ class MainTechScreen_BoxLayout(BoxLayout):
     
     def update_technology_buttons(self, research_object):
         for tech_id, tech_button in self.technologies.items():
-            if tech_id in research_object.blueprints:
-                tech_button.add_blueprint()
-            if tech_id in research_object.completed_techs:
-                tech_button.complete()
-                continue
-            if tech_id in research_object.active_techs:
-                tech_button.activate()
-                continue
-            if tech_id in research_object.deactivated_techs:
-                tech_button.deactivate()
-                continue
-            tech_button.reset_color()
-
+            tech_button.update_status(research_object)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
