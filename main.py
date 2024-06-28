@@ -353,17 +353,40 @@ class TechInfoPanel(BoxLayout):
 
 class RequirementPanel(BoxLayout):
     # requirement_header = 
+    def select_technology(self, widget):
+        self.parent.parent.parent.select_technology_by_id(widget.parent.tech_id)
+
+    def create_tech_button(self, tech_id, research_object, optional=False):
+        tech_btn = TechnologyButton(research_object.techs[tech_id].short_name, tech_id)
+        tech_btn.update_status(research_object)
+        tech_btn.size_hint = (0.8, None)
+        tech_btn.pos_hint = {"center_x": 0.5}
+        tech_btn.height = dp(25)
+        tech_btn.technology.bind(on_release=self.select_technology)
+        if optional:
+            tech_btn.technology.text = f"*{tech_btn.technology.text}"
+        return tech_btn
+
     def show_reqs_and_deacts(self, requirements, deactivations):
         self.clear_widgets()
+        research = self.parent.parent.parent.research
         if requirements:
-            self.add_widget(Label(text="Requirements:", size_hint=(1, None), height=dp(20), color=(1, 1, 0, 1)))
+            self.add_widget(Label(text="Requirements:", size_hint=(1, None), height=dp(25), color=(1, 1, 0, 1)))
             for requirement in requirements:
-                self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(20)))
+                # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
+                tech_id = int(requirement.split(" ")[0].strip("*"))
+                tech_btn = self.create_tech_button(tech_id, research, "*" == requirement[0])
+                
+                self.add_widget(tech_btn)
 
         if deactivations:
-            self.add_widget(Label(text="Deactivates:", size_hint=(1, None), height=dp(20), color=(1, 0, 0, 1)))
+            self.add_widget(Label(text="Deactivates:", size_hint=(1, None), height=dp(25), color=(1, 0, 0, 1)))
             for deactivation in deactivations:
-                self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(20)))
+                # self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(25)))
+                tech_id = int(deactivation.split(" ")[0].strip("*"))
+                tech_btn = self.create_tech_button(tech_id, research, "*" == deactivation[0])
+                
+                self.add_widget(tech_btn)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
