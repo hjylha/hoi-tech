@@ -81,6 +81,24 @@ def suggest_countries(input_text, country_names, max_num_of_suggestions):
     return suggestions[:max_num_of_suggestions]
 
 
+def suggest_tech_teams(input_text, tech_teams, max_num_of_suggestions):
+    matches = []
+    starts = []
+    others = []
+    search_text = input_text.lower()
+    for team in tech_teams:
+        name = team.name.lower()
+        if search_text == name:
+            matches.append(team.name)
+        elif name.startswith(search_text):
+            starts.append(team.name)
+        elif search_text in name and len(others) < max_num_of_suggestions:
+            others.append(team.name)
+
+    suggestions = matches + starts + others
+    return suggestions[:max_num_of_suggestions]
+
+
 def test_printer(*args):
     for arg in args:
         print(f"{arg=}")
@@ -207,9 +225,97 @@ class TechnologyButton(BoxLayout):
 
 
 class UpperTeamScreen(BoxLayout):
+
+    def update_research_time(self, time_to_complete_tech = "?"):
+        self.research_time_label.text = f"Finishes tech in {time_to_complete_tech} days"
+
+    def show_default_texts(self):
+        self.name_label.text = "Name: ?"
+        self.nation_and_id_label.text = "Nation: ?  ID: ?"
+        self.skill_label.text = "Skill: ?"
+        self.years_label.text = "Years active: ? - ?"
+        for speciality_label in self.speciality_labels:
+            speciality_label.text = ""
+        # self.research_time_label.text = "Finishes tech in ? days"
+        self.update_research_time()
+    
+    def show_team_info(self, team, time_to_complete_tech="?"):
+        if team is None:
+            self.show_default_texts()
+            return
+        self.name_label.text = team.name
+        self.nation_and_id_label.text = f"{team.nation}  {team.team_id}"
+        self.skill_label.text = f"Skill: {team.skill}"
+        self.years_label.text = f"Years active: {team.start_year} - {team.end_year}"
+        for speciality_label, speciality in zip(self.speciality_labels, team.specialities):
+            speciality_label.text = component_types[speciality]
+        # self.research_time_label.text = f"Finishes tech in {time_to_complete_tech} days"
+        self.update_research_time(time_to_complete_tech)
+
+    def select_team(self, widget, value):
+        if value:
+            self.team_selection_dropdown.select(widget.text)
+
+    def suggest_team_names(self, widget, text):
+        if not self.team_input.focus:
+            return
+        self.team_selection_dropdown.clear_widgets()
+
+        list_of_teams = self.parent.parent.parent.research.teams
+        suggestions = suggest_tech_teams(text, list_of_teams, self.max_num_of_team_suggestions)
+        for i, suggestion in enumerate(suggestions):
+            suggestion_thingy = TextInput(text=suggestion, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(25))
+            suggestion_thingy.bind(focus=self.select_team)
+            self.team_selection_dropdown.add_widget(suggestion_thingy)
+        
+        if self.team_selection_dropdown.parent is None and self.team_input.get_parent_window() is not None:
+            self.team_selection_dropdown.open(self.team_input)
+
+    def make_team_selection(self, widget, text):
+        self.team_input.text = ""
+        # team_name = text
+        research = self.parent.parent.parent.research
+        tech_team = research.get_team_by_name(text)
+        time_to_complete = None
+        if (tech := self.parent.parent.parent.current_tech) is not None:
+            time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
+        self.show_team_info(tech_team, time_to_complete)
+        self.parent.parent.parent.current_team = tech_team
+
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(Label(text="UpperTeamScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="UpperTeamScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
+        self.max_num_of_team_suggestions = 10
+        self.team_selection_dropdown = DropDown()
+        self.team_input = TextInput(text="", multiline=False, write_tab=False, size_hint=(1, 0.1))
+        self.team_selection_dropdown.bind(on_select=self.make_team_selection)
+        self.team_input.bind(text=self.suggest_team_names)
+        self.add_widget(self.team_input)
+
+        self.name_label = Label(text="name goes here", size_hint=(1, 0.1))
+        self.add_widget(self.name_label)
+
+        self.nation_and_id_label = Label(text="nation and id go here", size_hint=(1, 0.1))
+        self.add_widget(self.nation_and_id_label)
+
+        self.skill_label = Label(text="Skill: ?", size_hint=(1, 0.1))
+        self.add_widget(self.skill_label)
+
+        self.years_label = Label(text="Years active: ? - ?", size_hint=(1, 0.1))
+        self.add_widget(self.years_label)
+
+        specialities_header_label = Label(text="Specialities:", size_hint=(1, 0.1))
+        self.add_widget(specialities_header_label)
+
+        self.speciality_labels = [Label(text="", size_hint=(1, 0.1)) for _ in range(5)]
+        for speciality in self.speciality_labels:
+            self.add_widget(speciality)
+        
+        self.research_time_label = Label(text="Finishes tech in ? days", size_hint=(1, 0.1))
+        self.add_widget(self.research_time_label)
+        
 
 
 # class TeamComparisonTable(GridLayout):
@@ -800,6 +906,11 @@ class TechScreen(BoxLayout):
         # sorted_teams = self.parent.parent.research.sort_teams_for_researching_tech(tech)
         # self.parent.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
 
+        # update team info
+        if (team := self.parent.parent.current_team) is not None:
+            time_to_complete = self.research.calculate_how_many_days_to_complete(team, tech)
+            self.parent.teamscreen.upperteamscreen.update_research_time(time_to_complete)
+
         # update infopanels
         requirements = self.research.list_requirements(tech)
         deactivations = self.research.list_deactivations(tech)
@@ -1287,6 +1398,7 @@ class MainFullScreen(BoxLayout):
         self.research = the_research
 
         self.current_tech = None
+        self.current_team = None
 
         self.mainscreen = MainScreen(orientation="horizontal", size_hint=(1, 0.96))
         self.statusbar = StatusBar(orientation="horizontal", size_hint=(1, 0.04), bg_color=self.statusbar_BACKGROUND_COLOR)
