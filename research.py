@@ -180,6 +180,12 @@ class Research:
         for tech in self.techs.values():
             if tech.short_name == short_name and tech.category == category:
                 return tech
+    
+    # this might not work
+    def get_team_by_name(self, team_name):
+        for team in self.teams:
+            if team.name == team_name:
+                return team
             
     def list_requirements(self, tech):
         reqs = []
@@ -363,6 +369,10 @@ class Research:
         # just in case
         self.research_speed = round(self.research_speed, 1)
         self.update_active_techs()
+
+    def calculate_how_many_days_to_complete(self, team, tech):
+        has_blueprint = int(tech.tech_id in self.blueprints)
+        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
     
     def sort_teams_for_researching_tech(self, tech):
         # check blueprint
@@ -370,7 +380,8 @@ class Research:
 
         team_results = []
         for team in self.teams:
-            days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
+            # days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
+            days = self.calculate_how_many_days_to_complete(team, tech)
             team_results.append([team, days])
         return sorted(team_results, key=lambda x: x[1])
     
