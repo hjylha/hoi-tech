@@ -187,6 +187,93 @@ class Research:
             if team.name == team_name and team.nation == country_code:
                 return team
             
+    def save_status_to_file(self, path):
+        lines = []
+        country_line = f"country={','.join(self.countries)}"
+        lines.append(country_line)
+        difficulty_line = f"difficulty={self.difficulty}"
+        lines.append(difficulty_line)
+        year_line = f"year={self.year}"
+        lines.append(year_line)
+        research_speed_line = f"research_speed={self.research_speed}"
+        lines.append(research_speed_line)
+        rocket_site_line = f"num_of_rocket_sites={self.num_of_rocket_sites}"
+        lines.append(rocket_site_line)
+        completed_techs_line = f"completed={','.join([str(t) for t in self.completed_techs])}"
+        lines.append(completed_techs_line)
+        deactivated_techs_line = f"deactivated={','.join([str(t) for t in self.deactivated_techs])}"
+        lines.append(deactivated_techs_line)
+        blueprints_line = f"blueprints={','.join([str(t) for t in self.blueprints])}"
+        lines.append(blueprints_line)
+        with open(path, "w") as f:
+            f.write("\n".join(lines))
+
+    def load_status_from_file(self, path):
+        if not path.exists():
+            return
+        self.clear_all_tech()
+        country_codes = None
+        year = None
+        research_speed = None
+        completed = None
+        deactivated = None
+        blueprints = None
+        with open(path, "r") as f:
+            for line in f:
+                if "country" in line:
+                    country_codes = line.split("=")[1].strip().split(",")
+                elif "difficulty" in line:
+                    try:
+                        self.difficulty = int(line.split("=")[1].strip())
+                    except ValueError:
+                        pass
+                elif "year" in line:
+                    try:
+                        year = int(line.split("=")[1].strip())
+                    except ValueError:
+                        pass
+                elif "research_speed" in line:
+                    try:
+                        research_speed = float(line.split("=")[1].strip())
+                    except ValueError:
+                        pass
+                elif "num_of_rocket_sites" in line:
+                    try:
+                        self.num_of_rocket_sites = int(line.split("=")[1].strip())
+                    except ValueError:
+                        pass
+                elif "completed" in line:
+                    try:
+                        completed = [int(tech) for tech in line.split("=")[1].strip().split(",")]
+                    except ValueError:
+                        pass
+                elif "deactivated" in line:
+                    try:
+                        deactivated = [int(tech) for tech in line.split("=")[1].strip().split(",")]
+                    except ValueError:
+                        pass
+                elif "blueprints" in line:
+                    try:
+                        blueprints = [int(tech) for tech in line.split("=")[1].strip().split(",")]
+                    except ValueError:
+                        pass
+        if country_codes:
+            for country_code in country_codes:
+                if country_code:
+                    self.add_country(country_code)
+        if year:
+            self.change_year(year)
+        if research_speed:
+            self.research_speed = research_speed
+        if completed:
+            self.completed_techs = set(completed)
+        if deactivated:
+            self.deactivated_techs = set(deactivated)
+        if blueprints:
+            self.blueprints = set(blueprints)
+        self.update_active_techs()
+        
+            
     def list_requirements(self, tech):
         reqs = []
         for req in tech.requirements:
@@ -375,9 +462,6 @@ class Research:
         return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
     
     def sort_teams_for_researching_tech(self, tech):
-        # check blueprint
-        has_blueprint = int(tech.tech_id in self.blueprints)
-
         team_results = []
         for team in self.teams:
             # days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
