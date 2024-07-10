@@ -1,5 +1,6 @@
 
 from collections import namedtuple
+import math
 
 # should this be read from game files?
 RESEARCH_SPEED_CONSTANT = 2.8
@@ -120,24 +121,66 @@ class TechTeam:
             self.pic_path
                 )
     
-    def calculate_1_day_progress_for_component(self, component, research_speed_modifier, game_difficulty, total_extra_bonus = 0, has_blueprint=0, num_of_rocket_sites = 0):
+    def calculate_1_day_progress_for_component(
+            self,
+            component,
+            research_speed_modifier,
+            game_difficulty,
+            total_extra_bonus = 0,
+            has_blueprint=0,
+            num_of_rocket_sites = 0
+            ):
         has_speciality = 0
         component_type = component.type
         if component_type in self.specialities:
             has_speciality = 1
-        difficulty_modifier = calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus)
+        difficulty_modifier = calculate_components_difficulty_multiplier(
+            component,
+            research_speed_modifier,
+            game_difficulty,
+            total_extra_bonus
+            )
         skill_issue = 0.1 * (self.skill + 6) * (has_speciality + 1)
         if component_type == "rocketry":
             skill_issue += num_of_rocket_sites
         return 0.01 * RESEARCH_SPEED_CONSTANT * skill_issue * (0.7 * has_blueprint + 1) * difficulty_modifier
 
-    def calculate_how_many_days_to_complete(self, tech, research_speed_modifier, game_difficulty, total_extra_bonus = 0, has_blueprint=0, num_of_rocket_sites = 0):
+    def calculate_how_many_days_to_complete(
+            self,
+            tech,
+            research_speed_modifier,
+            game_difficulty,
+            total_extra_bonus = 0,
+            has_blueprint=0,
+            num_of_rocket_sites = 0
+            ):
         days_gone = 0
         for component in tech.components:
-            daily_progress = self.calculate_1_day_progress_for_component(component, research_speed_modifier, game_difficulty, total_extra_bonus, has_blueprint, num_of_rocket_sites)
-            days_to_complete_component = int(20 // daily_progress + 1)
+            daily_progress = self.calculate_1_day_progress_for_component(
+                component,
+                research_speed_modifier,
+                game_difficulty,
+                total_extra_bonus,
+                has_blueprint,
+                num_of_rocket_sites)
+            # TODO: something is weird here
+            days_to_complete_component = max(1, math.ceil(20 // daily_progress))
             days_gone += days_to_complete_component
         return days_gone
     
-    def calculate_1_day_progress_for_tech(self, tech, research_speed_modifier, game_difficulty, total_extra_bonus = 0, has_blueprint=0, num_of_rocket_sites = 0):
-        return self.calculate_1_day_progress_for_component(tech.components[tech.current_component], research_speed_modifier, game_difficulty, total_extra_bonus, has_blueprint, num_of_rocket_sites)
+    def calculate_1_day_progress_for_tech(
+            self,
+            tech,
+            research_speed_modifier,
+            game_difficulty,
+            total_extra_bonus = 0,
+            has_blueprint=0,
+            num_of_rocket_sites = 0
+            ):
+        return self.calculate_1_day_progress_for_component(
+            tech.components[tech.current_component],
+            research_speed_modifier,
+            game_difficulty,
+            total_extra_bonus,
+            has_blueprint,
+            num_of_rocket_sites)
