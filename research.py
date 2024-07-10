@@ -182,9 +182,9 @@ class Research:
                 return tech
     
     # this might not work
-    def get_team_by_name(self, team_name):
+    def get_team_by_name_and_country(self, team_name, country_code):
         for team in self.teams:
-            if team.name == team_name:
+            if team.name == team_name and team.nation == country_code:
                 return team
             
     def list_requirements(self, tech):
