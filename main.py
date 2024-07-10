@@ -89,11 +89,11 @@ def suggest_tech_teams(input_text, tech_teams, max_num_of_suggestions):
     for team in tech_teams:
         name = team.name.lower()
         if search_text == name:
-            matches.append(team.name)
+            matches.append(team.format_name_and_country())
         elif name.startswith(search_text):
-            starts.append(team.name)
+            starts.append(team.format_name_and_country())
         elif search_text in name and len(others) < max_num_of_suggestions:
-            others.append(team.name)
+            others.append(team.format_name_and_country())
 
     suggestions = matches + starts + others
     return suggestions[:max_num_of_suggestions]
@@ -272,10 +272,15 @@ class UpperTeamScreen(BoxLayout):
             self.team_selection_dropdown.open(self.team_input)
 
     def make_team_selection(self, widget, text):
+        country_code = text[1:4]
+        name = text[6:]
         self.team_input.text = ""
         # team_name = text
         research = self.parent.parent.parent.research
-        tech_team = research.get_team_by_name(text)
+        
+        tech_team = research.get_team_by_name_and_country(name, country_code)
+        if tech_team is None:
+            print(text, country_code, name)
         time_to_complete = None
         if (tech := self.parent.parent.parent.current_tech) is not None:
             time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
