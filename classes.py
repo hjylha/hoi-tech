@@ -109,6 +109,9 @@ class TechTeam:
         return self.name
         # return f"{self.name} {self.nation}"
     
+    def format_name_and_country(self):
+        return f"[{self.nation}] {self.name}"
+    
     def to_db_tuple(self):
         return (
             self.team_id,
