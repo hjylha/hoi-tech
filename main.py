@@ -28,13 +28,13 @@ from lines import land_doct_lines, land_doct_deact_lines, naval_doct_lines, nava
 
 
 
-DIFFICULTY_DICT = {
-    "Very Easy": -1,
-    "Easy": 0,
-    "Normal": 1,
-    "Hard": 2,
-    "Very Hard": 3
-}
+DIFFICULTIES = (
+    ("Very Easy", -1),
+    ("Easy", 0),
+    ("Normal", 1),
+    ("Hard", 2),
+    ("Very Hard", 3)
+)
 
 TECH_CATEGORIES = (
             ("infantry", "Infantry"),
@@ -48,6 +48,14 @@ TECH_CATEGORIES = (
             ("naval_doctrines", "Naval Docrine"),
             ("air_doctrines", "Air Doctrine")
 )
+
+
+def get_the_other_difficulty(difficulty):
+    for d1, d2 in DIFFICULTIES:
+        if d1 == difficulty:
+            return d2
+        if d2 == difficulty:
+            return d1
 
 def get_the_other_category(category):
     for c1, c2 in TECH_CATEGORIES:
@@ -937,11 +945,15 @@ class TechScreen(BoxLayout):
             tech_id = self.parent.parent.current_tech.tech_id
         except AttributeError:
             return
+        if tech_id in self.research.completed_techs:
+            return
         self.research.complete_until_tech(tech_id)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
+        # save status
+        self.parent.parent.save_status()
 
     def complete_tech(self):
         try:
@@ -955,6 +967,8 @@ class TechScreen(BoxLayout):
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
+        # save status
+        self.parent.parent.save_status()
     
     def undo_tech(self):
         try:
@@ -968,13 +982,19 @@ class TechScreen(BoxLayout):
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
+        # save status
+        self.parent.parent.save_status()
 
     def clear_tech(self):
+        if not self.research.completed_techs and not self.research.deactivated_techs and not self.research.blueprints:
+            return
         self.research.clear_all_tech()
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
         self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
+        # save status
+        self.parent.parent.save_status()
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1008,7 +1028,7 @@ class MainScreen(BoxLayout):
 
 
 class StatusBar(BoxLayout):
-    save_file = "save.data"
+    save_file = Path("save.data")
 
     def update_fastest_teams(self):
         if self.parent.current_tech is not None:
@@ -1032,19 +1052,10 @@ class StatusBar(BoxLayout):
         self.country_buttons[primary_country].size_hint_x = 0.5
         self.countries_selected.add_widget(self.country_buttons[primary_country])
         self.countries_selected.add_widget(self.reload_countries_button)
-
-    def add_country(self, country_code):
-        if country_code in self.country_buttons.keys():
-            return
-        # we need a scrollview
-        # self.country_buttons[country_code] = CountryButton(country_code, size_hint=(None, 1), width=dp(100))
+    
+    def add_country_ui_updates(self, country_code):
         self.country_buttons[country_code] = CountryButton(country_code, self.bg_color)
         self.country_buttons[country_code].remove_button.bind(on_release=lambda *args: self.remove_country(country_code))
-        
-        # print(f"{self.parent=}")
-        self.parent.add_country(country_code)
-        self.update_fastest_teams()
-        self.save_country_difficulty_and_year()
 
         num_of_countries = len(self.country_buttons)
         btn_text = "Reload countries" if num_of_countries > 1 else "Reload country"
@@ -1059,7 +1070,19 @@ class StatusBar(BoxLayout):
             self.countries_selected.add_widget(self.active_countries_button)
             self.countries_selected.add_widget(self.reload_countries_button)
             self.countries_selected.add_widget(self.clear_countries_button)
-            
+
+    def add_country(self, country_code):
+        if country_code in self.country_buttons.keys():
+            return
+        # we need a scrollview
+        # self.country_buttons[country_code] = CountryButton(country_code, size_hint=(None, 1), width=dp(100))
+        
+        # print(f"{self.parent=}")
+        self.parent.add_country(country_code)
+        self.update_fastest_teams()
+        # self.save_country_difficulty_and_year()
+        self.parent.save_status()
+        self.add_country_ui_updates(country_code)
     
     def remove_country(self, country_code):
         num_of_countries = len(self.country_buttons)
@@ -1072,7 +1095,8 @@ class StatusBar(BoxLayout):
         del self.country_buttons[country_code]
         self.parent.remove_country(country_code)
         self.update_fastest_teams()
-        self.save_country_difficulty_and_year()
+        # self.save_country_difficulty_and_year()
+        self.parent.save_status()
 
         if not self.country_buttons:
             if self.active_countries_dropdown.parent is not None:
@@ -1100,7 +1124,8 @@ class StatusBar(BoxLayout):
         self.active_countries_dropdown.clear_widgets()
         self.show_no_country_selected()
         self.update_fastest_teams()
-        self.save_country_difficulty_and_year()
+        # self.save_country_difficulty_and_year()
+        self.parent.save_status()
 
     def reload_countries(self, widget):
         country_codes = list(self.country_buttons.keys())
@@ -1130,7 +1155,8 @@ class StatusBar(BoxLayout):
                     self.add_country(country_code)
         if difficulty:
             self.difficulty_button.text = difficulty
-            self.parent.research.difficulty = DIFFICULTY_DICT[difficulty]
+            # self.parent.research.difficulty = DIFFICULTY_DICT[difficulty]
+            self.parent.research.difficulty = get_the_other_difficulty(difficulty)
         if year:
             try:
                 self.parent.change_year(int(year))
@@ -1141,11 +1167,13 @@ class StatusBar(BoxLayout):
     def select_difficulty(self, widget, value):
         # setattr(self.difficulty_button, "text", value)
         self.difficulty_button.text = value
-        self.parent.research.difficulty = DIFFICULTY_DICT[value]
+        # self.parent.research.difficulty = DIFFICULTY_DICT[value]
+        self.parent.research.difficulty = get_the_other_difficulty(value)
         # if self.parent.current_tech is not None:
         #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
         self.update_fastest_teams()
-        self.save_country_difficulty_and_year()
+        # self.save_country_difficulty_and_year()
+        self.parent.save_status()
 
     def select_year(self, widget, value):
         # previous_year = self.year_input.select_all()
@@ -1155,7 +1183,8 @@ class StatusBar(BoxLayout):
             # if self.parent.current_tech is not None:
             #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
             self.update_fastest_teams()
-            self.save_country_difficulty_and_year()
+            # self.save_country_difficulty_and_year()
+            self.parent.save_status()
         except ValueError:
             self.year_input.text = str(self.parent.research.year)
         
@@ -1238,7 +1267,8 @@ class StatusBar(BoxLayout):
             # if self.parent.current_tech is not None:
             #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
             self.update_fastest_teams()
-            self.save_country_difficulty_and_year()
+            # self.save_country_difficulty_and_year()
+            self.parent.save_status()
     
     def validate_research_speed(self, widget, text):
         if not text:
@@ -1252,6 +1282,16 @@ class StatusBar(BoxLayout):
             self.update_fastest_teams()
         except ValueError:
             widget.text = str(previous_research_speed)
+
+    def update_statusbar_from_research(self):
+        research = self.parent.research
+        for country_code in research.countries:
+            self.add_country_ui_updates(country_code)
+        self.year_input.text = str(research.year)
+        self.difficulty_button.text = get_the_other_difficulty(research.difficulty)
+        self.research_speed_input.text = str(research.research_speed)
+        self.rocket_site_button.text = str(research.num_of_rocket_sites)
+
 
     def __init__(self, bg_color=(0, 0, 0, 0), **kwargs):
         super().__init__(**kwargs)
@@ -1302,7 +1342,7 @@ class StatusBar(BoxLayout):
         self.add_widget(self.extra_bonus_button)
 
         # difficulty selection
-        self.difficulty_suggestions = list(DIFFICULTY_DICT.keys())
+        self.difficulty_suggestions = tuple(d for d, _ in DIFFICULTIES)
 
         self.difficulty_dropdown = DropDown()
         for diff in self.difficulty_suggestions:
@@ -1362,7 +1402,11 @@ class StatusBar(BoxLayout):
 
 
 class MainFullScreen(BoxLayout):
+    save_file = Path("save.data")
     statusbar_BACKGROUND_COLOR = (0, 0.3, 0.1, 0.9)
+
+    def save_status(self):
+        self.research.save_status_to_file(self.save_file)
 
     def update_statusbar(self):
         self.statusbar.research_speed_input.text = str(self.research.research_speed)
@@ -1395,6 +1439,12 @@ class MainFullScreen(BoxLayout):
 
     def remove_country(self, country_code):
         self.research.remove_country(country_code)
+    
+    def load_status(self):
+        self.research.load_status_from_file(self.save_file)
+        self.statusbar.update_statusbar_from_research()
+        self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1408,9 +1458,11 @@ class MainFullScreen(BoxLayout):
         self.mainscreen = MainScreen(orientation="horizontal", size_hint=(1, 0.96))
         self.statusbar = StatusBar(orientation="horizontal", size_hint=(1, 0.04), bg_color=self.statusbar_BACKGROUND_COLOR)
 
-        self.statusbar.year_input.text = str(self.research.year)
-        self.statusbar.research_speed_input.text = str(self.research.research_speed)
-        self.statusbar.rocket_site_button.text = str(self.research.num_of_rocket_sites)
+        
+
+        # self.statusbar.year_input.text = str(self.research.year)
+        # self.statusbar.research_speed_input.text = str(self.research.research_speed)
+        # self.statusbar.rocket_site_button.text = str(self.research.num_of_rocket_sites)
         
         self.add_widget(self.mainscreen)
         self.add_widget(self.statusbar)
@@ -1422,7 +1474,9 @@ class MainFullScreen(BoxLayout):
 
         self.mainscreen.techscreen.research = self.research
 
-        self.statusbar.load_country_difficulty_and_year()
+        self.load_status()
+
+        # self.statusbar.load_country_difficulty_and_year()
 
 
 # class MainWidget(Widget):
