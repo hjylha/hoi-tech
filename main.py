@@ -272,7 +272,7 @@ class UpperTeamScreen(BoxLayout):
         list_of_teams = self.parent.parent.parent.research.teams
         suggestions = suggest_tech_teams(text, list_of_teams, self.max_num_of_team_suggestions)
         for i, suggestion in enumerate(suggestions):
-            suggestion_thingy = TextInput(text=suggestion, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(25))
+            suggestion_thingy = TextInput(text=suggestion, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(30))
             suggestion_thingy.bind(focus=self.select_team)
             self.team_selection_dropdown.add_widget(suggestion_thingy)
         
@@ -302,7 +302,7 @@ class UpperTeamScreen(BoxLayout):
 
         self.max_num_of_team_suggestions = 10
         self.team_selection_dropdown = DropDown()
-        self.team_input = TextInput(text="", multiline=False, write_tab=False, size_hint=(1, 0.1))
+        self.team_input = TextInput(text="", multiline=False, write_tab=False, size_hint=(1, 0.08))
         self.team_selection_dropdown.bind(on_select=self.make_team_selection)
         self.team_input.bind(text=self.suggest_team_names)
         self.add_widget(self.team_input)
@@ -1198,8 +1198,16 @@ class StatusBar(BoxLayout):
         except ValueError as e:
             print(f"Bad number of rocket sites: {value}")
             raise e
+    
+    def select_reactor_size(self, widget, value):
+        try:
+            self.parent.research.reactor_size = int(value)
+            self.reactor_size_button.text = value
+        except ValueError as e:
+            print(f"Bad reactor size: {value}")
+            raise e
 
-
+    # useless method
     def on_checkbox_active_placeholder(self, checkbox, value):
         if value:
             print(f"Values are locked by checkbox {checkbox} (NOT REALLY, THIS DOES NOTHING)")
@@ -1291,6 +1299,9 @@ class StatusBar(BoxLayout):
         self.difficulty_button.text = get_the_other_difficulty(research.difficulty)
         self.research_speed_input.text = str(research.research_speed)
         self.rocket_site_button.text = str(research.num_of_rocket_sites)
+        # print(f"STATUSBAR UPDATED: {self.rocket_site_button.text=}")
+        self.reactor_size_button.text = str(research.reactor_size)
+        # print(f"STATUSBAR UPDATED: {self.reactor_size_button.text=}")
 
 
     def __init__(self, bg_color=(0, 0, 0, 0), **kwargs):
@@ -1359,7 +1370,7 @@ class StatusBar(BoxLayout):
         self.add_widget(self.difficulty_button)
 
         # year selection
-        self.add_widget(Label(text="Year", size_hint=(0.04, 1)))
+        self.add_widget(Label(text="Year", size_hint=(0.035, 1)))
         self.year_selection_dropdown = DropDown()
         for year in self.years:
             # label = Label(text=str(year), size_hint=(1, None), height=dp(20))
@@ -1387,7 +1398,7 @@ class StatusBar(BoxLayout):
         # self.add_widget(self.value_lock_checkbox)
 
         # rocket sites
-        self.add_widget(Label(text="Number of rocket sites", size_hint=(0.11, 1)))
+        self.add_widget(Label(text="Rocket sites", size_hint=(0.055, 1)))
 
         self.rocket_site_dropdown = DropDown()
         for i in range(11):
@@ -1395,10 +1406,24 @@ class StatusBar(BoxLayout):
             btn.bind(on_release=lambda b: self.rocket_site_dropdown.select(b.text))
             self.rocket_site_dropdown.add_widget(btn)
 
-        self.rocket_site_button = Button(text="infty", size_hint=(0.03, 1))
+        self.rocket_site_button = Button(text="infty", size_hint=(0.02, 1))
         self.rocket_site_button.bind(on_release=self.rocket_site_dropdown.open)
         self.rocket_site_dropdown.bind(on_select=self.select_num_of_rocket_sites)
         self.add_widget(self.rocket_site_button)
+
+        # nuclear reactor size
+        self.add_widget(Label(text="Reactor size", size_hint=(0.055, 1)))
+
+        self.reactor_size_dropdown = DropDown()
+        for i in range(11):
+            btn = Button(text=str(i), size_hint=(1, None), height=dp(25))
+            btn.bind(on_release=lambda b: self.reactor_size_dropdown.select(b.text))
+            self.reactor_size_dropdown.add_widget(btn)
+
+        self.reactor_size_button = Button(text="infty", size_hint=(0.02, 1))
+        self.reactor_size_button.bind(on_release=self.reactor_size_dropdown.open)
+        self.reactor_size_dropdown.bind(on_select=self.select_reactor_size)
+        self.add_widget(self.reactor_size_button)
 
 
 class MainFullScreen(BoxLayout):
@@ -1442,6 +1467,7 @@ class MainFullScreen(BoxLayout):
     
     def load_status(self):
         self.research.load_status_from_file(self.save_file)
+        # print(f"LOADED STATUS: {self.research.num_of_rocket_sites=}")
         self.statusbar.update_statusbar_from_research()
         self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
 
