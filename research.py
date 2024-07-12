@@ -91,7 +91,6 @@ class Research:
         # for tech_id in self.techs:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
-        self.num_of_rocket_sites = 0
 
 
     def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
@@ -243,6 +242,7 @@ class Research:
                 elif "num_of_rocket_sites" in line:
                     try:
                         self.num_of_rocket_sites = int(line.split("=")[1].strip())
+                        # print(f"{self.num_of_rocket_sites=}")
                     except ValueError:
                         pass
                 elif "reactor_size" in line:
