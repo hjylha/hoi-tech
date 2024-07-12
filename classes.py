@@ -131,7 +131,8 @@ class TechTeam:
             game_difficulty,
             total_extra_bonus = 0,
             has_blueprint=0,
-            num_of_rocket_sites = 0
+            num_of_rocket_sites = 0,
+            reactor_size = 0
             ):
         has_speciality = 0
         component_type = component.type
@@ -146,6 +147,8 @@ class TechTeam:
         skill_issue = 0.1 * (self.skill + 6) * (has_speciality + 1)
         if component_type == "rocketry":
             skill_issue += num_of_rocket_sites
+        if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
+            skill_issue += math.sqrt(reactor_size)
         return 0.01 * RESEARCH_SPEED_CONSTANT * skill_issue * (0.7 * has_blueprint + 1) * difficulty_modifier
 
     def calculate_how_many_days_to_complete(
@@ -155,7 +158,8 @@ class TechTeam:
             game_difficulty,
             total_extra_bonus = 0,
             has_blueprint=0,
-            num_of_rocket_sites = 0
+            num_of_rocket_sites = 0,
+            reactor_size = 0
             ):
         days_gone = 0
         for component in tech.components:
@@ -165,7 +169,8 @@ class TechTeam:
                 game_difficulty,
                 total_extra_bonus,
                 has_blueprint,
-                num_of_rocket_sites)
+                num_of_rocket_sites,
+                reactor_size)
             # TODO: something is weird here
             days_to_complete_component = max(1, math.ceil(20 // daily_progress))
             days_gone += days_to_complete_component
@@ -178,7 +183,8 @@ class TechTeam:
             game_difficulty,
             total_extra_bonus = 0,
             has_blueprint=0,
-            num_of_rocket_sites = 0
+            num_of_rocket_sites = 0,
+            reactor_size = 0
             ):
         return self.calculate_1_day_progress_for_component(
             tech.components[tech.current_component],
@@ -186,4 +192,5 @@ class TechTeam:
             game_difficulty,
             total_extra_bonus,
             has_blueprint,
-            num_of_rocket_sites)
+            num_of_rocket_sites,
+            reactor_size)

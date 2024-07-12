@@ -122,8 +122,9 @@ class Research:
         self.filter_teams()
         # difficulty -1, 0, 1, 2, 3
         self.difficulty = difficulty
-        # TODO: more rocket sites
+        # do we need to do anything else with rockets and reactors?
         self.num_of_rocket_sites = 0
+        self.reactor_size = 0
 
 
     def add_country(self, country_code):
@@ -199,6 +200,8 @@ class Research:
         lines.append(research_speed_line)
         rocket_site_line = f"num_of_rocket_sites={self.num_of_rocket_sites}"
         lines.append(rocket_site_line)
+        reactor_size_line = f"reactor_size={self.reactor_size}"
+        lines.append(reactor_size_line)
         completed_techs_line = f"completed={','.join([str(t) for t in self.completed_techs])}"
         lines.append(completed_techs_line)
         deactivated_techs_line = f"deactivated={','.join([str(t) for t in self.deactivated_techs])}"
@@ -240,6 +243,11 @@ class Research:
                 elif "num_of_rocket_sites" in line:
                     try:
                         self.num_of_rocket_sites = int(line.split("=")[1].strip())
+                    except ValueError:
+                        pass
+                elif "reactor_size" in line:
+                    try:
+                        self.reactor_size = int(line.split("=")[1].strip())
                     except ValueError:
                         pass
                 elif "completed" in line:
@@ -459,7 +467,9 @@ class Research:
 
     def calculate_how_many_days_to_complete(self, team, tech):
         has_blueprint = int(tech.tech_id in self.blueprints)
-        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
+        # TODO: implement minister and idea bonuses
+        extra_bonus = 0
+        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size)
     
     def sort_teams_for_researching_tech(self, tech):
         team_results = []
