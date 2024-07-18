@@ -119,7 +119,7 @@ def scan_tech_file(filepath, tech_names):
                 try:
                     component_type = comp_text.split("type =")[1].split("\n")[0].strip(" =")
                     component_difficulty = int(comp_text.split("difficulty =")[1].split("\n")[0].strip(" ="))
-                    components.append(Component(component_type, component_difficulty))
+                    components.append(Component(component_type.lower(), component_difficulty))
                 except IndexError as e:
                     print(filepath)
                     print(comp_text)
@@ -209,8 +209,8 @@ def scan_tech_team_file(filepath):
             
                 specialities = []
                 for spec in items[6:]:
-                    if spec:
-                        specialities.append(spec)
+                    if spec and spec.lower() not in specialities:
+                        specialities.append(spec.lower())
                     else:
                         break
                 tech_teams.append(TechTeam(team_id, team_name, nation_key, skill, start_year, end_year, specialities, pic_path))
