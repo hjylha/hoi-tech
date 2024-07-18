@@ -1107,11 +1107,12 @@ class StatusBar(BoxLayout):
         num_of_countries = len(self.country_buttons)
         btn_text = "Reload countries" if num_of_countries > 1 else "Reload country"
         self.reload_countries_button.text = btn_text
-        primary_country = self.parent.research.primary_country
+        primary_country = self.parent.research.countries[0]
         if num_of_countries == 1:
             if self.active_countries_dropdown.parent is not None:
                 self.active_countries_dropdown.clear_widgets()
                 self.active_countries_dropdown.dismiss()
+            self.parent.add_country(primary_country)
             self.add_only_primary_country()
             return
         self.active_countries_button.text = f"{primary_country} +{num_of_countries - 1}"
@@ -1349,7 +1350,7 @@ class StatusBar(BoxLayout):
         
 
         self.add_widget(Label(text="", size_hint=(0.02, 1)))
-        self.extra_bonus_button = Button(text="Ministers & Culture", size_hint=(0.1, 1))
+        self.extra_bonus_button = Button(text="Ministers & Ideas", size_hint=(0.1, 1))
         self.add_widget(self.extra_bonus_button)
 
         # difficulty selection
