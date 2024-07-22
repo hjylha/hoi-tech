@@ -171,8 +171,7 @@ class TechTeam:
                 has_blueprint,
                 num_of_rocket_sites,
                 reactor_size)
-            # TODO: something is weird here
-            days_to_complete_component = max(1, math.ceil(20 // daily_progress))
+            days_to_complete_component = math.ceil(20 / daily_progress)
             days_gone += days_to_complete_component
         return days_gone
     
