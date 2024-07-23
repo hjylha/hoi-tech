@@ -51,6 +51,15 @@ def get_results_for_progress_estimates(testing_results):
         results.append(result_tuple)
     return results
 
+def get_results_for_completion_estimates(testing_results):
+    results = []
+    for result in testing_results:
+        team = techteams_for_testing[result["techteam"]]
+        tech = techs_for_testing[result["tech"]]
+        result_tuple = (team, tech, result["research speed"], result["game difficulty"], result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["days to complete game estimate"])
+        results.append(result_tuple)
+    return results
+
 
 research_observations = research_speed_testing_results()
 
@@ -72,3 +81,11 @@ def test_calculate_components_difficulty_multiplier(component, research_speed_mo
 def test_1_day_progression_for_component(team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, observed_1_day_progress):
     one_day_progress_estimate = team.calculate_1_day_progress_for_component(component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size)
     assert round(one_day_progress_estimate, 2) == observed_1_day_progress
+
+
+@pytest.mark.parametrize(
+        "team, tech, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, completion_estimate", get_results_for_completion_estimates(research_observations)
+)
+def test_calculate_how_many_days_to_complete(team, tech, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, completion_estimate):
+    days_to_complete = team.calculate_how_many_days_to_complete(tech, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size)
+    assert days_to_complete == completion_estimate
