@@ -247,7 +247,14 @@ class UpperTeamScreen(BoxLayout):
         # self.research_time_label.text = "Finishes tech in ? days"
         self.update_research_time()
     
-    def show_team_info(self, team, time_to_complete_tech="?"):
+    def highlight_specialities(self, current_component_types):
+        for speciality_label in self.speciality_labels:
+            if speciality_label.text in current_component_types:
+                speciality_label.color = (0, 1, 0, 1)
+            else:
+                speciality_label.color = (1, 1, 1, 1)
+    
+    def show_team_info(self, team, time_to_complete_tech="?", current_component_types=None):
         if team is None:
             self.show_default_texts()
             return
@@ -255,8 +262,17 @@ class UpperTeamScreen(BoxLayout):
         self.nation_and_id_label.text = f"{team.nation}  {team.team_id}"
         self.skill_label.text = f"Skill: {team.skill}"
         self.years_label.text = f"Years active: {team.start_year} - {team.end_year}"
-        for speciality_label, speciality in zip(self.speciality_labels, team.specialities):
+        num_of_specs = len(team.specialities)
+        for speciality_label, speciality in zip(self.speciality_labels[:num_of_specs], team.specialities):
             speciality_label.text = component_types[speciality]
+            speciality_label.color = (1, 1, 1, 1)
+            if current_component_types is not None:
+                if speciality in current_component_types:
+                    speciality_label.color = (0, 1, 0, 1)
+        if num_of_specs < len(self.speciality_labels):
+            for label in self.speciality_labels[num_of_specs:]:
+                label.text = ""
+
         # self.research_time_label.text = f"Finishes tech in {time_to_complete_tech} days"
         self.update_research_time(time_to_complete_tech)
 
@@ -290,9 +306,11 @@ class UpperTeamScreen(BoxLayout):
         if tech_team is None:
             print(text, country_code, name)
         time_to_complete = None
+        component_types = None
         if (tech := self.parent.parent.parent.current_tech) is not None:
             time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
-        self.show_team_info(tech_team, time_to_complete)
+            component_types = [comp.type for comp in tech.components]
+        self.show_team_info(tech_team, time_to_complete, component_types)
         self.parent.parent.parent.current_team = tech_team
 
     
@@ -308,18 +326,20 @@ class UpperTeamScreen(BoxLayout):
         self.add_widget(self.team_input)
 
         self.name_label = Label(text="name goes here", size_hint=(1, 0.1))
+        # self.name_label.text_size = self.size
+        self.name_label.halign = "left"
         self.add_widget(self.name_label)
 
-        self.nation_and_id_label = Label(text="nation and id go here", size_hint=(1, 0.1))
+        self.nation_and_id_label = Label(text="nation and id go here", size_hint=(1, 0.1), halign="left")
         self.add_widget(self.nation_and_id_label)
 
-        self.skill_label = Label(text="Skill: ?", size_hint=(1, 0.1))
+        self.skill_label = Label(text="Skill: ?", size_hint=(1, 0.1), halign="left")
         self.add_widget(self.skill_label)
 
-        self.years_label = Label(text="Years active: ? - ?", size_hint=(1, 0.1))
+        self.years_label = Label(text="Years active: ? - ?", size_hint=(1, 0.1), halign="left")
         self.add_widget(self.years_label)
 
-        specialities_header_label = Label(text="Specialities:", size_hint=(1, 0.1))
+        specialities_header_label = Label(text="Specialities:", size_hint=(1, 0.1), halign="left")
         self.add_widget(specialities_header_label)
 
         self.speciality_labels = [Label(text="", size_hint=(1, 0.1)) for _ in range(5)]
@@ -334,11 +354,17 @@ class UpperTeamScreen(BoxLayout):
 # class TeamComparisonTable(GridLayout):
 class TeamComparisonTable(BoxLayout):
     NUM_OF_ROWS = 10
+    MAX_TEAMNAME_LENGTH = 30
 
     def row_color(self, row_num):
         if row_num % 2 == 0:
             return (0.2, 0.2, 0.2, 1)
         return (0.2, 0, 0.2, 1)
+
+    def button_color(self, row_num):
+        if row_num % 2 == 0:
+            return (0.2, 0.2, 0.2, 0)
+        return (0.2, 0, 0.2, 0)
     
     def update_boxlayout(self, widget, value):
         widget.rect.pos = widget.pos
@@ -346,17 +372,27 @@ class TeamComparisonTable(BoxLayout):
     
     def fill_comparison_table(self, teams_and_times):
         for i, team_and_time in enumerate(teams_and_times[:self.NUM_OF_ROWS]):
-            self.labels[2*i].text = team_and_time[0].name
+            self.labels[2*i].text = team_and_time[0].name[:self.MAX_TEAMNAME_LENGTH]
+            self.labels[2*i].disabled = False
             self.labels[2*i+1].text = str(team_and_time[1])
         if len(teams_and_times) < self.NUM_OF_ROWS:
             for i in range(len(teams_and_times), self.NUM_OF_ROWS):
                 self.labels[2*i].text = ""
+                self.labels[2*i].disabled = True
                 self.labels[2*i+1].text = ""
+        self.teams_in_table = [team for team, _ in teams_and_times]
+    
+    def select_team_from_table(self, widget):
+        button_index = self.labels.index(widget)
+        # print(self.teams_in_table[button_index // 2].name)
+        self.parent.update_team_selection(self.teams_in_table[button_index // 2])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self.orientation = "vertical"
+
+        self.teams_in_table = []
 
         header_line = BoxLayout(size_hint=(1, 0.09))
         header_line.add_widget(Label(text="Team", size_hint=(0.8, 1)))
@@ -370,6 +406,7 @@ class TeamComparisonTable(BoxLayout):
         self.table = [BoxLayout(size_hint=(0.5 + (-1)**(i) * 0.3, 1)) for i in range(2 * self.NUM_OF_ROWS)]
         for i, layout in enumerate(self.table):
             lines[i // 2].add_widget(layout)
+            # print("Layout color:", self.row_color(i // 2))
             with layout.canvas.before:
                 Color(*self.row_color(i // 2))
                 layout.rect = Rectangle(size=layout.size, pos=layout.pos)
@@ -378,7 +415,9 @@ class TeamComparisonTable(BoxLayout):
         self.labels = []
         for i, layout in enumerate(self.table):
             if i % 2 == 0:
-                cell = Label(text="...")
+                # cell = Label(text="...")
+                cell = Button(text="", background_color=self.button_color(i // 2), on_release=self.select_team_from_table, halign="left")
+                # print("Button color:", self.row_color(i // 2))
             else:
                 cell = Label(text="?")
             self.labels.append(cell)
@@ -386,6 +425,18 @@ class TeamComparisonTable(BoxLayout):
 
 
 class TeamScreen(BoxLayout):
+    def update_team_selection(self, tech_team):
+        self.parent.parent.current_team = tech_team
+        research = self.parent.parent.research
+        time_to_complete = None
+        component_types = None
+        if (tech := self.parent.parent.current_tech) is not None:
+            time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
+            component_types = [comp.type for comp in tech.components]
+            self.parent.techscreen.update_tech_infopanels(tech)
+        self.upperteamscreen.show_team_info(tech_team, time_to_complete, component_types)
+
+        
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.upperteamscreen = UpperTeamScreen(orientation="vertical", size_hint=(1, 0.5))
@@ -414,9 +465,18 @@ class TechCategories(GridLayout):
 
 class TechInfoPanel(BoxLayout):
     def update_components(self, components):
+        specialities = []
+        if (team := self.parent.parent.parent.parent.current_team) is not None:
+            specialities = team.specialities
+        # print(specialities)
+        # print(components)
         for i, component in enumerate(components):
             self.tech_components[2*i].text = component_types[component.type]
             self.tech_components[2*i + 1].text = str(component.difficulty)
+            if component.type in specialities:
+                self.tech_components[2*i].color = (0, 1, 0, 1)
+            else:
+                self.tech_components[2*i].color = (1, 1, 1, 1)
             
     def update_info(self, tech_id, tech_name, components, has_blueprint):
         self.technology_name.text = f"{tech_id} {tech_name}"
@@ -908,6 +968,13 @@ class TechScreen(BoxLayout):
         self.active_category = category
         self.maintechscreen.change_layout(category)
     
+    def update_tech_infopanels(self, tech):
+        requirements = self.research.list_requirements(tech)
+        deactivations = self.research.list_deactivations(tech)
+        effects = self.research.list_effects(tech)
+        has_blueprint = tech.tech_id in self.research.blueprints
+        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
+    
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
         tech = self.research.get_tech(tech_id)
@@ -923,6 +990,7 @@ class TechScreen(BoxLayout):
         if (team := self.parent.parent.current_team) is not None:
             time_to_complete = self.research.calculate_how_many_days_to_complete(team, tech)
             self.parent.teamscreen.upperteamscreen.update_research_time(time_to_complete)
+            self.parent.teamscreen.update_team_selection(team)
 
         # update infopanels
         requirements = self.research.list_requirements(tech)
@@ -939,6 +1007,7 @@ class TechScreen(BoxLayout):
         deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
         self.maintechscreen.show_requirements(req_ids)
         self.maintechscreen.show_deactivation_warnings(deact_ids)
+            
     
     def complete_until_tech(self):
         try:
