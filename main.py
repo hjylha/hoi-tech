@@ -974,6 +974,7 @@ class TechScreen(BoxLayout):
         effects = self.research.list_effects(tech)
         has_blueprint = tech.tech_id in self.research.blueprints
         self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
+        return [requirements, deactivations]
     
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
@@ -993,11 +994,7 @@ class TechScreen(BoxLayout):
             self.parent.teamscreen.update_team_selection(team)
 
         # update infopanels
-        requirements = self.research.list_requirements(tech)
-        deactivations = self.research.list_deactivations(tech)
-        effects = self.research.list_effects(tech)
-        has_blueprint = tech.tech_id in self.research.blueprints
-        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
+        requirements, deactivations = self.update_tech_infopanels(tech)
 
         # update tech buttons
         self.maintechscreen.hide_old_requirements()
