@@ -1,0 +1,22 @@
+
+# random thing
+
+layer0 =
+{
+    key1 = normal
+    key2 = 2
+    key3 = 3.14
+    layer1 
+=
+ {
+    key1 = {3 5}
+    key2 
+    =
+    {
+        a
+        b
+        c
+    }
+    layer2 = { key1 = 0 key1 = 1}
+ }
+}

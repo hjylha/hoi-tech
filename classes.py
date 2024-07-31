@@ -2,8 +2,12 @@
 from collections import namedtuple
 import math
 
+from read_hoi_files import get_blueprint_bonus_and_tech_speed_modifier
+
 # should this be read from game files?
-RESEARCH_SPEED_CONSTANT = 2.8
+# RESEARCH_SPEED_CONSTANT = 2.8
+# BLUEPRINT_BONUS = 1.7
+BLUEPRINT_BONUS, RESEARCH_SPEED_CONSTANT = get_blueprint_bonus_and_tech_speed_modifier()
 
 Component = namedtuple("Component", ["type", "difficulty"])
 EFFECT_ATTRIBUTES = ["type", "which", "value", "when", "where"]
@@ -149,7 +153,7 @@ class TechTeam:
             skill_issue += num_of_rocket_sites
         if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
             skill_issue += math.sqrt(reactor_size)
-        return 0.01 * RESEARCH_SPEED_CONSTANT * skill_issue * (0.7 * has_blueprint + 1) * difficulty_modifier
+        return 0.01 * RESEARCH_SPEED_CONSTANT * skill_issue * ((BLUEPRINT_BONUS - 1) * has_blueprint + 1) * difficulty_modifier
 
     def calculate_how_many_days_to_complete(
             self,
@@ -193,3 +197,37 @@ class TechTeam:
             has_blueprint,
             num_of_rocket_sites,
             reactor_size)
+
+
+class Minister:
+    def get_modifiers(self):
+        modifiers = []
+
+        return modifiers
+
+    def __init__(self, minister_id, name, position, personality, start_year, ideology, loyalty, pic_path=None):
+        self.m_id = minister_id
+        self.name = name
+        self.position = position
+        self.personality = personality
+        self.start_year = start_year
+        self.ideology = ideology
+        self.loyalty = loyalty
+        self.pic_path = pic_path
+        if self.pic_path is None:
+            self.pic_path = "gfx/interface/pics/Unknown.bmp"
+        self.modifiers = self.get_modifiers()
+    
+    def get_research_bonus(self):
+        pass
+
+
+class Idea:
+    def __init__(self, name, idea_type, modifiers, gov_types):
+        self.name = name
+        self.idea_type = idea_type
+        self.modifiers = modifiers
+        self.gov_types = gov_types
+
+    def get_research_bonus(self):
+        pass

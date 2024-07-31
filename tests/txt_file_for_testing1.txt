@@ -1,0 +1,5 @@
+layer0 = {
+    key1 = normal
+    key2 = 2
+    key3 = 3.14
+}
