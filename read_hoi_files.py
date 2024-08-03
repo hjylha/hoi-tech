@@ -51,6 +51,18 @@ def get_ideas_path():
     aod_path = get_aod_path()
     return aod_path / "db" / "ideas" / "ideas.txt"
 
+def get_ministers_path(country_code):
+    aod_path = get_aod_path()
+    return aod_path / "db" / "ministers" / f"ministers_{country_code.lower()}.csv"
+
+def get_tech_names_path():
+    aod_path = get_aod_path()
+    return aod_path / "config" / "tech_names.csv"
+
+def get_country_names_path():
+    aod_path = get_aod_path()
+    return aod_path / "config" / "world_names.csv"
+
 
 def change_type_if_necessary(text):
     try:
@@ -76,8 +88,25 @@ def read_name_file(filepath, language="English"):
             names[clean_line[0]] = clean_line[language_index]
     return names
 
+def read_names_from_file(search_terms, filepath, language="English"):
+    names = dict()
+    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+        for i, line in enumerate(f):
+            if i == 0:
+                language_index = line.split(";").index(language)
+                continue
+            clean_line = line.split("#")[0].strip()
+            if not clean_line:
+                continue
+            if clean_line[0] in search_terms:
+                names[clean_line[0]] = clean_line[language_index]
+            if len(names) == len(search_terms):
+                return names
+    return names
+
+
 def read_csv_file(filepath, check_filetype=True):
-    if check_filetype and filepath.suffix != "csv":
+    if check_filetype and filepath.suffix != ".csv":
         print(f"{filepath} is not a csv file.")
         return
     csv_content_list = None
@@ -228,29 +257,29 @@ def read_txt_file(filepath, check_filetype=True):
 
 def read_misc_file():
     misc_filepath = get_misc_path()
-    misc_content = dict()
-    content_types = ["economy", "combat", "research"]
-    with open(misc_filepath, "r", encoding = "ISO-8859-1") as f:
-        current_type = None
-        for line in f:
-            clean_line = line.split("#")[0].strip()
-            if clean_line == "":
-                continue
-            for t in content_types:
-                if t in clean_line:
-                    misc_content[t] = []
-                    current_type = t
-                    break
-            else:
-                if "}" in clean_line:
-                    current_type = None
-                    continue
-                try:
-                    item = int(clean_line)
-                except ValueError:
-                    item = float(clean_line)
-                misc_content[current_type].append(item)
-    return misc_content
+    # misc_content = dict()
+    # content_types = ["economy", "combat", "research"]
+    # with open(misc_filepath, "r", encoding = "ISO-8859-1") as f:
+    #     current_type = None
+    #     for line in f:
+    #         clean_line = line.split("#")[0].strip()
+    #         if clean_line == "":
+    #             continue
+    #         for t in content_types:
+    #             if t in clean_line:
+    #                 misc_content[t] = []
+    #                 current_type = t
+    #                 break
+    #         else:
+    #             if "}" in clean_line:
+    #                 current_type = None
+    #                 continue
+    #             try:
+    #                 item = int(clean_line)
+    #             except ValueError:
+    #                 item = float(clean_line)
+    #             misc_content[current_type].append(item)
+    return read_txt_file(misc_filepath)
 
 def get_blueprint_bonus_and_tech_speed_modifier():
     misc_content = read_misc_file()
@@ -284,8 +313,9 @@ def read_ideas():
 
 
 def get_tech_names():
-    aod_path = get_aod_path()
-    tech_names_path = aod_path / "config" / "tech_names.csv"
+    # aod_path = get_aod_path()
+    # tech_names_path = aod_path / "config" / "tech_names.csv"
+    tech_names_path = get_tech_names_path()
     tech_names = dict()
     with open(tech_names_path, "r", encoding = "ISO-8859-1") as f:
         for line in f:
@@ -296,12 +326,13 @@ def get_tech_names():
 
 
 def get_country_names():
-    aod_path = get_aod_path()
+    # aod_path = get_aod_path()
 
     tech_team_files = get_tech_team_files(get_tech_path())
     country_codes = [filepath.stem[-3:].upper() for filepath in tech_team_files]
 
-    country_names_path = aod_path / "config" / "world_names.csv"
+    # country_names_path = aod_path / "config" / "world_names.csv"
+    country_names_path = get_country_names_path()
     country_names = dict()
     with open(country_names_path, "r", encoding = "ISO-8859-1") as f:
         for line in f:

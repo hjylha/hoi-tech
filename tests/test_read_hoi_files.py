@@ -51,8 +51,12 @@ def txt_file_content3():
         "layer2": layer2
     }
     content["layer0"]["layer1"] = layer1
-
     return content
+
+
+@pytest.fixture
+def aod_path():
+    return rhf.get_aod_path()
 
 
 def test_read_txt_file0(txt_file_content0):
@@ -83,3 +87,69 @@ def test_read_txt_file3(txt_file_content3):
     content = rhf.read_txt_file(test_txt_file_path)
     assert isinstance(content, dict)
     assert content == txt_file_content3
+
+
+def test_get_tech_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_tech_path().exists()
+
+
+def test_get_scenario_paths(aod_path):
+    if aod_path.exists():
+        path_33, path_34 = rhf.get_scenario_paths()
+        assert path_33.exists()
+        assert path_34.exists()
+
+
+def test_get_scenario_path_for_country(aod_path):
+    if aod_path.exists():
+        for code in ("AFG", "ENG", "FIN", "ITA", "SOV", "USA"):
+            assert rhf.get_scenario_path_for_country(code).exists()
+
+
+def test_get_misc_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_misc_path().exists()
+
+
+def test_get_minister_modifier_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_minister_modifier_path().exists()
+
+
+def test_get_ideas_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_ideas_path().exists()
+
+
+def test_get_ministers_path(aod_path):
+    if aod_path.exists():
+        for code in ("AFG", "ENG", "FIN", "ITA", "SOV", "USA"):
+            assert rhf.get_ministers_path(code).exists()
+
+
+def test_get_tech_names_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_tech_names_path().exists()
+
+
+def test_get_country_names_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_country_names_path().exists()
+
+
+@pytest.mark.parametrize(
+        "text, result", [
+            ("0", 0),
+            ("314", 314),
+            ("-5", -5),
+            ("2.71", 2.71),
+            ("0.500", 0.5),
+            ("-3.140", -3.14),
+            ("testing", "testing"),
+            ('"quoted"', 'quoted'),
+            ("  testing  ", "testing")
+        ]
+)
+def test_change_type_if_necessary(text, result):
+    assert rhf.change_type_if_necessary(text) == result
