@@ -1,72 +1,8 @@
 
-import os
-from pathlib import Path
-
-from classes import Component, EFFECT_ATTRIBUTES, Effect, Tech, TechTeam
-
-
-def get_aod_path():
-    if os.name == "nt":
-        with open("aod_path.txt", "r") as f:
-            return Path(f.read().strip())
-    with open("aod_path_linux.txt", "r") as f:
-        return Path(f.read().strip())
-
-
-def get_tech_path():
-    aod_path = get_aod_path()
-    tech_path = aod_path / "db" / "tech"
-    return tech_path
-
-
-def get_tech_files(tech_path):
-    return tech_path.glob("*_tech.txt")
-
-
-def get_tech_team_files(tech_path):
-    tech_team_path = tech_path / "teams"
-    return tech_team_path.glob("teams*.csv")
-
-def get_scenario_paths():
-    aod_path = get_aod_path()
-    scenario33_path = aod_path / "scenarios" / "1933"
-    scenario34_path = aod_path / "scenarios" / "1934"
-    return [scenario33_path, scenario34_path]
-
-def get_scenario_path_for_country(country_code):
-    scenario_directories = get_scenario_paths()
-    for sd_path in scenario_directories:
-        possible_path = sd_path / f"{country_code.lower()}_{sd_path.stem[-2:]}.inc"
-        if possible_path.exists():
-            return possible_path
-
-
-def get_tech_names():
-    aod_path = get_aod_path()
-    tech_names_path = aod_path / "config" / "tech_names.csv"
-    tech_names = dict()
-    with open(tech_names_path, "r", encoding = "ISO-8859-1") as f:
-        for line in f:
-            names = line.split(";")
-            if names[0]:
-                tech_names[names[0]] = names[1]
-    return tech_names
-
-
-def get_country_names():
-    aod_path = get_aod_path()
-
-    tech_team_files = get_tech_team_files(get_tech_path())
-    country_codes = [filepath.stem[-3:].upper() for filepath in tech_team_files]
-
-    country_names_path = aod_path / "config" / "world_names.csv"
-    country_names = dict()
-    with open(country_names_path, "r", encoding = "ISO-8859-1") as f:
-        for line in f:
-            names = line.split(";")
-            if names[0].upper() in country_codes:
-                country_names[names[0].upper()] = names[1]
-    return country_names
+from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_scenario_path_for_country
+from read_hoi_files import get_tech_names, read_csv_file, read_txt_file
+from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
+from classes import MinisterPersonality, Minister, Idea, get_minister_personality
 
 
 def scan_tech_file(filepath, tech_names):
@@ -233,6 +169,104 @@ def get_tech_teams(country_code):
     # tech_teams = []
     team_filepath = get_tech_path() / "teams" / f"teams_{country_code.lower()}.csv"
     return scan_tech_team_file(team_filepath)
+
+
+def get_correct_modifiers(modifier_dict):
+    modifiers = []
+    for mod_key in MODIFIER_ATTRIBUTES:
+        if modifier_dict.get(mod_key) is not None:
+            modifiers.append(modifier_dict[mod_key])
+        else:
+            for key in modifier_dict.keys():
+                if key.startswith(mod_key):
+                    modifiers.append(modifier_dict[key])
+                    break
+            else:
+                modifiers.append(None)
+    return Modifier(*modifiers)
+
+def ensure_lists_are_lists(should_be_list):
+    if isinstance(should_be_list, list):
+        return should_be_list
+    if should_be_list is None:
+        return []
+    return [should_be_list]
+    
+
+def scan_minister_personalities():
+    minister_modifier_path = get_minister_modifier_path()
+    personalities = []
+    content = read_txt_file(minister_modifier_path)
+    m_personalities = content["minister_personalities"]["personality"]
+    for personality in m_personalities:
+        name = personality["personality_string"]
+        position = personality["minister_position"]
+        personality_modifiers = ensure_lists_are_lists(personality.get("modifier"))
+        modifiers = []
+        for modifier in personality_modifiers:
+            modifiers.append(get_correct_modifiers(modifier))
+        # if personality.get("modifier") is None:
+        #     modifiers = []
+        # elif isinstance(personality["modifier"], dict):
+        #     # modifiers = [Modifier(*[personality["modifier"].get(key) for key in MODIFIER_ATTRIBUTES])]
+        #     modifiers = [get_correct_modifiers(personality["modifier"])]
+        # else:
+        #     modifiers = []
+        #     for modifier in personality["modifier"]:
+        #         # modifiers.append(Modifier(*[modifier.get(key) for key in MODIFIER_ATTRIBUTES]))
+        #         modifiers.append(get_correct_modifiers(modifier))
+        personalities.append(MinisterPersonality(name, position, modifiers))
+    return personalities
+
+
+def scan_ideas():
+    ideas_path = get_ideas_path()
+    content = read_txt_file(ideas_path)
+    raw_ideas = content["national_ideas"]["national_idea"]
+    ideas = []
+    for idea in raw_ideas:
+        name = idea["personality_string"]
+        idea_type = idea["minister_position"]
+        gov_types = ensure_lists_are_lists(idea.get("category"))
+        idea_modifiers = ensure_lists_are_lists(idea.get("modifier"))
+        modifiers = []
+        for modifier in idea_modifiers:
+            modifiers.append(get_correct_modifiers(modifier))
+        ideas.append(Idea(name, idea_type, modifiers, gov_types))
+    return ideas
+
+
+
+def scan_minister_csv(filepath, minister_personalities):
+    csv_content = read_csv_file(filepath)
+    ministers = []
+    country_code_from_file = None
+    for line_num, line in enumerate(csv_content):
+        if line_num == 0:
+            country_code_from_file = line[0]
+            continue
+        minister_id = line[0]
+        if not minister_id:
+            continue
+        # minister_position = line[1]
+        # minister_name = line[2]
+        # start_year = line[3]
+        # minister_ideology = line[4]
+        minister_personality_str = line[5]
+        minister_personality = get_minister_personality(minister_personalities, minister_personality_str, line[1])
+        # minister_loyalty = line[6]
+        # minister_pic = line[7]
+        ministers.append(Minister(minister_id, line[2], line[1], minister_personality, line[3], line[4], line[6], line[7]))
+    return {country_code_from_file: ministers}
+
+def scan_ministers_for_country(country_code):
+    ministers_path = get_ministers_path(country_code)
+    if not ministers_path.exists():
+        print(f"Filepath {ministers_path} not found")
+    minister_personalities = scan_minister_personalities()
+    minister_dict = scan_minister_csv(ministers_path, minister_personalities)
+    return minister_dict[country_code]
+
 
 def scan_scenario_file(filepath):
     if filepath is None:
