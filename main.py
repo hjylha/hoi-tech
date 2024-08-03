@@ -18,7 +18,7 @@ from kivy.graphics import Color, Line, Rectangle
 from kivy.metrics import dp
 
 from research import Research
-from scan_hoi_files import get_country_names
+from read_hoi_files import get_country_names
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from component_types import component_types
