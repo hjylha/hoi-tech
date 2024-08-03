@@ -12,10 +12,17 @@ BLUEPRINT_BONUS, RESEARCH_SPEED_CONSTANT = get_blueprint_bonus_and_tech_speed_mo
 Component = namedtuple("Component", ["type", "difficulty"])
 EFFECT_ATTRIBUTES = ["type", "which", "value", "when", "where"]
 Effect = namedtuple("Effect", EFFECT_ATTRIBUTES)
+MODIFIER_ATTRIBUTES = ["type", "value", "option", "extra", "modifier_effect"]
+Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
 
 def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus):
     return max(1 , (1 - game_difficulty / 10) * research_speed_modifier * 100 / (100 - total_extra_bonus) / (component.difficulty + 2) )
+
+
+def get_modifiers_tech_effects(modifier):
+    if modifier.type == "tech_group_mod":
+        return (modifier.value, modifier.modifier_effect)
 
 
 class Tech:
@@ -199,11 +206,42 @@ class TechTeam:
             reactor_size)
 
 
-class Minister:
-    def get_modifiers(self):
-        modifiers = []
+class MinisterPersonality:
+    def __init__(self, name, position, modifiers):
+        self.name = name
+        self.position = position
+        self.modifiers = modifiers
 
-        return modifiers
+    def get_research_bonus(self):
+        research_bonus_dict = dict()
+        for modifier in self.modifiers:
+            category, value = get_modifiers_tech_effects(modifier)
+            category = category if category else "all"
+            if research_bonus_dict.get(category) is None:
+                research_bonus_dict[category] = value
+                continue
+            research_bonus_dict[category] += value
+        return research_bonus_dict
+
+
+def get_minister_personality(minister_personalities, personality_str, position="all"):
+    for personality in minister_personalities:
+        if personality.name.lower() == personality_str.lower() and personality.position == "all":
+            return personality
+        if personality.name.lower() == personality_str.lower() and personality.position == position:
+            return personality
+        if personality.name.lower() == personality_str.lower():
+            print("Match for", personality.name, "but", personality.position, "!=", position)
+            return personality
+    else:
+        print(f"Minister personality {personality_str} not found")
+
+
+class Minister:
+    # def get_modifiers(self):
+    #     modifiers = []
+
+    #     return modifiers
 
     def __init__(self, minister_id, name, position, personality, start_year, ideology, loyalty, pic_path=None):
         self.m_id = minister_id
@@ -216,10 +254,10 @@ class Minister:
         self.pic_path = pic_path
         if self.pic_path is None:
             self.pic_path = "gfx/interface/pics/Unknown.bmp"
-        self.modifiers = self.get_modifiers()
+        # self.modifiers = self.get_modifiers()
     
     def get_research_bonus(self):
-        pass
+        return self.personality.get_research_bonus()
 
 
 class Idea:
@@ -231,3 +269,12 @@ class Idea:
 
     def get_research_bonus(self):
         pass
+
+# class NationalIdentity(Idea):
+#     pass
+
+# class SocialPolicy(Idea):
+#     pass
+
+# class NationalCulture(Idea):
+#     pass
