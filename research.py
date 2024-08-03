@@ -1,5 +1,6 @@
 
-from scan_hoi_files import get_country_names, scan_techs, get_tech_teams, scan_scenario_file_for_country
+from read_hoi_files import get_country_names
+from scan_hoi_files import scan_techs, get_tech_teams, scan_scenario_file_for_country
 
 
 class Research:
@@ -141,6 +142,9 @@ class Research:
         if self.primary_country == country_code:
             self.primary_country = None
             self.clear_all_tech()
+        # is this needed?
+        # if self.primary_country is None and self.countries:
+        #     self.choose_primary_country(self.countries[0])
         self.filter_teams()
     
     def change_year(self, new_year):
