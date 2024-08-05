@@ -65,6 +65,8 @@ def get_country_names_path():
 
 
 def change_type_if_necessary(text):
+    if text is None:
+        return None
     try:
         return int(text)
     except ValueError:
@@ -134,7 +136,7 @@ def read_txt_file(filepath, check_filetype=True):
             if not clean_line:
                 continue
             while clean_line:
-                item = clean_line.split(" ")[0].strip()
+                item = clean_line.split(" ")[0].strip().split("\t")[0].strip()
                 # previous_text = item
                 # clean_line = clean_line[len(item):].strip()
                 if item[0] == "{":
@@ -152,6 +154,8 @@ def read_txt_file(filepath, check_filetype=True):
                     if previous_text in ["{", "=", "}"]:
                         raise Exception(f"{previous_text} {item} can not be handled")
                     nested_keys.append(change_type_if_necessary(previous_text))
+                    if previous_text is None:
+                        print(line)
                     nested_values.append(None)
                     # 
                     # print("=", previous_text, item)
