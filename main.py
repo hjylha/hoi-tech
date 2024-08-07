@@ -1093,6 +1093,57 @@ class MainScreen(BoxLayout):
         self.add_widget(self.techscreen)
 
 
+class PolicyScreen(BoxLayout):
+    def __init__(self, bg_color=(0, 0, 0, 1), **kwargs):
+        super().__init__(**kwargs)
+
+        self.orientation = "horizontal"
+        self.bg_color = bg_color
+        with self.canvas.before:
+            Color(*self.bg_color)
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+        self.bind(pos=update_layout, size=update_layout)
+
+        arm_minister_choice = BoxLayout(orientation="vertical")
+        intel_and_cos_choice = BoxLayout(orientation="vertical")
+        idea_choice = BoxLayout(orientation="vertical")
+
+        for i in range(11):
+            checkbox = CheckBox(group="armamentminister")
+            label = Label(text=f"minister{i+1}")
+            arm_minister_choice.add_widget(checkbox)
+            arm_minister_choice.add_widget(label)
+
+        for i in range(2):
+            checkbox = CheckBox(group="ministerofintelligence")
+            label = Label(text=f"minister{i+1}")
+            intel_and_cos_choice.add_widget(checkbox)
+            intel_and_cos_choice.add_widget(label)
+
+        for i in range(2):
+            checkbox = CheckBox(group="chiefofstaff")
+            label = Label(text=f"minister{i+1}")
+            intel_and_cos_choice.add_widget(checkbox)
+            intel_and_cos_choice.add_widget(label)
+
+        for i in range(3):
+            checkbox = CheckBox(group="socialpolicy")
+            label = Label(text=f"idea{i+1}")
+            idea_choice.add_widget(checkbox)
+            idea_choice.add_widget(label)
+
+        for i in range(2):
+            checkbox = CheckBox(group="nationalculture")
+            label = Label(text=f"idea{i+1}")
+            idea_choice.add_widget(checkbox)
+            idea_choice.add_widget(label)
+
+        self.add_widget(arm_minister_choice)
+        self.add_widget(intel_and_cos_choice)
+        self.add_widget(idea_choice)
+
+
+
 class StatusBar(BoxLayout):
     save_file = Path("save.data")
 
@@ -1413,11 +1464,19 @@ class StatusBar(BoxLayout):
 
         # self.add_widget(Label(text="", size_hint=(0.01, 1)))
 
+        self.rest_of_the_statusbar = BoxLayout(orientation="horizontal", size_hint=(0.555, 1))
+
+        self.policy_dropdown = DropDown()
+        self.policy_screen = PolicyScreen(bg_color=self.bg_color, size_hint_y=None, height=dp(250))
+
+        self.policy_dropdown.add_widget(self.policy_screen)
+
         
 
-        self.add_widget(Label(text="", size_hint=(0.02, 1)))
+        self.rest_of_the_statusbar.add_widget(Label(text="", size_hint=(0.02, 1)))
         self.extra_bonus_button = Button(text="Ministers & Ideas", size_hint=(0.1, 1))
-        self.add_widget(self.extra_bonus_button)
+        self.extra_bonus_button.bind(on_release=lambda x: self.policy_dropdown.open(self.rest_of_the_statusbar))
+        self.rest_of_the_statusbar.add_widget(self.extra_bonus_button)
 
         # difficulty selection
         self.difficulty_suggestions = tuple(d for d, _ in DIFFICULTIES)
@@ -1428,16 +1487,16 @@ class StatusBar(BoxLayout):
             btn.bind(on_release=lambda b: self.difficulty_dropdown.select(b.text))
             self.difficulty_dropdown.add_widget(btn)
 
-        self.add_widget(Label(text="Difficulty", size_hint=(0.04, 1)))
+        self.rest_of_the_statusbar.add_widget(Label(text="Difficulty", size_hint=(0.04, 1)))
         self.difficulty_button = Button(text="Easy", size_hint=(0.05, 1))
         self.difficulty_button.bind(on_release=self.difficulty_dropdown.open)
         # self.difficulty_dropdown.bind(on_select=lambda instance, value: setattr(self.difficulty_button, "text", value))
         self.difficulty_dropdown.bind(on_select=self.select_difficulty)
 
-        self.add_widget(self.difficulty_button)
+        self.rest_of_the_statusbar.add_widget(self.difficulty_button)
 
         # year selection
-        self.add_widget(Label(text="Year", size_hint=(0.035, 1)))
+        self.rest_of_the_statusbar.add_widget(Label(text="Year", size_hint=(0.035, 1)))
         self.year_selection_dropdown = DropDown()
         for year in self.years:
             # label = Label(text=str(year), size_hint=(1, None), height=dp(20))
@@ -1450,12 +1509,12 @@ class StatusBar(BoxLayout):
         self.year_input.bind(focus=self.open_year_selection_dropdown)
         self.year_input.bind(text=self.validate_year)
         self.year_selection_dropdown.bind(on_select=self.select_year)
-        self.add_widget(self.year_input)
+        self.rest_of_the_statusbar.add_widget(self.year_input)
 
         # research speed selection
-        self.add_widget(Label(text="Research Speed", size_hint=(0.08, 1)))
+        self.rest_of_the_statusbar.add_widget(Label(text="Research Speed", size_hint=(0.08, 1)))
         self.research_speed_input = TextInput(size_hint=(0.04, 1), multiline=False, write_tab=False)
-        self.add_widget(self.research_speed_input)
+        self.rest_of_the_statusbar.add_widget(self.research_speed_input)
         self.research_speed_input.bind(text=self.validate_research_speed)
 
         # # lock values checkbox
@@ -1465,7 +1524,7 @@ class StatusBar(BoxLayout):
         # self.add_widget(self.value_lock_checkbox)
 
         # rocket sites
-        self.add_widget(Label(text="Rocket sites", size_hint=(0.055, 1)))
+        self.rest_of_the_statusbar.add_widget(Label(text="Rocket sites", size_hint=(0.055, 1)))
 
         self.rocket_site_dropdown = DropDown()
         for i in range(11):
@@ -1476,10 +1535,10 @@ class StatusBar(BoxLayout):
         self.rocket_site_button = Button(text="infty", size_hint=(0.02, 1))
         self.rocket_site_button.bind(on_release=self.rocket_site_dropdown.open)
         self.rocket_site_dropdown.bind(on_select=self.select_num_of_rocket_sites)
-        self.add_widget(self.rocket_site_button)
+        self.rest_of_the_statusbar.add_widget(self.rocket_site_button)
 
         # nuclear reactor size
-        self.add_widget(Label(text="Reactor size", size_hint=(0.055, 1)))
+        self.rest_of_the_statusbar.add_widget(Label(text="Reactor size", size_hint=(0.055, 1)))
 
         self.reactor_size_dropdown = DropDown()
         for i in range(11):
@@ -1490,7 +1549,9 @@ class StatusBar(BoxLayout):
         self.reactor_size_button = Button(text="infty", size_hint=(0.02, 1))
         self.reactor_size_button.bind(on_release=self.reactor_size_dropdown.open)
         self.reactor_size_dropdown.bind(on_select=self.select_reactor_size)
-        self.add_widget(self.reactor_size_button)
+        self.rest_of_the_statusbar.add_widget(self.reactor_size_button)
+
+        self.add_widget(self.rest_of_the_statusbar)
 
 
 class MainFullScreen(BoxLayout):
