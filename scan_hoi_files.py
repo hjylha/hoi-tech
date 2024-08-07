@@ -226,13 +226,13 @@ def scan_ideas():
     ideas = []
     for idea in raw_ideas:
         name = idea["personality_string"]
-        idea_type = idea["minister_position"]
+        position = idea["minister_position"]
         gov_types = ensure_lists_are_lists(idea.get("category"))
         idea_modifiers = ensure_lists_are_lists(idea.get("modifier"))
         modifiers = []
         for modifier in idea_modifiers:
             modifiers.append(get_correct_modifiers(modifier))
-        ideas.append(Idea(name, idea_type, modifiers, gov_types))
+        ideas.append(Idea(name, position, modifiers, gov_types=gov_types))
     return ideas
 
 
@@ -332,3 +332,11 @@ if __name__ == "__main__":
     techs = scan_techs()
     tech_dict = {t.name: t for t in techs}
     teams = scan_tech_teams()
+
+    ideas = scan_ideas()
+    minister_personalities = scan_minister_personalities()
+
+    fin_path = get_scenario_path_for_country("FIN")
+    content = read_txt_file(fin_path, False)
+    provinces = content["province"]
+    fin = content["country"]

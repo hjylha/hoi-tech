@@ -206,7 +206,7 @@ class TechTeam:
             reactor_size)
 
 
-class MinisterPersonality:
+class MinisterOrIdea:
     def __init__(self, name, position, modifiers):
         self.name = name
         self.position = position
@@ -215,13 +215,31 @@ class MinisterPersonality:
     def get_research_bonus(self):
         research_bonus_dict = dict()
         for modifier in self.modifiers:
-            category, value = get_modifiers_tech_effects(modifier)
-            category = category if category else "all"
-            if research_bonus_dict.get(category) is None:
-                research_bonus_dict[category] = value
-                continue
-            research_bonus_dict[category] += value
+            if (effect := get_modifiers_tech_effects(modifier)):
+            # category, value = get_modifiers_tech_effects(modifier)
+                category, value = effect
+                category = category if category else "all"
+                if research_bonus_dict.get(category) is None:
+                    research_bonus_dict[category] = value
+                    continue
+                research_bonus_dict[category] += value
         return research_bonus_dict
+
+
+class MinisterPersonality(MinisterOrIdea):
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    # def get_research_bonus(self):
+    #     research_bonus_dict = dict()
+    #     for modifier in self.modifiers:
+    #         category, value = get_modifiers_tech_effects(modifier)
+    #         category = category if category else "all"
+    #         if research_bonus_dict.get(category) is None:
+    #             research_bonus_dict[category] = value
+    #             continue
+    #         research_bonus_dict[category] += value
+    #     return research_bonus_dict
 
 
 def get_minister_personality(minister_personalities, personality_str, position="all"):
@@ -257,18 +275,26 @@ class Minister:
         # self.modifiers = self.get_modifiers()
     
     def get_research_bonus(self):
+        if self.personality is None:
+            return dict()
         return self.personality.get_research_bonus()
 
 
-class Idea:
-    def __init__(self, name, idea_type, modifiers, gov_types):
-        self.name = name
-        self.idea_type = idea_type
-        self.modifiers = modifiers
-        self.gov_types = gov_types
+class Idea(MinisterOrIdea):
+    def __init__(self, *args, gov_types=None):
+        super().__init__(*args)
+        self.gov_types = gov_types if gov_types else []
 
-    def get_research_bonus(self):
-        pass
+    # def get_research_bonus(self):
+    #     research_bonus_dict = dict()
+    #     for modifier in self.modifiers:
+    #         category, value = get_modifiers_tech_effects(modifier)
+    #         category = category if category else "all"
+    #         if research_bonus_dict.get(category) is None:
+    #             research_bonus_dict[category] = value
+    #             continue
+    #         research_bonus_dict[category] += value
+    #     return research_bonus_dict
 
 # class NationalIdentity(Idea):
 #     pass

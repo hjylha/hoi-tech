@@ -1,6 +1,75 @@
 
 from read_hoi_files import get_country_names
+from scan_hoi_files import scan_minister_personalities, scan_ideas, scan_ministers_for_country
 from scan_hoi_files import scan_techs, get_tech_teams, scan_scenario_file_for_country
+
+
+class Politics:
+
+    def filter_personalities_and_ideas_that_affect_research(self):
+        self.tech_minister_personalities = []
+        for personality in self.minister_personalities:
+            if personality.get_research_bonus():
+                self.tech_minister_personalities.append(personality)
+        self.tech_ideas = []
+        for idea in self.ideas:
+            if idea.get_research_bonus():
+                self.tech_ideas.append(idea)
+
+    def __init__(self):
+        self.minister_personalities = scan_minister_personalities()
+        self.ideas = scan_ideas()
+
+        self.filter_personalities_and_ideas_that_affect_research()
+
+        self.current_policies = {
+            "headofstate": None,
+            "headofgovernment": None,
+            "foreignminister": None,
+            "armamentminister": None,
+            "ministerofsecurity": None,
+            "ministerofintelligence": None,
+            "chiefofstaff": None,
+            "chiefofarmy": None,
+            "chiefofnavy": None,
+            "chiefofair": None,
+            "nationalidentity": None,
+            "socialpolicy": None,
+            "nationalculture": None
+        }
+        self.available_ministers = []
+    
+    def scan_available_ministers(self, country_code):
+        self.available_ministers = scan_ministers_for_country(country_code)
+    
+    def get_minister_by_id(self, minister_id):
+        for minister in self.available_ministers:
+            if minister.m_id == minister_id:
+                return minister
+    
+    def get_sum_of_research_bonuses(self):
+        bonuses = dict()
+        for minister_or_idea in self.current_policies.values():
+            if minister_or_idea is None:
+                continue
+            for category, value in minister_or_idea.get_research_bonus().items():
+                if bonuses.get(category) is None:
+                    bonuses[category] = value
+                else:
+                    bonuses[category] += value
+        return bonuses
+
+    def change_minister(self, new_minister):
+        self.current_policies[new_minister.position] = new_minister.personality
+
+    def change_idea(self, new_idea):
+        self.current_policies[new_idea.position] = new_idea
+
+    def change_ministers(self, ministers_dict, check_position=True):
+        for position, minister in ministers_dict.items():
+            if check_position and position.lower() != minister.position.lower():
+                raise Exception(f"{position} does not match {minister.position} for {minister.name} [{minister.m_id}]")
+            self.current_policies[position] = minister.personality
 
 
 class Research:
@@ -93,6 +162,8 @@ class Research:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
 
+    def change_minister(self, new_minister_personality):
+        self.politics.current_policies[new_minister_personality.position.lower()] = new_minister_personality.get_research_bonus()
 
     def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
         if list_of_techs is None:
@@ -126,6 +197,20 @@ class Research:
         self.num_of_rocket_sites = 0
         self.reactor_size = 0
 
+        self.politics = Politics()
+
+    def get_sum_of_policy_effects(self):
+        return self.politics.get_sum_of_research_bonuses()
+    
+    def get_policy_effect_for_tech_category(self, tech_category):
+        effect = 0
+        for category, policy_effect in self.get_sum_of_policy_effects().items():
+            if category == "all" or category == tech_category:
+                effect += policy_effect
+        return effect
+    
+    def get_policy_effect_for_tech(self, tech):
+        return self.get_policy_effect_for_tech_category(tech.category)
 
     def add_country(self, country_code):
         if country_code not in self.countries:
@@ -472,7 +557,7 @@ class Research:
     def calculate_how_many_days_to_complete(self, team, tech):
         has_blueprint = int(tech.tech_id in self.blueprints)
         # TODO: implement minister and idea bonuses
-        extra_bonus = 0
+        extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
         return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size)
     
     def sort_teams_for_researching_tech(self, tech):

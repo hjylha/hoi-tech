@@ -142,6 +142,8 @@ def read_txt_file(filepath, check_filetype=True):
                 if item[0] == "{":
                     item = "{"
                     if previous_text != "=":
+                        # TODO: handle pure list
+                        print(line)
                         raise Exception(f"{previous_text} {item} can not be handled (at least not yet...)")
                     # 
                     # print("{", previous_text, item)
@@ -290,30 +292,30 @@ def get_blueprint_bonus_and_tech_speed_modifier():
     return misc_content["research"][0], misc_content["research"][5]
 
 
-def read_minister_modifiers():
-    minister_modifier_file = get_minister_modifier_path()
-    personalities_and_modifiers = dict()
-    with open(minister_modifier_file, "r", encoding = "ISO-8859-1") as f:
-        for line in f:
+# def read_minister_modifiers():
+#     minister_modifier_file = get_minister_modifier_path()
+#     personalities_and_modifiers = dict()
+#     with open(minister_modifier_file, "r", encoding = "ISO-8859-1") as f:
+#         for line in f:
 
-            clean_line = line.split("#")[0].strip()
-            if not clean_line:
-                continue
+#             clean_line = line.split("#")[0].strip()
+#             if not clean_line:
+#                 continue
     
-    return personalities_and_modifiers
+#     return personalities_and_modifiers
 
 
-def read_ideas():
-    ideas_filepath = get_ideas_path()
-    ideas = dict()
-    with open(ideas_filepath, "r", encoding = "ISO-8859-1") as f:
-        for line in f:
+# def read_ideas():
+#     ideas_filepath = get_ideas_path()
+#     ideas = dict()
+#     with open(ideas_filepath, "r", encoding = "ISO-8859-1") as f:
+#         for line in f:
 
-            clean_line = line.split("#")[0].strip()
-            if not clean_line:
-                continue
+#             clean_line = line.split("#")[0].strip()
+#             if not clean_line:
+#                 continue
     
-    return ideas
+#     return ideas
 
 
 def get_tech_names():
