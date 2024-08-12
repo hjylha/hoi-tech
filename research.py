@@ -15,6 +15,42 @@ class Politics:
         for idea in self.ideas:
             if idea.get_research_bonus():
                 self.tech_ideas.append(idea)
+    
+    def get_tech_personalities_and_ideas_as_dict(self):
+        tech_personalities_and_ideas = dict()
+        for personality in self.tech_minister_personalities:
+            key = personality.position.lower()
+            if tech_personalities_and_ideas.get(key) is None:
+                tech_personalities_and_ideas[key] = [personality]
+            else:
+                tech_personalities_and_ideas[key].append(personality)
+        for idea in self.tech_ideas:
+            key = idea.position.lower()
+            if tech_personalities_and_ideas.get(key) is None:
+                tech_personalities_and_ideas[key] = [idea]
+            else:
+                tech_personalities_and_ideas[key].append(idea)
+        return tech_personalities_and_ideas
+    
+    def get_policies_for_checkboxes(self):
+        initial_dict = self.get_tech_personalities_and_ideas_as_dict()
+        final_dict = dict()
+        for key, value in initial_dict.items():
+            final_dict[key] = [personality.name for personality in value]
+            final_dict[key].append("other")
+        return final_dict
+    
+    def get_minister_personality(personality_str):
+        for personality in self.minister_personalities:
+            if personality.name.lower() == personality_str.lower() and personality.position == "all":
+                return personality
+            if personality.name.lower() == personality_str.lower() and personality.position == position:
+                return personality
+            if personality.name.lower() == personality_str.lower():
+                print("Match for", personality.name, "but", personality.position, "!=", position)
+                return personality
+        else:
+            print(f"Minister personality {personality_str} not found")
 
     def __init__(self):
         self.minister_personalities = scan_minister_personalities()
@@ -70,7 +106,14 @@ class Politics:
             if check_position and position.lower() != minister.position.lower():
                 raise Exception(f"{position} does not match {minister.position} for {minister.name} [{minister.m_id}]")
             self.current_policies[position] = minister.personality
-
+    
+    def change_minister_or_idea(self, position, name):
+        for pos in self.current_policies.keys():
+            if pos == position.lower() and name == "other":
+                self.current_policies[pos] = None
+            elif pos == position.lower():
+                personality = self.get_minister_personality(name)
+                self.current_policies[pos] = personality
 
 class Research:
     DEFAULT_YEAR = 1933
@@ -163,7 +206,10 @@ class Research:
         #         self.active_techs.add(tech_id)
 
     def change_minister(self, new_minister_personality):
-        self.politics.current_policies[new_minister_personality.position.lower()] = new_minister_personality.get_research_bonus()
+        self.politics.current_policies[new_minister_personality.position.lower()] = new_minister_personality
+    
+    def change_minister_or_idea(self, position, name):
+        self.politics.change_minister_or_idea(position, name)
 
     def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
         if list_of_techs is None:

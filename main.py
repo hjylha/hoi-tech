@@ -138,6 +138,53 @@ class CountryButton(BoxLayout):
         self.add_widget(self.remove_button)
 
 
+class MinisterCheckBox(BoxLayout):
+    def on_checkbox_active(self, checkbox, value):
+        if value:
+            self.parent.choose_minister_or_idea(self.name.text)
+            # print(value)
+            # print(self.name.text, "is selected")
+        else:
+            # print(value)
+            print(self.name.text, "is not selected")
+
+    def __init__(self, label_text, group_name, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = "horizontal"
+
+        self.name = Label(text=label_text)
+        self.checkbox = CheckBox(group=group_name)
+        self.checkbox.bind(active=self.on_checkbox_active)
+
+        self.add_widget(self.checkbox)
+        self.add_widget(self.name)
+
+
+class MinisterCheckBoxGroup(BoxLayout):
+    def choose_minister_or_idea(self, name):
+        print(self.title.text, name)
+        print(self.parent)
+        print(self.parent.parent)
+        print(self.parent.parent.parent)
+        print(self.parent.parent.parent.parent.attach_to)
+        print(self.parent.parent.parent.parent.parent)
+    
+    def __init__(self, group_name, list_of_labels, **kwargs):
+        super().__init__(**kwargs)
+        self.orientation = "vertical"
+
+        self.title = Label(text=group_name)
+        self.add_widget(self.title)
+
+        for label in list_of_labels:
+            checkbox = MinisterCheckBox(label, group_name)
+            self.add_widget(checkbox)
+
+        self.effects = [Label(text=""), Label(text="")]
+        for effect in self.effects:
+            self.add_widget(effect)
+
+
 class TechnologyButton(BoxLayout):
     SIZE_HINT = (0.15, 0.035)
     
@@ -1104,39 +1151,55 @@ class PolicyScreen(BoxLayout):
             self.rect = Rectangle(size=self.size, pos=self.pos)
         self.bind(pos=update_layout, size=update_layout)
 
-        arm_minister_choice = BoxLayout(orientation="vertical")
-        intel_and_cos_choice = BoxLayout(orientation="vertical")
-        idea_choice = BoxLayout(orientation="vertical")
+        arm_minister_choice = BoxLayout(orientation="vertical", size_hint=(0.33, 1))
+        intel_and_cos_choice = BoxLayout(orientation="vertical", size_hint=(0.33, 1))
+        idea_choice = BoxLayout(orientation="vertical", size_hint=(0.33, 1))
 
-        for i in range(11):
-            checkbox = CheckBox(group="armamentminister")
-            label = Label(text=f"minister{i+1}")
-            arm_minister_choice.add_widget(checkbox)
-            arm_minister_choice.add_widget(label)
+        labels = the_research.politics.get_policies_for_checkboxes()
 
-        for i in range(2):
-            checkbox = CheckBox(group="ministerofintelligence")
-            label = Label(text=f"minister{i+1}")
-            intel_and_cos_choice.add_widget(checkbox)
-            intel_and_cos_choice.add_widget(label)
+        # self.choices = dict()
+        self.choices = []
+        for key, list_of_labels in labels.items():
+            choice = MinisterCheckBoxGroup(key, list_of_labels)
+            self.choices.append(choice)
 
-        for i in range(2):
-            checkbox = CheckBox(group="chiefofstaff")
-            label = Label(text=f"minister{i+1}")
-            intel_and_cos_choice.add_widget(checkbox)
-            intel_and_cos_choice.add_widget(label)
+        for i, choice in enumerate(self.choices):
+            if i == 0:
+                arm_minister_choice.add_widget(choice)
+            elif i in [1, 2]:
+                intel_and_cos_choice.add_widget(choice)
+            else:
+                idea_choice.add_widget(choice)
 
-        for i in range(3):
-            checkbox = CheckBox(group="socialpolicy")
-            label = Label(text=f"idea{i+1}")
-            idea_choice.add_widget(checkbox)
-            idea_choice.add_widget(label)
+        # for i in range(11):
+        #     checkbox = CheckBox(group="armamentminister")
+        #     label = Label(text=f"minister{i+1}")
+        #     arm_minister_choice.add_widget(checkbox)
+        #     arm_minister_choice.add_widget(label)
 
-        for i in range(2):
-            checkbox = CheckBox(group="nationalculture")
-            label = Label(text=f"idea{i+1}")
-            idea_choice.add_widget(checkbox)
-            idea_choice.add_widget(label)
+        # for i in range(2):
+        #     checkbox = CheckBox(group="ministerofintelligence")
+        #     label = Label(text=f"minister{i+1}")
+        #     intel_and_cos_choice.add_widget(checkbox)
+        #     intel_and_cos_choice.add_widget(label)
+
+        # for i in range(2):
+        #     checkbox = CheckBox(group="chiefofstaff")
+        #     label = Label(text=f"minister{i+1}")
+        #     intel_and_cos_choice.add_widget(checkbox)
+        #     intel_and_cos_choice.add_widget(label)
+
+        # for i in range(3):
+        #     checkbox = CheckBox(group="socialpolicy")
+        #     label = Label(text=f"idea{i+1}")
+        #     idea_choice.add_widget(checkbox)
+        #     idea_choice.add_widget(label)
+
+        # for i in range(2):
+        #     checkbox = CheckBox(group="nationalculture")
+        #     label = Label(text=f"idea{i+1}")
+        #     idea_choice.add_widget(checkbox)
+        #     idea_choice.add_widget(label)
 
         self.add_widget(arm_minister_choice)
         self.add_widget(intel_and_cos_choice)
@@ -1467,7 +1530,8 @@ class StatusBar(BoxLayout):
         self.rest_of_the_statusbar = BoxLayout(orientation="horizontal", size_hint=(0.555, 1))
 
         self.policy_dropdown = DropDown()
-        self.policy_screen = PolicyScreen(bg_color=self.bg_color, size_hint_y=None, height=dp(250))
+        # self.policy_screen = PolicyScreen(bg_color=self.bg_color, size_hint_y=None, height=dp(400))
+        self.policy_screen = PolicyScreen(bg_color=(0, 0.15, 0.05, 1), size_hint_y=None, height=dp(400))
 
         self.policy_dropdown.add_widget(self.policy_screen)
 
