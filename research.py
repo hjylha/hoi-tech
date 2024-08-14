@@ -5,6 +5,7 @@ from scan_hoi_files import scan_techs, get_tech_teams, scan_scenario_file_for_co
 
 
 class Politics:
+    # TODO: year has an effect on available ministers
 
     def filter_personalities_and_ideas_that_affect_research(self):
         self.tech_minister_personalities = []
@@ -40,11 +41,11 @@ class Politics:
             final_dict[key].append("other")
         return final_dict
     
-    def get_minister_personality(personality_str):
-        for personality in self.minister_personalities:
-            if personality.name.lower() == personality_str.lower() and personality.position == "all":
+    def get_minister_personality_or_idea(self, personality_str, position):
+        for personality in (self.minister_personalities + self.ideas):
+            if personality.name.lower() == personality_str.lower() and personality.position.lower() == "all":
                 return personality
-            if personality.name.lower() == personality_str.lower() and personality.position == position:
+            if personality.name.lower() == personality_str.lower() and personality.position.lower() == position.lower():
                 return personality
             if personality.name.lower() == personality_str.lower():
                 print("Match for", personality.name, "but", personality.position, "!=", position)
@@ -112,7 +113,7 @@ class Politics:
             if pos == position.lower() and name == "other":
                 self.current_policies[pos] = None
             elif pos == position.lower():
-                personality = self.get_minister_personality(name)
+                personality = self.get_minister_personality_or_idea(name, pos)
                 self.current_policies[pos] = personality
 
 class Research:
@@ -184,8 +185,15 @@ class Research:
         self.blueprints = set()
         self.update_active_techs()
 
+    def change_minister(self, new_minister_personality):
+        self.politics.current_policies[new_minister_personality.position.lower()] = new_minister_personality
+    
+    def change_minister_or_idea(self, position, name):
+        self.politics.change_minister_or_idea(position, name)
+
     def choose_primary_country(self, country_code):
         self.primary_country = country_code
+        self.politics.scan_available_ministers(country_code)
         scenario_data = scan_scenario_file_for_country(country_code)
         if scenario_data is None:
             return
@@ -194,6 +202,14 @@ class Research:
         self.blueprints = set(scenario_data["blueprints"])
         if scenario_data.get("research_speed") is not None:
             self.research_speed = scenario_data["research_speed"]
+        
+        for possible_position, minister_id in scenario_data.items():
+            if possible_position in self.politics.current_policies.keys():
+                minister = self.politics.get_minister_by_id(minister_id)
+                if minister is None:
+                    print(minister_id)
+                self.politics.current_policies[possible_position] = minister.personality
+
 
         for tech_id in self.completed_techs:
             deactivations = self.techs[tech_id].get_deactivated_tech()
@@ -204,12 +220,6 @@ class Research:
         # for tech_id in self.techs:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
-
-    def change_minister(self, new_minister_personality):
-        self.politics.current_policies[new_minister_personality.position.lower()] = new_minister_personality
-    
-    def change_minister_or_idea(self, position, name):
-        self.politics.change_minister_or_idea(position, name)
 
     def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
         if list_of_techs is None:
@@ -222,6 +232,8 @@ class Research:
 
         self.year = year
         self.research_speed = self.DEFAULT_RESEARCH_SPEED
+
+        self.politics = Politics()
 
         if countries:
             country_code = countries[0]
@@ -242,8 +254,6 @@ class Research:
         # do we need to do anything else with rockets and reactors?
         self.num_of_rocket_sites = 0
         self.reactor_size = 0
-
-        self.politics = Politics()
 
     def get_sum_of_policy_effects(self):
         return self.politics.get_sum_of_research_bonuses()
@@ -342,6 +352,9 @@ class Research:
         lines.append(deactivated_techs_line)
         blueprints_line = f"blueprints={','.join([str(t) for t in self.blueprints])}"
         lines.append(blueprints_line)
+        for position, personality in self.politics.current_policies.items():
+            name = "" if personality is None else personality.name
+            lines.append(f"{position}={name}")
         with open(path, "w") as f:
             f.write("\n".join(lines))
 
@@ -355,6 +368,7 @@ class Research:
         completed = None
         deactivated = None
         blueprints = None
+        policy_changes = dict()
         with open(path, "r") as f:
             for line in f:
                 if "country" in line:
@@ -400,6 +414,13 @@ class Research:
                         blueprints = [int(tech) for tech in line.split("=")[1].strip().split(",")]
                     except ValueError:
                         pass
+                else:
+                    for position in self.politics.current_policies:
+                        if position in line:
+                            policy_changes[position] = line.split("=")[1].strip()
+                            # personality_str = line.split("=")[1].strip()
+                            # personality = self.politics.get_minister_personality(personality_str, position)
+                            # self.politics.current_policies[position] = personality
         if country_codes:
             for country_code in country_codes:
                 if country_code:
@@ -414,8 +435,22 @@ class Research:
             self.deactivated_techs = set(deactivated)
         if blueprints:
             self.blueprints = set(blueprints)
+        if policy_changes:
+            for position, name in policy_changes.items():
+                self.change_minister_or_idea(position, name)
         self.update_active_techs()
-        
+    
+
+    def get_current_policies_and_effects_for_checkboxes(self):
+        policy_dict = dict()
+        for position, personality in self.politics.current_policies.items():
+            if personality is None:
+                policy_dict[position] = ["other", dict()]
+            elif (research_bonus := personality.get_research_bonus()):
+                policy_dict[position] = [personality.name, research_bonus]
+            else:
+                policy_dict[position] = ["other", dict()]
+        return policy_dict
             
     def list_requirements(self, tech):
         reqs = []
@@ -643,5 +678,8 @@ if __name__ == "__main__":
     print("Completed:", r.completed_techs)
     print("Deactivated:", r.deactivated_techs)
     print("Blueprints:", r.blueprints)
+
+    pol = r.politics
+    curr = r.politics.current_policies
 
 

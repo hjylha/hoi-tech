@@ -200,7 +200,7 @@ def scan_minister_personalities():
     m_personalities = content["minister_personalities"]["personality"]
     for personality in m_personalities:
         name = personality["personality_string"]
-        position = personality["minister_position"]
+        position = personality["minister_position"].lower()
         personality_modifiers = ensure_lists_are_lists(personality.get("modifier"))
         modifiers = []
         for modifier in personality_modifiers:
@@ -249,14 +249,17 @@ def scan_minister_csv(filepath, minister_personalities):
         if not minister_id:
             continue
         # minister_position = line[1]
+        position = line[1].replace(" ", "").lower()
         # minister_name = line[2]
         # start_year = line[3]
         # minister_ideology = line[4]
         minister_personality_str = line[5]
-        minister_personality = get_minister_personality(minister_personalities, minister_personality_str, line[1])
+        minister_personality = get_minister_personality(minister_personalities, minister_personality_str, position)
+        # if minister_personality is None:
+        #     print(minister_personality_str)
         # minister_loyalty = line[6]
         # minister_pic = line[7]
-        ministers.append(Minister(minister_id, line[2], line[1], minister_personality, line[3], line[4], line[6], line[7]))
+        ministers.append(Minister(minister_id, line[2], position, minister_personality, line[3], line[4], line[6], line[7]))
     return {country_code_from_file: ministers}
 
 def scan_ministers_for_country(country_code):
@@ -272,47 +275,86 @@ def scan_scenario_file(filepath):
     if filepath is None:
         return None
     results = dict()
-    deactivated_tech = []
-    researched_tech = []
-    blueprints = []
-    mode = None
-    stages = "={"
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
-        for line in f:
-            textline = line.split("#")[0].strip()
-            if not textline:
-                continue
-            if "deactivate" in textline:
-                mode = ["deactivated", 0]
-                current_list = deactivated_tech
-            if "techapps" in textline:
-                mode = ["researched", 0]
-                current_list = researched_tech
-            if "blueprints" in textline:
-                mode = ["blueprints", 0]
-                current_list = blueprints
-            
-            if mode is not None:
-                if mode[1] < 2:
-                    for char in stages[mode[1]:]:
-                        if char in textline:
-                            textline = textline.split(char)[1].strip()
-                            mode[1] += 1
-                if mode[1] == 2:
-                    if "}" in textline:
-                        textline = textline.split("}")[0].strip()
-                        mode = None
-                    additions = [int(item.strip()) for item in textline.split(" ") if item]
-                    current_list += additions
 
-            # if mode[0] == "deactivated":
-            #     textline.split(stages[mode[1]])
+    results["deactivated"] = []
+    results["researched"] = []
+    results["blueprints"] = []
+
+    content = read_txt_file(filepath, False)
+    if content["country"].get("deactivate") is not None:
+        results["deactivated"] = content["country"]["deactivate"]
+    if content["country"].get("techapps") is not None:
+        results["researched"] = content["country"]["techapps"]
+    if content["country"].get("blueprints") is not None:
+        results["blueprints"] = content["country"]["blueprints"]
+    if content["country"].get("research_mod") is not None:
+        results["research_speed"] = float(content["country"]["research_mod"]) * 100
+    minister_positions = ["headofstate", "headofgovernment", "foreignminister", "armamentminister", "ministerofsecurity", "ministerofintelligence", "chiefofstaff", "chiefofarmy", "chiefofnavy", "chiefofair"]
+    for position in minister_positions:
+        if content["country"].get(position) is not None:
+            results[position] = int(content["country"][position]["id"])
+    # if content["country"].get("headofstate") is not None:
+    #     results["headofstate"] = content["country"]["headofstate"]["id"]
+    # if content["country"].get("headofgovernment") is not None:
+    #     results["headofgovernment"] = content["country"]["headofgovernment"]["id"]
+    # if content["country"].get("foreignminister") is not None:
+    #     results["foreignminister"] = content["country"]["foreignminister"]["id"]
+    # if content["country"].get("armamentminister") is not None:
+    #     results["armamentminister"] = content["country"]["armamentminister"]["id"]
+    # if content["country"].get("ministerofsecurity") is not None:
+    #     results["ministerofsecurity"] = content["country"]["ministerofsecurity"]["id"]
+    # if content["country"].get("ministerofintelligence") is not None:
+    #     results["ministerofintelligence"] = content["country"]["ministerofintelligence"]["id"]
+    # if content["country"].get("chiefofstaff") is not None:
+    #     results["chiefofstaff"] = content["country"]["chiefofstaff"]["id"]
+    # if content["country"].get("chiefofarmy") is not None:
+    #     results["chiefofarmy"] = content["country"]["chiefofarmy"]["id"]
+    # if content["country"].get("chiefofnavy") is not None:
+    #     results["chiefofnavy"] = content["country"]["chiefofnavy"]["id"]
+    # if content["country"].get("chiefofair") is not None:
+    #     results["chiefofair"] = content["country"]["chiefofair"]["id"]
+
+    # deactivated_tech = []
+    # researched_tech = []
+    # blueprints = []
+    # mode = None
+    # stages = "={"
+    # with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    #     for line in f:
+    #         textline = line.split("#")[0].strip()
+    #         if not textline:
+    #             continue
+    #         if "deactivate" in textline:
+    #             mode = ["deactivated", 0]
+    #             current_list = deactivated_tech
+    #         if "techapps" in textline:
+    #             mode = ["researched", 0]
+    #             current_list = researched_tech
+    #         if "blueprints" in textline:
+    #             mode = ["blueprints", 0]
+    #             current_list = blueprints
             
-            if "research_mod" in textline:
-                results["research_speed"] = float(textline.split("=")[1].strip()) * 100
-    results["deactivated"] = deactivated_tech
-    results["researched"] = researched_tech
-    results["blueprints"] = blueprints
+    #         if mode is not None:
+    #             if mode[1] < 2:
+    #                 for char in stages[mode[1]:]:
+    #                     if char in textline:
+    #                         textline = textline.split(char)[1].strip()
+    #                         mode[1] += 1
+    #             if mode[1] == 2:
+    #                 if "}" in textline:
+    #                     textline = textline.split("}")[0].strip()
+    #                     mode = None
+    #                 additions = [int(item.strip()) for item in textline.split(" ") if item]
+    #                 current_list += additions
+
+    #         # if mode[0] == "deactivated":
+    #         #     textline.split(stages[mode[1]])
+            
+    #         if "research_mod" in textline:
+    #             results["research_speed"] = float(textline.split("=")[1].strip()) * 100
+    # results["deactivated"] = deactivated_tech
+    # results["researched"] = researched_tech
+    # results["blueprints"] = blueprints
     return results
 
 def scan_scenario_file_for_country(country_code):
