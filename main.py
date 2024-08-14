@@ -144,16 +144,16 @@ class MinisterCheckBox(BoxLayout):
             self.parent.choose_minister_or_idea(self.name.text)
             # print(value)
             # print(self.name.text, "is selected")
-        else:
+        # else:
             # print(value)
-            print(self.name.text, "is not selected")
+            # print(self.name.text, "is not selected")
 
     def __init__(self, label_text, group_name, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "horizontal"
 
-        self.name = Label(text=label_text)
-        self.checkbox = CheckBox(group=group_name)
+        self.name = Label(text=label_text, size_hint=(0.8, 1))
+        self.checkbox = CheckBox(group=group_name, size_hint=(0.2, 1))
         self.checkbox.bind(active=self.on_checkbox_active)
 
         self.add_widget(self.checkbox)
@@ -162,12 +162,36 @@ class MinisterCheckBox(BoxLayout):
 
 class MinisterCheckBoxGroup(BoxLayout):
     def choose_minister_or_idea(self, name):
-        print(self.title.text, name)
-        print(self.parent)
-        print(self.parent.parent)
-        print(self.parent.parent.parent)
-        print(self.parent.parent.parent.parent.attach_to)
-        print(self.parent.parent.parent.parent.parent)
+        if self.parent is None or self.parent.parent is None:
+            return
+        self.parent.parent.choose_minister_or_idea(self.title.text, name)
+        # print(self.title.text, name)
+        # print(self.parent)
+        # print(self.parent.parent)
+        # print(self.parent.parent.parent)
+        # print(self.parent.parent.parent.parent.attach_to)
+        # print(self.parent.parent.parent.parent.parent)
+    
+    def change_minister(self, minister_personality_str):
+        for checkbox in self.list_of_checkboxes:
+            checkbox.checkbox.active = False
+        if not minister_personality_str:
+            self.list_of_checkboxes[-1].checkbox.active = True
+            return
+        for checkbox in self.list_of_checkboxes:
+            if checkbox.name.text.lower() == minister_personality_str.lower():
+                checkbox.checkbox.active = True
+                return
+        else:
+            self.list_of_checkboxes[-1].checkbox.active = True
+        
+    def change_research_effects(self, effect_dict):
+        for effect_label in self.effects:
+            effect_label.text = ""
+        if not effect_dict:
+            return
+        for effect_label, effect_type in zip(self.effects[:len(effect_dict)], effect_dict.keys()):
+            effect_label.text = f"{effect_type}: +{-100 * effect_dict[effect_type]}"
     
     def __init__(self, group_name, list_of_labels, **kwargs):
         super().__init__(**kwargs)
@@ -176,9 +200,12 @@ class MinisterCheckBoxGroup(BoxLayout):
         self.title = Label(text=group_name)
         self.add_widget(self.title)
 
+        self.list_of_checkboxes = []
         for label in list_of_labels:
             checkbox = MinisterCheckBox(label, group_name)
+            self.list_of_checkboxes.append(checkbox)
             self.add_widget(checkbox)
+        self.list_of_checkboxes[-1].checkbox.active = True
 
         self.effects = [Label(text=""), Label(text="")]
         for effect in self.effects:
@@ -1141,6 +1168,26 @@ class MainScreen(BoxLayout):
 
 
 class PolicyScreen(BoxLayout):
+    def choose_minister_or_idea(self, position, name):
+        # print(position, name)
+        # print(self.parent.parent.attach_to.parent)
+        if self.parent.parent.attach_to is None:
+            return
+        # print(self.parent)
+        # print(self.parent.parent)
+        # print(self.parent.parent.attach_to)
+        self.parent.parent.attach_to.parent.change_policies_based_on_checkboxes(name, position)
+
+    def change_policy_choices(self, policy_dict):
+        for choice in self.choices:
+            if choice.title.text.lower() in policy_dict:
+                choice.change_minister(policy_dict[choice.title.text.lower()])
+    
+    def show_tech_effects_of_policies(self, effect_dict):
+        for choice in self.choices:
+            if choice.title.text.lower() in effect_dict:
+                choice.change_research_effects(effect_dict[choice.title.text.lower()])
+
     def __init__(self, bg_color=(0, 0, 0, 1), **kwargs):
         super().__init__(**kwargs)
 
@@ -1259,6 +1306,8 @@ class StatusBar(BoxLayout):
         
         # print(f"{self.parent=}")
         self.parent.add_country(country_code)
+        if country_code == self.parent.research.primary_country:
+            self.change_checkboxes_based_on_policies()
         self.update_fastest_teams()
         # self.save_country_difficulty_and_year()
         self.parent.save_status()
@@ -1472,6 +1521,23 @@ class StatusBar(BoxLayout):
         except ValueError:
             widget.text = str(previous_research_speed)
 
+    
+    def change_checkboxes_based_on_policies(self, only_effects=False):
+        policies_and_effects = self.parent.research.get_current_policies_and_effects_for_checkboxes()
+        effects_dict = {position: value[1] for position, value in policies_and_effects.items()}
+        self.policy_screen.show_tech_effects_of_policies(effects_dict)
+        if only_effects:
+            return
+        policy__dict = {position: value[0] for position, value in policies_and_effects.items()}
+        self.policy_screen.change_policy_choices(policy__dict)
+
+    def change_policies_based_on_checkboxes(self, name, position):
+        self.parent.research.change_minister_or_idea(position, name)
+        # update effects
+        self.change_checkboxes_based_on_policies(True)
+        self.update_fastest_teams()
+
+    
     def update_statusbar_from_research(self):
         research = self.parent.research
         for country_code in research.countries:
@@ -1483,6 +1549,7 @@ class StatusBar(BoxLayout):
         # print(f"STATUSBAR UPDATED: {self.rocket_site_button.text=}")
         self.reactor_size_button.text = str(research.reactor_size)
         # print(f"STATUSBAR UPDATED: {self.reactor_size_button.text=}")
+        self.change_checkboxes_based_on_policies()
 
 
     def __init__(self, bg_color=(0, 0, 0, 0), **kwargs):
@@ -1530,6 +1597,7 @@ class StatusBar(BoxLayout):
         self.rest_of_the_statusbar = BoxLayout(orientation="horizontal", size_hint=(0.555, 1))
 
         self.policy_dropdown = DropDown()
+        self.policy_dropdown.attach_to = self.rest_of_the_statusbar
         # self.policy_screen = PolicyScreen(bg_color=self.bg_color, size_hint_y=None, height=dp(400))
         self.policy_screen = PolicyScreen(bg_color=(0, 0.15, 0.05, 1), size_hint_y=None, height=dp(400))
 
