@@ -43,6 +43,10 @@ def get_misc_path():
     aod_path = get_aod_path()
     return aod_path / "db" / "misc.txt"
 
+def get_difficulty_path():
+    aod_path = get_aod_path()
+    return aod_path / "db" / "difficulty.csv"
+
 def get_minister_modifier_path():
     aod_path = get_aod_path()
     return aod_path / "db" / "ministers" / "minister_modifiers.txt"
@@ -54,6 +58,10 @@ def get_ideas_path():
 def get_ministers_path(country_code):
     aod_path = get_aod_path()
     return aod_path / "db" / "ministers" / f"ministers_{country_code.lower()}.csv"
+
+def get_policies_path():
+    aod_path = get_aod_path()
+    return aod_path / "db" / "province_rev.inc"
 
 def get_tech_names_path():
     aod_path = get_aod_path()
@@ -107,7 +115,7 @@ def read_names_from_file(search_terms, filepath, language="English"):
     return names
 
 
-def read_csv_file(filepath, check_filetype=True):
+def read_csv_file(filepath, check_filetype=False):
     if check_filetype and filepath.suffix != ".csv":
         print(f"{filepath} is not a csv file.")
         return
@@ -121,7 +129,7 @@ def read_csv_file(filepath, check_filetype=True):
     return csv_content_list
 
 
-def read_txt_file(filepath, check_filetype=True):
+def read_txt_file(filepath, check_filetype=False):
     if check_filetype and filepath.suffix != ".txt":
         print(f"{filepath} is not a txt file.")
         return
