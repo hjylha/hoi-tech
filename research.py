@@ -1,7 +1,7 @@
 
 from read_hoi_files import get_country_names
 from scan_hoi_files import scan_minister_personalities, scan_ideas, scan_ministers_for_country
-from scan_hoi_files import scan_techs, get_tech_teams, scan_scenario_file_for_country
+from scan_hoi_files import scan_techs, get_tech_teams, scan_policies_file, scan_scenario_file_for_country
 
 
 class Politics:
@@ -209,7 +209,12 @@ class Research:
                 if minister is None:
                     print(minister_id)
                 self.politics.current_policies[possible_position] = minister.personality
-
+        
+        policies = scan_policies_file().get(country_code)
+        if policies:
+            for position, idea_name in policies.items():
+                idea = self.politics.get_minister_personality_or_idea(idea_name, position)
+                self.politics.current_policies[position] = idea
 
         for tech_id in self.completed_techs:
             deactivations = self.techs[tech_id].get_deactivated_tech()

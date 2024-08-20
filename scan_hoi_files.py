@@ -1,5 +1,5 @@
 
-from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_scenario_path_for_country
+from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path, get_scenario_path_for_country
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality
@@ -269,6 +269,22 @@ def scan_ministers_for_country(country_code):
     minister_personalities = scan_minister_personalities()
     minister_dict = scan_minister_csv(ministers_path, minister_personalities)
     return minister_dict[country_code]
+
+
+def scan_policies_file():
+    policy_path = get_policies_path()
+    country_data = read_txt_file(policy_path)["country"]
+    policy_dict = dict()
+    for country_dict in country_data:
+        if "nationalidentity" in country_dict.keys() or "socialpolicy" in country_dict.keys() or "nationalculture" in country_dict.keys():
+            country_code = country_dict["tag"]
+            if policy_dict.get(country_code) is None:
+                policy_dict[country_code] = {
+                    "nationalidentity": country_dict.get("nationalidentity"),
+                    "socialpolicy": country_dict.get("socialpolicy"),
+                    "nationalculture": country_dict.get("nationalculture")
+                }
+    return policy_dict
 
 
 def scan_scenario_file(filepath):
