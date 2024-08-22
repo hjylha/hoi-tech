@@ -47,13 +47,15 @@ def get_results_for_progress_estimates(testing_results):
         team = techteams_for_testing[result["techteam"]]
         component = techs_for_testing[result["tech"]].components[0]
         # research_speed = 
-        result_tuple = (team, component, result["research speed"], result["game difficulty"], result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["1-day progress"])
+        result_tuple = (team, component, result["research speed"], result["game difficulty"], result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["has_money"], result["1-day progress"])
         results.append(result_tuple)
     return results
 
 def get_results_for_completion_estimates(testing_results):
     results = []
     for result in testing_results:
+        if not result["has_money"]:
+            continue
         team = techteams_for_testing[result["techteam"]]
         tech = techs_for_testing[result["tech"]]
         result_tuple = (team, tech, result["research speed"], result["game difficulty"], result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["days to complete game estimate"])
@@ -76,10 +78,10 @@ def test_calculate_components_difficulty_multiplier(component, research_speed_mo
 
 
 @pytest.mark.parametrize(
-        "team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, observed_1_day_progress", get_results_for_progress_estimates(research_observations)
+        "team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, has_money, observed_1_day_progress", get_results_for_progress_estimates(research_observations)
 )
-def test_1_day_progression_for_component(team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, observed_1_day_progress):
-    one_day_progress_estimate = team.calculate_1_day_progress_for_component(component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size)
+def test_1_day_progression_for_component(team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, has_money, observed_1_day_progress):
+    one_day_progress_estimate = team.calculate_1_day_progress_for_component(component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, has_money)
     assert round(one_day_progress_estimate, 2) == observed_1_day_progress
 
 

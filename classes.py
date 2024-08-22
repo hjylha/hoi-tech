@@ -143,7 +143,8 @@ class TechTeam:
             total_extra_bonus = 0,
             has_blueprint=0,
             num_of_rocket_sites = 0,
-            reactor_size = 0
+            reactor_size = 0,
+            has_money = 1
             ):
         has_speciality = 0
         component_type = component.type
@@ -155,7 +156,7 @@ class TechTeam:
             game_difficulty,
             total_extra_bonus
             )
-        skill_issue = 0.1 * (self.skill + 6) * (has_speciality + 1)
+        skill_issue = 0.1 * (self.skill * has_money + 6) * (has_speciality + 1)
         if component_type == "rocketry":
             skill_issue += num_of_rocket_sites
         if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
@@ -170,7 +171,8 @@ class TechTeam:
             total_extra_bonus = 0,
             has_blueprint=0,
             num_of_rocket_sites = 0,
-            reactor_size = 0
+            reactor_size = 0,
+            has_money = 1
             ):
         days_gone = 0
         for component in tech.components:
@@ -181,7 +183,8 @@ class TechTeam:
                 total_extra_bonus,
                 has_blueprint,
                 num_of_rocket_sites,
-                reactor_size)
+                reactor_size,
+                has_money)
             days_to_complete_component = math.ceil(20 / daily_progress)
             days_gone += days_to_complete_component
         return days_gone
@@ -194,7 +197,8 @@ class TechTeam:
             total_extra_bonus = 0,
             has_blueprint=0,
             num_of_rocket_sites = 0,
-            reactor_size = 0
+            reactor_size = 0,
+            has_money = 1
             ):
         return self.calculate_1_day_progress_for_component(
             tech.components[tech.current_component],
@@ -203,7 +207,8 @@ class TechTeam:
             total_extra_bonus,
             has_blueprint,
             num_of_rocket_sites,
-            reactor_size)
+            reactor_size,
+            has_money)
 
 
 class MinisterOrIdea:
@@ -242,14 +247,15 @@ class MinisterPersonality(MinisterOrIdea):
     #     return research_bonus_dict
 
 
-def get_minister_personality(minister_personalities, personality_str, position="all"):
+def get_minister_personality(minister_personalities, personality_str, position="all", show_issues=False):
     for personality in minister_personalities:
         if personality.name.lower() == personality_str.lower() and personality.position == "all":
             return personality
         if personality.name.lower() == personality_str.lower() and personality.position == position:
             return personality
         if personality.name.lower() == personality_str.lower():
-            print("Match for", personality.name, "but", personality.position, "!=", position)
+            if show_issues:
+                print("Match for", personality.name, "but", personality.position, "!=", position)
             return personality
     else:
         print(f"Minister personality {personality_str} not found")
