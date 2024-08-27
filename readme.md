@@ -35,7 +35,8 @@ In the following, we will discuss what factors have an effect on a tech team res
 
 There are 9 categories of technologies, and every technology consists of 5 components, each of which have a type and a difficulty. In Iron Cross all components of a technology have the same difficulty, but only one technology out 775 has all its components be of the same type. All in all, there are 34 different component types in the game. 
 
-As mentioned before, each country has its own tech teams. Tech teams have a skill and up to 5 specializations, i.e. component types that they specialize in. Specialization doubles team's research speed.
+As mentioned before, each country has its own tech teams. Tech teams have a skill and up to 5 specializations, i.e. component types that they specialize in. If a tech team specializes in the component type it is researching, its research will progress at twice the speed. 
+<!-- Specialization doubles team's research speed. -->
 
 To research a technology player must assign a tech team to research it and finish researching all of its components consecutively. If the research of a technology is cancelled, it will start from the beginning regardless of how far it had progressed before. Research progress is calculated every day, and progress can only be made in one component. This means that even if there is only 0.01% left in a component, the next day tech team will finish that component, but not do any work on the next. Thus the fastest a technology can theoretically be researched is 5 days.
 
@@ -45,15 +46,41 @@ In the above image we see a tech team Artturi Virtanen (AIV) researching Improve
 
 The tooltip gives us more information. Base Difficulty and Base Skill are important to understand, whereas Historical sate modifier is completely useless leftover from the original Heart of Iron 2. And Current Component Speed (CCS) is in fact the (rounded) percentage of the component that is completed in a day. Since there are 5 components, CCS is 5 times the daily progress of the technology that a player observes: in this case $5.6 = 5 \times 1.12$. Given that we are interested in the progress of the whole technology and CCS is rounded to one decimal, we will mostly ignore it.
 
-In this case it is easy to see that $CCS = 2.8 \times BaseSkill / BaseDifficulty$, which gives us a base model for daily research completion
-$$ DailyCompletion = 2.8 \times \frac{BaseSkill}{5 \times BaseDifficulty}. $$
-Here the constant 2.8 is expected, since that is the value for _tech speed modifier_ in the game file `db/misc.txt`.
-
-There are two more things that could be showing up in the research tooltip, but in this case do not: Specialization and blueprints. As mentioned above
-
 <!-- In my opinion it would have been clearer to have CCS be the daily progress of the whole technology, but I guess it is true to its name and is only about the current component. -->
 
 
+In this case it is easy to see that $CCS = 2.8 \times BaseSkill / BaseDifficulty$, which gives us a base model for daily research completion
+```math
+DailyCompletion = 2.8 \times \frac{BaseSkill}{5 \times BaseDifficulty}.
+```
+Here the constant $2.8$ is expected, since that is the value for _tech speed modifier_ in the game file `db/misc.txt`.
+
+There are two more things that could be showing up in the research tooltip, but in this case do not: Specialization and blueprints. As mentioned above research progresses twice as fast if the tech team specializes in the type of component it is researching. On the other hand, having blueprints for a technology multiplies the speed of research by $1.7$. This constant can also be found in the file `db/misc.txt`. In the image below we see that the research tooltip mentions specialization and blueprints, if they are present.
+
+![More research information](pics/ic_info2.png)
+
+Based on this information we can refine our research completion model to include specialization and blueprints. The updated model is
+```math
+DailyCompletion = 2.8 \times \frac{BaseSkill \times (1 + HasSpecial)}{5 \times BaseDifficulty} \times (1 + 0.7 \times HasBlueprint),
+```
+where $HasSpecial$ and $HasBlueprint$ have value $1$ or $0$ depending on if they are true or false.
+
+So far I have tried to avoid using the term _research speed_, 
+
+And the unknowns...
+
+![Weird research information](pics/ic_info3.png)
+
+## What is Base Skill?
+
+This is simple:
+```math
+BaseSkill = \frac{TeamSkill + 6}{10}.
+```
+
+## What is Base Difficulty?
+
+Into the depths...
 
 
 <!-- $$ dailyprogress = CONSTANT \times \frac{teamskill \times researchspeed}{techdifficulty} $$ -->
