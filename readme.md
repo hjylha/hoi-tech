@@ -23,7 +23,13 @@ python main.py
 
 Iron Cross is a grand strategy game allowing player to control practically any country in the world before, during and after World War II just like the game it is based on: Hearts of Iron II. An important part of Iron Cross is advancing technology through research. The tech tree is the same for each country, though there are a few exclusive choices (and some of those have already been made for some countries). On the other hand, each country has their own tech teams that actually do the research. At any time, a country can have 1 - 5 tech teams researching technologies based on their size (or to be more accurate, their industrial capacity). 
 
-![Iron Cross technology screen](pics/ic_infantry.png)
+<!-- ![Iron Cross technology screen](pics/ic_infantry.png)
+<small>Image 1: Iron Cross technology screen</small> -->
+
+<figure>
+    <img src="pics/ic_infantry.png" alt="Iron Cross technology screen">
+    <figcaption>Image 1: Iron Cross technology screen</figcaption>
+</figure>
 
 The bigger number of active tech teams gives a potential technological advantage to bigger countries, and this advantage is further strengthened by the fact that countries cannot share technologies, only _blueprints_, and while blueprints speed up research significantly, they are not a "get out of do-your-research" card. To balance the advantage the bigger countries have, the game gives smaller countries greater _research speed_ at the start. However, since most technologies improve research speed slightly (in addition to their more obvious effects), bigger countries will catch up to smaller countries in research speed over time.
 
@@ -40,9 +46,15 @@ As mentioned before, each country has its own tech teams. Tech teams have a skil
 
 To research a technology player must assign a tech team to research it and finish researching all of its components consecutively. If the research of a technology is cancelled, it will start from the beginning regardless of how far it had progressed before. Research progress is calculated every day, and progress can only be made in one component. This means that even if there is only 0.01% left in a component, the next day tech team will finish that component, but not do any work on the next. Thus the fastest a technology can theoretically be researched is 5 days.
 
-![Research information](pics/ic_info.PNG)
+<!-- ![Research information](pics/ic_info.PNG)
+<small>Image 2: Artturi Virtanen researching Improved Industry</small> -->
 
-In the above image we see a tech team Artturi Virtanen (AIV) researching Improved Industry (II). After one day AIV has completed 1.12% of II. We notice that AIV has a skill of 6 and specializes in chemistry and management. These specializations are highlighted because II has components of those types. Ignoring the tooltip (which we will cover shortly) this image does not show that AIV does not specialize in the first component of II, there are no blueprints for II, or that II (or strictly speaking, all its components) has difficulty 4.
+<figure>
+    <img src="pics/ic_info.PNG" alt="Research information">
+    <figcaption>Image 2: Artturi Virtanen researching Improved Industry</figcaption>
+</figure>
+
+In Image 2 we see a tech team Artturi Virtanen (AIV) researching Improved Industry (II). After one day AIV has completed 1.12% of II. We notice that AIV has a skill of 6 and specializes in chemistry and management. These specializations are highlighted because II has components of those types. Ignoring the tooltip (which we will cover shortly) this image does not show that AIV does not specialize in the first component of II, there are no blueprints for II, or that II (or strictly speaking, all its components) has difficulty 4.
 
 The tooltip gives us more information. Base Difficulty and Base Skill are important to understand, whereas Historical sate modifier is completely useless leftover from the original Heart of Iron 2. And Current Component Speed (CCS) is in fact the (rounded) percentage of the component that is completed in a day. Since there are 5 components, CCS is 5 times the daily progress of the technology that a player observes: in this case $5.6 = 5 \times 1.12$. Given that we are interested in the progress of the whole technology and CCS is rounded to one decimal, we will mostly ignore it.
 
@@ -55,9 +67,15 @@ DailyCompletion = 2.8 \times \frac{BaseSkill}{5 \times BaseDifficulty}.
 ```
 Here the constant $2.8$ is expected, since that is the value for _tech speed modifier_ in the game file `db/misc.txt`.
 
-There are two more things that could be showing up in the research tooltip, but in this case do not: Specialization and blueprints. As mentioned above research progresses twice as fast if the tech team specializes in the type of component it is researching. On the other hand, having blueprints for a technology multiplies the speed of research by $1.7$. This constant can also be found in the file `db/misc.txt`. In the image below we see that the research tooltip mentions specialization and blueprints, if they are present.
+There are two more things that could be showing up in the research tooltip, but in this case do not: Specialization and blueprints. As mentioned above research progresses twice as fast if the tech team specializes in the type of component it is researching. On the other hand, having blueprints for a technology multiplies the speed of research by $1.7$. This constant can also be found in the file `db/misc.txt`. In Image 3 below we see that the research tooltip mentions specialization and blueprints, if they are present.
 
-![More research information](pics/ic_info2.png)
+<!-- ![More research information](pics/ic_info2.png)
+<small>Image 3: Artturi Virtanen researching Advanced Vacuum Tubes</small> -->
+
+<figure>
+    <img src="pics/ic_info2.png" alt="More research information">
+    <figcaption>Image 3: Artturi Virtanen researching Advanced Vacuum Tubes</figcaption>
+</figure>
 
 Based on this information we can refine our research completion model to include specialization and blueprints. The updated model is
 ```math
@@ -65,22 +83,41 @@ DailyCompletion = 2.8 \times \frac{BaseSkill \times (1 + HasSpecial)}{5 \times B
 ```
 where $HasSpecial$ and $HasBlueprint$ have value $1$ or $0$ depending on if they are true or false.
 
-So far I have tried to avoid using the term _research speed_, 
+So far I have deliberately tried to avoid using the term _research speed_, unless referring to the actual research speed value in the game. This value can be seen in the overview tab on the technology screen. Small countries start with research speed of $180\%$ (this is the case in the images above), medium sized countries have research speed $140\%$ and major powers have research speeds below $100\%$. Now it seems rather obvious that research speed does affect the speed of research (while also making things confusing), but as we have seen, the research tooltip does not refer to research speed in any way (maybe to avoid confusion with Current Component Speed?). Thus the effect of research speed must have been taken into account in either Base Skill or Base Difficulty.
 
-And the unknowns...
+There are still more factors that affect research. Some ministers and ideas give bonus to research in some (or all) technology categories. In the case of above images, there is a minister that gives $10\%$ bonus to industrial research, and Improved Industry and Advanced Vacuum Tubes are both industrial technologies. Since this bonus is not mentioned in the research tooltip, it should be factored into Base Skill or Base Difficulty.
 
-![Weird research information](pics/ic_info3.png)
+In the above images the green dollar sign indicates that the tech team is getting paid. Interestingly, if the player has no money, tech teams continue to do research, albeit at a slower pace, even though teams do not get paid and the dollar sign turns red. If the player directly stops funding research, then the tech teams actually stop. For the purposes of this analysis, we assume that the tech team either gets paid fully or not at all. Testing what happens if a team is paid only part of its salary gets very complicated (or maybe the game only checks if a team is paid in full, and I look stupid for not checking that...)
+
+Finally the game itself has 5 difficulty levels, which have an effect on research. Difficulty effects (or rather their values) can be found in the file `db/difficulty.csv`. In the case of above game images, the game difficulty modifier for research is $0$, but in general, the effect of game difficulty is included in Base Skill or Base Difficulty (well, surely it is going to be in Base Difficulty? Yes).
+
+Now before we attempt to ruin everything we have been building, it should be mentioned that the game shows a predicted date for when a tech team completes a technology. This date can be seen in Image 1 to the left of *Start Project* button. It should be noted that (quite predictably) this prediction does not take into account technologies whose research is completed before the predicted (and change research speed), events in the game that change research speed or give blueprints, or lack of money.
+
+Were all the factors affecting the daily progress of research mentioned? Of course not. Because rocket test sites and nuclear reactors look at our models for daily research completion and laugh at their inaccuracy. Image 4 illustrates this problem.
+
+<!-- ![Weird research information](pics/ic_info3.png)
+<small>Image 4: Henri Coanda researching Self-Propelled Rocket Artillery (with 9 rocket test sites)</small> -->
+
+<figure>
+    <img src="pics/ic_info3.png" alt="Weird research information">
+    <figcaption>Image 4: Henri Coanda researching Self-Propelled Rocket Artillery (with 9 rocket test sites)</figcaption>
+</figure>
+
+But for now, we will ignore these issues and try to make sense of what Base Skill and Base Difficulty are.
 
 ## What is Base Skill?
 
-This is simple:
+The answer is simple:
 ```math
-BaseSkill = \frac{TeamSkill + 6}{10}.
+BaseSkill = \frac{Skill + 6}{10}.
 ```
+This actually applies nicely to the situation where tech teams are not being paid, since tech teams are paid for their skill (or at least that is how I like to think about it). So unpaid teams "have skill $0$" and their Base Skill is $0.6$ (this is what the game shows the player). Note that specialization still doubles the daily progress of research, regardless of whether the team is paid or not.
 
 ## What is Base Difficulty?
 
-Into the depths...
+Well, now it gets interesting...
+
+
 
 
 <!-- $$ dailyprogress = CONSTANT \times \frac{teamskill \times researchspeed}{techdifficulty} $$ -->
