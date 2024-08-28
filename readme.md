@@ -79,7 +79,7 @@ There are two more things that could be showing up in the research tooltip, but 
 
 Based on this information we can refine our research completion model to include specialization and blueprints. The updated model is
 ```math
-DailyCompletion = 2.8 \times \frac{BaseSkill \times (1 + HasSpecial)}{5 \times BaseDifficulty} \times (1 + 0.7 \times HasBlueprint),
+DailyCompletion = 2.8 \times (1 + 0.7 \times HasBlueprint) \times \frac{BaseSkill \times (1 + HasSpecial)}{5 \times BaseDifficulty},
 ```
 where $HasSpecial$ and $HasBlueprint$ have value $1$ or $0$ depending on if they are true or false.
 
@@ -111,12 +111,48 @@ The answer is simple:
 ```math
 BaseSkill = \frac{Skill + 6}{10}.
 ```
-This actually applies nicely to the situation where tech teams are not being paid, since tech teams are paid for their skill (or at least that is how I like to think about it). So unpaid teams "have skill $0$" and their Base Skill is $0.6$ (this is what the game shows the player). Note that specialization still doubles the daily progress of research, regardless of whether the team is paid or not.
+This actually applies nicely to the situation where tech teams are not being paid, since tech teams are paid for their skill (or at least that is how I like to think about it). So unpaid teams "have skill $0$" and their Base Skill is $0.6$ (this is what the game shows to the player). Note that specialization still doubles the daily progress of research, regardless of whether the team is paid or not.
+
+## Brief interlude: "quick" way to choose the fastest tech team
+
+Suppose a technology has Base Difficulty $d$ (which based on previous observations should be the same for all components) and a tech team has skill $s$. Then we can make the (inaccurate) assumption that the time it takes for the tech team to research a component they are not specialized in is proportional to $\frac{d}{s + 6}$, and the time is proportional (with the same multiplier) to $\frac{d}{2(s + 6)}$, if the team specializes in that component.
+
+Thus, if the tech team specializes in $k$ of the $5$ components, it takes a time proportional to the quantity
+```math
+\frac{k \cdot d}{2(s + 6)} + \frac{(5 - k) d}{s+6} = \frac{10 - k}{s + 6} \cdot \frac{d}{2}
+```
+to complete the research on this technology. Here the multiplier $d/2$ is the same for each tech team, so to compare teams, it is sufficient to compare the quantities $\frac{10 - k}{s + 6}$ and see for which tech team that is smallest. Table 1 below has these quantities scaled so that a skilless (i.e. pennyless) not special team has completion time approximation of $1$.
+
+<figure>
+    <img src="pics/research_time_comparison_table.png" alt="Research time comparison table">
+    <figcaption>Table 1: Approximate research times relative to skilless non-specialized tech team</figcaption>
+</figure>
+
+While Table 1 gives a decent idea which teams are fastest, it should be noted that rocket sites and nuclear reactors ruin it for rocket and nuclear technologies.
 
 ## What is Base Difficulty?
 
 Well, now it gets interesting...
 
+It seems that a lot of things are combined into Base Difficulty. So let us break things down, and try a model like this
+```math
+\frac{1}{5 \times BaseDifficulty} = G_{GameDifficulty} \times R_{ResearchSpeed} \times M_{MinisterBonus} \times D_{Difficulty}.
+```
+Here the natural guess would be that the multiplier associated with research speed $R_{ResearchSpeed}$ is the research speed itself, just not as a percentage. In other words, if for example research speed is $180\%$, then $R_{ResearchSpeed} = 1.8$. (Yes, I omitted a constant from the right side of the model, because I knew it wasn't necessary, and yes the model is written in that way to avoid issues with dividing by zero, and yes this model fails when research speed is $0$, but it is not because of zero division)
+
+As for the technology/component difficulty multiplier, we can ultimately see that 
+```math
+D_{Difficulty} = \frac{1}{Difficulty + 2}
+```
+works.
+
+Game difficulty multiplier is 
+```math
+G_{GameDifficulty} = 1 + 0.01 \times GameDifficultyValue,
+```
+where $GameDifficultyValue$ is the value in the file `db/difficulty.csv` for RESEARCH for the current game difficulty.
+
+How to explain minister & ideas bonuses?
 
 
 
