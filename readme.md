@@ -35,7 +35,7 @@ The bigger number of active tech teams gives a potential technological advantage
 
 The most interesting part about technology research in Iron Cross is the game design decision to make industrial technologies that improve economy also decrease research speed, and in fact decrease it much more than most technologies increase it. Additionally, some of these industrial technologies are requirements for further research in other areas. Thus the player is given a problem of deciding when to take their level of technology up a tier at the cost of their research speed. This problem is a significant motivator for this little journey into the the details of the research system.
 
-In the following, we will discuss what factors have an effect on a tech team researching a technology, and more specifically how the game determines the speed of research.
+In the following, we will discuss what factors have an effect on a tech team researching a technology, and more specifically how the game determines the speed of research. This is based on ingame testing and the data from testing can be found in the file [research_speed_testing.csv](tests/research_speed_testing.csv).
 
 ## What the game tells us
 
@@ -140,21 +140,88 @@ It seems that a lot of things are combined into Base Difficulty. So let us break
 ```
 Here the natural guess would be that the multiplier associated with research speed $R_{ResearchSpeed}$ is the research speed itself, just not as a percentage. In other words, if for example research speed is $180\%$, then $R_{ResearchSpeed} = 1.8$. (Yes, I omitted a constant from the right side of the model, because I knew it wasn't necessary, and yes the model is written in that way to avoid issues with dividing by zero, and yes this model fails when research speed is $0$, but it is not because of zero division)
 
-As for the technology/component difficulty multiplier, we can ultimately see that 
+As for the technology/component difficulty multiplier, we can ultimately see that Base Difficulty is proportional to $Difficulty + 2$, and in the model above we can set
 ```math
-D_{Difficulty} = \frac{1}{Difficulty + 2}
+D_{Difficulty} = \frac{1}{Difficulty + 2}.
 ```
-works.
 
-Game difficulty multiplier is 
+As mentioned earlier, game difficulty modifiers can be found in the file `db/difficulty.csv`. Essentially, raising the difficulty one level decreases game difficulty multiplier by $10$ percent points. In other words, we have
 ```math
-G_{GameDifficulty} = 1 + 0.01 \times GameDifficultyValue,
+G_{GameDifficulty} = 1 + 0.01 \times GameDifficultyModifier,
 ```
-where $GameDifficultyValue$ is the value in the file `db/difficulty.csv` for RESEARCH for the current game difficulty.
+where $GameDifficultyModifier$ is the value in the file `db/difficulty.csv` for RESEARCH for the current game difficulty. Possible values for $GameDifficultyModifier$ are $10$, $0$, $-10$, $-20$ and $-30$.
 
-How to explain minister & ideas bonuses?
+Research bonuses from ministers and ideas are a bit more complicated to understand, mostly because they are presented differently in the game compared to the game files. Ingame each bonus is presented to be either $+10\%$ or $+5\%$, whereas in the game files the corresponding values are $-0.1$ and $-0.05$, respectively. What works out in the end is setting
+```math
+M_{MinisterBonus} = \frac{1}{1 + SumOfMinisterBonuses},
+```
+where $SumOfMinisterBonuses$ is the sum of all relevant (to the technology researched) minister and ideas bonuses as they are written in the game files.
 
 
+All in all, so far we have the following model for daily research completion
+```math
+DailyCompletion = 2.8 \times (1 + 0.7 \times HasBlueprint) \times \frac{(Skill + 6) \times (1 + HasSpecial)}{10} \times \frac{(1 + 0.01 \times GameDifficultyModifier) \times ResearchSpeed}{(1 + SumOfMinisterBonuses) \times (Difficulty + 2)},
+```
+which is good enough for most research.
 
-<!-- $$ dailyprogress = CONSTANT \times \frac{teamskill \times researchspeed}{techdifficulty} $$ -->
+On a somewhat amusing note, from the way the model is written (and who might have written it that way I wonder...) it is more natural to think that game difficulty modifies research speed and minister bonuses modify (tech) difficulty, even though a priori one would probably think the opposite.
 
+## The exceptions
+
+Before we get to the rocket test sites and nuclear reactors, it should be mentioned that the maximum value for Base Difficulty in the game is $20$. This will be taken into account in the final model, but for now let's move on.
+
+<!--  For a player the effect of rocket sites is more obvious than that of reactors for two reasons (well, three if you count the idea that players build reactors to get big boom, not to speed up research): First, rocket sites can be built relatively early, so that the player can have their rocket site at max size when researching later rocket technologies. On the other hand, to even build reactors the player must have researched about half of all the nuclear technologies in the game, and is probably going to continue researching more of them while -->
+Rocket test sites and nuclear reactors work somewhat similarly, when it comes to research. However, at maximum size rocket sites are much more effective in boosting research than reactors. Probably the easiest way to look at the effects of rocket test sites and reactors is to imagine them add a new tech team to assist (for free) whenever a tech team researches components of type rocketry, or nuclear engineering or nuclear physics, respectively.
+
+In the case of rocket test sites we switch the term $\frac{(Skill + 6) \times (1 + HasSpecial)}{10}$ in our model to be
+```math
+\frac{(Skill + 6) \times (1 + HasSpecial)}{10} + RocketSiteSize.
+```
+Obviously, this only works if the technology component the tech team is researching is a rocketry component.
+
+For nuclear reactors we make a similar swap. However this time the term we end up with is
+```math
+\frac{(Skill + 6) \times (1 + HasSpecial)}{10} + \sqrt{ReactorSize}.
+```
+Again, this works if the technology component under research has type nuclear engineering or nuclear physics.
+
+## The final model
+
+Our model more descriptively and come up with
+```math
+DailyCompletion = GlobalConstant \times BlueprintEffect \times SkillIssues \times SomethingSupposedlyRelatedToDifficulty.
+```
+
+Here 
+- $GlobalConstant = 2.8$ is the value for tech speed modifier in the game file `db/misc.txt`
+- $BlueprintEffect = (1 + 0.7 \times HasBlueprint)$, so this number is $1.7$ if the country has a blueprint for current technology and $1$ if not. (And $1.7$ is the value for blueprint bonus from `db/misc.txt`)
+
+The term $SkillIssues$ depends on the skill and specialization of the tech team, the type of the component being researched, size of the rocket test site and the size of the nuclear reactor. There are 3 cases: If the technology component under research is rocketry, we have
+```math
+SkillIssues = \frac{(Skill + 6) \times (1 + HasSpecial)}{10} + RocketSiteSize.
+```
+If the technology component under research is nuclear engineering or nuclear physics, we have
+```math
+SkillIssues = \frac{(Skill + 6) \times (1 + HasSpecial)}{10} + \sqrt{ReactorSize}.
+```
+Otherwise, we have
+```math
+SkillIssues = \frac{(Skill + 6) \times (1 + HasSpecial)}{10}.
+```
+
+Finally the last term in our model, $SomethingSupposedlyRelatedToDifficulty$ depends on game difficulty, research speed, the category and difficulty of the technology as well as research bonuses granted by ministers and ideas. This term is
+```math
+SomethingSupposedlyRelatedToDifficulty = \max\left\{ 0.01, \frac{(1 + 0.01 \times GameDifficultyModifier) \times ResearchSpeed}{(1 + SumOfMinisterBonuses) \times (Difficulty + 2)} \right\}.
+```
+
+## The readme has ended, nothing to see here
+
+So I just have to mention 2 somewhat "broken" things about the research in Iron Cross.
+
+First, there are  nice "Investing in resources" events for small countries, more specifically countries that are not GER, ITA, JAP, ENG, FRA, USA, CHI, SOV, U16, SPR, SPA, BEL, POL, ARG, BRA, HOL, CAN, AST, CZE, HUN, ROM, MEX, YUG, BUL, SWE, TUR, MAN, CGX, SAF, GRE, CSX, POR, DEN, FIN, SCH, SIA, AUS, PER, COL, NOR, CHL, PRU, U01, U02, U14, U15. These events can happen in 1933, 1936, 1938, 1940, 1942, 1944, 1946, 1948, 1950 and 1952. They allow a country with enough resources (10000 energy, 6000 metal or 3000 rare materials) to increase research speed by $20$ percent points at the cost of 9000 energy, 5000 metal or 2500 rares (well, there are two other choices, but who doesn't want to boost research speed?). There is one event for each resource, so using these events the player can increase research speed by $60$ percent points every year these events can happen.
+
+So suppose a small country makes some conquests in the early game (with tech team and IC takeover perhaps?) while getting research boost from these events. In 1938 they can have a research speed of $360\%$ (plus minus other effects on research speed) with a bunch of tech team slots, while the great powers of the world are chugging along with a research speed slightly over $100\%$. Communist China can take advantage of these events even in single player, but in multiplayer they are even easier to exploit.
+
+Second thing is the ability to abandon doctrines. In Iron Cross the player generally cannot undo researched technologies. The only (but pretty big) exception to this rule are doctrines, which can be abandoned. Presumably this is so that the player can choose a different path of doctrines to research, since these paths are (often) mutually exclusive, and the game has usually picked one path beforehand and deactivated others. However, abandoning doctrines does not simple make deactivated doctrines available. Instead, the player must start research on the available doctrine and then cancel the research. After that other doctrines are made available.
+
+Ok, so abandon doctrine is not the best implemented feature in the game. But it gets more "broken": Abandoning a doctrine gives the player the same research speed increase as completing the doctrine. This then can be exploited by researching and abandoning the same doctrine again and again for research speed gains. The Fact that the player gets a blueprint for the doctrine when abandoning it makes this exploit somewhat effective, but since blueprint bonus is so low, it doesn't seem to be truly game breaking (perhaps this is why blueprint bonus is so low?). Maybe I should do the math on that?
