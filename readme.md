@@ -12,7 +12,7 @@ The use of the app requires two things:
 
 The app reads the file `aod_path.txt` (or `aod_path_linux.txt` if you are on linux) to find the game directory. So, in order to use the app, create that file and write the path of the game directory into it. For example, my `aod_path.txt` file contains just the line `C:\games\ArsenalofDemocracy`.
 
-The app has been developed with Python 3.12.2 and Kivy 2.3.0, but other versions. Testing is done using pytest.
+The app has been developed with Python 3.12.2 and Kivy 2.3.0, but other recent versions should work. Testing is done using pytest.
 
 Once the requirements are satisfied, you can start the app by running
 ```
