@@ -18,7 +18,7 @@ Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
 
 def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus):
-    extra_bonus = min(99, total_extra_bonus)
+    extra_bonus = min(99.99, total_extra_bonus)
     return min(200, max(1 , 100 * (1 - 0.1 * game_difficulty) * research_speed_modifier / (100 - extra_bonus) / (component.difficulty + 2) ))
 
 

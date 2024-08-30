@@ -15,7 +15,7 @@ research_speed_test_result_path = Path(__file__).parent / "research_speed_testin
 def format_value(column, value):
     if column == "component":
         return value.strip().lower()
-    if column in ("base difficulty", "1-day progress"):
+    if column in ("base difficulty", "1-day progress", "extra bonus"):
         return float(value.strip())
     return int(value.strip())
 
