@@ -9,6 +9,7 @@ from read_hoi_files import get_blueprint_bonus_and_tech_speed_modifier
 # BLUEPRINT_BONUS = 1.7
 BLUEPRINT_BONUS, RESEARCH_SPEED_CONSTANT = get_blueprint_bonus_and_tech_speed_modifier()
 
+# GameConstants = namedtuple("GameConstants", ["speed_modifier", "blueprint_bonus"])
 Component = namedtuple("Component", ["type", "difficulty"])
 EFFECT_ATTRIBUTES = ["type", "which", "value", "when", "where"]
 Effect = namedtuple("Effect", EFFECT_ATTRIBUTES)
@@ -17,7 +18,8 @@ Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
 
 def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus):
-    return max(1 , (1 - game_difficulty / 10) * research_speed_modifier * 100 / (100 - total_extra_bonus) / (component.difficulty + 2) )
+    extra_bonus = min(99, total_extra_bonus)
+    return min(200, max(1 , 100 * (1 - 0.1 * game_difficulty) * research_speed_modifier / (100 - extra_bonus) / (component.difficulty + 2) ))
 
 
 def get_modifiers_tech_effects(modifier):
