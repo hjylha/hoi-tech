@@ -164,7 +164,7 @@ class MinisterCheckBoxGroup(BoxLayout):
     def choose_minister_or_idea(self, name):
         if self.parent is None or self.parent.parent is None:
             return
-        self.parent.parent.choose_minister_or_idea(self.title.text, name)
+        self.parent.parent.parent.choose_minister_or_idea(self.title.text, name)
         # print(self.title.text, name)
         # print(self.parent)
         # print(self.parent.parent)
@@ -1187,20 +1187,49 @@ class PolicyScreen(BoxLayout):
         for choice in self.choices:
             if choice.title.text.lower() in effect_dict:
                 choice.change_research_effects(effect_dict[choice.title.text.lower()])
+    
+    def change_bankrupt_status(self, widget, value):
+        self.parent.parent.attach_to.parent.change_bankrupt_status(int(value))
+        # print(widget)
+        # if value:
+        #     print("bankrupt")
+        #     return
+        # print("not bankrupt")
+    
+    def set_bankrupt_status(self, is_bankrupt):
+        self.bankrupt_checkbox.active = bool(is_bankrupt)
+
 
     def __init__(self, bg_color=(0, 0, 0, 1), **kwargs):
         super().__init__(**kwargs)
 
-        self.orientation = "horizontal"
+        self.orientation = "vertical"
         self.bg_color = bg_color
-        with self.canvas.before:
-            Color(*self.bg_color)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-        self.bind(pos=update_layout, size=update_layout)
+        # with self.canvas.before:
+        #     Color(*self.bg_color)
+        #     self.rect = Rectangle(size=self.size, pos=self.pos)
+        # self.bind(pos=update_layout, size=update_layout)
+
+        self.spacing = 5
+
+        policy_part = BoxLayout(orientation="horizontal", size_hint=(1, 0.9))
+        self.add_widget(policy_part)
 
         arm_minister_choice = BoxLayout(orientation="vertical", size_hint=(0.33, 1))
+        with arm_minister_choice.canvas.before:
+            Color(*bg_color)
+            arm_minister_choice.rect = Rectangle(size=arm_minister_choice.size, pos=arm_minister_choice.pos)
+        arm_minister_choice.bind(pos=update_layout, size=update_layout)
         intel_and_cos_choice = BoxLayout(orientation="vertical", size_hint=(0.33, 1))
+        with intel_and_cos_choice.canvas.before:
+            Color(*bg_color)
+            intel_and_cos_choice.rect = Rectangle(size=intel_and_cos_choice.size, pos=intel_and_cos_choice.pos)
+        intel_and_cos_choice.bind(pos=update_layout, size=update_layout)
         idea_choice = BoxLayout(orientation="vertical", size_hint=(0.33, 1))
+        with idea_choice.canvas.before:
+            Color(*bg_color)
+            idea_choice.rect = Rectangle(size=idea_choice.size, pos=idea_choice.pos)
+        idea_choice.bind(pos=update_layout, size=update_layout)
 
         labels = the_research.politics.get_policies_for_checkboxes()
 
@@ -1248,14 +1277,31 @@ class PolicyScreen(BoxLayout):
         #     idea_choice.add_widget(checkbox)
         #     idea_choice.add_widget(label)
 
-        self.add_widget(arm_minister_choice)
-        self.add_widget(intel_and_cos_choice)
-        self.add_widget(idea_choice)
+        policy_part.add_widget(arm_minister_choice)
+        policy_part.add_widget(intel_and_cos_choice)
+        policy_part.add_widget(idea_choice)
+
+        bankrupt_part = BoxLayout(orientation="horizontal", size_hint=(1, 0.1))
+
+        with bankrupt_part.canvas.before:
+            Color(*bg_color)
+            bankrupt_part.rect = Rectangle(size=bankrupt_part.size, pos=bankrupt_part.pos)
+        bankrupt_part.bind(pos=update_layout, size=update_layout)
+
+        bankrupt_part.add_widget(Label(text="", size_hint=(0.4, 1)))
+        self.bankrupt_checkbox = CheckBox(size_hint=(0.05, 1))
+        self.bankrupt_checkbox.bind(active=self.change_bankrupt_status)
+        bankrupt_part.add_widget(self.bankrupt_checkbox)
+        bankrupt_part.add_widget(Label(text="country is bankrupt", size_hint=(0.15, 1)))
+        bankrupt_part.add_widget(Label(text="", size_hint=(0.4, 1)))
+
+        self.add_widget(bankrupt_part)
 
 
 
 class StatusBar(BoxLayout):
     save_file = Path("save.data")
+    policyscreen_bg_color = (0, 0.1, 0.03, 1)
 
     def update_fastest_teams(self):
         if self.parent.current_tech is not None:
@@ -1536,6 +1582,15 @@ class StatusBar(BoxLayout):
         # update effects
         self.change_checkboxes_based_on_policies(True)
         self.update_fastest_teams()
+        self.parent.save_status()
+    
+    def change_bankrupt_status(self, is_bankrupt):
+        self.parent.research.teams_get_paid = 1 - is_bankrupt
+        self.update_fastest_teams()
+        self.parent.save_status()
+    
+    def set_bankrupt_status(self, is_bankrupt):
+        self.policy_screen.set_bankrupt_status(is_bankrupt)
 
     
     def update_statusbar_from_research(self):
@@ -1550,6 +1605,7 @@ class StatusBar(BoxLayout):
         self.reactor_size_button.text = str(research.reactor_size)
         # print(f"STATUSBAR UPDATED: {self.reactor_size_button.text=}")
         self.change_checkboxes_based_on_policies()
+        self.set_bankrupt_status(1 - research.teams_get_paid)
 
 
     def __init__(self, bg_color=(0, 0, 0, 0), **kwargs):
@@ -1599,7 +1655,7 @@ class StatusBar(BoxLayout):
         self.policy_dropdown = DropDown()
         self.policy_dropdown.attach_to = self.rest_of_the_statusbar
         # self.policy_screen = PolicyScreen(bg_color=self.bg_color, size_hint_y=None, height=dp(400))
-        self.policy_screen = PolicyScreen(bg_color=(0, 0.15, 0.05, 1), size_hint_y=None, height=dp(400))
+        self.policy_screen = PolicyScreen(bg_color=self.policyscreen_bg_color, size_hint_y=None, height=dp(400))
 
         self.policy_dropdown.add_widget(self.policy_screen)
 
