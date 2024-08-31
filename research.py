@@ -259,6 +259,8 @@ class Research:
         # do we need to do anything else with rockets and reactors?
         self.num_of_rocket_sites = 0
         self.reactor_size = 0
+        # money issues
+        self.teams_get_paid = 1
 
     def get_sum_of_policy_effects(self):
         return self.politics.get_sum_of_research_bonuses()
@@ -357,6 +359,7 @@ class Research:
         lines.append(deactivated_techs_line)
         blueprints_line = f"blueprints={','.join([str(t) for t in self.blueprints])}"
         lines.append(blueprints_line)
+        money_line = f"has_money={str(self.teams_get_paid)}"
         for position, personality in self.politics.current_policies.items():
             name = "" if personality is None else personality.name
             lines.append(f"{position}={name}")
@@ -417,6 +420,11 @@ class Research:
                 elif "blueprints" in line:
                     try:
                         blueprints = [int(tech) for tech in line.split("=")[1].strip().split(",")]
+                    except ValueError:
+                        pass
+                elif "has_money" in line:
+                    try:
+                        self.teams_get_paid = int(line.split("=")[1].strip())
                     except ValueError:
                         pass
                 else:
@@ -644,7 +652,7 @@ class Research:
         has_blueprint = int(tech.tech_id in self.blueprints)
         # TODO: implement minister and idea bonuses
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
-        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size)
+        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
     
     def sort_teams_for_researching_tech(self, tech):
         team_results = []
@@ -661,6 +669,20 @@ class Research:
             print(line[1], line[0])
         return sorted_teams
 
+    def sort_active_techs_based_on_research_time(self):
+        tech_results = []
+        for tech_id in self.active_techs:
+            team, days = self.sort_teams_for_researching_tech(self.techs[tech_id])[0]
+            tech_results.append([self.techs[tech_id], days, team])
+        return sorted(tech_results, key=lambda x: x[1])
+
+    def st2(self, num_of_techs=5):
+        sorted_tech = self.sort_active_techs_based_on_research_time()
+        print("Fastest techs to research:")
+        for line in sorted_tech[:num_of_techs]:
+            # tech, days, team = line
+            print(line[1], line[0].name, f"({line[2].name})")
+        return sorted_tech
 
     
 if __name__ == "__main__":
