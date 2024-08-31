@@ -1281,21 +1281,26 @@ class PolicyScreen(BoxLayout):
         policy_part.add_widget(intel_and_cos_choice)
         policy_part.add_widget(idea_choice)
 
-        bankrupt_part = BoxLayout(orientation="horizontal", size_hint=(1, 0.1))
+        bigger_bankrupt_part = BoxLayout(orientation="horizontal", size_hint=(1, 0.1))
+
+        bankrupt_part = BoxLayout(orientation="horizontal", size_hint=(0.36, 1))
 
         with bankrupt_part.canvas.before:
             Color(*bg_color)
             bankrupt_part.rect = Rectangle(size=bankrupt_part.size, pos=bankrupt_part.pos)
         bankrupt_part.bind(pos=update_layout, size=update_layout)
 
-        bankrupt_part.add_widget(Label(text="", size_hint=(0.4, 1)))
-        self.bankrupt_checkbox = CheckBox(size_hint=(0.05, 1))
+        bigger_bankrupt_part.add_widget(Label(text="", size_hint=(0.32, 1)))
+        self.bankrupt_checkbox = CheckBox(size_hint=(0.15, 1))
         self.bankrupt_checkbox.bind(active=self.change_bankrupt_status)
+        bankrupt_part.add_widget(Label(text="", size_hint=(0.2, 1)))
         bankrupt_part.add_widget(self.bankrupt_checkbox)
-        bankrupt_part.add_widget(Label(text="country is bankrupt", size_hint=(0.15, 1)))
-        bankrupt_part.add_widget(Label(text="", size_hint=(0.4, 1)))
+        bankrupt_part.add_widget(Label(text="country is bankrupt", size_hint=(0.45, 1)))
+        bankrupt_part.add_widget(Label(text="", size_hint=(0.2, 1)))
+        bigger_bankrupt_part.add_widget(bankrupt_part)
+        bigger_bankrupt_part.add_widget(Label(text="", size_hint=(0.32, 1)))
 
-        self.add_widget(bankrupt_part)
+        self.add_widget(bigger_bankrupt_part)
 
 
 
