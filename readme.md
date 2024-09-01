@@ -153,16 +153,19 @@ G_{GameDifficulty} = 1 + 0.01 \times GameDifficultyModifier,
 ```
 where $GameDifficultyModifier$ is the value in the file `db/difficulty.csv` for RESEARCH for the current game difficulty. Possible values for $GameDifficultyModifier$ are $10$, $0$, $-10$, $-20$ and $-30$.
 
-Research bonuses from ministers and ideas are a bit more complicated to understand, mostly because they are presented differently in the game compared to the game files. Ingame each bonus is presented to be either $+10$% or $+5$%, whereas in the game files the corresponding values are $-0.1$ and $-0.05$, respectively. What works out in the end is setting
+Research bonuses from ministers and ideas are a bit more complicated to understand, mostly because they are presented differently in the game compared to the game files. Ingame each bonus is presented to be either $+10$% or $+5$%, whereas in the game files the corresponding values are $-0.1$ and $-0.05$, respectively. There is some weirdness about this (mentioned in exceptions), but for now we set
 ```math
-M_{MinisterBonus} = \frac{1}{1 + SumOfMinisterBonuses},
+M_{MinisterBonus} = \frac{1}{1 + \max\{ -0.9999, SumOfMinisterBonuses\}},
 ```
 where $SumOfMinisterBonuses$ is the sum of all relevant (to the technology researched) minister and ideas bonuses as they are written in the game files.
 
 
 All in all, so far we have the following model for daily research completion
 ```math
-DailyCompletion = 2.8 \times (1 + 0.7 \times HasBlueprint) \times \frac{(Skill + 6) \times (1 + HasSpecial)}{10} \times \frac{(1 + 0.01 \times GameDifficultyModifier) \times ResearchSpeed}{(1 + SumOfMinisterBonuses) \times (Difficulty + 2)},
+DailyCompletion = 2.8 \times (1 + 0.7 \times HasBlueprint) \times \frac{(Skill + 6) \times (1 + HasSpecial)}{10} 
+```
+```math
+\qquad\qquad\qquad\qquad\qquad\qquad\qquad \times \frac{(1 + 0.01 \times GameDifficultyModifier) \times ResearchSpeed}{(1 + \max\{ -0.9999, SumOfMinisterBonuses\}) \times (Difficulty + 2)},
 ```
 which is good enough for most research.
 
@@ -170,7 +173,11 @@ On a somewhat amusing note, from the way the model is written (and who might hav
 
 ## The exceptions
 
-Before we get to the rocket test sites and nuclear reactors, it should be mentioned that the maximum value for Base Difficulty in the game is $20$. This will be taken into account in the final model, but for now let's move on.
+The practical exception we should be worried about is the effect of rocket test sites and nuclear reactors. Before we get to that, let us mention some things which the player is very unlikely to run into without editing game files. What might be possible to see in regular play is the fact that Base Difficulty has a maximum value of $20$ and a minimum value of $0.1$. This is taken into account in the final model.
+
+In our model the minister bonus term is such that dividing by zero will not be an issue. In reality, it can be, in a way. Now, if the player has $SumOfMinisterBonuses = -1S and research speed is above $0$, then Base Difficulty will be $0.1$ for every technology. However, if $SumOfMinisterBonuses = -1$ and research speed equals $0$, the game crashes. The ultimate weirdness happens if $SumOfMinisterBonuses < -1$: Then Base Difficulty will be $0.1$ for every technology even if research speed is $0$.
+
+<!-- Before we get to the rocket test sites and nuclear reactors, it should be mentioned that the maximum value for Base Difficulty in the game is $20$. This will be taken into account in the final model, but for now let's move on. -->
 
 <!--  For a player the effect of rocket sites is more obvious than that of reactors for two reasons (well, three if you count the idea that players build reactors to get big boom, not to speed up research): First, rocket sites can be built relatively early, so that the player can have their rocket site at max size when researching later rocket technologies. On the other hand, to even build reactors the player must have researched about half of all the nuclear technologies in the game, and is probably going to continue researching more of them while -->
 Rocket test sites and nuclear reactors work somewhat similarly, when it comes to research. However, at maximum size rocket sites are much more effective in boosting research than reactors. Probably the easiest way to look at the effects of rocket test sites and reactors is to imagine them add a new tech team to assist (for free) whenever a tech team researches components of type rocketry, or nuclear engineering or nuclear physics, respectively.
@@ -191,7 +198,7 @@ Again, this works if the technology component under research has type nuclear en
 
 Our model more descriptively and come up with
 ```math
-DailyCompletion = GlobalConstant \times BlueprintEffect \times SkillIssues \times SomethingSupposedlyRelatedToDifficulty.
+DailyCompletion = GlobalConstant \times BlueprintEffect \times SkillIssues \times DifficultyTerm.
 ```
 
 Here 
@@ -211,9 +218,9 @@ Otherwise, we have
 SkillIssues = \frac{(Skill + 6) \times (1 + HasSpecial)}{10}.
 ```
 
-Finally the last term in our model, $SomethingSupposedlyRelatedToDifficulty$ depends on game difficulty, research speed, the category and difficulty of the technology as well as research bonuses granted by ministers and ideas. This term is
+Finally the last term in our model, $DifficultyTerm$ depends on game difficulty, research speed, the category and difficulty of the technology as well as research bonuses granted by ministers and ideas. This term is
 ```math
-SomethingSupposedlyRelatedToDifficulty = \max\left\{ 0.01, \frac{(1 + 0.01 \times GameDifficultyModifier) \times ResearchSpeed}{(1 + SumOfMinisterBonuses) \times (Difficulty + 2)} \right\}.
+DifficultyTerm = \min\left\{ 2, \max\left\{ 0.01, \frac{(1 + 0.01 \times GameDifficultyModifier) \times ResearchSpeed}{(1 + \max\{ -0.9999, SumOfMinisterBonuses\}) \times (Difficulty + 2)} \right\} \right\}.
 ```
 
 ## The readme has ended, nothing to see here
