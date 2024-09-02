@@ -1798,14 +1798,14 @@ class MainFullScreen(BoxLayout):
         # print(f"{text=}")
         # print(f"{modifiers=}")
 
-        # c to complete
-        if keycode == 99:
+        # ctrl + c to complete
+        if keycode == 99 and "ctrl" in modifiers:
             self.mainscreen.techscreen.complete_until_tech()
-        # f to force complete
-        elif keycode == 102:
+        # ctrl + f to force complete
+        elif keycode == 102 and "ctrl" in modifiers:
             self.mainscreen.techscreen.complete_tech()
-        # u to undo
-        elif keycode == 117:
+        # ctrl + u to undo
+        elif keycode == 117 and "ctrl" in modifiers:
             self.mainscreen.techscreen.undo_tech()
         # ctrl + r to reload country
         elif keycode == 114 and "ctrl" in modifiers:
