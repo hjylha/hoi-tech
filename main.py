@@ -1792,6 +1792,25 @@ class MainFullScreen(BoxLayout):
         self.statusbar.update_statusbar_from_research()
         self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
 
+    # KEYBOARD SHORTCUTS
+    def _on_keyboard_down(self, keyboard, keycode, some_number, text, modifiers):
+        # print(f"{keycode=}")
+        # print(f"{text=}")
+        # print(f"{modifiers=}")
+
+        # c to complete
+        if keycode == 99:
+            self.mainscreen.techscreen.complete_until_tech()
+        # f to force complete
+        elif keycode == 102:
+            self.mainscreen.techscreen.complete_tech()
+        # u to undo
+        elif keycode == 117:
+            self.mainscreen.techscreen.undo_tech()
+        # ctrl + r to reload country
+        elif keycode == 114 and "ctrl" in modifiers:
+            self.statusbar.reload_countries(self.statusbar.reload_countries_button)
+
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1824,6 +1843,8 @@ class MainFullScreen(BoxLayout):
         self.load_status()
 
         # self.statusbar.load_country_difficulty_and_year()
+
+        Window.bind(on_key_down=self._on_keyboard_down)
 
 
 # class MainWidget(Widget):
