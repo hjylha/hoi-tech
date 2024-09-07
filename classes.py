@@ -17,6 +17,12 @@ MODIFIER_ATTRIBUTES = ["type", "value", "option", "extra", "modifier_effect"]
 Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
 
+# just some approximate value to use in time = difficulty / skill
+def get_approx_difficulty(tech_difficulty, research_speed_modifier, total_extra_bonus):
+    return (tech_difficulty + 2) * (1 - 0.01 * total_extra_bonus) / research_speed_modifier
+
+
+# 1 / base difficulty from the game, up to scaling
 def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus):
     extra_bonus = min(99.99, total_extra_bonus)
     return min(200, max(1 , 100 * (1 - 0.1 * game_difficulty) * research_speed_modifier / (100 - extra_bonus) / (component.difficulty + 2) ))
@@ -136,6 +142,26 @@ class TechTeam:
             "; ".join(self.specialities),
             self.pic_path
                 )
+
+    def get_num_of_specials(self, tech):
+        specials = 0
+        for comp in tech.components:
+            if comp.type in self.specialities:
+                specials += 1
+        return specials
+    
+    def calculate_approx_time_comparison_to_complete_tech(
+            self, 
+            tech, 
+            research_speed_modifier,
+            total_extra_bonus=0, 
+            has_blueprint=0,
+            has_money=1):
+        num_of_specials = self.get_num_of_specials(tech)
+        # difficulty_multiplier = tech.components[0].difficulty + 2
+        difficulty_multiplier = get_approx_difficulty(tech.components[0].difficulty, research_speed_modifier, total_extra_bonus)
+        skill_multiplier = self.skill + 6 if has_money else 6
+        return difficulty_multiplier * (10 - num_of_specials)  / skill_multiplier / (1 + (BLUEPRINT_BONUS - 1) * has_blueprint)
     
     def calculate_1_day_progress_for_component(
             self,
@@ -260,7 +286,8 @@ def get_minister_personality(minister_personalities, personality_str, position="
                 print("Match for", personality.name, "but", personality.position, "!=", position)
             return personality
     else:
-        print(f"Minister personality {personality_str} not found")
+        if show_issues:
+            print(f"Minister personality {personality_str} not found")
 
 
 class Minister:
