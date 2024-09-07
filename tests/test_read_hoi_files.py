@@ -148,6 +148,11 @@ def test_get_country_names_path(aod_path):
         assert rhf.get_country_names_path().exists()
 
 
+def test_get_save_game_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_save_game_path().exists()
+
+
 @pytest.mark.parametrize(
         "text, result", [
             ("0", 0),

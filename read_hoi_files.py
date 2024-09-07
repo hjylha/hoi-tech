@@ -71,6 +71,10 @@ def get_country_names_path():
     aod_path = get_aod_path()
     return aod_path / "config" / "world_names.csv"
 
+def get_save_game_path():
+    aod_path = get_aod_path()
+    return aod_path / "scenarios" / "save games"
+
 
 def change_type_if_necessary(text):
     if text is None:
@@ -300,6 +304,11 @@ def get_blueprint_bonus_and_tech_speed_modifier():
     return misc_content["research"][0], misc_content["research"][5]
 
 
+def read_difficulty_file():
+    difficulty_path = get_difficulty_path()
+    data = read_csv_file(difficulty_path)
+    # TODO: lots of stuff
+
 # def read_minister_modifiers():
 #     minister_modifier_file = get_minister_modifier_path()
 #     personalities_and_modifiers = dict()
@@ -355,3 +364,19 @@ def get_country_names():
                 country_names[names[0].upper()] = names[1]
     return country_names
 
+
+def read_savefile_for_research_order(savefilepath):
+    strings_from_file = []
+    with open(savefilepath, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            if "has developed" in line:
+                strings_from_file.append(line.strip().split("=")[1].strip().strip('"'))
+    tech_n_team_n_time = []
+    for s in strings_from_file:
+        time0, time, rest = s.split(":")
+        time = (":".join([time0, time])).strip()
+        team, tech = rest.strip().split(" has developed ")
+        team = team.strip()
+        tech = tech.strip(" '.")
+        tech_n_team_n_time.append((tech, team, time))
+    return tech_n_team_n_time
