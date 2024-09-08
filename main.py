@@ -306,8 +306,98 @@ class TechnologyButton(BoxLayout):
         blueprint_box.bind(pos=update_layout, size=update_layout)
 
 
-class UpperTeamScreen(BoxLayout):
+class TechComparisonTable(BoxLayout):
+    NUM_OF_ROWS = 10
+    MAX_TECHNAME_LENGTH = 30
 
+    def row_color(self, row_num):
+        if row_num % 2 == 0:
+            return (0.2, 0.2, 0.2, 1)
+        return (0.2, 0, 0.2, 1)
+
+    def button_color(self, row_num):
+        if row_num % 2 == 0:
+            return (0.2, 0.2, 0.2, 0)
+        return (0.2, 0, 0.2, 0)
+    
+    def fill_comparison_table(self, tech_and_values):
+        # self.title.text = f"Fastest to complete {tech.short_name}"
+        # self.title.text = f"Best techs to research"
+        for i, tech_and_value_n_team in enumerate(tech_and_values[:self.NUM_OF_ROWS]):
+            tech, value, _ = tech_and_value_n_team
+            self.labels[2*i].text = f"{tech.tech_id} {tech.name[:self.MAX_TECHNAME_LENGTH]}"
+            self.labels[2*i].disabled = False
+            self.labels[2*i+1].text = str(round(value, 3))
+        if len(tech_and_values) < self.NUM_OF_ROWS:
+            for i in range(len(tech_and_values), self.NUM_OF_ROWS):
+                self.labels[2*i].text = ""
+                self.labels[2*i].disabled = True
+                self.labels[2*i+1].text = ""
+        self.tech_in_table = [tech for tech, _, _ in tech_and_values]
+    
+    def select_tech_from_table(self, widget):
+        button_index = self.labels.index(widget)
+        # print(self.tech_in_table[button_index // 2].tech_id, self.tech_in_table[button_index // 2].name)
+        # self.parent.update_team_selection(self.teams_in_table[button_index // 2])
+        self.parent.select_tech(self.tech_in_table[button_index // 2])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.orientation = "vertical"
+
+        self.tech_in_table = []
+
+        self.title = Label(text="Fastest tech to complete", size_hint=(1, 0.08))
+        self.add_widget(self.title)
+
+        header_line = BoxLayout(size_hint=(1, 0.08))
+        header_line.add_widget(Label(text="Tech", size_hint=(0.8, 1)))
+        self.value_label = Label(text="Days", size_hint=(0.2, 1))
+        header_line.add_widget(self.value_label)
+        self.add_widget(header_line)
+
+        lines = [BoxLayout(size_hint=(1, 0.09)) for _ in range(self.NUM_OF_ROWS)]
+        for line in lines:
+            self.add_widget(line)
+
+        self.table = [BoxLayout(size_hint=(0.5 + (-1)**(i) * 0.3, 1)) for i in range(2 * self.NUM_OF_ROWS)]
+        for i, layout in enumerate(self.table):
+            lines[i // 2].add_widget(layout)
+            # print("Layout color:", self.row_color(i // 2))
+            with layout.canvas.before:
+                Color(*self.row_color(i // 2))
+                layout.rect = Rectangle(size=layout.size, pos=layout.pos)
+            layout.bind(pos=update_layout, size=update_layout)
+        
+        self.labels = []
+        for i, layout in enumerate(self.table):
+            if i % 2 == 0:
+                # cell = Label(text="...")
+                cell = Button(text="", background_color=self.button_color(i // 2), on_release=self.select_tech_from_table, halign="left")
+                # print("Button color:", self.row_color(i // 2))
+            else:
+                cell = Label(text="?")
+            self.labels.append(cell)
+            layout.add_widget(cell)
+
+class FastestTechScreen(TechComparisonTable):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+
+class ResearchSpeedImpactScreen(TechComparisonTable):
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self.title.text = "Tech that boost research speed the fastest"
+        self.value_label.text = "Slope"
+
+
+class TechteamScreen(BoxLayout):
+    # TODO: parents will change
     def update_research_time(self, time_to_complete_tech = "?"):
         self.research_time_label.text = f"Finishes tech in {time_to_complete_tech} days"
 
@@ -359,7 +449,7 @@ class UpperTeamScreen(BoxLayout):
             return
         self.team_selection_dropdown.clear_widgets()
 
-        list_of_teams = self.parent.parent.parent.research.teams
+        list_of_teams = self.parent.parent.parent.parent.research.teams
         suggestions = suggest_tech_teams(text, list_of_teams, self.max_num_of_team_suggestions)
         for i, suggestion in enumerate(suggestions):
             suggestion_thingy = TextInput(text=suggestion, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(30))
@@ -374,23 +464,24 @@ class UpperTeamScreen(BoxLayout):
         name = text[6:]
         self.team_input.text = ""
         # team_name = text
-        research = self.parent.parent.parent.research
+        research = self.parent.parent.parent.parent.research
         
         tech_team = research.get_team_by_name_and_country(name, country_code)
         if tech_team is None:
             print(text, country_code, name)
         time_to_complete = None
         component_types = None
-        if (tech := self.parent.parent.parent.current_tech) is not None:
+        if (tech := self.parent.parent.parent.parent.current_tech) is not None:
             time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
             component_types = [comp.type for comp in tech.components]
         self.show_team_info(tech_team, time_to_complete, component_types)
-        self.parent.parent.parent.current_team = tech_team
+        self.parent.parent.parent.parent.current_team = tech_team
 
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # self.add_widget(Label(text="UpperTeamScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        self.orientation = "vertical"
 
         self.max_num_of_team_suggestions = 10
         self.team_selection_dropdown = DropDown()
@@ -422,7 +513,32 @@ class UpperTeamScreen(BoxLayout):
         
         self.research_time_label = Label(text="Finishes tech in ? days", size_hint=(1, 0.1))
         self.add_widget(self.research_time_label)
-        
+
+
+class UpperTeamScreen(BoxLayout):
+    BUTTON_TEXTS = ["Team info", "Fastest tech", "R-Speed boost"]
+
+    def select_tech(self, tech):
+        self.parent.select_tech(tech)
+
+    def change_upperteamscreen(self, btn_text):
+        # print(text)
+        for i, text in enumerate(self.BUTTON_TEXTS):
+            if btn_text == text and self.screen_index != i:
+                self.clear_widgets()
+                self.screen_index = i
+                self.add_widget(self.screens[self.screen_index])
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # self.add_widget(Label(text="UpperTeamScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
+
+        self.screen_index = 1
+        self.screens = [TechteamScreen(), FastestTechScreen(), ResearchSpeedImpactScreen()]
+        # self.techteam_screen = TechteamScreen()
+        # self.fastest_tech_screen = FastestTechScreen()
+        # self.research_speed_impact_screen = ResearchSpeedImpactScreen()
+        self.add_widget(self.screens[self.screen_index])
 
 
 # class TeamComparisonTable(GridLayout):
@@ -444,7 +560,9 @@ class TeamComparisonTable(BoxLayout):
         widget.rect.pos = widget.pos
         widget.rect.size = widget.size
     
-    def fill_comparison_table(self, teams_and_times):
+    def fill_comparison_table(self, teams_and_times, tech):
+        # self.title.text = f"Fastest to complete {tech.short_name}"
+        self.title.text = f"Time to complete {tech.name}"
         for i, team_and_time in enumerate(teams_and_times[:self.NUM_OF_ROWS]):
             self.labels[2*i].text = team_and_time[0].name[:self.MAX_TEAMNAME_LENGTH]
             self.labels[2*i].disabled = False
@@ -468,7 +586,10 @@ class TeamComparisonTable(BoxLayout):
 
         self.teams_in_table = []
 
-        header_line = BoxLayout(size_hint=(1, 0.09))
+        self.title = Label(text="Time to complete [tech]", size_hint=(1, 0.08))
+        self.add_widget(self.title)
+
+        header_line = BoxLayout(size_hint=(1, 0.08))
         header_line.add_widget(Label(text="Team", size_hint=(0.8, 1)))
         header_line.add_widget(Label(text="Days", size_hint=(0.2, 1)))
         self.add_widget(header_line)
@@ -499,6 +620,9 @@ class TeamComparisonTable(BoxLayout):
 
 
 class TeamScreen(BoxLayout):
+    def change_upperteamscreen(self, widget):
+        self.upperteamscreen.change_upperteamscreen(widget.text)
+    
     def update_team_selection(self, tech_team):
         self.parent.parent.current_team = tech_team
         research = self.parent.parent.research
@@ -508,19 +632,42 @@ class TeamScreen(BoxLayout):
             time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
             component_types = [comp.type for comp in tech.components]
             self.parent.techscreen.update_tech_infopanels(tech)
-        self.upperteamscreen.show_team_info(tech_team, time_to_complete, component_types)
+        self.upperteamscreen.screens[0].show_team_info(tech_team, time_to_complete, component_types)
+
+    def update_research_time(self, time_to_complete):
+        self.upperteamscreen.screens[0].update_research_time(time_to_complete)
+    
+    def select_tech(self, tech):
+        self.parent.select_tech(tech)
 
         
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.upperteamscreen = UpperTeamScreen(orientation="vertical", size_hint=(1, 0.5))
+
+        self.upperteamscreen = UpperTeamScreen(orientation="vertical", size_hint=(1, 0.48))
         self.add_widget(self.upperteamscreen)
+        with self.upperteamscreen.canvas.before:
+            Color(0.15, 0.15, 0.15, 0.5)
+            self.upperteamscreen.rect = Rectangle(size=self.upperteamscreen.size, pos=self.upperteamscreen.pos)
+        self.upperteamscreen.bind(pos=update_layout, size=update_layout)
+
+        buttons_row = BoxLayout(orientation="horizontal", size_hint=(1, 0.04))
+        teaminfo_btn = Button(text=self.upperteamscreen.BUTTON_TEXTS[0], on_release=self.change_upperteamscreen)
+        fastest_btn = Button(text=self.upperteamscreen.BUTTON_TEXTS[1], on_release=self.change_upperteamscreen)
+        speedboost_btn = Button(text=self.upperteamscreen.BUTTON_TEXTS[2], on_release=self.change_upperteamscreen)
+        buttons_row.add_widget(teaminfo_btn)
+        buttons_row.add_widget(fastest_btn)
+        buttons_row.add_widget(speedboost_btn)
+        self.add_widget(buttons_row)
 
         # self.comparisontable = TeamComparisonTable(cols=2, size_hint=(1, 0.5))
-        self.comparisontable = TeamComparisonTable(size_hint=(1, 0.5))
+        self.comparisontable = TeamComparisonTable(size_hint=(1, 0.48))
         self.add_widget(self.comparisontable)
+        with self.comparisontable.canvas.before:
+            Color(0.15, 0.15, 0.15, 0.5)
+            self.comparisontable.rect = Rectangle(size=self.comparisontable.size, pos=self.comparisontable.pos)
+        self.comparisontable.bind(pos=update_layout, size=update_layout)
         
-
 
 class TechCategories(GridLayout):
     def select_category(self, widget):
@@ -570,7 +717,8 @@ class TechInfoPanel(BoxLayout):
                 self.parent.parent.research.blueprints.remove(tech_id)
                 self.parent.parent.maintechscreen.technologies[tech_id].remove_blueprint()
         # redo the calculations
-        self.parent.parent.parent.show_fastest_teams(self.parent.parent.parent.parent.current_tech)
+        # self.parent.parent.parent.show_fastest_teams(self.parent.parent.parent.parent.current_tech)
+        self.parent.parent.parent.update_tables(self.parent.parent.parent.parent.current_tech)
 
 
     def __init__(self, **kwargs):
@@ -1050,6 +1198,19 @@ class TechScreen(BoxLayout):
         self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
         return [requirements, deactivations]
     
+    def update_panels_and_stuff(self, tech):
+        # update infopanels
+        requirements, deactivations = self.update_tech_infopanels(tech)
+
+        # update tech buttons
+        self.maintechscreen.hide_old_requirements()
+        self.maintechscreen.hide_old_deactivation_warnings()
+
+        req_ids = [int(line.split(" ")[0].strip("*")) for line in requirements]
+        deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
+        self.maintechscreen.show_requirements(req_ids)
+        self.maintechscreen.show_deactivation_warnings(deact_ids)
+    
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
         tech = self.research.get_tech(tech_id)
@@ -1064,20 +1225,10 @@ class TechScreen(BoxLayout):
         # update team info
         if (team := self.parent.parent.current_team) is not None:
             time_to_complete = self.research.calculate_how_many_days_to_complete(team, tech)
-            self.parent.teamscreen.upperteamscreen.update_research_time(time_to_complete)
+            self.parent.teamscreen.update_research_time(time_to_complete)
             self.parent.teamscreen.update_team_selection(team)
 
-        # update infopanels
-        requirements, deactivations = self.update_tech_infopanels(tech)
-
-        # update tech buttons
-        self.maintechscreen.hide_old_requirements()
-        self.maintechscreen.hide_old_deactivation_warnings()
-
-        req_ids = [int(line.split(" ")[0].strip("*")) for line in requirements]
-        deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
-        self.maintechscreen.show_requirements(req_ids)
-        self.maintechscreen.show_deactivation_warnings(deact_ids)
+        self.update_panels_and_stuff(tech)
             
     
     def complete_until_tech(self):
@@ -1088,6 +1239,8 @@ class TechScreen(BoxLayout):
         if tech_id in self.research.completed_techs:
             return
         self.research.complete_until_tech(tech_id)
+        # update tables
+        self.parent.update_tables(self.parent.parent.current_tech)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
@@ -1103,6 +1256,8 @@ class TechScreen(BoxLayout):
         if tech_id in self.research.completed_techs:
             return
         self.research.complete_tech(tech_id)
+        # update tables
+        self.parent.update_tables(self.parent.parent.current_tech)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
@@ -1118,6 +1273,8 @@ class TechScreen(BoxLayout):
         if tech_id not in self.research.completed_techs:
             return
         self.research.undo_completed_tech(tech_id)
+        # update tables
+        self.parent.update_tables(self.parent.parent.current_tech)
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
@@ -1129,6 +1286,8 @@ class TechScreen(BoxLayout):
         if not self.research.completed_techs and not self.research.deactivated_techs and not self.research.blueprints:
             return
         self.research.clear_all_tech()
+        # update tables
+        self.parent.update_tables()
         # update tech buttons
         self.maintechscreen.update_technology_buttons(self.research)
         # update research speed
@@ -1154,9 +1313,34 @@ class TechScreen(BoxLayout):
 class MainScreen(BoxLayout):
 
     def show_fastest_teams(self, tech):
+        if tech is None:
+            return
         sorted_teams = self.parent.research.sort_teams_for_researching_tech(tech)
-        self.teamscreen.comparisontable.fill_comparison_table(sorted_teams)
+        self.teamscreen.comparisontable.fill_comparison_table(sorted_teams, tech)
         self.parent.change_year(self.parent.research.year)
+    
+    def show_fastest_tech(self):
+        sorted_tech = self.parent.research.sort_active_tech_based_on_research_time()
+        self.teamscreen.upperteamscreen.screens[1].fill_comparison_table(sorted_tech)
+    
+    def show_best_tech(self):
+        sorted_tech = self.parent.research.sort_active_tech_based_on_research_time_and_research_speed()
+        self.teamscreen.upperteamscreen.screens[2].fill_comparison_table(sorted_tech)
+
+    def update_tables(self, tech=None):
+        self.show_fastest_teams(tech)
+        self.show_fastest_tech()
+        self.show_best_tech()
+
+    def select_tech(self, tech):
+        self.show_fastest_teams(tech)
+        # update team info
+        if (team := self.parent.current_team) is not None:
+            time_to_complete = self.parent.research.calculate_how_many_days_to_complete(team, tech)
+            self.teamscreen.update_research_time(time_to_complete)
+            self.teamscreen.update_team_selection(team)
+        # update techscreen
+        self.techscreen.update_panels_and_stuff(tech)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1308,9 +1492,12 @@ class StatusBar(BoxLayout):
     save_file = Path("save.data")
     policyscreen_bg_color = (0, 0.1, 0.03, 1)
 
-    def update_fastest_teams(self):
-        if self.parent.current_tech is not None:
-            self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+    def update_tables(self):
+        self.parent.mainscreen.update_tables(self.parent.current_tech)
+        # if self.parent.current_tech is not None:
+        #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
+        # self.parent.mainscreen.show_fastest_tech()
+        # self.parent.mainscreen.show_best_tech()
 
     def save_country_difficulty_and_year(self):
         with open(self.save_file, "w") as f:
@@ -1359,7 +1546,7 @@ class StatusBar(BoxLayout):
         self.parent.add_country(country_code)
         if country_code == self.parent.research.primary_country:
             self.change_checkboxes_based_on_policies()
-        self.update_fastest_teams()
+        self.update_tables()
         # self.save_country_difficulty_and_year()
         self.parent.save_status()
         self.add_country_ui_updates(country_code)
@@ -1374,7 +1561,7 @@ class StatusBar(BoxLayout):
             self.active_countries_dropdown.remove_widget(self.country_buttons[country_code])
         del self.country_buttons[country_code]
         self.parent.remove_country(country_code)
-        self.update_fastest_teams()
+        self.update_tables()
         # self.save_country_difficulty_and_year()
         self.parent.save_status()
 
@@ -1404,7 +1591,7 @@ class StatusBar(BoxLayout):
         self.country_buttons = dict()
         self.active_countries_dropdown.clear_widgets()
         self.show_no_country_selected()
-        self.update_fastest_teams()
+        self.update_tables()
         # self.save_country_difficulty_and_year()
         self.parent.save_status()
 
@@ -1452,7 +1639,7 @@ class StatusBar(BoxLayout):
         self.parent.research.difficulty = get_the_other_difficulty(value)
         # if self.parent.current_tech is not None:
         #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
-        self.update_fastest_teams()
+        self.update_tables()
         # self.save_country_difficulty_and_year()
         self.parent.save_status()
 
@@ -1463,7 +1650,7 @@ class StatusBar(BoxLayout):
             self.year_input.text = value
             # if self.parent.current_tech is not None:
             #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
-            self.update_fastest_teams()
+            self.update_tables()
             # self.save_country_difficulty_and_year()
             self.parent.save_status()
         except ValueError:
@@ -1475,7 +1662,7 @@ class StatusBar(BoxLayout):
             self.rocket_site_button.text = value
             # if self.parent.current_tech is not None:
             #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
-            self.update_fastest_teams()
+            self.update_tables()
         except ValueError as e:
             print(f"Bad number of rocket sites: {value}")
             raise e
@@ -1555,7 +1742,7 @@ class StatusBar(BoxLayout):
             self.parent.research.change_year(int(text))
             # if self.parent.current_tech is not None:
             #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
-            self.update_fastest_teams()
+            self.update_tables()
             # self.save_country_difficulty_and_year()
             self.parent.save_status()
     
@@ -1568,7 +1755,7 @@ class StatusBar(BoxLayout):
         try:
             new_research_speed = float(text)
             self.parent.research.research_speed = new_research_speed
-            self.update_fastest_teams()
+            self.update_tables()
         except ValueError:
             widget.text = str(previous_research_speed)
 
@@ -1586,12 +1773,12 @@ class StatusBar(BoxLayout):
         self.parent.research.change_minister_or_idea(position, name)
         # update effects
         self.change_checkboxes_based_on_policies(True)
-        self.update_fastest_teams()
+        self.update_tables()
         self.parent.save_status()
     
     def change_bankrupt_status(self, is_bankrupt):
         self.parent.research.teams_get_paid = 1 - is_bankrupt
-        self.update_fastest_teams()
+        self.update_tables()
         self.parent.save_status()
     
     def set_bankrupt_status(self, is_bankrupt):
