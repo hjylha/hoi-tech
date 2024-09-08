@@ -244,7 +244,6 @@ class Research:
             country_code = countries[0]
             self.choose_primary_country(country_code)
             
-        
         # can override research speed
         if research_speed is not None:
             self.research_speed = research_speed
@@ -302,7 +301,10 @@ class Research:
     def find_tech(self, search_term):
         results = []
         for tech in self.techs.values():
-            if search_term.upper() in tech.name.upper():
+            if search_term.lower() in tech.name.lower():
+                if search_term == tech.name:
+                    results.insert(0, tech)
+                    continue
                 results.append(tech)
         return results
 
@@ -313,6 +315,16 @@ class Research:
             for tech in self.techs.values():
                 if key == tech.name:
                     return tech
+    
+    def find_team(self, search_term):
+        results = []
+        for team in self.teams:
+            if search_term.lower() in team.name.lower():
+                if search_term == team.name:
+                    results.insert(0, team)
+                    continue
+                results.append(team)
+        return results
     
     def get_techs_from_ids(self, tech_ids):
         techs = []
@@ -640,17 +652,23 @@ class Research:
             self.complete_tech(t_id, update_active=False, check_requirements=True)
         self.update_active_techs()
 
+    def abandon_doctrine(self, tech_id):
+        self.completed_techs.remove(tech_id)
+        self.techs[tech_id].researched = 0
+        self.research_speed += self.techs[tech_id].get_research_speed_change()
+        # 
+        self.update_active_techs()
+
     def undo_completed_tech(self, tech_id):
         self.completed_techs.remove(tech_id)
         self.techs[tech_id].researched = 0
         self.research_speed -= self.techs[tech_id].get_research_speed_change()
         # just in case
-        self.research_speed = round(self.research_speed, 1)
+        # self.research_speed = round(self.research_speed, 1)
         self.update_active_techs()
 
     def calculate_how_many_days_to_complete(self, team, tech):
         has_blueprint = int(tech.tech_id in self.blueprints)
-        # TODO: implement minister and idea bonuses
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
         return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
     
@@ -669,7 +687,9 @@ class Research:
             print(line[1], line[0])
         return sorted_teams
 
-    def sort_active_techs_based_on_research_time(self):
+    def sort_active_tech_based_on_research_time(self):
+        if not self.teams:
+            return []
         tech_results = []
         for tech_id in self.active_techs:
             team, days = self.sort_teams_for_researching_tech(self.techs[tech_id])[0]
@@ -677,15 +697,72 @@ class Research:
         return sorted(tech_results, key=lambda x: x[1])
 
     def st2(self, num_of_techs=5):
+        if not self.teams:
+            return []
         sorted_tech = self.sort_active_techs_based_on_research_time()
         print("Fastest techs to research:")
         for line in sorted_tech[:num_of_techs]:
             # tech, days, team = line
             print(line[1], line[0].name, f"({line[2].name})")
         return sorted_tech
-
     
+    def sort_active_tech_based_on_research_time_and_research_speed(self):
+        if not self.teams:
+            return []
+        tech_results = []
+        for tech_id in self.active_techs:
+            team, days = self.sort_teams_for_researching_tech(self.techs[tech_id])[0]
+            research_speed_change = self.techs[tech_id].get_research_speed_change()
+            slope_of_research_speed = research_speed_change / days
+            tech_results.append([self.techs[tech_id], 100 * slope_of_research_speed, team])
+        return sorted(tech_results, key=lambda x: x[1], reverse=True)
+
+    # approximations
+    def calculate_approx_time_comparison_to_complete_tech(self, team, tech):
+        has_blueprint = int(tech.tech_id in self.blueprints)
+        extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
+        return team.calculate_approx_time_comparison_to_complete_tech(tech, self.research_speed, extra_bonus, has_blueprint, self.teams_get_paid)
+
+    def sort_teams_based_on_approx_time(self, tech):
+        team_results = []
+        for team in self.teams:
+            time_comparison = self.calculate_approx_time_comparison_to_complete_tech(team, tech)
+            team_results.append([team, time_comparison])
+        return sorted(team_results, key=lambda x: x[1])
+    
+    def sort_active_tech_based_on_approx_time(self):
+        if not self.teams:
+            return []
+        tech_results = []
+        for tech_id in self.active_techs:
+            team, time_comparison = self.sort_teams_based_on_approx_time(self.techs[tech_id])[0]
+            tech_results.append([self.techs[tech_id], time_comparison, team])
+        return sorted(tech_results, key=lambda x: x[1])
+
+    def sort_active_tech_based_on_approx_time_and_research_speed(self):
+        if not self.teams:
+            return []
+        positive_change = []
+        no_change = []
+        negative_change = []
+        for tech_id in self.active_techs:
+            team, time_comparison = self.sort_teams_based_on_approx_time(self.techs[tech_id])[0]
+            research_speed_change = self.techs[tech_id].get_research_speed_change()
+            if research_speed_change == 0:
+                # hopefully nothing positive gets to 10_000 comparison
+                no_change.append([self.techs[tech_id], 10_000 + time_comparison, team])
+                continue
+            # smaller is better here, though negative is worse than positive
+            comparison_value = (self.research_speed / research_speed_change + 1) * time_comparison
+            if research_speed_change > 0:
+                positive_change.append([self.techs[tech_id], comparison_value, team])
+                continue
+            negative_change.append([self.techs[tech_id], comparison_value, team])
+        return sorted(positive_change, key= lambda x: x[1]) + sorted(no_change, key=lambda x: x[1]) + sorted(negative_change, key=lambda x: x[1])
+
+
 if __name__ == "__main__":
+    import sys
     country = input("Select country: ")
     country_dict = get_country_names()
     for nation_code, nation in country_dict.items():
@@ -708,5 +785,35 @@ if __name__ == "__main__":
 
     pol = r.politics
     curr = r.politics.current_policies
+
+    if len(sys.argv) > 1 and sys.argv[1] == "1":
+        import time
+        t1_start = time.perf_counter()
+        tech_list1 = r.sort_active_tech_based_on_approx_time()
+        t1_end = time.perf_counter()
+        t1_duration = t1_end - t1_start
+        
+        t2_start = time.perf_counter()
+        tech_list2 = r.sort_active_tech_based_on_research_time()
+        t2_end = time.perf_counter()
+        t2_duration = t2_end - t2_start
+
+        print(f"Approximate calculation: \t {t1_duration}")
+        print(f"Accurate calculation: \t\t {t2_duration}")
+        print(f"Approx takes {round(t1_duration / t2_duration, 4)} of accurate calculation's time")
+    
+    if len(sys.argv) > 2 and sys.argv[2] == "1":
+
+        print()
+        sorting = r.sort_active_tech_based_on_approx_time_and_research_speed()
+        print("Sorting active tech based on approx research time and research speed inpact (smaller is better, though negative is worse than positive)")
+        for tech, value, team in sorting:
+            print(f"{tech.name} --- {round(value, 4)} --- ({team.name})")
+
+        print()
+        true_sorting = r.sort_active_tech_based_on_research_time_and_research_speed()
+        print(f"Sorting active tech according to biggest slope of research speed and time")
+        for tech, slope, team in true_sorting:
+            print(f"{tech.name} --- {round(slope, 4)} --- ({team.name})")
 
 
