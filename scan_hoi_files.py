@@ -23,7 +23,7 @@ def scan_tech_file(filepath, tech_names):
                 raise e
 
             tech_name_key = tech_text.split("Name =")[1].split("\n")[0].strip(" =")
-            tech_name = tech_names[tech_name_key]
+            tech_name = tech_names[tech_name_key].strip()
             short_tech_name_key = f"SHORT_{tech_name_key}"
             short_tech_name = tech_names[short_tech_name_key]
 
@@ -137,7 +137,7 @@ def scan_tech_team_file(filepath):
                         print(len(items[0]))
                         raise Exception(f"{nation_key} is not {items[0]}")
                     continue
-                team_name = items[1]
+                team_name = items[1].strip()
                 pic_path = f"gfx/interface/pics/{items[2]}.bmp"
                 skill = int(items[3])
                 start_year = int(items[4])
@@ -378,13 +378,21 @@ def scan_scenario_file_for_country(country_code):
     return scan_scenario_file(filepath)
 
 
-def find_tech(tech_id, list_of_techs):
+def get_tech_by_id(tech_id, list_of_techs):
     for tech in list_of_techs:
         if tech.tech_id == tech_id:
             return tech
-    print(f"Tech with id {tech_id} not found")
+    # print(f"Tech with id {tech_id} not found")
     return
 
+def find_tech_by_name(tech_name, list_of_techs):
+    results = []
+    for tech in list_of_techs:
+        if tech_name == tech.name:
+            results.append(tech)
+    # print(f"Tech named {tech_name} not found")
+    return results
+        
 
 if __name__ == "__main__":
     techs = scan_techs()
