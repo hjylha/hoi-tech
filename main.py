@@ -2005,6 +2005,7 @@ class MainFullScreen(BoxLayout):
         # ctrl + r to reload country
         elif keycode == 114 and "ctrl" in modifiers:
             self.statusbar.reload_countries(self.statusbar.reload_countries_button)
+        # 1 2 3 to change the view top left
         elif keycode == 49 and "ctrl" in modifiers:
             self.mainscreen.teamscreen.change_upperteamscreen_by_index(0)
         elif keycode == 50 and "ctrl" in modifiers:

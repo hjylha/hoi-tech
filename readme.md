@@ -19,7 +19,21 @@ Once the requirements are satisfied, you can start the app by running
 python main.py
 ```
 
+
+#### Some notes
+
 Note that the requirements for secret weapons technologies are misleading, because they also require invention events to activate and these inventions may have requirements outside of the technology system. For similar reasons post-war technologies have been left out for now (also not having post-war technologies frees up a lot of space on the screen).
+
+#### Shortcut keys
+
+- CTRL + C completes tech (if possible)
+- CTRL + F completes tech regardless of any limitations
+- CTRL + U undos selected tech (if it is researched)
+- CTRL + R reloads country/countries
+
+- CTRL + 1 switches to Team Info view on the top left
+- CTRL + 2 switches to Fastest Tech view on the top left
+- CTRL + 3 switches to Fastest Tech view on the top left
 
 # A brief look into the research system
 
