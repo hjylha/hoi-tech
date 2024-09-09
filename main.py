@@ -520,6 +520,13 @@ class UpperTeamScreen(BoxLayout):
 
     def select_tech(self, tech):
         self.parent.select_tech(tech)
+    
+    def change_upperteamscreen_by_index(self, index_num):
+        if self.screen_index == index_num:
+            return
+        self.clear_widgets()
+        self.screen_index = index_num
+        self.add_widget(self.screens[self.screen_index])
 
     def change_upperteamscreen(self, btn_text):
         # print(text)
@@ -578,6 +585,7 @@ class TeamComparisonTable(BoxLayout):
         button_index = self.labels.index(widget)
         # print(self.teams_in_table[button_index // 2].name)
         self.parent.update_team_selection(self.teams_in_table[button_index // 2])
+        self.parent.change_upperteamscreen_by_index(0)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -622,6 +630,9 @@ class TeamComparisonTable(BoxLayout):
 class TeamScreen(BoxLayout):
     def change_upperteamscreen(self, widget):
         self.upperteamscreen.change_upperteamscreen(widget.text)
+
+    def change_upperteamscreen_by_index(self, index_num):
+        self.upperteamscreen.change_upperteamscreen_by_index(index_num)
     
     def update_team_selection(self, tech_team):
         self.parent.parent.current_team = tech_team
@@ -1333,6 +1344,7 @@ class MainScreen(BoxLayout):
         self.show_best_tech()
 
     def select_tech(self, tech):
+        self.parent.current_tech = tech
         self.show_fastest_teams(tech)
         # update team info
         if (team := self.parent.current_team) is not None:
@@ -1981,10 +1993,6 @@ class MainFullScreen(BoxLayout):
 
     # KEYBOARD SHORTCUTS
     def _on_keyboard_down(self, keyboard, keycode, some_number, text, modifiers):
-        # print(f"{keycode=}")
-        # print(f"{text=}")
-        # print(f"{modifiers=}")
-
         # ctrl + c to complete
         if keycode == 99 and "ctrl" in modifiers:
             self.mainscreen.techscreen.complete_until_tech()
@@ -1997,6 +2005,16 @@ class MainFullScreen(BoxLayout):
         # ctrl + r to reload country
         elif keycode == 114 and "ctrl" in modifiers:
             self.statusbar.reload_countries(self.statusbar.reload_countries_button)
+        elif keycode == 49 and "ctrl" in modifiers:
+            self.mainscreen.teamscreen.change_upperteamscreen_by_index(0)
+        elif keycode == 50 and "ctrl" in modifiers:
+            self.mainscreen.teamscreen.change_upperteamscreen_by_index(1)
+        elif keycode == 51 and "ctrl" in modifiers:
+            self.mainscreen.teamscreen.change_upperteamscreen_by_index(2)
+        # else:
+        #     print(f"{keycode=}")
+        #     print(f"{text=}")
+        #     print(f"{modifiers=}")
 
 
     def __init__(self, **kwargs):
