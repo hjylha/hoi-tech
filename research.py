@@ -493,6 +493,9 @@ class Research:
         deactivation_ids = tech.get_deactivated_tech()
         return [f"{self.techs[t_id]}" for t_id in deactivation_ids]
 
+    def list_is_required_in(self, tech):
+        return [f"{self.techs[t_id]}" for t_id in tech.allows]
+
     def list_effects(self, tech):
         # TODO: improve this
         effects = []

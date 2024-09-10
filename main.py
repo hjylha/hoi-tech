@@ -234,6 +234,12 @@ class TechnologyButton(BoxLayout):
     def hide_requirement(self):
         self.requirement_label.text = ""
 
+    def show_as_allowed_by(self):
+        self.requirement_label.text = "A"
+    
+    def hide_is_required_in(self):
+        self.requirement_label.text = ""
+
     def show_deactivation_warning(self):
         self.deactivation_label.text = "D"
     
@@ -779,12 +785,21 @@ class RequirementPanel(BoxLayout):
             tech_btn.technology.text = f"*{tech_btn.technology.text}"
         return tech_btn
 
-    def show_reqs_and_deacts(self, requirements, deactivations):
+    def show_reqs_and_deacts(self, requirements, is_required_ins, deactivations):
         self.clear_widgets()
         research = self.parent.parent.parent.research
         if requirements:
             self.add_widget(Label(text="Requirements:", size_hint=(1, None), height=dp(25), color=(1, 1, 0, 1)))
             for requirement in requirements:
+                # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
+                tech_id = int(requirement.split(" ")[0].strip("*"))
+                tech_btn = self.create_tech_button(tech_id, research, "*" == requirement[0])
+                
+                self.add_widget(tech_btn)
+        
+        if is_required_ins:
+            self.add_widget(Label(text="Is required in:", size_hint=(1, None), height=dp(25), color=(1, 1, 0, 1)))
+            for requirement in is_required_ins:
                 # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
                 tech_id = int(requirement.split(" ")[0].strip("*"))
                 tech_btn = self.create_tech_button(tech_id, research, "*" == requirement[0])
@@ -1068,6 +1083,19 @@ class MainTechScreen_BoxLayout(BoxLayout):
             if tech_btn is not None:
                 tech_btn.hide_requirement()
     
+    def show_is_required_ins(self, allowed_tech_ids):
+        for tech_id in allowed_tech_ids:
+            tech_btn = self.technologies.get(tech_id)
+            if tech_btn is not None:
+                tech_btn.show_as_allowed_by()
+        self.old_is_required_ins = allowed_tech_ids
+    
+    def hide_old_is_required_ins(self):
+        for tech_id in self.old_is_required_ins:
+            tech_btn = self.technologies.get(tech_id)
+            if tech_btn is not None:
+                tech_btn.hide_is_required_in()
+    
     def show_deactivation_warnings(self, deactivated_tech_ids):
         for tech_id in deactivated_tech_ids:
             tech_btn = self.technologies.get(tech_id)
@@ -1104,6 +1132,7 @@ class MainTechScreen_BoxLayout(BoxLayout):
         # self.add_widget(Label(text="MainTechScreen", pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
         self.old_requirements = []
+        self.old_is_required_ins = []
         self.old_deactivations = []
 
         # self.tech_buttons = dict()
@@ -1145,10 +1174,10 @@ class TechInfoPanels(BoxLayout):
     #     widget.rect.pos = widget.pos
     #     widget.rect.size = widget.size
 
-    def update_tech_info(self, tech, has_blueprint, requirements, deactivations, effects):
+    def update_tech_info(self, tech, has_blueprint, requirements, is_required_ins, deactivations, effects):
         self.techinfopanel.update_info(tech.tech_id, tech.name, tech.components, has_blueprint)
 
-        self.requirement_panel.show_reqs_and_deacts(requirements, deactivations)
+        self.requirement_panel.show_reqs_and_deacts(requirements, is_required_ins, deactivations)
 
         self.effects_panel.show_effects(effects)
     
@@ -1203,23 +1232,27 @@ class TechScreen(BoxLayout):
     
     def update_tech_infopanels(self, tech):
         requirements = self.research.list_requirements(tech)
+        is_required_ins = self.research.list_is_required_in(tech)
         deactivations = self.research.list_deactivations(tech)
         effects = self.research.list_effects(tech)
         has_blueprint = tech.tech_id in self.research.blueprints
-        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, deactivations, effects)
-        return [requirements, deactivations]
+        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, is_required_ins, deactivations, effects)
+        return [requirements, deactivations, is_required_ins]
     
     def update_panels_and_stuff(self, tech):
         # update infopanels
-        requirements, deactivations = self.update_tech_infopanels(tech)
+        requirements, deactivations, is_required_ins = self.update_tech_infopanels(tech)
 
         # update tech buttons
         self.maintechscreen.hide_old_requirements()
+        self.maintechscreen.hide_old_is_required_ins()
         self.maintechscreen.hide_old_deactivation_warnings()
 
         req_ids = [int(line.split(" ")[0].strip("*")) for line in requirements]
         deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
+        allow_ids = [int(line.split(" ")[0].strip("*")) for line in is_required_ins]
         self.maintechscreen.show_requirements(req_ids)
+        self.maintechscreen.show_is_required_ins(allow_ids)
         self.maintechscreen.show_deactivation_warnings(deact_ids)
     
     def select_technology_by_id(self, tech_id):
