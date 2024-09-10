@@ -37,7 +37,7 @@ class Tech:
     COMPONENT_SIZE = 20
     NUM_OF_COMPONENTS = 5
 
-    def __init__(self, tech_id, tech_name, short_name, tech_category, requirements, components, effects):
+    def __init__(self, tech_id, tech_name, short_name, tech_category, requirements, components, effects, allows=None):
         self.tech_id = tech_id
         self.name = tech_name
         self.short_name = short_name
@@ -45,6 +45,7 @@ class Tech:
         self.requirements = requirements
         self.components = components
         self.effects = effects
+        self.allows = set() if allows is None else set(allows)
         self.current_component = 0
         self.component_progress = 0
         self.researched = 0

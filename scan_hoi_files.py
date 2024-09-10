@@ -104,8 +104,6 @@ def scan_tech_file(filepath, tech_names):
     return techs
 
 
-
-
 def scan_techs():
     techs = []
     tech_files = get_tech_files(get_tech_path())
@@ -114,9 +112,22 @@ def scan_techs():
     for tech_file in tech_files:
         techs_in_file = scan_tech_file(tech_file, tech_names)
         techs = techs + techs_in_file
-    
     return techs
 
+def get_tech_dict():
+    techs = scan_techs()
+    techs = {tech.tech_id: tech for tech in techs}
+    # add what each tech allows
+    for tech_id, tech in techs.items():
+        for requirement in tech.requirements:
+            if isinstance(requirement, int):
+                techs[requirement].allows.add(tech_id)
+                continue
+            if isinstance(requirement, list):
+                for req in requirement:
+                    techs[req].allows.add(tech_id)
+    return techs
+            
 
 def scan_tech_team_file(filepath):
     tech_teams = []
