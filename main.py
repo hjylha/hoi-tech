@@ -2014,6 +2014,8 @@ class MainFullScreen(BoxLayout):
         self.update_statusbar()
         if update_tech:
             self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
+            if (t := self.current_tech) is not None:
+                self.mainscreen.techscreen.techinfopanel.techinfopanel.update_info(t.tech_id, t.name, t.components, t.tech_id in self.research.blueprints)
 
     def remove_country(self, country_code):
         self.research.remove_country(country_code)
