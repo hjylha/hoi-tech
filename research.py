@@ -1,7 +1,7 @@
 
 from read_hoi_files import get_country_names
 from scan_hoi_files import scan_minister_personalities, scan_ideas, scan_ministers_for_country
-from scan_hoi_files import scan_techs, get_tech_teams, scan_policies_file, scan_scenario_file_for_country
+from scan_hoi_files import get_tech_dict, get_tech_teams, scan_policies_file, scan_scenario_file_for_country
 
 
 class Politics:
@@ -226,10 +226,10 @@ class Research:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
 
-    def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, list_of_techs=None, countries=None, year=DEFAULT_YEAR) -> None:
-        if list_of_techs is None:
-            list_of_techs = scan_techs()
-        self.techs = {tech.tech_id: tech for tech in list_of_techs}
+    def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, tech_dict=None, countries=None, year=DEFAULT_YEAR) -> None:
+        # if tech_dict is None:
+        #     tech_dict = get_tech_dict()
+        self.techs = get_tech_dict() if tech_dict is None else tech_dict
 
         self.primary_country = None
 
@@ -742,23 +742,24 @@ class Research:
     def sort_active_tech_based_on_approx_time_and_research_speed(self):
         if not self.teams:
             return []
-        positive_change = []
-        no_change = []
-        negative_change = []
+        # positive_change = []
+        # no_change = []
+        tech_results = []
         for tech_id in self.active_techs:
             team, time_comparison = self.sort_teams_based_on_approx_time(self.techs[tech_id])[0]
             research_speed_change = self.techs[tech_id].get_research_speed_change()
-            if research_speed_change == 0:
-                # hopefully nothing positive gets to 10_000 comparison
-                no_change.append([self.techs[tech_id], 10_000 + time_comparison, team])
-                continue
+            # if research_speed_change == 0:
+            #     # hopefully nothing positive gets to 10_000 comparison
+            #     no_change.append([self.techs[tech_id], 10_000 + time_comparison, team])
+            #     continue
             # smaller is better here, though negative is worse than positive
-            comparison_value = (self.research_speed / research_speed_change + 1) * time_comparison
-            if research_speed_change > 0:
-                positive_change.append([self.techs[tech_id], comparison_value, team])
-                continue
-            negative_change.append([self.techs[tech_id], comparison_value, team])
-        return sorted(positive_change, key= lambda x: x[1]) + sorted(no_change, key=lambda x: x[1]) + sorted(negative_change, key=lambda x: x[1])
+            comparison_value = research_speed_change / (self.research_speed + research_speed_change) / time_comparison
+            # if research_speed_change > 0:
+            #     positive_change.append([self.techs[tech_id], comparison_value, team])
+            #     continue
+            tech_results.append([self.techs[tech_id], comparison_value, team])
+        # return sorted(positive_change, key= lambda x: x[1]) + sorted(no_change, key=lambda x: x[1]) + sorted(tech_results, key=lambda x: x[1])
+        return sorted(tech_results, key=lambda x: x[1], reverse=True)
 
 
 if __name__ == "__main__":
