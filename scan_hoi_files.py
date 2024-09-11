@@ -126,7 +126,7 @@ def scan_techs():
 def get_tech_dict():
     techs = scan_techs()
     techs = {tech.tech_id: tech for tech in techs}
-    # add what each tech allows
+    # add what each tech allows and deactivates
     for tech_id, tech in techs.items():
         for requirement in tech.requirements:
             if isinstance(requirement, int):
@@ -135,6 +135,8 @@ def get_tech_dict():
             if isinstance(requirement, list):
                 for req in requirement:
                     techs[req].allows.add(tech_id)
+        for deactivation in tech.get_deactivated_tech():
+            techs[deactivation].deactivated_by.add(tech_id)
     # mark post-war tech
     start_index = 0
     post_war_techs = [5840, 1890]
