@@ -41,7 +41,7 @@ TECH_CATEGORIES = (
             ("armor", "Armor & Artillery"),
             ("naval", "Naval"),
             ("aircraft", "Aircraft"),
-            (None, "Overview"),
+            (None, "Post-War"),
             ("industry", "Industrial"),
             ("land_doctrines", "Land Doctrine"),
             ("secret_weapons", "Secret Weapons"),
@@ -726,12 +726,17 @@ class TechInfoPanel(BoxLayout):
             tech_id = self.parent.parent.parent.parent.current_tech.tech_id
         except AttributeError:
             return
+        research = self.parent.parent.research
         if value:
-            self.parent.parent.research.blueprints.add(tech_id)
+            research.blueprints.add(tech_id)
+            if research.techs[tech_id].is_post_war:
+                tech_id += 10_000
             self.parent.parent.maintechscreen.technologies[tech_id].add_blueprint()
         else:
-            if tech_id in self.parent.parent.research.blueprints:
-                self.parent.parent.research.blueprints.remove(tech_id)
+            if tech_id in research.blueprints:
+                research.blueprints.remove(tech_id)
+                if research.techs[tech_id].is_post_war:
+                    tech_id += 10_000
                 self.parent.parent.maintechscreen.technologies[tech_id].remove_blueprint()
         # redo the calculations
         # self.parent.parent.parent.show_fastest_teams(self.parent.parent.parent.parent.current_tech)
@@ -792,26 +797,28 @@ class RequirementPanel(BoxLayout):
             self.add_widget(Label(text="Requirements:", size_hint=(1, None), height=dp(25), color=(1, 1, 0, 1)))
             for requirement in requirements:
                 # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
-                tech_id = int(requirement.split(" ")[0].strip("*"))
+                tech_id = int(requirement.strip("*")) % 10_000
                 tech_btn = self.create_tech_button(tech_id, research, "*" == requirement[0])
                 
                 self.add_widget(tech_btn)
         
         if is_required_ins:
             self.add_widget(Label(text="Is required in:", size_hint=(1, None), height=dp(25), color=(1, 1, 0, 1)))
-            for requirement in is_required_ins:
+            for tech_id in is_required_ins:
+                tech_id = tech_id % 10_000
                 # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
-                tech_id = int(requirement.split(" ")[0].strip("*"))
-                tech_btn = self.create_tech_button(tech_id, research, "*" == requirement[0])
+                # tech_id = int(requirement.split(" ")[0].strip("*"))
+                tech_btn = self.create_tech_button(tech_id, research)
                 
                 self.add_widget(tech_btn)
 
         if deactivations:
             self.add_widget(Label(text="Deactivates:", size_hint=(1, None), height=dp(25), color=(1, 0, 0, 1)))
-            for deactivation in deactivations:
+            for tech_id in deactivations:
+                tech_id = tech_id % 10_000
                 # self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(25)))
-                tech_id = int(deactivation.split(" ")[0].strip("*"))
-                tech_btn = self.create_tech_button(tech_id, research, "*" == deactivation[0])
+                # tech_id = int(deactivation.split(" ")[0].strip("*"))
+                tech_btn = self.create_tech_button(tech_id, research)
                 
                 self.add_widget(tech_btn)
 
@@ -987,7 +994,7 @@ class AircraftTechScreen(MainTechScreen):
         # self.add_widget(Label(text="AircraftTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
-class OverviewTechScreen(MainTechScreen):
+class PostWarTechScreen(MainTechScreen):
     def draw_lines(self):
         return super().draw_lines()
 
@@ -995,7 +1002,7 @@ class OverviewTechScreen(MainTechScreen):
         super().__init__(**kwargs)
 
         # placeholder text
-        self.add_widget(Label(text="OverviewTechScreen\nThis will probably remain empty", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
+        # self.add_widget(Label(text="OverviewTechScreen\nThis will probably remain empty", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
 
 class IndustryTechScreen(MainTechScreen):
@@ -1071,9 +1078,12 @@ class MainTechScreen_BoxLayout(BoxLayout):
 
     def show_requirements(self, required_tech_ids):
         for tech_id in required_tech_ids:
+            tech_id = int(tech_id.strip("*"))
             tech_btn = self.technologies.get(tech_id)
             if tech_btn is not None:
                 tech_btn.show_as_requirement()
+            else:
+                print(f"{tech_id} not in tech buttons")
             # self.technologies[tech_id].show_as_requirement()
         self.old_requirements = required_tech_ids
     
@@ -1117,6 +1127,9 @@ class MainTechScreen_BoxLayout(BoxLayout):
     
     def add_technology_buttons(self, i, layout):
         if i == 4:
+            for tech_id, tech_btn in self.technologies.items():
+                if tech_id >=10_000:
+                    layout.add_widget(tech_btn)
             return
         lower_id = (i + 1) * 1000 if i < 4 else i * 1000
         for tech_id, tech_btn in self.technologies.items():
@@ -1139,8 +1152,9 @@ class MainTechScreen_BoxLayout(BoxLayout):
 
         self.technologies = dict()
         for key, value in tech_positions.items():
-            name = the_research.techs[key].short_name
-            self.technologies[key] = TechnologyButton(name, key, pos_hint={"x": value[0], "y": value[1]})
+            tech_id = key % 10_000
+            name = the_research.techs[tech_id].short_name
+            self.technologies[key] = TechnologyButton(name, tech_id, pos_hint={"x": value[0], "y": value[1]})
 
         for tb in self.technologies.values():
             # self.add_widget(tb)
@@ -1151,7 +1165,7 @@ class MainTechScreen_BoxLayout(BoxLayout):
             TECH_CATEGORIES[1][1]: ArmorTechScreen(),
             TECH_CATEGORIES[2][1]: NavalTechScreen(),
             TECH_CATEGORIES[3][1]: AircraftTechScreen(),
-            TECH_CATEGORIES[4][1]: OverviewTechScreen(),
+            TECH_CATEGORIES[4][1]: PostWarTechScreen(),
             TECH_CATEGORIES[5][1]: IndustryTechScreen(),
             TECH_CATEGORIES[6][1]: LandDoctrineTechScreen(),
             TECH_CATEGORIES[7][1]: SecretWeaponTechScreen(),
@@ -1248,12 +1262,15 @@ class TechScreen(BoxLayout):
         self.maintechscreen.hide_old_is_required_ins()
         self.maintechscreen.hide_old_deactivation_warnings()
 
-        req_ids = [int(line.split(" ")[0].strip("*")) for line in requirements]
-        deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
-        allow_ids = [int(line.split(" ")[0].strip("*")) for line in is_required_ins]
-        self.maintechscreen.show_requirements(req_ids)
-        self.maintechscreen.show_is_required_ins(allow_ids)
-        self.maintechscreen.show_deactivation_warnings(deact_ids)
+        self.maintechscreen.show_requirements(requirements)
+        self.maintechscreen.show_is_required_ins(is_required_ins)
+        self.maintechscreen.show_deactivation_warnings(deactivations)
+        # req_ids = [int(line.split(" ")[0].strip("*")) for line in requirements]
+        # deact_ids = [int(line.split(" ")[0].strip("*")) for line in deactivations]
+        # allow_ids = [int(line.split(" ")[0].strip("*")) for line in is_required_ins]
+        # self.maintechscreen.show_requirements(req_ids)
+        # self.maintechscreen.show_is_required_ins(allow_ids)
+        # self.maintechscreen.show_deactivation_warnings(deact_ids)
     
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
