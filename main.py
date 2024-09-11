@@ -790,7 +790,7 @@ class RequirementPanel(BoxLayout):
             tech_btn.technology.text = f"*{tech_btn.technology.text}"
         return tech_btn
 
-    def show_reqs_and_deacts(self, requirements, is_required_ins, deactivations):
+    def show_reqs_and_deacts(self, requirements, is_required_ins, deactivations, deactivated_by):
         self.clear_widgets()
         research = self.parent.parent.parent.research
         if requirements:
@@ -799,7 +799,6 @@ class RequirementPanel(BoxLayout):
                 # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
                 tech_id = int(requirement.strip("*")) % 10_000
                 tech_btn = self.create_tech_button(tech_id, research, "*" == requirement[0])
-                
                 self.add_widget(tech_btn)
         
         if is_required_ins:
@@ -809,7 +808,6 @@ class RequirementPanel(BoxLayout):
                 # self.add_widget(Label(text=requirement, size_hint=(1, None), height=dp(25)))
                 # tech_id = int(requirement.split(" ")[0].strip("*"))
                 tech_btn = self.create_tech_button(tech_id, research)
-                
                 self.add_widget(tech_btn)
 
         if deactivations:
@@ -819,7 +817,15 @@ class RequirementPanel(BoxLayout):
                 # self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(25)))
                 # tech_id = int(deactivation.split(" ")[0].strip("*"))
                 tech_btn = self.create_tech_button(tech_id, research)
-                
+                self.add_widget(tech_btn)
+        
+        if deactivated_by:
+            self.add_widget(Label(text="Deactivated by:", size_hint=(1, None), height=dp(25), color=(1, 0, 0, 1)))
+            for tech_id in deactivated_by:
+                tech_id = tech_id % 10_000
+                # self.add_widget(Label(text=deactivation, size_hint=(1, None), height=dp(25)))
+                # tech_id = int(deactivation.split(" ")[0].strip("*"))
+                tech_btn = self.create_tech_button(tech_id, research)
                 self.add_widget(tech_btn)
 
     def __init__(self, **kwargs):
@@ -1155,6 +1161,12 @@ class MainTechScreen_BoxLayout(BoxLayout):
             tech_id = key % 10_000
             name = the_research.techs[tech_id].short_name
             self.technologies[key] = TechnologyButton(name, tech_id, pos_hint={"x": value[0], "y": value[1]})
+        
+        for tech_id, tech in the_research.techs.items():
+            if tech.is_post_war:
+                tech_id += 10_000
+            if self.technologies.get(tech_id) is None:
+                print(f"{tech_id} not among technology buttons")
 
         for tb in self.technologies.values():
             # self.add_widget(tb)
@@ -1188,10 +1200,10 @@ class TechInfoPanels(BoxLayout):
     #     widget.rect.pos = widget.pos
     #     widget.rect.size = widget.size
 
-    def update_tech_info(self, tech, has_blueprint, requirements, is_required_ins, deactivations, effects):
+    def update_tech_info(self, tech, has_blueprint, requirements, is_required_ins, deactivations, deactivated_by, effects):
         self.techinfopanel.update_info(tech.tech_id, tech.name, tech.components, has_blueprint)
 
-        self.requirement_panel.show_reqs_and_deacts(requirements, is_required_ins, deactivations)
+        self.requirement_panel.show_reqs_and_deacts(requirements, is_required_ins, deactivations, deactivated_by)
 
         self.effects_panel.show_effects(effects)
     
@@ -1248,9 +1260,10 @@ class TechScreen(BoxLayout):
         requirements = self.research.list_requirements(tech)
         is_required_ins = self.research.list_is_required_in(tech)
         deactivations = self.research.list_deactivations(tech)
+        deactivated_by = self.research.list_is_deactivated_by(tech, False)
         effects = self.research.list_effects(tech)
         has_blueprint = tech.tech_id in self.research.blueprints
-        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, is_required_ins, deactivations, effects)
+        self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, is_required_ins, deactivations, deactivated_by, effects)
         return [requirements, deactivations, is_required_ins]
     
     def update_panels_and_stuff(self, tech):

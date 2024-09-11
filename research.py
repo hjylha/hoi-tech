@@ -518,6 +518,11 @@ class Research:
             return self.get_post_war_modified_ids(tech.allows)
         return list(tech.allows)
         # return [f"{self.techs[t_id]}" for t_id in tech.allows]
+    
+    def list_is_deactivated_by(self, tech, with_post_war_modification=True):
+        if with_post_war_modification:
+            return self.get_post_war_modified_ids(tech.deactivaed_by)
+        return list(tech.deactivated_by)
 
     def list_effects(self, tech):
         # TODO: improve this
