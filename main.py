@@ -1085,7 +1085,7 @@ class MainTechScreen_BoxLayout(BoxLayout):
             else:
                 print(f"{tech_id} not in tech buttons")
             # self.technologies[tech_id].show_as_requirement()
-        self.old_requirements = required_tech_ids
+        self.old_requirements = [int(tech_id.strip("*")) for tech_id in required_tech_ids]
     
     def hide_old_requirements(self):
         for tech_id in self.old_requirements:
