@@ -120,6 +120,7 @@ class Research:
     DEFAULT_YEAR = 1933
     DEFAULT_RESEARCH_SPEED = 100
     DEFAULT_DIFFICULTY = 0
+    POST_WAR_MODIFICATION = 10_000
 
     def activate_tech(self, tech_id):
         self.active_techs.add(tech_id)
@@ -476,25 +477,47 @@ class Research:
             else:
                 policy_dict[position] = ["other", dict()]
         return policy_dict
+
+    def get_post_war_modified_ids(self, tech_ids):
+        modified_ids = []
+        for t_id in tech_ids:
+            if self.techs[t_id].is_post_war:
+                t_id += self.POST_WAR_MODIFICATION
+            modified_ids.append(t_id)
+        return modified_ids
             
-    def list_requirements(self, tech):
+    def list_requirements(self, tech, with_post_war_modification=True):
         reqs = []
         for req in tech.requirements:
             if isinstance(req, int):
-                reqs.append(f"{self.techs[req]}")
+                if with_post_war_modification and self.techs[req].is_post_war:
+                    req += self.POST_WAR_MODIFICATION
+                reqs.append(str(req))
+                # reqs.append(f"{self.techs[req]}")
             elif isinstance(req, list):
                 for t_id in req:
-                    reqs.append(f"*{self.techs[t_id]}")
+                    if with_post_war_modification and self.techs[t_id].is_post_war:
+                        t_id += self.POST_WAR_MODIFICATION
+                    reqs.append(f"*{t_id}")
+                    # reqs.append(f"*{self.techs[t_id]}")
             else:
                 raise Exception(f"Invalid type in requirements: {req}")
+        # if with_post_war_modification:
+        #     reqs = self.get_post_war_modified_ids(reqs)
         return reqs
     
-    def list_deactivations(self, tech):
-        deactivation_ids = tech.get_deactivated_tech()
-        return [f"{self.techs[t_id]}" for t_id in deactivation_ids]
+    def list_deactivations(self, tech, with_post_war_modification=True):
+        if with_post_war_modification:
+            return self.get_post_war_modified_ids(tech.get_deactivated_tech())
+        return tech.get_deactivated_tech()
+        # deactivation_ids = tech.get_deactivated_tech()
+        # return [f"{self.techs[t_id]}" for t_id in deactivation_ids]
 
-    def list_is_required_in(self, tech):
-        return [f"{self.techs[t_id]}" for t_id in tech.allows]
+    def list_is_required_in(self, tech, with_post_war_modification=True):
+        if with_post_war_modification:
+            return self.get_post_war_modified_ids(tech.allows)
+        return list(tech.allows)
+        # return [f"{self.techs[t_id]}" for t_id in tech.allows]
 
     def list_effects(self, tech):
         # TODO: improve this
@@ -657,6 +680,7 @@ class Research:
 
     def abandon_doctrine(self, tech_id):
         self.completed_techs.remove(tech_id)
+        self.blueprints.add(tech_id)
         self.techs[tech_id].researched = 0
         self.research_speed += self.techs[tech_id].get_research_speed_change()
         # 
