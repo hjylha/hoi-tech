@@ -282,8 +282,13 @@ industry_lines = [
     # basic computers -> state control
     ((left3_x + 0.03, 0.34, left3_x + 0.03, 0.2), True),
     ((left3_x + 0.03, 0.2, left3_x + 0.03, 0.145), False),
+    # complex calculator -> transistor
+    ((left4_x + 0.06, 0.34, left4_x + 0.06, 0.275), True),
     # complex calculator -> foreign trade
-    ((left4_x + 0.11, 0.34, left4_x + 0.11, 0.07), True),
+    ((left4_x + 0.12, 0.355, left4_x + 0.135, 0.355), False),
+    ((left4_x + 0.135, 0.355, left4_x + 0.135, 0.055), True),
+    ((left4_x + 0.135, 0.055, left4_x + 0.11, 0.055), False),
+    # ((left4_x + 0.11, 0.34, left4_x + 0.11, 0.07), True),
     # economic theory -> liberal/military/marxist
     ((right1_x + 0.02, 0.165, left1_x - 0.02, 0.165), True),
     ((left1_x - 0.01, 0.19, left1_x - 0.02, 0.19, left1_x - 0.02, 0.135), False),
@@ -509,4 +514,12 @@ air_doct_lines = [
 air_doct_deact_lines = [
     # independent / tactical
     (left1_x + 0.06, 0.65, left1_x + 0.06, 0.635)
+]
+
+post_war_lines = [
+
+]
+
+post_war_deact_lines = [
+    
 ]

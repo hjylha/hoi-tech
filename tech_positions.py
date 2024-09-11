@@ -604,6 +604,9 @@ tech_positions = {
     5580: (left4_x, 0.34),
     # long range radar
     5650: (left3_x + 0.05, 0.23),
+    # transistor, integrated circuit
+    5940: (left4_x, 0.24),
+    5950: (left4_x, 0.205),
 
     # wartime or peacetime
     5660: (left4_x, 0.7),
@@ -1090,7 +1093,132 @@ tech_positions = {
     # submarines
     7580: (left4_x, 0.35),
     7590: (left4_x, 0.3),
-    7600: (left4_x, 0.25)
+    7600: (left4_x, 0.25),
 
+
+    # POST-WAR
+    # INFANTRY
+    11890: (left0_x - 0.01, 0.9),
+    11770: (left0_x - 0.01, 0.85),
+    11870: (left0_x, 0.815),
+    11880: (left0_x + 0.01, 0.78),
+    11780: (left0_x, 0.745),
+    11790: (left0_x + 0.01, 0.71),
+    11850: (left0_x + 0.01, 0.675),
+    11860: (left0_x + 0.02, 0.64),
+    # mot and mech
+    11800: (left1_x - 0.03, 0.86),
+    11810: (left1_x - 0.02, 0.825),
+    11820: (left1_x - 0.02, 0.775),
+    11830: (left1_x - 0.01, 0.735),
+    11840: (left1_x, 0.7),
+
+    # LAND DOCTRINES
+    16810: (left2_x + 0.03, 0.9),
+    # massive means + stuff
+    16820: (left2_x - 0.04, 0.85),
+    16830: (left2_x - 0.04, 0.815),
+    16840: (left2_x - 0.04, 0.78),
+    # eco forces + stuff
+    16850: (left2_x + 0.13, 0.85),
+    16860: (left2_x + 0.13, 0.815),
+    16870: (left2_x + 0.13, 0.78),
+    # counterint/elect counterm
+    16880: (left2_x + 0.03, 0.715),
+    16890: (left2_x + 0.03, 0.665),
+    # combined arms
+    16900: (left2_x + 0.05, 0.62),
+    # command unit/individual
+    16910: (left2_x + 0.07, 0.575),
+    16920: (left2_x + 0.07, 0.525),
+
+    # ECONOMY/INDUSTRIAL
+    15840: (left0_x - 0.01, 0.55),
+    15850: (left0_x, 0.5),
+    # free trade / mutual assist
+    15860: (left0_x + 0.01, 0.46),
+    15870: (left0_x + 0.01, 0.41),
+    # labor org + just in time
+    15880: (left0_x + 0.01, 0.37),
+    15890: (left0_x + 0.02, 0.335),
+    # eco restruct, casting, quality, finish
+    15900: (left0_x + 0.03, 0.27),
+    15910: (left0_x + 0.04, 0.235),
+    15920: (left0_x + 0.05, 0.2),
+    15930: (left0_x + 0.06, 0.165),
+    # laser + microprocessor
+    15960: (left0_x + 0.04, 0.1),
+    15970: (left0_x + 0.05, 0.065),
+
+    # AIRCRAFT
+    14740: (left1_x + 0.03, 0.43),
+    # helicopters
+    14840: (left1_x + 0.04, 0.38),
+    # transports
+    14820: (left1_x + 0.04, 0.345),
+    # interceptor
+    14780: (left1_x + 0.04, 0.31),
+    # fighter
+    14770: (left1_x + 0.04, 0.275),
+    14790: (left1_x + 0.05, 0.24),
+    # tac bomber
+    14800: (left1_x + 0.04, 0.205),
+    14810: (left1_x + 0.05, 0.17),
+    # naval bomber
+    14830: (left1_x + 0.04, 0.135),
+    # strategic bomber
+    14750: (left1_x + 0.04, 0.1),
+    14760: (left1_x + 0.05, 0.065),
+
+    # AIR DOCTRINES
+    19650: (left2_x + 0.02, 0.43),
+    # asw helicopters
+    19690: (left2_x + 0.03, 0.38),
+    # bvr
+    19660: (left2_x + 0.03, 0.345),
+    19670: (left2_x + 0.04, 0.31),
+    19680: (left2_x + 0.05, 0.275),
+    # multitasking
+    19700: (left2_x + 0.03, 0.24),
+    19710: (left2_x + 0.04, 0.205),
+    # radar line
+    19730: (left2_x + 0.03, 0.17),
+    19740: (left2_x + 0.04, 0.135),
+    # awacs
+    19720: (left2_x + 0.03, 0.1),
+
+    # NAVAL
+    13860: (left4_x - 0.06, 0.9),
+    # destroyers
+    13930: (left4_x - 0.04, 0.85),
+    13940: (left4_x - 0.03, 0.815),
+    # corvettes
+    13950: (left4_x - 0.03, 0.78),
+    13970: (left4_x - 0.02, 0.745),
+    13960: (left4_x - 0.02, 0.71),
+    # frigates
+    13870: (left4_x - 0.04, 0.675),
+    13880: (left4_x - 0.03, 0.64),
+    # cruisers
+    13890: (left4_x - 0.04, 0.605),
+    13900: (left4_x - 0.03, 0.57),
+    13910: (left4_x - 0.02, 0.535),
+    # cv
+    13920: (left4_x - 0.04, 0.5),
+
+    # NAVAL DOCTRINES
+    18770: (left3_x + 0.1, 0.4),
+    # depth
+    18780: (left3_x + 0.01, 0.33),
+    18790: (left3_x + 0.02, 0.295),
+    18800: (left3_x + 0.03, 0.26),
+    18810: (left3_x + 0.03, 0.225),
+    18820: (left3_x + 0.04, 0.19),
+    # surface
+    18830: (left4_x, 0.33),
+    18840: (left4_x + 0.01, 0.295),
+    18850: (left4_x + 0.02, 0.26),
+    18860: (left4_x + 0.02, 0.225),
+    18870: (left4_x + 0.03, 0.19)
 
 }

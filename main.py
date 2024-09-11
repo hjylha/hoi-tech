@@ -22,9 +22,10 @@ from read_hoi_files import get_country_names
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from component_types import component_types
-from lines import infantry_lines, infantry_deact_lines, armor_lines, armor_deact_lines, naval_lines
-from lines import aircraft_lines, aircraft_deact_lines, industry_lines, industry_deact_lines
-from lines import land_doct_lines, land_doct_deact_lines, naval_doct_lines, naval_doct_deact_lines, air_doct_lines, air_doct_deact_lines
+import lines
+# from lines import infantry_lines, infantry_deact_lines, armor_lines, armor_deact_lines, naval_lines
+# from lines import aircraft_lines, aircraft_deact_lines, industry_lines, industry_deact_lines
+# from lines import land_doct_lines, land_doct_deact_lines, naval_doct_lines, naval_doct_deact_lines, air_doct_lines, air_doct_deact_lines
 
 
 
@@ -946,10 +947,10 @@ class MainTechScreen(FloatLayout):
 
 class InfantryTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(infantry_lines, infantry_deact_lines)
+        self.draw_lines_from_points(lines.infantry_lines, lines.infantry_deact_lines)
 
     def update_lines(self, widget, value):
-        self.update_lines_from_points(infantry_lines, infantry_deact_lines)    
+        self.update_lines_from_points(lines.infantry_lines, lines.infantry_deact_lines)    
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -960,10 +961,10 @@ class InfantryTechScreen(MainTechScreen):
 
 class ArmorTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(armor_lines, armor_deact_lines)
+        self.draw_lines_from_points(lines.armor_lines, lines.armor_deact_lines)
 
     def update_lines(self, widget, value):
-        self.update_lines_from_points(armor_lines, armor_deact_lines)
+        self.update_lines_from_points(lines.armor_lines, lines.armor_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -974,10 +975,10 @@ class ArmorTechScreen(MainTechScreen):
 
 class NavalTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(naval_lines, [])
+        self.draw_lines_from_points(lines.naval_lines, [])
     
     def update_lines(self, widget, value):
-        self.update_lines_from_points(naval_lines, [])
+        self.update_lines_from_points(lines.naval_lines, [])
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -988,10 +989,10 @@ class NavalTechScreen(MainTechScreen):
 
 class AircraftTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(aircraft_lines, aircraft_deact_lines)
+        self.draw_lines_from_points(lines.aircraft_lines, lines.aircraft_deact_lines)
     
     def update_lines(self, widget, value):
-        self.update_lines_from_points(aircraft_lines, aircraft_deact_lines)
+        self.update_lines_from_points(lines.aircraft_lines, lines.aircraft_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1002,7 +1003,10 @@ class AircraftTechScreen(MainTechScreen):
 
 class PostWarTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(lines.post_war_lines, lines.post_war_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(lines.post_war_lines, lines.post_war_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1013,10 +1017,10 @@ class PostWarTechScreen(MainTechScreen):
 
 class IndustryTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(industry_lines, industry_deact_lines)
+        self.draw_lines_from_points(lines.industry_lines, lines.industry_deact_lines)
     
     def update_lines(self, widget, value):
-        self.update_lines_from_points(industry_lines, industry_deact_lines)
+        self.update_lines_from_points(lines.industry_lines, lines.industry_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1027,10 +1031,10 @@ class IndustryTechScreen(MainTechScreen):
 
 class LandDoctrineTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(land_doct_lines, land_doct_deact_lines)
+        self.draw_lines_from_points(lines.land_doct_lines, lines.land_doct_deact_lines)
     
     def update_lines(self, widget, value):
-        self.update_lines_from_points(land_doct_lines, land_doct_deact_lines)
+        self.update_lines_from_points(lines.land_doct_lines, lines.land_doct_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1052,10 +1056,10 @@ class SecretWeaponTechScreen(MainTechScreen):
 
 class NavalDoctrineTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(naval_doct_lines, naval_doct_deact_lines)
+        self.draw_lines_from_points(lines.naval_doct_lines, lines.naval_doct_deact_lines)
     
     def update_lines(self, widget, value):
-        self.update_lines_from_points(naval_doct_lines, naval_doct_deact_lines)
+        self.update_lines_from_points(lines.naval_doct_lines, lines.naval_doct_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -1066,10 +1070,10 @@ class NavalDoctrineTechScreen(MainTechScreen):
 
 class AirDoctrineTechScreen(MainTechScreen):
     def draw_lines(self):
-        self.draw_lines_from_points(air_doct_lines, air_doct_deact_lines)
+        self.draw_lines_from_points(lines.air_doct_lines, lines.air_doct_deact_lines)
     
     def update_lines(self, widget, value):
-        self.update_lines_from_points(air_doct_lines, air_doct_deact_lines)
+        self.update_lines_from_points(lines.air_doct_lines, lines.air_doct_deact_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
