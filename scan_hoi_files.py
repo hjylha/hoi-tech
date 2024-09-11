@@ -37,6 +37,15 @@ def scan_tech_file(filepath, tech_names):
                         requirements.append(reqs)
                 except IndexError:
                     pass
+                # try again
+                first_split = tech_text.split("or_required =")
+                try:
+                    for text in first_split[1:]:
+                        reqs = text.split("\n")[0].strip(" ={}").split(" ")
+                        reqs = [int(req) for req in reqs if req]
+                        requirements.append(reqs)
+                except IndexError:
+                    pass
                 
                 for text0 in first_split:
                     try:
@@ -126,6 +135,20 @@ def get_tech_dict():
             if isinstance(requirement, list):
                 for req in requirement:
                     techs[req].allows.add(tech_id)
+    # mark post-war tech
+    start_index = 0
+    post_war_techs = [5840, 1890]
+    end_index = len(post_war_techs)
+    while end_index > start_index:
+        # new_start_index = end_index
+        for tech_id in post_war_techs[start_index:end_index]:
+            techs[tech_id].is_post_war = 1
+            for t_id in techs[tech_id].allows:
+                if t_id not in post_war_techs:
+                    post_war_techs.append(t_id)
+        start_index = end_index
+        end_index = len(post_war_techs)
+    # post_war_techs = list(techs[5840].allows)
     return techs
             
 
