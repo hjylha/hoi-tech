@@ -1151,7 +1151,7 @@ tech_positions = {
     15970: (left0_x + 0.05, 0.065),
 
     # AIRCRAFT
-    14740: (left1_x + 0.03, 0.43),
+    14740: (left1_x + 0.03, 0.415),
     # helicopters
     14840: (left1_x + 0.04, 0.38),
     # transports
@@ -1171,7 +1171,7 @@ tech_positions = {
     14760: (left1_x + 0.05, 0.065),
 
     # AIR DOCTRINES
-    19650: (left2_x + 0.02, 0.43),
+    19650: (left2_x + 0.02, 0.415),
     # asw helicopters
     19690: (left2_x + 0.03, 0.38),
     # bvr

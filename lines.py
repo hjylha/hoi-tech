@@ -517,9 +517,53 @@ air_doct_deact_lines = [
 ]
 
 post_war_lines = [
-
+    # PW inf -> PW LD
+    ((right1_x - 0.01, 0.92, left2_x + 0.03, 0.92), True),
+    # PW inf -> IFV
+    ((right1_x - 0.07, 0.9, right1_x - 0.07, 0.885), True),
+    # IFV -> mot
+    ((right1_x - 0.01, 0.87, left1_x - 0.03, 0.87), True),
+    # PW LD -> massive means
+    ((left2_x + 0.05, 0.9, left2_x + 0.05, 0.885), True),
+    # PW LD -> economy forces
+    ((right3_x + 0.02, 0.9, right3_x + 0.02, 0.885), True),
+    # cooperation -> counterintel
+    ((left2_x + 0.05, 0.78, left2_x + 0.05, 0.75), True),
+    # neutralization -> counterintel
+    ((right3_x + 0.02, 0.78, right3_x + 0.02, 0.75), True),
+    # PW eco -> recovery
+    ((right1_x - 0.06, 0.55, right1_x - 0.06, 0.535), True),
+    # free trade / mutual assist + just in time -> econ restruct
+    ((right1_x + 0.01, 0.475, right1_x + 0.03, 0.475, right1_x + 0.03, 0.43), False),
+    ((right1_x + 0.01, 0.43, right1_x + 0.03, 0.43, right1_x + 0.03, 0.35, right1_x + 0.02, 0.35), False),
+    ((right1_x + 0.03, 0.35, right1_x + 0.03, 0.305), True),
+    # quality control -> laser
+    ((right1_x - 0.07, 0.2, right1_x - 0.07, 0.135), True),
+    # PW aircraft -> PW AD
+    ((right2_x + 0.03,  0.435, left2_x + 0.02, 0.435), True),
+    # PW ship -> everything
+    ((left4_x - 0.06, 0.9, left4_x - 0.06, 0.865), True),
+    ((left4_x - 0.04, 0.865, left4_x - 0.06, 0.865, left4_x - 0.06, 0.69), False),
+    ((left4_x - 0.04, 0.69, left4_x - 0.06, 0.69, left4_x - 0.06, 0.62), False),
+    ((left4_x - 0.04, 0.62, left4_x - 0.06, 0.62, left4_x - 0.06, 0.52), False),
+    ((left4_x - 0.04, 0.52, left4_x - 0.06, 0.52, left4_x - 0.06, 0.435), False),
+    # PW ND -> depth
+    ((right4_x - 0.01, 0.4, right4_x - 0.01, 0.365), True),
+    # PW ND -> surface
+    ((left4_x + 0.01, 0.4, left4_x + 0.01, 0.365), True)
 ]
 
 post_war_deact_lines = [
-    
+    # heavy mech / light mech
+    (left1_x + 0.04, 0.825, left1_x + 0.04, 0.81),
+    # massive means / economy forces
+    (right3_x - 0.04, 0.87, left3_x - 0.05, 0.87),
+    # counterintell / elec counterm
+    (left2_x + 0.09, 0.715, left2_x + 0.09, 0.7),
+    # command unit / individual initiative
+    (right3_x + 0.01, 0.575, right3_x + 0.01, 0.56),
+    # free trade / mutual assist
+    (right1_x - 0.05, 0.46, right1_x - 0.05, 0.445),
+    # depth / surface
+    (right4_x + 0.01, 0.35, left4_x, 0.35)
 ]
