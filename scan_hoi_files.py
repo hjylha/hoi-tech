@@ -38,7 +38,7 @@ def scan_tech_file(filepath, tech_names):
                 except IndexError:
                     pass
                 # try again
-                first_split = tech_text.split("or_required =")
+                first_split = first_split[0].split("or_required =")
                 try:
                     for text in first_split[1:]:
                         reqs = text.split("\n")[0].strip(" ={}").split(" ")
