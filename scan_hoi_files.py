@@ -10,105 +10,156 @@ def scan_tech_file(filepath, tech_names):
 
     tech_category = filepath.stem[:filepath.stem.index("_tech")]
 
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
-        filtered_full_text = "\n".join([text.split("#")[0] for text in f.read().split("\n")])
-        # for tech_text in f.read().split("application =")[1:]:
-        for tech_text in filtered_full_text.split("application =")[1:]:
-            try:
-                tech_id = int(tech_text.split("id =")[1].split("\n")[0].strip(" ="))
-            except ValueError as e:
-                print(filepath)
-                print(tech_text.split("id ")[1].split("\n")[0].strip(" ="))
-                print(tech_text[:100])
-                raise e
+    content = read_txt_file(filepath)["technology"]
 
-            tech_name_key = tech_text.split("Name =")[1].split("\n")[0].strip(" =")
-            tech_name = tech_names[tech_name_key].strip()
-            short_tech_name_key = f"SHORT_{tech_name_key}"
-            short_tech_name = tech_names[short_tech_name_key]
+    if tech_category != content["category"]:
+        raise Exception(f"Category mismatch: {tech_category} /= {content["category"]}")
 
-            requirements = []
-            if "required =" in tech_text:
-                first_split = tech_text.split("OR_required =")
-                try:
-                    for text in first_split[1:]:
-                        reqs = text.split("\n")[0].strip(" ={}").split(" ")
-                        reqs = [int(req) for req in reqs if req]
-                        requirements.append(reqs)
-                except IndexError:
-                    pass
-                # try again
-                first_split = first_split[0].split("or_required =")
-                try:
-                    for text in first_split[1:]:
-                        reqs = text.split("\n")[0].strip(" ={}").split(" ")
-                        reqs = [int(req) for req in reqs if req]
-                        requirements.append(reqs)
-                except IndexError:
-                    pass
-                
-                for text0 in first_split:
-                    try:
-                        for text in text0.split("required =")[1:]:
-                            reqs = text.split("\n")[0].strip(" ={}").split(" ")
-                            reqs = [int(req) for req in reqs if req]
-                            requirements = requirements + reqs
-                    except IndexError:
-                        pass
-                # reqs = tech_text.split("required =")[1].split("\n")[0].strip(" ={}").split(" ")
-                # requirements = [int(req) for req in reqs if req]
-            
-            components = []
-            component_texts = [t.split("}")[0] for t in tech_text.split("component =")[1:]]
-            for comp_text in component_texts:
-                try:
-                    component_type = comp_text.split("type =")[1].split("\n")[0].strip(" =")
-                    component_difficulty = int(comp_text.split("difficulty =")[1].split("\n")[0].strip(" ="))
-                    components.append(Component(component_type.lower(), component_difficulty))
-                except IndexError as e:
-                    print(filepath)
-                    print(comp_text)
-                    print()
-                    print("component".join(component_texts))
-                    print(tech_text)
-                    raise e
-            
+    for tech in content["application"]:
+        try:
+            tech_id = int(tech["id"])
+        except ValueError as e:
+            print(filepath)
+            print(f"tech id not int: {tech['id']}")
+            raise e
+        tech_name_key = tech["Name"]
+        tech_name = tech_names[tech_name_key].strip()
+        short_tech_name_key = f"SHORT_{tech_name_key}"
+        short_tech_name = tech_names[short_tech_name_key].strip()
+
+        requirements = []
+        if (reqs := tech.get("required")) is not None:
+            for req in reqs:
+                if isinstance(req, int):
+                    requirements.append(req)
+                elif isinstance(req, list):
+                    for r in req:
+                        requirements.append(r)
+                else:
+                    print(tech["id"])
+                    print(tech["required"])
+                    raise Exception(f"Requirements messed up")
+        if (opt_reqs := tech.get("OR_required")) is not None:
+            requirements.append(opt_reqs)
+        if (opt_reqs := tech.get("or_required")) is not None:
+            requirements.append(opt_reqs)
+        components = []
+        for component in tech["component"]:
+            components.append(Component(component["type"].lower(), int(component["difficulty"])))
+        
+        list_of_effects = tech["effects"]["command"]
+        if isinstance(list_of_effects, dict):
+            effects = [Effect(*[list_of_effects.get(key) for key in EFFECT_ATTRIBUTES])]
+        else:
             effects = []
-            effect_texts = tech_text.split("effects =")[1].split("command")[1:]
-            effect_texts = [t.split("{")[1].split("}")[0].strip() for t in effect_texts]
-            for effect_text in effect_texts:
-                words = effect_text.split(" ")
-                
-                effect = dict()
-                previous_word = None
-                equals_between = False
-                for word in words:
-                    if equals_between and previous_word is not None:
-                        if previous_word == "value":
-                            try:
-                                effect[previous_word] = int(word)
-                            except ValueError:
-                                try:
-                                    effect[previous_word] = float(word)
-                                except ValueError:
-                                    effect[previous_word] = word
-                        else:
-                            effect[previous_word] = word
-                        previous_word = None
-                        equals_between = False
-                        continue
-                    if word == "=":
-                        equals_between = True
-                    if not equals_between and word != "=":
-                        previous_word = word
-                try:
-                    effect_tuple = Effect(*[effect.get(key) for key in EFFECT_ATTRIBUTES])
-                except Exception as e:
+            for effect in list_of_effects:
+                if isinstance(effect, str):
+                    print(tech["id"])
                     print(effect)
-                    raise e
+                    raise Exception(f"Effects messed up")
+                effect_tuple = Effect(*[effect.get(key) for key in EFFECT_ATTRIBUTES])
                 effects.append(effect_tuple)
+        techs.append(Tech(tech_id, tech_name, short_tech_name, tech_category, requirements, components, effects))
 
-            techs.append(Tech(tech_id, tech_name, short_tech_name, tech_category, requirements, components, effects))
+    # with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    #     filtered_full_text = "\n".join([text.split("#")[0] for text in f.read().split("\n")])
+    #     # for tech_text in f.read().split("application =")[1:]:
+    #     for tech_text in filtered_full_text.split("application =")[1:]:
+    #         try:
+    #             tech_id = int(tech_text.split("id =")[1].split("\n")[0].strip(" ="))
+    #         except ValueError as e:
+    #             print(filepath)
+    #             print(tech_text.split("id ")[1].split("\n")[0].strip(" ="))
+    #             print(tech_text[:100])
+    #             raise e
+
+    #         tech_name_key = tech_text.split("Name =")[1].split("\n")[0].strip(" =")
+    #         tech_name = tech_names[tech_name_key].strip()
+    #         short_tech_name_key = f"SHORT_{tech_name_key}"
+    #         short_tech_name = tech_names[short_tech_name_key]
+
+    #         requirements = []
+    #         if "required =" in tech_text:
+    #             first_split = tech_text.split("OR_required =")
+    #             try:
+    #                 for text in first_split[1:]:
+    #                     reqs = text.split("\n")[0].strip(" ={}").split(" ")
+    #                     reqs = [int(req) for req in reqs if req]
+    #                     requirements.append(reqs)
+    #             except IndexError:
+    #                 pass
+    #             # try again
+    #             first_split = first_split[0].split("or_required =")
+    #             try:
+    #                 for text in first_split[1:]:
+    #                     reqs = text.split("\n")[0].strip(" ={}").split(" ")
+    #                     reqs = [int(req) for req in reqs if req]
+    #                     requirements.append(reqs)
+    #             except IndexError:
+    #                 pass
+                
+    #             for text0 in first_split:
+    #                 try:
+    #                     for text in text0.split("required =")[1:]:
+    #                         reqs = text.split("\n")[0].strip(" ={}").split(" ")
+    #                         reqs = [int(req) for req in reqs if req]
+    #                         requirements = requirements + reqs
+    #                 except IndexError:
+    #                     pass
+    #             # reqs = tech_text.split("required =")[1].split("\n")[0].strip(" ={}").split(" ")
+    #             # requirements = [int(req) for req in reqs if req]
+            
+    #         components = []
+    #         component_texts = [t.split("}")[0] for t in tech_text.split("component =")[1:]]
+    #         for comp_text in component_texts:
+    #             try:
+    #                 component_type = comp_text.split("type =")[1].split("\n")[0].strip(" =")
+    #                 component_difficulty = int(comp_text.split("difficulty =")[1].split("\n")[0].strip(" ="))
+    #                 components.append(Component(component_type.lower(), component_difficulty))
+    #             except IndexError as e:
+    #                 print(filepath)
+    #                 print(comp_text)
+    #                 print()
+    #                 print("component".join(component_texts))
+    #                 print(tech_text)
+    #                 raise e
+            
+    #         effects = []
+    #         effect_texts = tech_text.split("effects =")[1].split("command")[1:]
+    #         effect_texts = [t.split("{")[1].split("}")[0].strip() for t in effect_texts]
+    #         for effect_text in effect_texts:
+    #             words = effect_text.split(" ")
+                
+    #             effect = dict()
+    #             previous_word = None
+    #             equals_between = False
+    #             for word in words:
+    #                 if equals_between and previous_word is not None:
+    #                     if previous_word == "value":
+    #                         try:
+    #                             effect[previous_word] = int(word)
+    #                         except ValueError:
+    #                             try:
+    #                                 effect[previous_word] = float(word)
+    #                             except ValueError:
+    #                                 effect[previous_word] = word
+    #                     else:
+    #                         effect[previous_word] = word
+    #                     previous_word = None
+    #                     equals_between = False
+    #                     continue
+    #                 if word == "=":
+    #                     equals_between = True
+    #                 if not equals_between and word != "=":
+    #                     previous_word = word
+    #             try:
+    #                 effect_tuple = Effect(*[effect.get(key) for key in EFFECT_ATTRIBUTES])
+    #             except Exception as e:
+    #                 print(effect)
+    #                 raise e
+    #             effects.append(effect_tuple)
+
+    #         techs.append(Tech(tech_id, tech_name, short_tech_name, tech_category, requirements, components, effects))
     
     return techs
 
