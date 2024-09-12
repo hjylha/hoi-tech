@@ -651,6 +651,9 @@ class Research:
 
     def complete_until_tech(self, tech_id):
         # techs_to_complete = self.find_necessary_requirements(tech_id)
+        if tech_id in self.active_techs:
+            self.complete_tech(tech_id, update_active=True)
+            return
         techs_to_complete = self.find_sufficient_requirements(tech_id)
         if techs_to_complete is None:
             return
