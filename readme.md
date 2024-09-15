@@ -22,7 +22,7 @@ python main.py
 
 #### Some notes
 
-Note that the requirements for secret weapons technologies are misleading, because they also require invention events to activate and these inventions may have requirements outside of the technology system. For similar reasons post-war technologies have been left out for now (also not having post-war technologies frees up a lot of space on the screen).
+Note that the requirements for secret weapons technologies are misleading, because they also require invention events to activate and these inventions may have requirements outside of the technology system. Post-war technologies have a similar issue, in that Post-War Economy deactivates by researching Heavy Industry and is then reactivated by an event. In turn Post-War Economy reactivates Post-War Infantry, which is deactivated by Advanced Infantry. These reactivations are not included in this app, at least for now.
 
 #### Shortcut keys
 
