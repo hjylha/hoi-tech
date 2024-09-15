@@ -669,7 +669,7 @@ class Research:
             found_some = False
             tech_ids_to_remove = []
             for t_id in techs_to_complete:
-                if self.are_tech_requirements_in_list(t_id, list(self.completed_techs) + steps):
+                if self.are_tech_requirements_in_list(t_id, list(self.completed_techs) + steps) and not any([t in steps for t in self.techs[t_id].deactivated_by]):
                     steps.append(t_id)
                     # techs_to_complete.remove(t_id)
                     tech_ids_to_remove.append(t_id)
