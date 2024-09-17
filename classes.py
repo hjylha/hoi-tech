@@ -104,6 +104,13 @@ class Tech:
                 deactivated_tech.append(int(effect.which))
         return deactivated_tech
     
+    def get_reactivated_tech(self):
+        reactivated_tech = []
+        for effect in self.effects:
+            if effect.type == "activate":
+                reactivated_tech.append(int(effect.which))
+        return reactivated_tech
+    
     def calculate_component_difficulty_multiplier(self, component_index, research_speed_modifier, game_difficulty, total_extra_bonus):
         # return max(1 / 20, 9 * research_speed_modifier / (self.components[component_index].difficulty + 2) / 200)
         return calculate_components_difficulty_multiplier(self.components[component_index], research_speed_modifier, game_difficulty, total_extra_bonus)
