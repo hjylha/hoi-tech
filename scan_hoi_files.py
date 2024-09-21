@@ -13,7 +13,7 @@ def scan_tech_file(filepath, tech_names):
     content = read_txt_file(filepath)["technology"]
 
     if tech_category != content["category"]:
-        raise Exception(f"Category mismatch: {tech_category} /= {content["category"]}")
+        raise Exception(f"Category mismatch: {tech_category} /= {content['category']}")
 
     for tech in content["application"]:
         try:
