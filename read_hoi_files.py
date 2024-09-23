@@ -481,6 +481,10 @@ def get_country_names():
             names = line.split(";")
             if names[0].upper() in country_codes:
                 country_names[names[0].upper()] = names[1]
+    # fill the missing countries
+    for country_code in country_codes:
+        if country_code.upper() not in country_names.keys():
+            country_names[country_code.upper()] = ""
     return country_names
 
 
