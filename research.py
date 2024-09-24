@@ -160,6 +160,19 @@ class Research:
                 else:
                     return False
         return True
+    
+    def can_tech_be_abandoned(self, tech):
+        if tech.tech_id not in self.completed_techs:
+            return False
+        category_num = tech.tech_id // 1000
+        if category_num not in [6, 8, 9]:
+            return False
+        for tech_id in tech.allows:
+            cat_num = tech_id // 1000
+            if cat_num == category_num and tech_id in self.completed_techs:
+                return False
+        # should this check more?
+        return True
 
     def filter_teams(self):
         filtered_teams = []
