@@ -2051,10 +2051,7 @@ class MainFullScreen(BoxLayout):
         self.research.remove_country(country_code)
     
     def load_status(self):
-        try:
-            self.research.load_status_from_file(self.save_file)
-        except KeyError:
-            pass
+        self.research.load_status_from_file(self.save_file)
         # print(f"LOADED STATUS: {self.research.num_of_rocket_sites=}")
         self.statusbar.update_statusbar_from_research()
         self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)

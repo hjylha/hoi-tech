@@ -407,10 +407,9 @@ class Research:
                 if "country" in line:
                     country_codes = line.split("=")[1].strip().split(",")
                 elif "difficulty" in line:
-                    try:
-                        self.constants.change_difficulty(line.split("=")[1].strip())
-                    except ValueError:
-                        pass
+                    difficulty_string = line.split("=")[1].strip()
+                    if difficulty_string in self.constants.difficulty_modifiers.keys():
+                        self.constants.change_difficulty(difficulty_string)
                 elif "year" in line:
                     try:
                         year = int(line.split("=")[1].strip())
