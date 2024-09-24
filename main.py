@@ -2054,7 +2054,7 @@ class MainFullScreen(BoxLayout):
         try:
             self.research.load_status_from_file(self.save_file)
         except KeyError:
-            return
+            pass
         # print(f"LOADED STATUS: {self.research.num_of_rocket_sites=}")
         self.statusbar.update_statusbar_from_research()
         self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
