@@ -426,7 +426,21 @@ def get_blueprint_bonus_and_tech_speed_modifier():
 def read_difficulty_file():
     difficulty_path = get_difficulty_path()
     data = read_csv_file(difficulty_path)
-    # TODO: lots of stuff
+    important_rows = []
+    starts = ["CATEGORY", "HUMAN", "RESEARCH"]
+    starts_index = 0
+    starting_string = starts[starts_index]
+    row_num = 0
+    while starts_index < 3:
+        row_as_list = data[row_num]
+        if starting_string == row_as_list[0]:
+            starts_index += 1
+            important_rows.append(row_as_list[1:6])
+            if starts_index == 3:
+                break
+            starting_string = starts[starts_index]
+        row_num += 1
+    return {diff: int(modifier) for diff, modifier in zip(important_rows[0], important_rows[2])}
 
 # def read_minister_modifiers():
 #     minister_modifier_file = get_minister_modifier_path()

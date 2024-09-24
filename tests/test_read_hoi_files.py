@@ -74,3 +74,12 @@ def test_get_country_names_path(aod_path):
 def test_get_save_game_path(aod_path):
     if aod_path.exists():
         assert rhf.get_save_game_path().exists()
+
+
+def test_read_difficulty_file(aod_path):
+    if aod_path.exists():
+        difficulty_dict = rhf.read_difficulty_file()
+        # hopefully nobody changes these
+        difficulties = ["VERYEASY", "EASY", "NORMAL", "HARD", "VERYHARD"]
+        for difficulty in difficulties:
+            assert isinstance(difficulty_dict[difficulty], int)
