@@ -23,18 +23,14 @@ from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from component_types import component_types
 import lines
-# from lines import infantry_lines, infantry_deact_lines, armor_lines, armor_deact_lines, naval_lines
-# from lines import aircraft_lines, aircraft_deact_lines, industry_lines, industry_deact_lines
-# from lines import land_doct_lines, land_doct_deact_lines, naval_doct_lines, naval_doct_deact_lines, air_doct_lines, air_doct_deact_lines
-
 
 
 DIFFICULTIES = (
-    ("Very Easy", -1),
-    ("Easy", 0),
-    ("Normal", 1),
-    ("Hard", 2),
-    ("Very Hard", 3)
+    ("Very Easy", "VERYEASY"),
+    ("Easy", "EASY"),
+    ("Normal", "NORMAL"),
+    ("Hard", "HARD"),
+    ("Very Hard", "VERYHARD")
 )
 
 TECH_CATEGORIES = (
@@ -1703,7 +1699,7 @@ class StatusBar(BoxLayout):
         if difficulty:
             self.difficulty_button.text = difficulty
             # self.parent.research.difficulty = DIFFICULTY_DICT[difficulty]
-            self.parent.research.difficulty = get_the_other_difficulty(difficulty)
+            self.parent.research.change_difficulty(get_the_other_difficulty(difficulty))
         if year:
             try:
                 self.parent.change_year(int(year))
@@ -1715,7 +1711,7 @@ class StatusBar(BoxLayout):
         # setattr(self.difficulty_button, "text", value)
         self.difficulty_button.text = value
         # self.parent.research.difficulty = DIFFICULTY_DICT[value]
-        self.parent.research.difficulty = get_the_other_difficulty(value)
+        self.parent.research.change_difficulty(get_the_other_difficulty(value))
         # if self.parent.current_tech is not None:
         #     self.parent.mainscreen.show_fastest_teams(self.parent.current_tech)
         self.update_tables()
@@ -1869,7 +1865,7 @@ class StatusBar(BoxLayout):
         for country_code in research.countries:
             self.add_country_ui_updates(country_code)
         self.year_input.text = str(research.year)
-        self.difficulty_button.text = get_the_other_difficulty(research.difficulty)
+        self.difficulty_button.text = get_the_other_difficulty(research.constants.current_difficulty_string)
         self.research_speed_input.text = str(research.research_speed)
         self.rocket_site_button.text = str(research.num_of_rocket_sites)
         # print(f"STATUSBAR UPDATED: {self.rocket_site_button.text=}")
@@ -2055,7 +2051,10 @@ class MainFullScreen(BoxLayout):
         self.research.remove_country(country_code)
     
     def load_status(self):
-        self.research.load_status_from_file(self.save_file)
+        try:
+            self.research.load_status_from_file(self.save_file)
+        except KeyError:
+            return
         # print(f"LOADED STATUS: {self.research.num_of_rocket_sites=}")
         self.statusbar.update_statusbar_from_research()
         self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)

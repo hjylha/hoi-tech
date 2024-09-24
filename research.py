@@ -1,5 +1,6 @@
 
 from read_hoi_files import get_country_names
+from classes import GameConstants
 from scan_hoi_files import scan_minister_personalities, scan_ideas, scan_ministers_for_country
 from scan_hoi_files import get_tech_dict, get_tech_teams, scan_policies_file, scan_scenario_file_for_country
 
@@ -119,7 +120,7 @@ class Politics:
 class Research:
     DEFAULT_YEAR = 1933
     DEFAULT_RESEARCH_SPEED = 100
-    DEFAULT_DIFFICULTY = 0
+    DEFAULT_DIFFICULTY = "EASY"
     POST_WAR_MODIFICATION = 10_000
 
     def activate_tech(self, tech_id):
@@ -234,7 +235,7 @@ class Research:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
 
-    def __init__(self, research_speed=None, difficulty=DEFAULT_DIFFICULTY, tech_dict=None, countries=None, year=DEFAULT_YEAR) -> None:
+    def __init__(self, research_speed=None, tech_dict=None, countries=None, year=DEFAULT_YEAR, **kwargs) -> None:
         # if tech_dict is None:
         #     tech_dict = get_tech_dict()
         self.techs = get_tech_dict() if tech_dict is None else tech_dict
@@ -261,8 +262,9 @@ class Research:
         for country_code in self.countries:
             self.all_teams += get_tech_teams(country_code)
         self.filter_teams()
-        # difficulty -1, 0, 1, 2, 3
-        self.difficulty = difficulty
+        # difficulty -1, 0, 1, 2, 3  # not anymore
+        # self.difficulty = difficulty
+        self.constants = GameConstants(**kwargs)
         # do we need to do anything else with rockets and reactors?
         self.num_of_rocket_sites = 0
         self.reactor_size = 0
@@ -305,6 +307,9 @@ class Research:
     def change_year(self, new_year):
         self.year = new_year
         self.filter_teams()
+    
+    def change_difficulty(self, difficulty_string):
+        self.constants.change_difficulty(difficulty_string)
 
     def find_tech(self, search_term):
         results = []
@@ -363,7 +368,7 @@ class Research:
         lines = []
         country_line = f"country={','.join(self.countries)}"
         lines.append(country_line)
-        difficulty_line = f"difficulty={self.difficulty}"
+        difficulty_line = f"difficulty={self.constants.current_difficulty_string}"
         lines.append(difficulty_line)
         year_line = f"year={self.year}"
         lines.append(year_line)
@@ -403,7 +408,7 @@ class Research:
                     country_codes = line.split("=")[1].strip().split(",")
                 elif "difficulty" in line:
                     try:
-                        self.difficulty = int(line.split("=")[1].strip())
+                        self.constants.change_difficulty(line.split("=")[1].strip())
                     except ValueError:
                         pass
                 elif "year" in line:
@@ -714,7 +719,7 @@ class Research:
     def calculate_how_many_days_to_complete(self, team, tech):
         has_blueprint = int(tech.tech_id in self.blueprints)
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
-        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
+        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
     
     def sort_teams_for_researching_tech(self, tech):
         team_results = []

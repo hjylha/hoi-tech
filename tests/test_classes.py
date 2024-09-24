@@ -15,7 +15,7 @@ research_speed_test_result_path = Path(__file__).parent / "research_speed_testin
 def format_value(column, value):
     if column == "component":
         return value.strip().lower()
-    if column in ("base difficulty", "1-day progress", "extra bonus"):
+    if column in ("base difficulty", "1-day progress", "extra bonus", "tech speed modifier", "blueprint bonus"):
         return float(value.strip())
     return int(value.strip())
 
@@ -46,8 +46,9 @@ def get_results_for_progress_estimates(testing_results):
     for result in testing_results:
         team = techteams_for_testing[result["techteam"]]
         component = techs_for_testing[result["tech"]].components[0]
+        game_constants = classes.GameConstants(result["tech speed modifier"], result["blueprint bonus"], {}, result["game difficulty"], None)
         # research_speed = 
-        result_tuple = (team, component, result["research speed"], result["game difficulty"], result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["has_money"], result["1-day progress"])
+        result_tuple = (team, component, result["research speed"], game_constants, result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["has_money"], result["1-day progress"])
         results.append(result_tuple)
     return results
 
@@ -58,7 +59,8 @@ def get_results_for_completion_estimates(testing_results):
             continue
         team = techteams_for_testing[result["techteam"]]
         tech = techs_for_testing[result["tech"]]
-        result_tuple = (team, tech, result["research speed"], result["game difficulty"], result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["days to complete game estimate"])
+        game_constants = classes.GameConstants(result["tech speed modifier"], result["blueprint bonus"], {}, result["game difficulty"], None)
+        result_tuple = (team, tech, result["research speed"], game_constants, result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["days to complete game estimate"])
         results.append(result_tuple)
     return results
 

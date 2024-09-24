@@ -2,7 +2,7 @@
 from collections import namedtuple
 import math
 
-from read_hoi_files import get_blueprint_bonus_and_tech_speed_modifier
+from read_hoi_files import get_blueprint_bonus_and_tech_speed_modifier, read_difficulty_file
 
 # should this be read from game files?
 # RESEARCH_SPEED_CONSTANT = 2.8
@@ -17,15 +17,45 @@ MODIFIER_ATTRIBUTES = ["type", "value", "option", "extra", "modifier_effect"]
 Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
 
+class GameConstants:
+    # is difficulty needed here?
+    DEFAULT_DIFFICULTY = "EASY"
+
+    def overwrite_difficulty_modifier(self, difficulty_modifier):
+        self.current_difficulty = difficulty_modifier
+
+    def __init__(self, research_speed_constant=None, blueprint_bonus=None, difficulty_modifiers=None, current_difficulty=None, current_difficulty_string=None) -> None:
+        if research_speed_constant is None or blueprint_bonus is None:
+            blueprint_bonus, research_speed_constant = get_blueprint_bonus_and_tech_speed_modifier()
+        self.research_speed_constant = research_speed_constant
+        self.blueprint_bonus = blueprint_bonus
+        # you can overwrite difficulty modifier
+        if current_difficulty is not None:
+            self.overwrite_difficulty_modifier(current_difficulty)
+            return
+        if difficulty_modifiers is None:
+            difficulty_modifiers = read_difficulty_file()
+        self.difficulty_modifiers = difficulty_modifiers
+        if current_difficulty_string is None:
+            current_difficulty_string = self.DEFAULT_DIFFICULTY
+        self.current_difficulty_string = current_difficulty_string
+        self.current_difficulty = self.difficulty_modifiers[self.current_difficulty_string]
+        
+    
+    def change_difficulty(self, difficulty_string):
+        self.current_difficulty_string = difficulty_string
+        self.current_difficulty = self.difficulty_modifiers[self.current_difficulty_string]
+
+
 # just some approximate value to use in time = difficulty / skill
 def get_approx_difficulty(tech_difficulty, research_speed_modifier, total_extra_bonus):
     return (tech_difficulty + 2) * (1 - 0.01 * total_extra_bonus) / research_speed_modifier
 
 
 # 1 / base difficulty from the game, up to scaling
-def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus):
+def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty_modifier, total_extra_bonus):
     extra_bonus = min(99.99, total_extra_bonus)
-    return min(200, max(1 , 100 * (1 - 0.1 * game_difficulty) * research_speed_modifier / (100 - extra_bonus) / (component.difficulty + 2) ))
+    return min(200, max(1 , 100 * (1 + 0.01 * game_difficulty_modifier) * research_speed_modifier / (100 - extra_bonus) / (component.difficulty + 2) ))
 
 
 def get_modifiers_tech_effects(modifier):
@@ -177,7 +207,7 @@ class TechTeam:
             self,
             component,
             research_speed_modifier,
-            game_difficulty,
+            game_constants = GameConstants(),
             total_extra_bonus = 0,
             has_blueprint=0,
             num_of_rocket_sites = 0,
@@ -191,7 +221,7 @@ class TechTeam:
         difficulty_modifier = calculate_components_difficulty_multiplier(
             component,
             research_speed_modifier,
-            game_difficulty,
+            game_constants.current_difficulty,
             total_extra_bonus
             )
         skill_issue = 0.1 * (self.skill * has_money + 6) * (has_speciality + 1)
@@ -199,13 +229,13 @@ class TechTeam:
             skill_issue += num_of_rocket_sites
         if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
             skill_issue += math.sqrt(reactor_size)
-        return 0.01 * RESEARCH_SPEED_CONSTANT * skill_issue * ((BLUEPRINT_BONUS - 1) * has_blueprint + 1) * difficulty_modifier
+        return 0.01 * game_constants.research_speed_constant * skill_issue * ((game_constants.blueprint_bonus - 1) * has_blueprint + 1) * difficulty_modifier
 
     def calculate_how_many_days_to_complete(
             self,
             tech,
             research_speed_modifier,
-            game_difficulty,
+            game_constants = GameConstants(),
             total_extra_bonus = 0,
             has_blueprint=0,
             num_of_rocket_sites = 0,
@@ -217,7 +247,7 @@ class TechTeam:
             daily_progress = self.calculate_1_day_progress_for_component(
                 component,
                 research_speed_modifier,
-                game_difficulty,
+                game_constants,
                 total_extra_bonus,
                 has_blueprint,
                 num_of_rocket_sites,
@@ -231,7 +261,7 @@ class TechTeam:
             self,
             tech,
             research_speed_modifier,
-            game_difficulty,
+            game_constants = GameConstants(),
             total_extra_bonus = 0,
             has_blueprint=0,
             num_of_rocket_sites = 0,
@@ -241,7 +271,7 @@ class TechTeam:
         return self.calculate_1_day_progress_for_component(
             tech.components[tech.current_component],
             research_speed_modifier,
-            game_difficulty,
+            game_constants,
             total_extra_bonus,
             has_blueprint,
             num_of_rocket_sites,
