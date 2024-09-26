@@ -161,15 +161,15 @@ class Research:
                     return False
         return True
     
-    def can_tech_be_abandoned(self, tech):
-        if tech.tech_id not in self.completed_techs:
+    def can_tech_be_abandoned(self, tech_id):
+        if tech_id not in self.completed_techs:
             return False
-        category_num = tech.tech_id // 1000
+        category_num = tech_id // 1000
         if category_num not in [6, 8, 9]:
             return False
-        for tech_id in tech.allows:
-            cat_num = tech_id // 1000
-            if cat_num == category_num and tech_id in self.completed_techs:
+        for t_id in self.techs[tech_id].allows:
+            cat_num = t_id // 1000
+            if cat_num == category_num and t_id in self.completed_techs:
                 return False
         # should this check more?
         return True
@@ -717,7 +717,8 @@ class Research:
         self.blueprints.add(tech_id)
         self.techs[tech_id].researched = 0
         self.research_speed += self.techs[tech_id].get_research_speed_change()
-        # 
+        # just in case
+        self.research_speed = round(self.research_speed, 1)
         self.update_active_techs()
 
     def undo_completed_tech(self, tech_id):
@@ -725,7 +726,7 @@ class Research:
         self.techs[tech_id].researched = 0
         self.research_speed -= self.techs[tech_id].get_research_speed_change()
         # just in case
-        # self.research_speed = round(self.research_speed, 1)
+        self.research_speed = round(self.research_speed, 1)
         self.update_active_techs()
 
     def calculate_how_many_days_to_complete(self, team, tech):
