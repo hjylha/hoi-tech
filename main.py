@@ -853,14 +853,35 @@ class EffectsPanel(BoxLayout):
 
 
 class ResearchButtonsPanel(GridLayout):
+    COMPLETE_BUTTON_TEXTS = ["Complete Tech", "Abandon Doctrine"]
+    FORCE_COMPLETE_BUTTON_TEXTS = ["       Force  \nComplete Tech", "Undo Tech"]
+
+    def change_complete_button(self, index, disable=False):
+        self.complete_button.text = self.COMPLETE_BUTTON_TEXTS[index]
+        self.complete_button.disabled = disable
+
+    def change_force_complete_button(self, index):
+        self.force_complete_button.text = self.FORCE_COMPLETE_BUTTON_TEXTS[index]
+
     def complete_button_pressed(self, widget):
-        self.parent.parent.complete_until_tech()
+        if widget.text == self.COMPLETE_BUTTON_TEXTS[0]:
+            self.parent.parent.complete_until_tech()
+            return
+        if widget.text == self.COMPLETE_BUTTON_TEXTS[1]:
+            self.parent.parent.abandon_doctrine()
 
     def force_complete_button_pressed(self, widget):
-        self.parent.parent.complete_tech()
+        if widget.text == self.FORCE_COMPLETE_BUTTON_TEXTS[0]:
+            self.parent.parent.complete_tech()
+            return
+        if widget.text == self.FORCE_COMPLETE_BUTTON_TEXTS[1]:
+            self.parent.parent.undo_tech()
 
     def undo_button_pressed(self, widget):
         self.parent.parent.undo_tech()
+
+    def reload_countries_button_pressed(self, widget):
+        self.parent.parent.reload_countries()
 
     def clear_button_pressed(self, widget):
         self.parent.parent.clear_tech()
@@ -868,16 +889,17 @@ class ResearchButtonsPanel(GridLayout):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        self.complete_button = Button(text="Complete Tech", on_release=self.complete_button_pressed, size_hint=(0.4, 0.4))
+        self.complete_button = Button(text=self.COMPLETE_BUTTON_TEXTS[0], on_release=self.complete_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.complete_button)
 
         # empty
         # self.add_widget(Label(text=" "))
-        
-        self.undo_button = Button(text="Undo Tech", on_release=self.undo_button_pressed, size_hint=(0.4, 0.4))
-        self.add_widget(self.undo_button)
+        self.reload_country_button = Button(text="Reload Countries", on_release=self.reload_countries_button_pressed, size_hint=(0.4, 0.4))
+        self.add_widget(self.reload_country_button)
+        # self.undo_button = Button(text="Undo Tech", on_release=self.undo_button_pressed, size_hint=(0.4, 0.4))
+        # self.add_widget(self.undo_button)
 
-        self.force_complete_button = Button(text="       Force  \nComplete Tech", on_release=self.force_complete_button_pressed, size_hint=(0.4, 0.4))
+        self.force_complete_button = Button(text=self.FORCE_COMPLETE_BUTTON_TEXTS[0], on_release=self.force_complete_button_pressed, size_hint=(0.4, 0.4))
         self.add_widget(self.force_complete_button)
 
         # empty
@@ -1243,7 +1265,8 @@ class TechInfoPanels(BoxLayout):
             self.extra_layout.rect = Rectangle(size=self.extra_layout.size, pos=self.extra_layout.pos)
         self.extra_layout.bind(pos=update_layout, size=update_layout)
 
-        self.add_widget(ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.22, 1)))
+        self.researchbuttons_panel = ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.22, 1))
+        self.add_widget(self.researchbuttons_panel)
         # for i in range(4):
         #     self.add_widget(Button(text=f"InfoPanel {i+1}", size_hint=(0.25, 1)))
 
@@ -1255,6 +1278,9 @@ class TechScreen(BoxLayout):
             return
         self.active_category = category
         self.maintechscreen.change_layout(category)
+
+    def disable_reload_countries_button(self, disable):
+        self.techinfopanel.researchbuttons_panel.reload_country_button.disabled = disable
     
     def update_tech_infopanels(self, tech):
         requirements = self.research.list_requirements(tech)
@@ -1265,6 +1291,15 @@ class TechScreen(BoxLayout):
         has_blueprint = tech.tech_id in self.research.blueprints
         self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, is_required_ins, deactivations, deactivated_by, effects)
         return [requirements, deactivations, is_required_ins]
+    
+    def update_researchbuttons(self, tech_id):
+        if tech_id is None:
+            return
+        completed = tech_id in self.research.completed_techs
+        self.techinfopanel.researchbuttons_panel.change_force_complete_button(int(completed))
+        can_be_abandoned = self.research.can_tech_be_abandoned(tech_id)
+        disable_c = (not(can_be_abandoned) and completed) or tech_id in self.research.deactivated_techs
+        self.techinfopanel.researchbuttons_panel.change_complete_button(int(can_be_abandoned), disable_c)
     
     def update_panels_and_stuff(self, tech):
         # update infopanels
@@ -1284,6 +1319,7 @@ class TechScreen(BoxLayout):
         # self.maintechscreen.show_requirements(req_ids)
         # self.maintechscreen.show_is_required_ins(allow_ids)
         # self.maintechscreen.show_deactivation_warnings(deact_ids)
+        self.update_researchbuttons(tech.tech_id)
     
     def select_technology_by_id(self, tech_id):
         # category = get_the_other_category(self.active_category)
@@ -1303,7 +1339,18 @@ class TechScreen(BoxLayout):
             self.parent.teamscreen.update_team_selection(team)
 
         self.update_panels_and_stuff(tech)
-            
+    
+    def update_after_action(self, tech_id):
+        # update tables
+        self.parent.update_tables(self.parent.parent.current_tech)
+        # update tech buttons
+        self.maintechscreen.update_technology_buttons(self.research)
+        # update research buttons
+        self.update_researchbuttons(tech_id)
+        # update research speed
+        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
+        # save status
+        self.parent.parent.save_status()
     
     def complete_until_tech(self):
         try:
@@ -1313,15 +1360,17 @@ class TechScreen(BoxLayout):
         if tech_id in self.research.completed_techs:
             return
         self.research.complete_until_tech(tech_id)
-        # update tables
-        self.parent.update_tables(self.parent.parent.current_tech)
-        # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.research)
-        # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
-        # save status
-        self.parent.parent.save_status()
-
+        self.update_after_action(tech_id)
+    
+    def abandon_doctrine(self):
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
+        if self.research.can_tech_be_abandoned(tech_id):
+            self.research.abandon_doctrine(tech_id)
+            self.update_after_action(tech_id)
+    
     def complete_tech(self):
         try:
             tech_id = self.parent.parent.current_tech.tech_id
@@ -1330,14 +1379,7 @@ class TechScreen(BoxLayout):
         if tech_id in self.research.completed_techs:
             return
         self.research.complete_tech(tech_id)
-        # update tables
-        self.parent.update_tables(self.parent.parent.current_tech)
-        # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.research)
-        # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
-        # save status
-        self.parent.parent.save_status()
+        self.update_after_action(tech_id)
     
     def undo_tech(self):
         try:
@@ -1347,27 +1389,25 @@ class TechScreen(BoxLayout):
         if tech_id not in self.research.completed_techs:
             return
         self.research.undo_completed_tech(tech_id)
-        # update tables
-        self.parent.update_tables(self.parent.parent.current_tech)
-        # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.research)
-        # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
-        # save status
-        self.parent.parent.save_status()
+        self.update_after_action(tech_id)
+    
+    def reload_countries(self):
+        self.parent.parent.reload_countries()
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
+        self.update_after_action(tech_id)
 
     def clear_tech(self):
         if not self.research.completed_techs and not self.research.deactivated_techs and not self.research.blueprints:
             return
         self.research.clear_all_tech()
-        # update tables
-        self.parent.update_tables()
-        # update tech buttons
-        self.maintechscreen.update_technology_buttons(self.research)
-        # update research speed
-        self.parent.parent.statusbar.research_speed_input.text = str(self.research.research_speed)
-        # save status
-        self.parent.parent.save_status()
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
+        self.update_after_action(tech_id)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -2045,7 +2085,8 @@ class MainFullScreen(BoxLayout):
         if update_tech:
             self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
             if (t := self.current_tech) is not None:
-                self.mainscreen.techscreen.techinfopanel.techinfopanel.update_info(t.tech_id, t.name, t.components, t.tech_id in self.research.blueprints)
+                # self.mainscreen.techscreen.techinfopanel.techinfopanel.update_info(t.tech_id, t.name, t.components, t.tech_id in self.research.blueprints)
+                self.mainscreen.techscreen.update_panels_and_stuff(t)
 
     def remove_country(self, country_code):
         self.research.remove_country(country_code)
@@ -2055,6 +2096,12 @@ class MainFullScreen(BoxLayout):
         # print(f"LOADED STATUS: {self.research.num_of_rocket_sites=}")
         self.statusbar.update_statusbar_from_research()
         self.mainscreen.techscreen.maintechscreen.update_technology_buttons(self.research)
+    
+    def reload_countries(self):
+        country_codes = list(self.statusbar.country_buttons.keys())
+        self.statusbar.clear_countries()
+        for country_code in country_codes:
+            self.statusbar.add_country(country_code)
 
     # KEYBOARD SHORTCUTS
     def _on_keyboard_down(self, keyboard, keycode, some_number, text, modifiers):
@@ -2067,9 +2114,13 @@ class MainFullScreen(BoxLayout):
         # ctrl + u to undo
         elif keycode == 117 and "ctrl" in modifiers:
             self.mainscreen.techscreen.undo_tech()
+        # ctrl + a to abandon
+        elif keycode == 97 and "ctrl" in modifiers:
+            self.mainscreen.techscreen.abandon_doctrine()
         # ctrl + r to reload country
         elif keycode == 114 and "ctrl" in modifiers:
-            self.statusbar.reload_countries(self.statusbar.reload_countries_button)
+            # self.statusbar.reload_countries(self.statusbar.reload_countries_button)
+            self.mainscreen.techscreen.reload_countries()
         # 1 2 3 to change the view top left
         elif keycode == 49 and "ctrl" in modifiers:
             self.mainscreen.teamscreen.change_upperteamscreen_by_index(0)
