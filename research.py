@@ -191,7 +191,7 @@ class Research:
             if self.are_tech_requirements_completed(tech_id):
                 self.activate_tech(tech_id)
     
-    def reactivate_tech(self, tech_id, update_tech=False):
+    def reactivate_tech(self, tech_id, update_tech=True):
         if tech_id not in self.deactivated_techs:
             return
         self.deactivated_techs.remove(tech_id)
@@ -585,7 +585,7 @@ class Research:
         for tech_id in self.techs[tech_id].get_deactivated_tech():
             self.deactivate_tech(tech_id)
         for tech_id in self.techs[tech_id].get_reactivated_tech():
-            self.reactivate_tech(tech_id)
+            self.reactivate_tech(tech_id, False)
         
         if update_active:
             self.update_active_techs()

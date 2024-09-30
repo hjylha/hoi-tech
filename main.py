@@ -853,7 +853,7 @@ class EffectsPanel(BoxLayout):
 
 
 class ResearchButtonsPanel(GridLayout):
-    COMPLETE_BUTTON_TEXTS = ["Complete Tech", "Abandon Doctrine"]
+    COMPLETE_BUTTON_TEXTS = ["Complete Tech", "Abandon Doctrine", "Activate Tech"]
     FORCE_COMPLETE_BUTTON_TEXTS = ["       Force  \nComplete Tech", "Undo Tech"]
 
     def change_complete_button(self, index, disable=False):
@@ -869,6 +869,9 @@ class ResearchButtonsPanel(GridLayout):
             return
         if widget.text == self.COMPLETE_BUTTON_TEXTS[1]:
             self.parent.parent.abandon_doctrine()
+            return
+        if widget.text == self.COMPLETE_BUTTON_TEXTS[2]:
+            self.parent.parent.activate_tech()
 
     def force_complete_button_pressed(self, widget):
         if widget.text == self.FORCE_COMPLETE_BUTTON_TEXTS[0]:
@@ -1298,8 +1301,9 @@ class TechScreen(BoxLayout):
         completed = tech_id in self.research.completed_techs
         self.techinfopanel.researchbuttons_panel.change_force_complete_button(int(completed))
         can_be_abandoned = self.research.can_tech_be_abandoned(tech_id)
-        disable_c = (not(can_be_abandoned) and completed) or tech_id in self.research.deactivated_techs
-        self.techinfopanel.researchbuttons_panel.change_complete_button(int(can_be_abandoned), disable_c)
+        is_deactivated = tech_id in self.research.deactivated_techs
+        disable_c = not(can_be_abandoned) and completed and not(is_deactivated)
+        self.techinfopanel.researchbuttons_panel.change_complete_button(int(can_be_abandoned) + 2 * int(is_deactivated), disable_c)
     
     def update_panels_and_stuff(self, tech):
         # update infopanels
@@ -1389,6 +1393,16 @@ class TechScreen(BoxLayout):
         if tech_id not in self.research.completed_techs:
             return
         self.research.undo_completed_tech(tech_id)
+        self.update_after_action(tech_id)
+
+    def activate_tech(self):
+        try:
+            tech_id = self.parent.parent.current_tech.tech_id
+        except AttributeError:
+            return
+        if tech_id not in self.research.deactivated_techs:
+            return
+        self.research.reactivate_tech(tech_id)
         self.update_after_action(tech_id)
     
     def reload_countries(self):
