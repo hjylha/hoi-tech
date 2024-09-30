@@ -27,6 +27,7 @@ Note that the requirements for secret weapons technologies are misleading, becau
 #### Shortcut keys
 
 - CTRL + C completes tech (if possible)
+- CTRL + A abandons doctrine (if possible)
 - CTRL + F completes tech regardless of any limitations
 - CTRL + U undos selected tech (if it is researched)
 - CTRL + R reloads country/countries
