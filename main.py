@@ -1303,7 +1303,8 @@ class TechScreen(BoxLayout):
         can_be_abandoned = self.research.can_tech_be_abandoned(tech_id)
         is_deactivated = tech_id in self.research.deactivated_techs
         disable_c = not(can_be_abandoned) and completed and not(is_deactivated)
-        self.techinfopanel.researchbuttons_panel.change_complete_button(int(can_be_abandoned) + 2 * int(is_deactivated), disable_c)
+        the_index = 1 if can_be_abandoned else 2 * int(is_deactivated)
+        self.techinfopanel.researchbuttons_panel.change_complete_button(the_index, disable_c)
     
     def update_panels_and_stuff(self, tech):
         # update infopanels
