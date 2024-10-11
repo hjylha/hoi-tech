@@ -177,7 +177,7 @@ class Research:
     def filter_teams(self):
         filtered_teams = []
         for team in self.all_teams:
-            if team.start_year <= self.year and team.end_year >= self.year:
+            if team.start_year <= self.year and team.end_year > self.year:
                 filtered_teams.append(team)
         self.teams = filtered_teams
     
