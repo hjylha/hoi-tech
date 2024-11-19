@@ -9,6 +9,72 @@ from techteams_for_testing import techteams_for_testing
 import classes
 
 
+class TestHoITime:
+    hoi_time = classes.HoITime()
+
+    def test_constants(self):
+        assert self.hoi_time.DEFAULT_START_DAY == 30
+        assert self.hoi_time.DEFAULT_START_YEAR == 1933
+
+    @pytest.mark.parametrize(
+        "date, year", [
+            (1, 1933),
+            (370, 1934),
+            (600, 1934),
+            (750, 1935),
+            (1000, 1935),
+            (1100, 1936),
+            (1441, 1937),
+            (1801, 1938),
+            (2161, 1939),
+            (2878, 1940),
+            (2890, 1941),
+            (3599, 1942),
+            (4321, 1945),
+            (6000, 1949),
+            (7000, 1952),
+            (hoi_time.DEFAULT_START_DAY, hoi_time.DEFAULT_START_YEAR)
+        ]
+    )
+    def test_get_year(self, date, year):
+        self.hoi_time.date = date
+        assert self.hoi_time.get_year() == year
+
+    @pytest.mark.parametrize(
+            "date, date_str", [
+                (60, "1 Mar 1933"),
+                (462, "13 Apr 1934"),
+                (hoi_time.DEFAULT_START_DAY, "1 Feb 1933")
+            ]
+    )
+    def test_get_date(self, date, date_str):
+        self.hoi_time.date = date
+        assert self.hoi_time.get_date() == date_str
+
+    @pytest.mark.parametrize(
+            "new_year, date", [
+                (1940, hoi_time.DEFAULT_START_DAY + 2520),
+                (1950, hoi_time.DEFAULT_START_DAY + 6120),
+                (1933, hoi_time.DEFAULT_START_DAY)
+            ]
+    )
+    def test_change_year(self, new_year, date):
+        self.hoi_time.change_year(new_year)
+        assert self.hoi_time.date == date
+
+    @pytest.mark.parametrize(
+            "date_str, date", [
+                ("0:00 December 17, 1933", 346),
+                ("0:00 January 12, 1937", 1451),
+                ("0:00 August 25, 1938", 2034)
+            ]
+    )
+    def test_date_str_to_date(self, date_str, date):
+        returned_date = self.hoi_time.date_str_to_date(date_str)
+        assert returned_date == date
+
+
+
 research_speed_test_result_path = Path(__file__).parent / "research_speed_testing.csv"
 
 

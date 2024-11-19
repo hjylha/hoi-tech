@@ -47,6 +47,38 @@ class GameConstants:
         self.current_difficulty = self.difficulty_modifiers[self.current_difficulty_string]
 
 
+class HoITime:
+    # day 0 = 1.1.1933
+    DEFAULT_START_YEAR = 1933
+    DEFAULT_START_DAY = 30
+    MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    DAYS_IN_MONTH = 30
+    DAYS_IN_YEAR = len(MONTHS) * DAYS_IN_MONTH
+
+    def __init__(self, date=DEFAULT_START_DAY):
+        self.date = date
+
+    def get_year(self):
+        return self.DEFAULT_START_YEAR + self.date // self.DAYS_IN_YEAR
+    
+    def get_date(self):
+        year = self.get_year()
+        month = self.MONTHS[self.date // self.DAYS_IN_MONTH % len(self.MONTHS)]
+        day = self.date % self.DAYS_IN_MONTH + 1
+        return f"{day} {month} {year}"
+    
+    def change_year(self, new_year):
+        self.date += (new_year - self.get_year()) * self.DAYS_IN_YEAR
+
+    # HH:MM month day, year -> date
+    def date_str_to_date(self, date_str):
+        _, month, day0, year = date_str.split(" ")
+        day = int(day0.strip(","))
+        year = int(year)
+        month_num = self.MONTHS.index(month[:3])
+        return (year - self.DEFAULT_START_YEAR) * self.DAYS_IN_YEAR + month_num * self.DAYS_IN_MONTH + day - 1
+
+
 # just some approximate value to use in time = difficulty / skill
 def get_approx_difficulty(tech_difficulty, research_speed_modifier, total_extra_bonus):
     return (tech_difficulty + 2) * (1 - 0.01 * total_extra_bonus) / research_speed_modifier
