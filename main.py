@@ -1446,7 +1446,7 @@ class MainScreen(BoxLayout):
             return
         sorted_teams = self.parent.research.sort_teams_for_researching_tech(tech)
         self.teamscreen.comparisontable.fill_comparison_table(sorted_teams, tech)
-        self.parent.change_year(self.parent.research.year)
+        self.parent.change_year(self.parent.research.get_year())
     
     def show_fastest_tech(self):
         sorted_tech = self.parent.research.sort_active_tech_based_on_research_time()
@@ -1633,7 +1633,7 @@ class StatusBar(BoxLayout):
         with open(self.save_file, "w") as f:
             country_line = f"country={','.join(self.country_buttons.keys())}"
             difficulty_line = f"difficulty={self.difficulty_button.text}"
-            year_line = f"year={self.parent.research.year}"
+            year_line = f"year={self.parent.research.get_year()}"
             f.write(f"{country_line}\n{difficulty_line}\n{year_line}")
     
     def show_no_country_selected(self):
@@ -1784,7 +1784,7 @@ class StatusBar(BoxLayout):
             # self.save_country_difficulty_and_year()
             self.parent.save_status()
         except ValueError:
-            self.year_input.text = str(self.parent.research.year)
+            self.year_input.text = str(self.parent.research.get_year())
         
     def select_num_of_rocket_sites(self, widget, value):
         try:
@@ -1821,7 +1821,7 @@ class StatusBar(BoxLayout):
         self.active_countries_dropdown.clear_widgets()
         for country_code, country_btn in self.country_buttons.items():
             country_btn.size_hint = (1, None)
-            country_btn.height = dp(25)
+            country_btn.height = dp(30)
             self.active_countries_dropdown.add_widget(country_btn)
         self.active_countries_dropdown.open(widget)
 
@@ -1840,7 +1840,7 @@ class StatusBar(BoxLayout):
 
         suggestions = suggest_countries(value, self.country_names, self.max_num_of_country_suggestions)
         for i, suggestion in enumerate(suggestions):
-            suggestion_thingy = TextInput(text=suggestion, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(25))
+            suggestion_thingy = TextInput(text=suggestion, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(30))
             suggestion_thingy.bind(focus=self.select_country)
             self.country_selection_dropdown.add_widget(suggestion_thingy)
         
@@ -1919,7 +1919,7 @@ class StatusBar(BoxLayout):
         research = self.parent.research
         for country_code in research.countries:
             self.add_country_ui_updates(country_code)
-        self.year_input.text = str(research.year)
+        self.year_input.text = str(research.get_year())
         self.difficulty_button.text = get_the_other_difficulty(research.constants.current_difficulty_string)
         self.research_speed_input.text = str(research.research_speed)
         self.rocket_site_button.text = str(research.num_of_rocket_sites)
@@ -2010,7 +2010,7 @@ class StatusBar(BoxLayout):
         self.year_selection_dropdown = DropDown()
         for year in self.years:
             # label = Label(text=str(year), size_hint=(1, None), height=dp(20))
-            label = TextInput(text=year, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(25))
+            label = TextInput(text=year, readonly=True, multiline=False, write_tab=False, size_hint_y=None, height=dp(30))
             label.bind(focus=lambda w, v: self.year_selection_dropdown.select(w.text))
             # label.bind(focus=test_printer)
             self.year_selection_dropdown.add_widget(label)
@@ -2076,7 +2076,7 @@ class MainFullScreen(BoxLayout):
 
     def change_year(self, year):
         self.research.change_year(year)
-        self.statusbar.year_input.text = str(self.research.year)
+        self.statusbar.year_input.text = str(self.research.get_year())
     
     # in case of not knowing what to do
     def reset_year(self):

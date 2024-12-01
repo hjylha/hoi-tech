@@ -1,6 +1,6 @@
 
 from read_hoi_files import get_country_names
-from classes import GameConstants
+from classes import GameConstants, HoITime
 from scan_hoi_files import scan_minister_personalities, scan_ideas, scan_ministers_for_country
 from scan_hoi_files import get_tech_dict, get_tech_teams, scan_policies_file, scan_scenario_file_for_country
 
@@ -123,6 +123,9 @@ class Research:
     DEFAULT_DIFFICULTY = "EASY"
     POST_WAR_MODIFICATION = 10_000
 
+    def get_year(self):
+        return self.date.get_year()
+
     def activate_tech(self, tech_id):
         self.active_techs.add(tech_id)
         self.techs[tech_id].active = 1
@@ -176,8 +179,9 @@ class Research:
 
     def filter_teams(self):
         filtered_teams = []
+        year = self.get_year()
         for team in self.all_teams:
-            if team.start_year <= self.year and team.end_year > self.year:
+            if team.start_year <= year and team.end_year > year:
                 filtered_teams.append(team)
         self.teams = filtered_teams
     
@@ -248,7 +252,7 @@ class Research:
         #     if self.are_tech_requirements_completed(tech_id) and tech_id not in self.completed_techs and tech_id not in self.deactivated_techs:
         #         self.active_techs.add(tech_id)
 
-    def __init__(self, research_speed=None, tech_dict=None, countries=None, year=DEFAULT_YEAR, **kwargs) -> None:
+    def __init__(self, research_speed=None, tech_dict=None, countries=None, year=DEFAULT_YEAR, date=None, num_of_research_slots=5, **kwargs) -> None:
         # if tech_dict is None:
         #     tech_dict = get_tech_dict()
         self.techs = get_tech_dict() if tech_dict is None else tech_dict
@@ -257,7 +261,8 @@ class Research:
 
         self.clear_all_tech()
 
-        self.year = year
+        # self.year = year
+        self.date = HoITime(**kwargs) if date is None else date
         self.research_speed = self.DEFAULT_RESEARCH_SPEED
 
         self.politics = Politics()
@@ -283,6 +288,13 @@ class Research:
         self.reactor_size = 0
         # money issues
         self.teams_get_paid = 1
+
+        self.num_of_research_slots = num_of_research_slots
+        self.research_slots = [[None, None] for _ in range(self.num_of_research_slots)]
+    
+    def change_year(self, new_year):
+        self.date.change_year(new_year)
+        self.filter_teams()
 
     def get_sum_of_policy_effects(self):
         return self.politics.get_sum_of_research_bonuses()
@@ -317,9 +329,9 @@ class Research:
         #     self.choose_primary_country(self.countries[0])
         self.filter_teams()
     
-    def change_year(self, new_year):
-        self.year = new_year
-        self.filter_teams()
+    # def change_year(self, new_year):
+    #     self.year = new_year
+    #     self.filter_teams()
     
     def change_difficulty(self, difficulty_string):
         self.constants.change_difficulty(difficulty_string)
@@ -376,6 +388,25 @@ class Research:
         for team in self.teams:
             if team.name == team_name and team.nation == country_code:
                 return team
+    
+    def get_vacant_research_slots(self):
+        vacant_indices = []
+        for i, t_n_t in enumerate(self.research_slots):
+            if t_n_t[0] is None or t_n_t[1] is None:
+                vacant_indices.append(i)
+        return vacant_indices
+
+    def update_num_of_research_slots(self):
+        new_research_slots = []
+        for t_n_t in self.research_slots:
+            if t_n_t[0] is not None and t_n_t[1] is not None:
+                new_research_slots.append(t_n_t)
+        self.research_slots = new_research_slots
+        num_of_empty_slots = self.num_of_research_slots - len(self.research_slots)
+        if num_of_empty_slots <= 0:
+            return
+        for _ in range(num_of_empty_slots):
+            self.research_slots.append([None, None])
             
     def save_status_to_file(self, path):
         lines = []
@@ -383,7 +414,7 @@ class Research:
         lines.append(country_line)
         difficulty_line = f"difficulty={self.constants.current_difficulty_string}"
         lines.append(difficulty_line)
-        year_line = f"year={self.year}"
+        year_line = f"year={self.get_year()}"
         lines.append(year_line)
         research_speed_line = f"research_speed={self.research_speed}"
         lines.append(research_speed_line)
@@ -728,6 +759,11 @@ class Research:
         # just in case
         self.research_speed = round(self.research_speed, 1)
         self.update_active_techs()
+    
+    def calculate_1_day_progress_for_research(self, team, tech):
+        has_blueprint = int(tech.tech_id in self.blueprints)
+        extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
+        return team.calculate_1_day_progress_for_tech(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
 
     def calculate_how_many_days_to_complete(self, team, tech):
         has_blueprint = int(tech.tech_id in self.blueprints)
@@ -737,6 +773,9 @@ class Research:
     def sort_teams_for_researching_tech(self, tech):
         team_results = []
         for team in self.teams:
+            # ignore teams that are researching
+            if team in [t for t, _ in self.research_slots]:
+                pass
             # days = team.calculate_how_many_days_to_complete(tech, self.research_speed, self.difficulty, has_blueprint=has_blueprint, num_of_rocket_sites=self.num_of_rocket_sites)
             days = self.calculate_how_many_days_to_complete(team, tech)
             team_results.append([team, days])
@@ -822,6 +861,21 @@ class Research:
             tech_results.append([self.techs[tech_id], comparison_value, team])
         # return sorted(positive_change, key= lambda x: x[1]) + sorted(no_change, key=lambda x: x[1]) + sorted(tech_results, key=lambda x: x[1])
         return sorted(tech_results, key=lambda x: x[1], reverse=True)
+
+    def do_research_for_day(self):
+        completed_tech_ids = []
+        for i, t_n_t in enumerate(self.research_slots):
+            team, tech = t_n_t
+            progress = self.calculate_1_day_progress_for_research(team, tech)
+            tech.update_progress(progress)
+            if tech.researched:
+                self.complete_tech(tech.tech_id)
+                completed_tech_ids.append(tech.tech_id)
+                self.research_slots[i] = [None, None]
+                if len(self.research_slots) != self.num_of_research_slots:
+                    self.update_num_of_research_slots()
+        self.date.next_day()
+        return completed_tech_ids
 
 
 if __name__ == "__main__":
