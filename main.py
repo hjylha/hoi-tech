@@ -1993,7 +1993,7 @@ class StatusBar(BoxLayout):
 
         self.difficulty_dropdown = DropDown()
         for diff in self.difficulty_suggestions:
-            btn = Button(text=diff, size_hint=(1, None), height=dp(25))
+            btn = Button(text=diff, size_hint=(1, None), height=dp(30))
             btn.bind(on_release=lambda b: self.difficulty_dropdown.select(b.text))
             self.difficulty_dropdown.add_widget(btn)
 
@@ -2038,7 +2038,7 @@ class StatusBar(BoxLayout):
 
         self.rocket_site_dropdown = DropDown()
         for i in range(11):
-            btn = Button(text=str(i), size_hint=(1, None), height=dp(25))
+            btn = Button(text=str(i), size_hint=(1, None), height=dp(30))
             btn.bind(on_release=lambda b: self.rocket_site_dropdown.select(b.text))
             self.rocket_site_dropdown.add_widget(btn)
 
@@ -2052,7 +2052,7 @@ class StatusBar(BoxLayout):
 
         self.reactor_size_dropdown = DropDown()
         for i in range(11):
-            btn = Button(text=str(i), size_hint=(1, None), height=dp(25))
+            btn = Button(text=str(i), size_hint=(1, None), height=dp(30))
             btn.bind(on_release=lambda b: self.reactor_size_dropdown.select(b.text))
             self.reactor_size_dropdown.add_widget(btn)
 
