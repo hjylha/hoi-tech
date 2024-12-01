@@ -170,6 +170,9 @@ class Research:
         category_num = tech_id // 1000
         if category_num not in [6, 8, 9]:
             return False
+        for _, tech in self.research_slots:
+            if tech.tech_id // 1000 == category_num:
+                return False
         for t_id in self.techs[tech_id].allows:
             cat_num = t_id // 1000
             if cat_num == category_num and t_id in self.completed_techs:
