@@ -55,8 +55,11 @@ class HoITime:
     DAYS_IN_MONTH = 30
     DAYS_IN_YEAR = len(MONTHS) * DAYS_IN_MONTH
 
-    def __init__(self, date=DEFAULT_START_DAY):
+    def __init__(self, date=DEFAULT_START_DAY, **kwargs):
         self.date = date
+
+    def reset_date(self):
+        self.date = self.DEFAULT_START_DAY
 
     def get_year(self):
         return self.DEFAULT_START_YEAR + self.date // self.DAYS_IN_YEAR
@@ -69,6 +72,9 @@ class HoITime:
     
     def change_year(self, new_year):
         self.date += (new_year - self.get_year()) * self.DAYS_IN_YEAR
+    
+    def next_day(self):
+        self.date += 1
 
     # HH:MM month day, year -> date
     def date_str_to_date(self, date_str):

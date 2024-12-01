@@ -17,6 +17,14 @@ class TestHoITime:
         assert self.hoi_time.DEFAULT_START_YEAR == 1933
 
     @pytest.mark.parametrize(
+            "new_date", [0, 64, 256, 8128, 9999999]
+    )
+    def test_reset_date(self, new_date):
+        self.hoi_time.date = new_date
+        self.hoi_time.reset_date()
+        assert self.hoi_time.date == self.hoi_time.DEFAULT_START_DAY
+
+    @pytest.mark.parametrize(
         "date, year", [
             (1, 1933),
             (370, 1934),
@@ -61,6 +69,16 @@ class TestHoITime:
     def test_change_year(self, new_year, date):
         self.hoi_time.change_year(new_year)
         assert self.hoi_time.date == date
+    
+    @pytest.mark.parametrize(
+            "new_date", [0, 64, 256, 8128, 9999999]
+    )
+    def test_next_day(self, new_date):
+        self.hoi_time.date = new_date
+        self.hoi_time.next_day()
+        assert self.hoi_time.date == new_date + 1
+        self.hoi_time.next_day()
+        assert self.hoi_time.date == new_date + 2
 
     @pytest.mark.parametrize(
             "date_str, date", [
