@@ -123,6 +123,12 @@ class Research:
     DEFAULT_DIFFICULTY = "EASY"
     POST_WAR_MODIFICATION = 10_000
 
+    def get_date(self):
+        return self.date.date
+    
+    def get_date_str(self):
+        return self.date.get_date()
+    
     def get_year(self):
         return self.date.get_year()
 
@@ -294,6 +300,12 @@ class Research:
 
         self.num_of_research_slots = num_of_research_slots
         self.research_slots = [[None, None] for _ in range(self.num_of_research_slots)]
+
+    def set_date(self, new_date):
+        self.date.date = new_date
+    
+    def reset_date(self):
+        self.date.reset_date()
     
     def change_year(self, new_year):
         self.date.change_year(new_year)
