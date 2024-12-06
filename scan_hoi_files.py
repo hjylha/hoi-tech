@@ -384,6 +384,7 @@ def scan_scenario_file(filepath):
     results["blueprints"] = []
 
     content = read_txt_file(filepath, False)
+    results["country_code"] = content["country"]["tag"].upper()
     if content["country"].get("deactivate") is not None:
         results["deactivated"] = content["country"]["deactivate"]
     if content["country"].get("techapps") is not None:
