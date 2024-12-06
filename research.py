@@ -785,6 +785,19 @@ class Research:
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
         return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
     
+    def find_fastest_team(self, tech):
+        fastest_team = None
+        fastest_time = 999999
+        for team in self.teams:
+            # ignore teams that are researching
+            if team in [t for t, _ in self.research_slots]:
+                pass
+            days = self.calculate_how_many_days_to_complete(team, tech)
+            if days < fastest_time:
+                fastest_time = days
+                fastest_team = team
+        return fastest_team
+
     def sort_teams_for_researching_tech(self, tech):
         team_results = []
         for team in self.teams:
