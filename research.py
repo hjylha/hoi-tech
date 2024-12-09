@@ -177,6 +177,8 @@ class Research:
         if category_num not in [6, 8, 9]:
             return False
         for _, tech in self.research_slots:
+            if tech is None:
+                continue
             if tech.tech_id // 1000 == category_num:
                 return False
         for t_id in self.techs[tech_id].allows:
@@ -184,6 +186,20 @@ class Research:
             if cat_num == category_num and t_id in self.completed_techs:
                 return False
         # should this check more?
+        return True
+    
+    def can_tech_be_researched(self, tech_id):
+        if tech_id in [tech.tech_id for _, tech in self.research_slots if tech is not None]:
+            return False
+        if tech_id in self.active_techs:
+            return True
+        if tech_id in self.completed_techs:
+            return False
+        if not self.are_tech_requirements_completed(tech_id):
+            return False
+        for t_id in self.techs[tech_id].deactivated_by:
+            if t_id in self.completed_techs:
+                return False
         return True
 
     def filter_teams(self):
@@ -591,7 +607,7 @@ class Research:
     
     def list_is_deactivated_by(self, tech, with_post_war_modification=True):
         if with_post_war_modification:
-            return self.get_post_war_modified_ids(tech.deactivaed_by)
+            return self.get_post_war_modified_ids(tech.deactivated_by)
         return list(tech.deactivated_by)
 
     def list_effects(self, tech):
@@ -791,12 +807,12 @@ class Research:
         for team in self.teams:
             # ignore teams that are researching
             if team in [t for t, _ in self.research_slots]:
-                pass
+                continue
             days = self.calculate_how_many_days_to_complete(team, tech)
             if days < fastest_time:
                 fastest_time = days
                 fastest_team = team
-        return fastest_team
+        return [fastest_team, fastest_time]
 
     def sort_teams_for_researching_tech(self, tech):
         team_results = []
@@ -894,6 +910,8 @@ class Research:
         completed_tech_ids = []
         for i, t_n_t in enumerate(self.research_slots):
             team, tech = t_n_t
+            if tech is None:
+                continue
             progress = self.calculate_1_day_progress_for_research(team, tech)
             tech.update_progress(progress)
             if tech.researched:
