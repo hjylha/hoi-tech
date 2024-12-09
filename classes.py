@@ -61,21 +61,10 @@ class HoITime:
     def reset_date(self):
         self.date = self.DEFAULT_START_DAY
 
-    def get_year(self):
-        return self.DEFAULT_START_YEAR + self.date // self.DAYS_IN_YEAR
+    def get_year(self, date=None):
+        date = self.date if date is None else date
+        return self.DEFAULT_START_YEAR + date // self.DAYS_IN_YEAR
     
-    def get_date(self):
-        year = self.get_year()
-        month = self.MONTHS[self.date // self.DAYS_IN_MONTH % len(self.MONTHS)]
-        day = self.date % self.DAYS_IN_MONTH + 1
-        return f"{day} {month} {year}"
-    
-    def change_year(self, new_year):
-        self.date += (new_year - self.get_year()) * self.DAYS_IN_YEAR
-    
-    def next_day(self):
-        self.date += 1
-
     # HH:MM month day, year -> date
     def date_str_to_date(self, date_str):
         _, month, day0, year = date_str.split(" ")
@@ -83,6 +72,21 @@ class HoITime:
         year = int(year)
         month_num = self.MONTHS.index(month[:3])
         return (year - self.DEFAULT_START_YEAR) * self.DAYS_IN_YEAR + month_num * self.DAYS_IN_MONTH + day - 1
+    
+    def date_to_date_str(self, date):
+        year = self.get_year(date)
+        month = self.MONTHS[date // self.DAYS_IN_MONTH % len(self.MONTHS)]
+        day = date % self.DAYS_IN_MONTH + 1
+        return f"{day} {month} {year}"
+    
+    def get_date(self):
+        return self.date_to_date_str(self.date)
+    
+    def change_year(self, new_year):
+        self.date += (new_year - self.get_year()) * self.DAYS_IN_YEAR
+    
+    def next_day(self):
+        self.date += 1
 
 
 # just some approximate value to use in time = difficulty / skill
