@@ -189,8 +189,12 @@ class Research:
         return True
     
     def can_tech_be_researched(self, tech_id):
-        if tech_id in [tech.tech_id for _, tech in self.research_slots if tech is not None]:
-            return False
+        techs_in_research = [tech for _, tech in self.research_slots if tech is not None]
+        for tech in techs_in_research:
+            if tech_id == tech.tech_id:
+                return False
+            if tech_id in tech.get_deactivated_tech():
+                return False
         if tech_id in self.active_techs:
             return True
         if tech_id in self.completed_techs:
