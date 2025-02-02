@@ -45,6 +45,9 @@ class GameConstants:
     def change_difficulty(self, difficulty_string):
         self.current_difficulty_string = difficulty_string
         self.current_difficulty = self.difficulty_modifiers[self.current_difficulty_string]
+    
+    def get_research_multiplier(self, has_blueprint):
+        return round(0.01 * self.research_speed_constant * ((self.blueprint_bonus - 1) * has_blueprint + 1), 4)
 
 
 class HoITime:
@@ -95,13 +98,13 @@ def get_approx_difficulty(tech_difficulty, research_speed_modifier, total_extra_
 
 
 def get_game_difficulty_multiplier(game_difficulty_modifier):
-    return 1 + 0.01 * game_difficulty_modifier
+    return round(1 + 0.01 * game_difficulty_modifier, 4)
 
 
 # not actually correct, but this should avoid dividing by zero
 def get_policy_modifier(total_extra_bonus):
     extra_bonus = min(99.99, total_extra_bonus)
-    return 100 - extra_bonus
+    return round(0.01 * (100 - extra_bonus), 4)
 
 
 def get_tech_difficulty_modifier(component):
@@ -116,6 +119,14 @@ def get_components_difficulty_modifiers(component, game_difficulty_modifier, tot
 def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty_modifier, total_extra_bonus):
     extra_bonus = min(99.99, total_extra_bonus)
     return min(200, max(1 , 100 * (1 + 0.01 * game_difficulty_modifier) * research_speed_modifier / (100 - extra_bonus) / (component.difficulty + 2) ))
+
+
+def calculate_components_difficulty_multiplier_from_modifiers(research_speed_modifier, tech_difficulty_modifier, game_difficulty_multiplier, policy_modifier):
+    return min(200, max(1, research_speed_modifier * game_difficulty_multiplier / tech_difficulty_modifier / policy_modifier))
+
+
+def calculate_1_day_progress_from_multipliers(game_constants, skill_multiplier, difficulty_multiplier, has_blueprint):
+    return game_constants.get_research_multiplier(has_blueprint) * skill_multiplier * difficulty_multiplier
 
 
 def get_modifiers_tech_effects(modifier):
@@ -257,7 +268,7 @@ class TechTeam:
         skill_issue = 0.1 * (self.skill * has_money + 6) * (has_speciality + 1)
         if component.type == "rocketry":
             skill_issue += num_of_rocket_sites
-        if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
+        if component.type == "nuclear_physics" or component.type == "nuclear_engineering":
             skill_issue += math.sqrt(reactor_size)
         return skill_issue
     
@@ -273,7 +284,7 @@ class TechTeam:
         difficulty_multiplier = get_approx_difficulty(tech.components[0].difficulty, research_speed_modifier, total_extra_bonus)
         skill_multiplier = self.skill + 6 if has_money else 6
         return difficulty_multiplier * (10 - num_of_specials)  / skill_multiplier / (1 + (BLUEPRINT_BONUS - 1) * has_blueprint)
-    
+
     def calculate_1_day_progress_for_component(
             self,
             component,
@@ -285,21 +296,13 @@ class TechTeam:
             reactor_size = 0,
             has_money = 1
             ):
-        has_speciality = 0
-        component_type = component.type
-        if component_type in self.specialities:
-            has_speciality = 1
+        skill_issue = self.get_skill_multiplier_for_component(component, num_of_rocket_sites, reactor_size, has_money)
         difficulty_modifier = calculate_components_difficulty_multiplier(
             component,
             research_speed_modifier,
             game_constants.current_difficulty,
             total_extra_bonus
             )
-        skill_issue = 0.1 * (self.skill * has_money + 6) * (has_speciality + 1)
-        if component_type == "rocketry":
-            skill_issue += num_of_rocket_sites
-        if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
-            skill_issue += math.sqrt(reactor_size)
         return 0.01 * game_constants.research_speed_constant * skill_issue * ((game_constants.blueprint_bonus - 1) * has_blueprint + 1) * difficulty_modifier
 
     def calculate_how_many_days_to_complete_component(
@@ -370,6 +373,40 @@ class TechTeam:
             num_of_rocket_sites,
             reactor_size,
             has_money)
+
+    def calculate_detailed_completion_times_for_tech(self, tech, research_speed_modifier, game_constants=GameConstants(), total_extra_bonus=0, has_blueprint=0, num_of_rocket_sites=0, reactor_size=0, has_money=1):
+        results = []
+        for component in tech.components:
+            component_result = []
+            c_n_bp = game_constants.get_research_multiplier(has_blueprint)
+            skill_issue = self.get_skill_multiplier_for_component(component, num_of_rocket_sites, reactor_size, has_money)
+            tdm, gdm, pm = get_components_difficulty_modifiers(component, game_constants.current_difficulty, total_extra_bonus)
+            difficulty_multiplier = calculate_components_difficulty_multiplier_from_modifiers(research_speed_modifier, tdm, gdm, pm)
+            one_day_progress = calculate_1_day_progress_from_multipliers(game_constants, skill_issue, difficulty_multiplier, has_blueprint)
+            days_to_complete_component = math.ceil(tech.COMPONENT_SIZE / one_day_progress)
+            component_result.append(days_to_complete_component)
+
+            lower_difficulty_multiplier = tech.COMPONENT_SIZE / (days_to_complete_component) / c_n_bp / skill_issue
+            if lower_difficulty_multiplier < 1 or lower_difficulty_multiplier > 200:
+                component_result.append(None)
+            else:
+                lower_research_speed = lower_difficulty_multiplier * tdm * pm / gdm
+                rs = round(math.ceil(lower_research_speed * 10) * 0.1 - 0.1, 1)
+                component_result.append((days_to_complete_component + 1, rs))
+            if days_to_complete_component == 1:
+                component_result.append(None)
+                results.append(tuple(component_result))
+                continue
+            higher_difficulty_multiplier = tech.COMPONENT_SIZE / (days_to_complete_component - 1) / c_n_bp / skill_issue
+            if higher_difficulty_multiplier > 200 or higher_difficulty_multiplier < 1:
+                component_result.append(None)
+                results.append(tuple(component_result))
+                continue
+            higher_research_speed = higher_difficulty_multiplier * tdm * pm / gdm
+            rs = round(math.ceil(higher_research_speed * 10) * 0.1, 1)
+            component_result.append((days_to_complete_component - 1, rs))
+            results.append(tuple(component_result))
+        return tuple(results)
 
 
 class MinisterOrIdea:

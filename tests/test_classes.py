@@ -9,6 +9,35 @@ from techteams_for_testing import techteams_for_testing
 import classes
 
 
+@pytest.fixture(scope="module")
+def game_constants():
+    difficulty_dict = {'VERYEASY': 10, 'EASY': 0, 'NORMAL': -10, 'HARD': -20, 'VERYHARD': -30}
+    return classes.GameConstants(2.8, 1.7, difficulty_dict)
+
+
+class TestGameConstants:
+    # game_constants = classes.GameConstants(2.8, 1.7, {'VERYEASY': 10, 'EASY': 0, 'NORMAL': -10, 'HARD': -20, 'VERYHARD': -30})
+
+    def test_change_difficulty(self, game_constants):
+        diff_str = "HARD"
+        diff_mod = -20
+        game_constants.change_difficulty(diff_str)
+        assert game_constants.current_difficulty_string == diff_str
+        assert game_constants.current_difficulty == diff_mod
+        game_constants.change_difficulty("EASY")
+        assert game_constants.current_difficulty_string == "EASY"
+        assert game_constants.current_difficulty == 0
+    
+    def test_overwrite_difficulty_modifier(self, game_constants):
+        diff_mod = 50
+        game_constants.overwrite_difficulty_modifier(diff_mod)
+        assert game_constants.current_difficulty == diff_mod
+
+    def test_get_research_multiplier(self, game_constants):
+        assert game_constants.get_research_multiplier(1) == 0.0476
+        assert game_constants.get_research_multiplier(0) == 0.028
+
+
 class TestHoITime:
     hoi_time = classes.HoITime()
 
@@ -92,88 +121,84 @@ class TestHoITime:
         assert returned_date == date
 
 
-
-research_speed_test_result_path = Path(__file__).parent / "research_speed_testing.csv"
-
-
-def format_value(column, value):
-    if column == "component":
-        return value.strip().lower()
-    if column in ("base difficulty", "1-day progress", "extra bonus", "tech speed modifier", "blueprint bonus"):
-        return float(value.strip())
-    return int(value.strip())
-
-# @pytest.fixture
-def research_speed_testing_results():
-    testing_results = []
-    with open(research_speed_test_result_path, "r") as f:
-        for i, line in enumerate(f):
-            if i == 0:
-                columns = [column.strip() for column in line.split(";")]
-            else:
-                values = line.split(";")
-                result = {column: format_value(column, value) for column, value in zip(columns, values)}
-                testing_results.append(result)
-    return testing_results
-
-
-def get_results_for_difficulty_multipliers(testing_results):
-    results = []
-    for result in testing_results:
-        component = classes.Component(result["component"], result["tech difficulty"])
-        result_tuple = (component, result["research speed"], result["game difficulty"], result["extra bonus"], result["base difficulty"])
-        results.append(result_tuple)
-    return results
-
-def get_results_for_progress_estimates(testing_results):
-    results = []
-    for result in testing_results:
-        team = techteams_for_testing[result["techteam"]]
-        component = techs_for_testing[result["tech"]].components[0]
-        game_constants = classes.GameConstants(result["tech speed modifier"], result["blueprint bonus"], {}, result["game difficulty"], None)
-        # research_speed = 
-        result_tuple = (team, component, result["research speed"], game_constants, result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["has_money"], result["1-day progress"])
-        results.append(result_tuple)
-    return results
-
-def get_results_for_completion_estimates(testing_results):
-    results = []
-    for result in testing_results:
-        if not result["has_money"]:
-            continue
-        team = techteams_for_testing[result["techteam"]]
-        tech = techs_for_testing[result["tech"]]
-        game_constants = classes.GameConstants(result["tech speed modifier"], result["blueprint bonus"], {}, result["game difficulty"], None)
-        result_tuple = (team, tech, result["research speed"], game_constants, result["extra bonus"], result["has blueprint"], result["rocket site size"], result["reactor size"], result["days to complete game estimate"])
-        results.append(result_tuple)
-    return results
-
-
-research_observations = research_speed_testing_results()
+@pytest.mark.parametrize(
+    "difficulty_modifier, difficulty_multiplier", [
+        (10, 1.1),
+        (0, 1),
+        (-10, 0.9),
+        (-20, 0.8),
+        (-30, 0.7)
+    ]
+)
+def test_get_game_difficulty_multiplier(difficulty_modifier, difficulty_multiplier):
+    assert classes.get_game_difficulty_multiplier(difficulty_modifier) == difficulty_multiplier
 
 
 @pytest.mark.parametrize(
-        "component, research_speed_modifier, game_difficulty, total_extra_bonus, base_difficulty", get_results_for_difficulty_multipliers(research_observations)
-        # "component, research_speed_modifier, game_difficulty, total_extra_bonus, base_difficulty", [
-        #     (classes.Component("small unit tactics", 2), 90, 1, 0, 1)
-        # ]
+    "policy_bonus, policy_modifier", [
+        (5, 0.95),
+        (10, 0.9),
+        (15, 0.85),
+        (20, 0.8)
+    ]
 )
-def test_calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus, base_difficulty):
-    difficulty_multiplier = classes.calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty, total_extra_bonus)
-    assert round(20 / difficulty_multiplier, 1) == base_difficulty
+def test_get_policy_modifier(policy_bonus, policy_modifier):
+    assert classes.get_policy_modifier(policy_bonus) == policy_modifier
 
 
 @pytest.mark.parametrize(
-        "team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, has_money, observed_1_day_progress", get_results_for_progress_estimates(research_observations)
+    "comp_difficulty, comp_type, difficulty_modifier", [
+        (2, "small_unit_tactics", 4),
+        (4, "centralized_execution", 6),
+        (10, "mathematics", 12),
+        (18, "nuclear_engineering", 20)
+    ]
 )
-def test_1_day_progression_for_component(team, component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, has_money, observed_1_day_progress):
-    one_day_progress_estimate = team.calculate_1_day_progress_for_component(component, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, has_money)
-    assert round(one_day_progress_estimate, 2) == observed_1_day_progress
+def test_get_tech_difficulty_modifier(comp_difficulty, comp_type, difficulty_modifier):
+    component = classes.Component(comp_type, comp_difficulty)
+    assert classes.get_tech_difficulty_modifier(component) == difficulty_modifier
+
+
+def test_get_components_difficulty_modifiers():
+    component = classes.Component("mathematics", 10)
+    difficulty_modifier = -20
+    policy_bonus = 10
+    modifiers = classes.get_components_difficulty_modifiers(component, difficulty_modifier, policy_bonus)
+    assert modifiers[0] == 12
+    assert modifiers[1] == 0.8
+    assert modifiers[2] == 0.9
 
 
 @pytest.mark.parametrize(
-        "team, tech, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, completion_estimate", get_results_for_completion_estimates(research_observations)
+    "research_speed_mod, tech_difficulty_mod, game_difficulty_mod, policy_mod, difficulty_multiplier", [
+        (100, 10, 1, 0.8, 12.5),
+        (140, 4, 0.8, 1, 28),
+        (180, 6, 0.9, 0.9, 30),
+        (20, 20, 0.7, 1, 1),
+        (2500, 4, 1.1, 0.8, 200)
+    ]
 )
-def test_calculate_how_many_days_to_complete(team, tech, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size, completion_estimate):
-    days_to_complete = team.calculate_how_many_days_to_complete(tech, research_speed, game_difficulty, total_bonus, has_blueprint, num_of_rocket_sites, reactor_size)
-    assert days_to_complete == completion_estimate
+def test_calculate_components_difficulty_multiplier_from_modifiers(research_speed_mod, tech_difficulty_mod, game_difficulty_mod, policy_mod, difficulty_multiplier):
+    assert round(classes.calculate_components_difficulty_multiplier_from_modifiers(research_speed_mod, tech_difficulty_mod, game_difficulty_mod, policy_mod), 4) == difficulty_multiplier
+
+
+@pytest.mark.parametrize(
+    "skill_multiplier, difficulty_multiplier, has_blueprint, progress", [
+        (1.5, 15, 0, 0.63),
+        (3, 10, 1, 1.428),
+        (2.6, 100, 0, 7.28)
+    ]
+)
+def test_calculate_1_day_progress_from_multipliers(game_constants, skill_multiplier, difficulty_multiplier, has_blueprint, progress):
+    assert round(classes.calculate_1_day_progress_from_multipliers(game_constants, skill_multiplier, difficulty_multiplier, has_blueprint), 4) == progress
+
+
+@pytest.mark.parametrize(
+    "m_type, m_value, m_option, m_extra, m_modifier_effect, result", [
+        ("tech_group_mod", "industry", None, None, -0.1000, ("industry", -0.1)),
+        ("diplomatic_cost_mod", "bring_to_alliance", 0, None, -0.5000, None)
+    ]
+)
+def test_get_modifiers_tech_effects(m_type, m_value, m_option, m_extra, m_modifier_effect, result):
+    modifier = classes.Modifier(m_type, m_value, m_option, m_extra, m_modifier_effect)
+    assert classes.get_modifiers_tech_effects(modifier) == result
