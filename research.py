@@ -795,16 +795,42 @@ class Research:
         self.research_speed = round(self.research_speed, 1)
         self.update_active_techs()
     
-    def calculate_1_day_progress_for_research(self, team, tech):
+    def calculate_1_day_progress_for_research(self, team, tech, research_speed=None):
+        if research_speed is None:
+            research_speed = self.research_speed
         has_blueprint = int(tech.tech_id in self.blueprints)
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
-        return team.calculate_1_day_progress_for_tech(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
+        return team.calculate_1_day_progress_for_tech(tech, research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
 
-    def calculate_how_many_days_to_complete(self, team, tech):
+    def calculate_how_many_days_to_complete(self, team, tech, research_speed=None):
+        if research_speed is None:
+            research_speed = self.research_speed
         has_blueprint = int(tech.tech_id in self.blueprints)
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
-        return team.calculate_how_many_days_to_complete(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
+        return team.calculate_how_many_days_to_complete(tech, research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
     
+    def calculate_completion_days_with_improvements(self, team, tech):
+        has_blueprint = int(tech.tech_id in self.blueprints)
+        extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
+        completion_info = team.calculate_detailed_completion_times_for_tech(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
+        # days_and_research_speeds = [0, 0, 999999]
+        days = 0
+        lower_rs = 0
+        upper_rs = 999999
+        for line in completion_info:
+            days += line[0]
+            if line[1] is not None and line[1][1] > lower_rs:
+                lower_rs = line[1][1]
+            if line[2] is not None and line[2][1] < upper_rs:
+                upper_rs = line[2][1]
+        return (days, (self.calculate_how_many_days_to_complete(team, tech, lower_rs), lower_rs), (self.calculate_how_many_days_to_complete(team, tech, upper_rs), upper_rs))
+
+    def pcd(self, team, tech):
+        stuff = self.calculate_completion_days_with_improvements(team, tech)
+        print(f"{team.name} completes {tech.name} in {stuff[0]} days.")
+        print(f"If research speed is {stuff[1][1]}, tech is completed in {stuff[1][0]} days.")
+        print(f"If research speed is {stuff[2][1]}, tech is completed in {stuff[2][0]} days.")
+
     def find_fastest_team(self, tech):
         fastest_team = None
         fastest_time = 999999
