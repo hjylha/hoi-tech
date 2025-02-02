@@ -94,6 +94,24 @@ def get_approx_difficulty(tech_difficulty, research_speed_modifier, total_extra_
     return (tech_difficulty + 2) * (1 - 0.01 * total_extra_bonus) / research_speed_modifier
 
 
+def get_game_difficulty_multiplier(game_difficulty_modifier):
+    return 1 + 0.01 * game_difficulty_modifier
+
+
+# not actually correct, but this should avoid dividing by zero
+def get_policy_modifier(total_extra_bonus):
+    extra_bonus = min(99.99, total_extra_bonus)
+    return 100 - extra_bonus
+
+
+def get_tech_difficulty_modifier(component):
+    return component.difficulty + 2
+
+
+def get_components_difficulty_modifiers(component, game_difficulty_modifier, total_extra_bonus):
+    return get_tech_difficulty_modifier(component), get_game_difficulty_multiplier(game_difficulty_modifier), get_policy_modifier(total_extra_bonus)
+
+
 # 1 / base difficulty from the game, up to scaling
 def calculate_components_difficulty_multiplier(component, research_speed_modifier, game_difficulty_modifier, total_extra_bonus):
     extra_bonus = min(99.99, total_extra_bonus)
@@ -232,6 +250,17 @@ class TechTeam:
                 specials += 1
         return specials
     
+    def get_skill_multiplier_for_component(self, component, num_of_rocket_sites=0, reactor_size=0, has_money=1):
+        has_speciality = 0
+        if component.type in self.specialities:
+            has_speciality = 1
+        skill_issue = 0.1 * (self.skill * has_money + 6) * (has_speciality + 1)
+        if component.type == "rocketry":
+            skill_issue += num_of_rocket_sites
+        if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
+            skill_issue += math.sqrt(reactor_size)
+        return skill_issue
+    
     def calculate_approx_time_comparison_to_complete_tech(
             self, 
             tech, 
@@ -272,6 +301,28 @@ class TechTeam:
         if component_type == "nuclear_physics" or component_type == "nuclear_engineering":
             skill_issue += math.sqrt(reactor_size)
         return 0.01 * game_constants.research_speed_constant * skill_issue * ((game_constants.blueprint_bonus - 1) * has_blueprint + 1) * difficulty_modifier
+
+    def calculate_how_many_days_to_complete_component(
+        self,
+        component,
+        research_speed_modifier,
+        game_constants = GameConstants(),
+        total_extra_bonus = 0,
+        has_blueprint = 0,
+        num_of_rocket_sites = 0,
+        reactor_size = 0,
+        has_money = 1
+    ):
+        daily_progress = self.calculate_1_day_progress_for_component(
+                component,
+                research_speed_modifier,
+                game_constants,
+                total_extra_bonus,
+                has_blueprint,
+                num_of_rocket_sites,
+                reactor_size,
+                has_money)
+        return math.ceil(20 / daily_progress)
 
     def calculate_how_many_days_to_complete(
             self,
