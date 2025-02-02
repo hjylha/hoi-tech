@@ -4,11 +4,14 @@ from pathlib import Path
 import csv
 
 
+this_files_directory = Path(__file__).parent
+
+
 def get_aod_path():
     if os.name == "nt":
-        with open("aod_path.txt", "r") as f:
+        with open(this_files_directory / "aod_path.txt", "r") as f:
             return Path(f.read().strip())
-    with open("aod_path_linux.txt", "r") as f:
+    with open(this_files_directory / "aod_path_linux.txt", "r") as f:
         return Path(f.read().strip())
 
 
