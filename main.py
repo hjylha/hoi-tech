@@ -401,8 +401,10 @@ class ResearchSpeedImpactScreen(TechComparisonTable):
 
 class TechteamScreen(BoxLayout):
     # TODO: parents will change
-    def update_research_time(self, time_to_complete_tech = "?"):
-        self.research_time_label.text = f"Finishes tech in {time_to_complete_tech} days"
+    def update_research_time(self, times_to_complete_tech = ("?", ("?", "?"), ("?", "?"))):
+        self.research_time_label.text = f"Finishes tech in {times_to_complete_tech[0]} days"
+        self.longer_time_label.text = f"If research speed is {times_to_complete_tech[1][1]}, finished in {times_to_complete_tech[1][0]} days"
+        self.shorter_time_label.text = f"If research speed is {times_to_complete_tech[2][1]}, finished in {times_to_complete_tech[2][0]} days"
 
     def show_default_texts(self):
         self.name_label.text = "Name: ?"
@@ -421,7 +423,7 @@ class TechteamScreen(BoxLayout):
             else:
                 speciality_label.color = (1, 1, 1, 1)
     
-    def show_team_info(self, team, time_to_complete_tech="?", current_component_types=None):
+    def show_team_info(self, team, times_to_complete_tech=("?", ("?", "?"), ("?", "?")), current_component_types=None):
         if team is None:
             self.show_default_texts()
             return
@@ -441,7 +443,7 @@ class TechteamScreen(BoxLayout):
                 label.text = ""
 
         # self.research_time_label.text = f"Finishes tech in {time_to_complete_tech} days"
-        self.update_research_time(time_to_complete_tech)
+        self.update_research_time(times_to_complete_tech)
 
     def select_team(self, widget, value):
         if value:
@@ -472,12 +474,12 @@ class TechteamScreen(BoxLayout):
         tech_team = research.get_team_by_name_and_country(name, country_code)
         if tech_team is None:
             print(text, country_code, name)
-        time_to_complete = None
+        times_to_complete = None
         component_types = None
         if (tech := self.parent.parent.parent.parent.current_tech) is not None:
-            time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
+            times_to_complete = research.calculate_completion_days_with_improvements(tech_team, tech)
             component_types = [comp.type for comp in tech.components]
-        self.show_team_info(tech_team, time_to_complete, component_types)
+        self.show_team_info(tech_team, times_to_complete, component_types)
         self.parent.parent.parent.parent.current_team = tech_team
 
     
@@ -516,6 +518,10 @@ class TechteamScreen(BoxLayout):
         
         self.research_time_label = Label(text="Finishes tech in ? days", size_hint=(1, 0.1))
         self.add_widget(self.research_time_label)
+        self.longer_time_label = Label(text="If research speed is ?, finishes in ? days", size_hint=(1, 0.08))
+        self.add_widget(self.longer_time_label)
+        self.shorter_time_label = Label(text="If research speed is ?, finishes in ? days", size_hint=(1, 0.08))
+        self.add_widget(self.shorter_time_label)
 
 
 class UpperTeamScreen(BoxLayout):
@@ -554,6 +560,7 @@ class UpperTeamScreen(BoxLayout):
 # class TeamComparisonTable(GridLayout):
 class TeamComparisonTable(BoxLayout):
     NUM_OF_ROWS = 10
+    NUM_OF_COLS = 3
     MAX_TEAMNAME_LENGTH = 30
 
     def row_color(self, row_num):
@@ -570,24 +577,29 @@ class TeamComparisonTable(BoxLayout):
         widget.rect.pos = widget.pos
         widget.rect.size = widget.size
     
-    def fill_comparison_table(self, teams_and_times, tech):
+    def fill_comparison_table(self, teams_and_times, tech, current_research_speed):
         # self.title.text = f"Fastest to complete {tech.short_name}"
         self.title.text = f"Time to complete {tech.name}"
         for i, team_and_time in enumerate(teams_and_times[:self.NUM_OF_ROWS]):
-            self.labels[2*i].text = team_and_time[0].name[:self.MAX_TEAMNAME_LENGTH]
-            self.labels[2*i].disabled = False
-            self.labels[2*i+1].text = str(team_and_time[1])
+            self.labels[self.NUM_OF_COLS * i].text = team_and_time[0].name[:self.MAX_TEAMNAME_LENGTH]
+            self.labels[self.NUM_OF_COLS * i].disabled = False
+            num_of_days_str = str(team_and_time[1])
+            if round(current_research_speed) == round(team_and_time[2][1]):
+                num_of_days_str = f"{num_of_days_str}*"
+            self.labels[self.NUM_OF_COLS * i + 1].text = num_of_days_str
+            self.labels[self.NUM_OF_COLS * i + 2].text = f"{team_and_time[3][0]} ({team_and_time[3][1]})"
         if len(teams_and_times) < self.NUM_OF_ROWS:
             for i in range(len(teams_and_times), self.NUM_OF_ROWS):
-                self.labels[2*i].text = ""
-                self.labels[2*i].disabled = True
-                self.labels[2*i+1].text = ""
-        self.teams_in_table = [team for team, _ in teams_and_times]
+                self.labels[self.NUM_OF_COLS * i].text = ""
+                self.labels[self.NUM_OF_COLS * i].disabled = True
+                self.labels[self.NUM_OF_COLS * i + 1].text = ""
+                self.labels[self.NUM_OF_COLS * i + 2].text = ""
+        self.teams_in_table = [t_n_t[0] for t_n_t in teams_and_times]
     
     def select_team_from_table(self, widget):
         button_index = self.labels.index(widget)
         # print(self.teams_in_table[button_index // 2].name)
-        self.parent.update_team_selection(self.teams_in_table[button_index // 2])
+        self.parent.update_team_selection(self.teams_in_table[button_index // self.NUM_OF_COLS])
         self.parent.change_upperteamscreen_by_index(0)
 
     def __init__(self, **kwargs):
@@ -601,28 +613,45 @@ class TeamComparisonTable(BoxLayout):
         self.add_widget(self.title)
 
         header_line = BoxLayout(size_hint=(1, 0.08))
-        header_line.add_widget(Label(text="Team", size_hint=(0.8, 1)))
-        header_line.add_widget(Label(text="Days", size_hint=(0.2, 1)))
+        header_line.add_widget(Label(text="Team", size_hint=(0.64, 1)))
+        header_line.add_widget(Label(text="Days", size_hint=(0.16, 1)))
+        header_line.add_widget(Label(text="Next(RS)", size_hint=(0.2, 1)))
         self.add_widget(header_line)
 
         lines = [BoxLayout(size_hint=(1, 0.09)) for _ in range(self.NUM_OF_ROWS)]
         for line in lines:
             self.add_widget(line)
 
-        self.table = [BoxLayout(size_hint=(0.5 + (-1)**(i) * 0.3, 1)) for i in range(2 * self.NUM_OF_ROWS)]
-        for i, layout in enumerate(self.table):
-            lines[i // 2].add_widget(layout)
-            # print("Layout color:", self.row_color(i // 2))
+        # self.table = [BoxLayout(size_hint=(0.5 + (-1)**(i) * 0.3, 1)) for i in range(self.NUM_OF_COLS * self.NUM_OF_ROWS)]
+        self.table = []
+        for i in range(self.NUM_OF_COLS * self.NUM_OF_ROWS):
+            if i % self.NUM_OF_COLS == 0:
+                x_hint = 0.64
+            elif i % self.NUM_OF_COLS == 1:
+                x_hint = 0.16
+            else:
+                x_hint = 0.2
+            # x_hint = 0.64 if i % self.NUM_OF_COLS == 0 else 0.15
+            layout = BoxLayout(size_hint=(x_hint, 1))
+            self.table.append(layout)
+            lines[i // self.NUM_OF_COLS].add_widget(layout)
             with layout.canvas.before:
-                Color(*self.row_color(i // 2))
+                Color(*self.row_color(i // self.NUM_OF_COLS))
                 layout.rect = Rectangle(size=layout.size, pos=layout.pos)
             layout.bind(pos=update_layout, size=update_layout)
+        # for i, layout in enumerate(self.table):
+        #     lines[i // self.NUM_OF_COLS].add_widget(layout)
+        #     # print("Layout color:", self.row_color(i // 2))
+        #     with layout.canvas.before:
+        #         Color(*self.row_color(i // self.NUM_OF_COLS))
+        #         layout.rect = Rectangle(size=layout.size, pos=layout.pos)
+        #     layout.bind(pos=update_layout, size=update_layout)
         
         self.labels = []
         for i, layout in enumerate(self.table):
-            if i % 2 == 0:
+            if i % self.NUM_OF_COLS == 0:
                 # cell = Label(text="...")
-                cell = Button(text="", background_color=self.button_color(i // 2), on_release=self.select_team_from_table, halign="left")
+                cell = Button(text="", background_color=self.button_color(i // self.NUM_OF_COLS), on_release=self.select_team_from_table, halign="left")
                 # print("Button color:", self.row_color(i // 2))
             else:
                 cell = Label(text="?")
@@ -640,16 +669,16 @@ class TeamScreen(BoxLayout):
     def update_team_selection(self, tech_team):
         self.parent.parent.current_team = tech_team
         research = self.parent.parent.research
-        time_to_complete = None
+        times_to_complete = None
         component_types = None
         if (tech := self.parent.parent.current_tech) is not None:
-            time_to_complete = research.calculate_how_many_days_to_complete(tech_team, tech)
+            times_to_complete = research.calculate_completion_days_with_improvements(tech_team, tech)
             component_types = [comp.type for comp in tech.components]
             self.parent.techscreen.update_tech_infopanels(tech)
-        self.upperteamscreen.screens[0].show_team_info(tech_team, time_to_complete, component_types)
+        self.upperteamscreen.screens[0].show_team_info(tech_team, times_to_complete, component_types)
 
-    def update_research_time(self, time_to_complete):
-        self.upperteamscreen.screens[0].update_research_time(time_to_complete)
+    def update_research_time(self, times_to_complete):
+        self.upperteamscreen.screens[0].update_research_time(times_to_complete)
     
     def select_tech(self, tech):
         self.parent.select_tech(tech)
@@ -1339,8 +1368,8 @@ class TechScreen(BoxLayout):
 
         # update team info
         if (team := self.parent.parent.current_team) is not None:
-            time_to_complete = self.research.calculate_how_many_days_to_complete(team, tech)
-            self.parent.teamscreen.update_research_time(time_to_complete)
+            times_to_complete = self.research.calculate_completion_days_with_improvements(team, tech)
+            self.parent.teamscreen.update_research_time(times_to_complete)
             self.parent.teamscreen.update_team_selection(team)
 
         self.update_panels_and_stuff(tech)
@@ -1444,8 +1473,9 @@ class MainScreen(BoxLayout):
     def show_fastest_teams(self, tech):
         if tech is None:
             return
-        sorted_teams = self.parent.research.sort_teams_for_researching_tech(tech)
-        self.teamscreen.comparisontable.fill_comparison_table(sorted_teams, tech)
+        # sorted_teams = self.parent.research.sort_teams_for_researching_tech(tech)
+        sorted_teams = self.parent.research.sort_teams_for_researching_tech_w_improvements(tech, self.teamscreen.comparisontable.NUM_OF_ROWS)
+        self.teamscreen.comparisontable.fill_comparison_table(sorted_teams, tech, self.parent.research.research_speed)
         self.parent.change_year(self.parent.research.get_year())
     
     def show_fastest_tech(self):
@@ -1466,8 +1496,8 @@ class MainScreen(BoxLayout):
         self.show_fastest_teams(tech)
         # update team info
         if (team := self.parent.current_team) is not None:
-            time_to_complete = self.parent.research.calculate_how_many_days_to_complete(team, tech)
-            self.teamscreen.update_research_time(time_to_complete)
+            times_to_complete = self.parent.research.calculate_completion_days_with_improvements(team, tech)
+            self.teamscreen.update_research_time(times_to_complete)
             self.teamscreen.update_team_selection(team)
         # update techscreen
         self.techscreen.update_panels_and_stuff(tech)
