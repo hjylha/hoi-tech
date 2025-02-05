@@ -862,6 +862,16 @@ class Research:
             print(line[1], line[0])
         return sorted_teams
 
+    def sort_teams_for_researching_tech_w_improvements(self, tech, num_of_teams=10):
+        sorted_teams = self.sort_teams_for_researching_tech(tech)[:num_of_teams]
+        sorted_teams_w_improvements = []
+        for team, days_num in sorted_teams:
+            days_plus_more = self.calculate_completion_days_with_improvements(team, tech)
+            if days_plus_more[0] != days_num:
+                raise Exception(f"Tech completion time mismatch: {days_plus_more[0]} /= {days_num}")
+            sorted_teams_w_improvements.append([team, days_num, (days_plus_more[1][0], days_plus_more[1][1]), (days_plus_more[2][0], days_plus_more[2][1])])
+        return sorted_teams_w_improvements
+
     def sort_active_tech_based_on_research_time(self):
         if not self.teams:
             return []
