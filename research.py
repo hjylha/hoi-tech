@@ -815,15 +815,25 @@ class Research:
         completion_info = team.calculate_detailed_completion_times_for_tech(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
         # days_and_research_speeds = [0, 0, 999999]
         days = 0
-        lower_rs = 0
-        upper_rs = 999999
+        unacceptable_lower_bound = -1
+        unacceptable_upper_bound = 999_999
+        lower_rs = unacceptable_lower_bound
+        upper_rs = unacceptable_upper_bound
         for line in completion_info:
             days += line[0]
             if line[1] is not None and line[1][1] > lower_rs:
                 lower_rs = line[1][1]
             if line[2] is not None and line[2][1] < upper_rs:
                 upper_rs = line[2][1]
-        return (days, (self.calculate_how_many_days_to_complete(team, tech, lower_rs), lower_rs), (self.calculate_how_many_days_to_complete(team, tech, upper_rs), upper_rs))
+        if lower_rs == unacceptable_lower_bound:
+            lower_tuple = None
+        else:
+            lower_tuple = (self.calculate_how_many_days_to_complete(team, tech, lower_rs), lower_rs)
+        if upper_rs == unacceptable_upper_bound:
+            upper_tuple = None
+        else:
+            upper_tuple = (self.calculate_how_many_days_to_complete(team, tech, upper_rs), upper_rs)
+        return (days, lower_tuple, upper_tuple)
 
     def pcd(self, team, tech):
         stuff = self.calculate_completion_days_with_improvements(team, tech)
@@ -869,7 +879,7 @@ class Research:
             days_plus_more = self.calculate_completion_days_with_improvements(team, tech)
             if days_plus_more[0] != days_num:
                 raise Exception(f"Tech completion time mismatch: {days_plus_more[0]} /= {days_num}")
-            sorted_teams_w_improvements.append([team, days_num, (days_plus_more[1][0], days_plus_more[1][1]), (days_plus_more[2][0], days_plus_more[2][1])])
+            sorted_teams_w_improvements.append([team, days_num, days_plus_more[1], days_plus_more[2]])
         return sorted_teams_w_improvements
 
     def sort_active_tech_based_on_research_time(self):

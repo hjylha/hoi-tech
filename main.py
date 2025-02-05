@@ -403,8 +403,14 @@ class TechteamScreen(BoxLayout):
     # TODO: parents will change
     def update_research_time(self, times_to_complete_tech = ("?", ("?", "?"), ("?", "?"))):
         self.research_time_label.text = f"Finishes tech in {times_to_complete_tech[0]} days"
-        self.longer_time_label.text = f"If research speed is {times_to_complete_tech[1][1]}, finished in {times_to_complete_tech[1][0]} days"
-        self.shorter_time_label.text = f"If research speed is {times_to_complete_tech[2][1]}, finished in {times_to_complete_tech[2][0]} days"
+        if times_to_complete_tech[1] is None:
+            self.longer_time_label.text = "This team cannot research this tech any slower"
+        else:
+            self.longer_time_label.text = f"If research speed is {times_to_complete_tech[1][1]}, finished in {times_to_complete_tech[1][0]} days"
+        if times_to_complete_tech[2] is None:
+            self.shorter_time_label.text = "This team cannot research this tech any faster"
+        else:
+            self.shorter_time_label.text = f"If research speed is {times_to_complete_tech[2][1]}, finished in {times_to_complete_tech[2][0]} days"
 
     def show_default_texts(self):
         self.name_label.text = "Name: ?"
@@ -583,11 +589,16 @@ class TeamComparisonTable(BoxLayout):
         for i, team_and_time in enumerate(teams_and_times[:self.NUM_OF_ROWS]):
             self.labels[self.NUM_OF_COLS * i].text = team_and_time[0].name[:self.MAX_TEAMNAME_LENGTH]
             self.labels[self.NUM_OF_COLS * i].disabled = False
+
             num_of_days_str = str(team_and_time[1])
-            if round(current_research_speed) == round(team_and_time[2][1]):
+            if team_and_time[2] is not None and round(current_research_speed) == round(team_and_time[2][1]):
                 num_of_days_str = f"{num_of_days_str}*"
             self.labels[self.NUM_OF_COLS * i + 1].text = num_of_days_str
-            self.labels[self.NUM_OF_COLS * i + 2].text = f"{team_and_time[3][0]} ({team_and_time[3][1]})"
+
+            if team_and_time[3] is not None:
+                self.labels[self.NUM_OF_COLS * i + 2].text = f"{team_and_time[3][0]} ({team_and_time[3][1]})"
+            else:
+                self.labels[self.NUM_OF_COLS * i + 2].text = "MAXED"
         if len(teams_and_times) < self.NUM_OF_ROWS:
             for i in range(len(teams_and_times), self.NUM_OF_ROWS):
                 self.labels[self.NUM_OF_COLS * i].text = ""
