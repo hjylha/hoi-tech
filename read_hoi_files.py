@@ -5,13 +5,16 @@ import csv
 
 
 this_files_directory = Path(__file__).parent
+gamepath_in = "aod_path.txt"
+gamepath_in_linux = "aod_path_linux.txt"
+scenario_file_paths_file = "scenario_file_paths.csv"
 
 
 def get_aod_path():
     if os.name == "nt":
-        with open(this_files_directory / "aod_path.txt", "r") as f:
+        with open(this_files_directory / gamepath_in, "r") as f:
             return Path(f.read().strip())
-    with open(this_files_directory / "aod_path_linux.txt", "r") as f:
+    with open(this_files_directory / gamepath_in_linux, "r") as f:
         return Path(f.read().strip())
 
 
@@ -35,6 +38,7 @@ def get_scenario_paths():
     scenario34_path = aod_path / "scenarios" / "1934"
     return [scenario33_path, scenario34_path]
 
+# this is not always correct
 def get_scenario_path_for_country(country_code):
     scenario_directories = get_scenario_paths()
     for sd_path in scenario_directories:
@@ -444,6 +448,71 @@ def read_difficulty_file():
             starting_string = starts[starts_index]
         row_num += 1
     return {diff: int(modifier) for diff, modifier in zip(important_rows[0], important_rows[2])}
+
+
+def get_country_codes_from_scenario_files():
+    scenario_paths = dict()
+    path33, path34 = get_scenario_paths()
+    paths33 = path33.glob("*.inc")
+    paths34 = path34.glob("*.inc")
+    for p in paths33:
+        content = read_txt_file(p)
+        try:
+            country_code = content["country"]["tag"]
+            if scenario_paths.get(country_code) is None:
+                scenario_paths[country_code] = p
+                continue
+            print(f"Country code {country_code} already found before {p}")
+        except KeyError as e:
+            print("Key Error with contents in file", p)
+            # raise e
+    for p in paths34:
+        content = read_txt_file(p)
+        try:
+            country_code = content["country"]["tag"]
+            if scenario_paths.get(country_code) is None:
+                scenario_paths[country_code] = p
+                continue
+            print(f"Country code {country_code} already found before {p}")
+        except KeyError as e:
+            print("Key Error with contents in file", p)
+            # raise e
+    return scenario_paths
+
+
+def write_scenario_file_paths_to_file(filepath_dict):
+    with open(this_files_directory / scenario_file_paths_file, "w", encoding = "ISO-8859-1") as f:
+        for country_code, path in filepath_dict.items():
+            f.write(f"{country_code};{str(path)}\n")
+
+def read_scenario_file_paths_from_file():
+    filepath = this_files_directory / scenario_file_paths_file
+    if not filepath.exists():
+        scenario_paths = get_country_codes_from_scenario_files()
+        write_scenario_file_paths_to_file(scenario_paths)
+    scenario_paths = dict()
+    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            try:
+                country_code, path_str = line.strip().split(";")
+                scenario_paths[country_code] = Path(path_str)
+            except ValueError:
+                pass
+    return scenario_paths
+
+def get_scenario_file_path_for_country(country_code):
+    filepath = this_files_directory / scenario_file_paths_file
+    if not filepath.exists():
+        scenario_paths = get_country_codes_from_scenario_files()
+        write_scenario_file_paths_to_file(scenario_paths)
+    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            try:
+                country_code_candidate, path_str = line.strip().split(";")
+                if country_code_candidate.upper() == country_code.upper():
+                    return Path(path_str)
+            except ValueError:
+                pass
 
 # def read_minister_modifiers():
 #     minister_modifier_file = get_minister_modifier_path()

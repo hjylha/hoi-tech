@@ -1,6 +1,6 @@
 
-from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path, get_scenario_path_for_country
-from read_hoi_files import get_tech_names, read_csv_file, read_txt_file
+from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path
+from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality
 
@@ -462,7 +462,7 @@ def scan_scenario_file(filepath):
     return results
 
 def scan_scenario_file_for_country(country_code):
-    filepath = get_scenario_path_for_country(country_code)
+    filepath = get_scenario_file_path_for_country(country_code)
     return scan_scenario_file(filepath)
 
 
@@ -490,7 +490,7 @@ if __name__ == "__main__":
     ideas = scan_ideas()
     minister_personalities = scan_minister_personalities()
 
-    fin_path = get_scenario_path_for_country("FIN")
+    fin_path = get_scenario_file_path_for_country("FIN")
     content = read_txt_file(fin_path, False)
     provinces = content["province"]
     fin = content["country"]
