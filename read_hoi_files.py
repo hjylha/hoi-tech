@@ -78,6 +78,10 @@ def get_country_names_path():
     aod_path = get_aod_path()
     return aod_path / "config" / "world_names.csv"
 
+def get_policy_names_path():
+    aod_path = get_aod_path()
+    return aod_path / "config" / "new_text.csv"
+
 def get_save_game_path():
     aod_path = get_aod_path()
     return aod_path / "scenarios" / "save games"
@@ -460,7 +464,7 @@ def get_country_codes_from_scenario_files():
         try:
             country_code = content["country"]["tag"]
             if scenario_paths.get(country_code) is None:
-                scenario_paths[country_code] = p
+                scenario_paths[country_code] = p.name
                 continue
             print(f"Country code {country_code} already found before {p}")
         except KeyError as e:
@@ -471,7 +475,7 @@ def get_country_codes_from_scenario_files():
         try:
             country_code = content["country"]["tag"]
             if scenario_paths.get(country_code) is None:
-                scenario_paths[country_code] = p
+                scenario_paths[country_code] = p.name
                 continue
             print(f"Country code {country_code} already found before {p}")
         except KeyError as e:
@@ -482,8 +486,8 @@ def get_country_codes_from_scenario_files():
 
 def write_scenario_file_paths_to_file(filepath_dict):
     with open(this_files_directory / scenario_file_paths_file, "w", encoding = "ISO-8859-1") as f:
-        for country_code, path in filepath_dict.items():
-            f.write(f"{country_code};{str(path)}\n")
+        for country_code, filename in filepath_dict.items():
+            f.write(f"{country_code};{filename}\n")
 
 def read_scenario_file_paths_from_file():
     filepath = this_files_directory / scenario_file_paths_file
@@ -505,12 +509,17 @@ def get_scenario_file_path_for_country(country_code):
     if not filepath.exists():
         scenario_paths = get_country_codes_from_scenario_files()
         write_scenario_file_paths_to_file(scenario_paths)
+    scenario_file_directories = get_scenario_paths()
     with open(filepath, "r", encoding = "ISO-8859-1") as f:
         for line in f:
             try:
                 country_code_candidate, path_str = line.strip().split(";")
                 if country_code_candidate.upper() == country_code.upper():
-                    return Path(path_str)
+                    for directory in scenario_file_directories:
+                        path = directory / path_str
+                        if path.exists():
+                            return path
+                    # return Path(path_str)
             except ValueError:
                 pass
 
@@ -572,6 +581,18 @@ def get_country_names():
         if country_code.upper() not in country_names.keys():
             country_names[country_code.upper()] = ""
     return country_names
+
+
+def get_minister_and_policy_names():
+    policy_name_file = get_policy_names_path()
+    policy_and_minister_names = dict()
+    with open(policy_name_file, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            names = line.split("#")[0].split(";")
+            key = names[0].upper()
+            if "NAME_POLICY" in key or "NPERSONALITY" in key:
+                policy_and_minister_names[key] = names[1]
+    return policy_and_minister_names
 
 
 def read_savefile_for_research_order(savefilepath):
