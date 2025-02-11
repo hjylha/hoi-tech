@@ -1,6 +1,6 @@
 
 from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path
-from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country
+from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality
 
@@ -281,13 +281,18 @@ def ensure_lists_are_lists(should_be_list):
     
 
 def scan_minister_personalities():
+    public_name_dict = get_minister_and_policy_names()
+    # minister_titles = get_government_titles()
     minister_modifier_path = get_minister_modifier_path()
     personalities = []
     content = read_txt_file(minister_modifier_path)
     m_personalities = content["minister_personalities"]["personality"]
     for personality in m_personalities:
         name = personality["personality_string"]
+        # public_name_key = personality["name"]
+        public_name = public_name_dict.get(personality["name"].upper())
         position = personality["minister_position"].lower()
+        # position = minister_titles[personality["minister_position"]]
         personality_modifiers = ensure_lists_are_lists(personality.get("modifier"))
         modifiers = []
         for modifier in personality_modifiers:
@@ -302,26 +307,39 @@ def scan_minister_personalities():
         #     for modifier in personality["modifier"]:
         #         # modifiers.append(Modifier(*[modifier.get(key) for key in MODIFIER_ATTRIBUTES]))
         #         modifiers.append(get_correct_modifiers(modifier))
-        personalities.append(MinisterPersonality(name, position, modifiers))
+        personalities.append(MinisterPersonality(name, public_name, position, modifiers))
     return personalities
 
 
 def scan_ideas():
+    public_name_dict = get_minister_and_policy_names()
+    # idea_titles = get_idea_titles()
     ideas_path = get_ideas_path()
     content = read_txt_file(ideas_path)
     raw_ideas = content["national_ideas"]["national_idea"]
     ideas = []
     for idea in raw_ideas:
         name = idea["personality_string"]
+        public_name = public_name_dict.get(idea["name"].upper())
         position = idea["minister_position"]
         gov_types = ensure_lists_are_lists(idea.get("category"))
         idea_modifiers = ensure_lists_are_lists(idea.get("modifier"))
         modifiers = []
         for modifier in idea_modifiers:
             modifiers.append(get_correct_modifiers(modifier))
-        ideas.append(Idea(name, position, modifiers, gov_types=gov_types))
+        ideas.append(Idea(name, public_name, position, modifiers, gov_types=gov_types))
     return ideas
 
+
+def scan_politics_titles():
+    title_dict = get_government_titles()
+    more_titles = get_idea_titles()
+    for key, item in more_titles.items():
+        actual_key = key.replace("_", "")
+        if title_dict.get(actual_key) is not None:
+            raise Exception(f"Idea title {actual_key}: {item} already in dict")
+        title_dict[actual_key] = item
+    return {key.lower(): item for key, item in title_dict.items()}
 
 
 def scan_minister_csv(filepath, minister_personalities):
@@ -337,6 +355,7 @@ def scan_minister_csv(filepath, minister_personalities):
             continue
         # minister_position = line[1]
         position = line[1].replace(" ", "").lower()
+        # position = line[1]
         # minister_name = line[2]
         # start_year = line[3]
         # minister_ideology = line[4]
