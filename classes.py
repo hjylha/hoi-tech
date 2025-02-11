@@ -410,8 +410,9 @@ class TechTeam:
 
 
 class MinisterOrIdea:
-    def __init__(self, name, position, modifiers):
+    def __init__(self, name, public_name, position, modifiers):
         self.name = name
+        self.public_name = public_name
         self.position = position
         self.modifiers = modifiers
 
@@ -446,20 +447,26 @@ class MinisterPersonality(MinisterOrIdea):
 
 
 def get_minister_personality(minister_personalities, personality_str, position="all", show_issues=False):
+    if not personality_str:
+        return
     for personality in minister_personalities:
-        if personality.name.lower() == personality_str.lower() and personality.position == "all":
+        if (personality.name.lower() == personality_str.lower() or personality.public_name.lower() == personality_str.lower()) and personality.position == "all":
             return personality
-        if personality.name.lower() == personality_str.lower() and personality.position == position:
+        if (personality.name.lower() == personality_str.lower() or personality.public_name.lower() == personality_str.lower()) and personality.position == position:
             return personality
         if personality.name.lower() == personality_str.lower():
             if show_issues:
                 print("Match for", personality.name, "but", personality.position, "!=", position)
             return personality
+        if personality.public_name.lower() == personality_str.lower():
+            if show_issues:
+                print("Match for", personality.public_name, "but", personality.position, "!=", position)
+            return personality
     else:
         if show_issues:
             print(f"Minister personality {personality_str} not found")
-
-
+    
+            
 class Minister:
     # def get_modifiers(self):
     #     modifiers = []
