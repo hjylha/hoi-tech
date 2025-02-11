@@ -82,6 +82,14 @@ def get_policy_names_path():
     aod_path = get_aod_path()
     return aod_path / "config" / "new_text.csv"
 
+def get_government_titles_path():
+    aod_path = get_aod_path()
+    return aod_path / "config" / "text.csv"
+
+def get_idea_titles_path():
+    aod_path = get_aod_path()
+    return aod_path / "config" / "boostertext.csv"
+
 def get_save_game_path():
     aod_path = get_aod_path()
     return aod_path / "scenarios" / "save games"
@@ -593,6 +601,37 @@ def get_minister_and_policy_names():
             if "NAME_POLICY" in key or "NPERSONALITY" in key:
                 policy_and_minister_names[key] = names[1]
     return policy_and_minister_names
+
+
+def format_title(title_w_all_caps_and_underscores):
+    words = [word.lower().capitalize() for word in title_w_all_caps_and_underscores.split("_")]
+    return "".join(words)
+
+
+def get_government_titles():
+    titles_in_file = get_government_titles_path()
+    # title_dict = {"all": "all"}
+    title_dict = dict()
+    start_text = "HOIG_"
+    with open(titles_in_file, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            if start_text in line:
+                items = line.strip().split(";")
+                key = format_title(items[0].split(start_text)[1])
+                title_dict[key] = items[1]
+    return title_dict
+
+def get_idea_titles():
+    titles_in_file = get_idea_titles_path()
+    title_dict = dict()
+    start_text = "HOINI_"
+    with open(titles_in_file, "r", encoding = "ISO-8859-1") as f:
+        for line in f:
+            if start_text in line:
+                items = line.strip().split(";")
+                key = items[0].split(start_text)[1]
+                title_dict[key] = items[1]
+    return title_dict
 
 
 def read_savefile_for_research_order(savefilepath):

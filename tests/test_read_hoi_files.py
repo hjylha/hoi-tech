@@ -71,6 +71,21 @@ def test_get_country_names_path(aod_path):
         assert rhf.get_country_names_path().exists()
 
 
+def test_get_policy_names_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_policy_names_path().exists()
+
+
+def test_get_government_titles_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_government_titles_path().exists()
+
+
+def test_get_idea_titles_path(aod_path):
+    if aod_path.exists():
+        assert rhf.get_idea_titles_path().exists()
+
+
 def test_get_save_game_path(aod_path):
     if aod_path.exists():
         assert rhf.get_save_game_path().exists()
@@ -83,3 +98,26 @@ def test_read_difficulty_file(aod_path):
         difficulties = ["VERYEASY", "EASY", "NORMAL", "HARD", "VERYHARD"]
         for difficulty in difficulties:
             assert isinstance(difficulty_dict[difficulty], int)
+
+
+def test_get_minister_and_policy_names(aod_path):
+    if aod_path.exists():
+        names = rhf.get_minister_and_policy_names()
+        assert names["NPERSONALITY_GENERAL_STAFFER"] == "General Staffer"
+        assert names["NAME_POLICY_CULTURE_ENTERPRISE"] == "Individualist Enterprise Culture"
+
+
+def test_format_title():
+    assert rhf.format_title("ARMAMENT_MINISTER") == "ArmamentMinister"
+
+
+def test_get_government_titles(aod_path):
+    if aod_path.exists():
+        titles = rhf.get_government_titles()
+        assert titles["ArmamentMinister"] == "Armaments Minister"
+
+
+def test_get_idea_titles(aod_path):
+    if aod_path.exists():
+        titles = rhf.get_idea_titles()
+        assert titles["SOCIAL_POLICY"] == "Social Policy"
