@@ -137,11 +137,21 @@ class CountryButton(BoxLayout):
 
 class MinisterCheckBox(BoxLayout):
     def on_checkbox_active(self, checkbox, value):
+        if not value and self.is_selected:
+            # print(f"{self.name.text} was selected")
+            self.parent.choose_minister_or_idea(self)
+            return
         if value:
-            self.parent.choose_minister_or_idea(self.name.text)
+            if self.is_selected:
+                return
+            # self.is_selected = True
+            # print(f"{self.name.text} is selected")
+            self.parent.choose_minister_or_idea(self)
+            return
             # print(value)
             # print(self.name.text, "is selected")
         # else:
+        #     self.parent.choose_minister_or_idea("")
             # print(value)
             # print(self.name.text, "is not selected")
 
@@ -152,35 +162,71 @@ class MinisterCheckBox(BoxLayout):
         self.name = Label(text=label_text, size_hint=(0.8, 1))
         self.checkbox = CheckBox(group=group_name, size_hint=(0.2, 1))
         self.checkbox.bind(active=self.on_checkbox_active)
+        self.is_selected = False
 
         self.add_widget(self.checkbox)
         self.add_widget(self.name)
 
 
 class MinisterCheckBoxGroup(BoxLayout):
-    def choose_minister_or_idea(self, name):
+    def choose_minister_or_idea(self, the_checkbox):
         if self.parent is None or self.parent.parent is None:
             return
-        self.parent.parent.parent.choose_minister_or_idea(self.title.text, name)
+        # print("before choices")
+        # for checkbox in self.list_of_checkboxes:
+        #     print(checkbox.checkbox.active, checkbox.is_selected, checkbox.name.text)
+        # print()
+        if all([not checkbox.checkbox.active for checkbox in self.list_of_checkboxes]):
+            # print(f"nothing selected, so choose {self.active_checkbox.name.text}")
+            if self.active_checkbox is not None:
+                self.active_checkbox.is_selected = True
+                self.active_checkbox.checkbox.active = True
+                return
+        if the_checkbox.checkbox.active and the_checkbox != self.active_checkbox:
+            # print(f"{the_checkbox.name.text} is chosen in MCBG")
+            the_checkbox.is_selected = True
+            self.active_checkbox = the_checkbox
+            self.parent.parent.parent.choose_minister_or_idea(self.title.text, the_checkbox.name.text)
+        elif the_checkbox.checkbox.active:
+            the_checkbox.is_selected = True
+        else:
+            # print(f"{the_checkbox.name.text} is not chosen in MCBG")
+            the_checkbox.is_selected = False
+            the_checkbox.checkbox.active = False
         # print(self.title.text, name)
         # print(self.parent)
         # print(self.parent.parent)
         # print(self.parent.parent.parent)
         # print(self.parent.parent.parent.parent.attach_to)
         # print(self.parent.parent.parent.parent.parent)
+        # print("after choices")
+        # for checkbox in self.list_of_checkboxes:
+        #     print(checkbox.checkbox.active, checkbox.is_selected, checkbox.name.text)
+        # print()
     
     def change_minister(self, minister_personality_str):
+        # print(f"changing minister {minister_personality_str}")
         for checkbox in self.list_of_checkboxes:
-            checkbox.checkbox.active = False
-        if not minister_personality_str:
-            self.list_of_checkboxes[-1].checkbox.active = True
-            return
-        for checkbox in self.list_of_checkboxes:
-            if checkbox.name.text.lower() == minister_personality_str.lower():
+            if checkbox.checkbox.active and checkbox.name.text != minister_personality_str:
+                checkbox.is_selected = False
+                # print(f"switching off checkbox {checkbox.name.text}")
+                checkbox.checkbox.active = False
+            if not checkbox.checkbox.active and checkbox.name.text == minister_personality_str:
+                # print(f"switching on checkbox {checkbox.name.text}")
                 checkbox.checkbox.active = True
-                return
-        else:
+                checkbox.is_selected = True
+        if not minister_personality_str:
+            # print(f"switching on checkbox other, when {minister_personality_str} is blank")
             self.list_of_checkboxes[-1].checkbox.active = True
+            self.list_of_checkboxes[-1].is_selected = True
+            return
+        # for checkbox in self.list_of_checkboxes:
+        #     if checkbox.name.text == minister_personality_str:
+        #         print(minister_personality_str)
+        #         checkbox.checkbox.active = True
+        #         return
+        # else:
+        #     self.list_of_checkboxes[-1].checkbox.active = True
         
     def change_research_effects(self, effect_dict):
         for effect_label in self.effects:
@@ -202,7 +248,8 @@ class MinisterCheckBoxGroup(BoxLayout):
             checkbox = MinisterCheckBox(label, group_name)
             self.list_of_checkboxes.append(checkbox)
             self.add_widget(checkbox)
-        self.list_of_checkboxes[-1].checkbox.active = True
+        # self.list_of_checkboxes[-1].checkbox.active = True
+        self.active_checkbox = None
 
         self.effects = [Label(text=""), Label(text="")]
         for effect in self.effects:
@@ -1524,24 +1571,25 @@ class MainScreen(BoxLayout):
 
 class PolicyScreen(BoxLayout):
     def choose_minister_or_idea(self, position, name):
-        # print(position, name)
         # print(self.parent.parent.attach_to.parent)
         if self.parent.parent.attach_to is None:
             return
         # print(self.parent)
+        # print(f"{position}: {name} is in PolicyScreen")
         # print(self.parent.parent)
         # print(self.parent.parent.attach_to)
         self.parent.parent.attach_to.parent.change_policies_based_on_checkboxes(name, position)
 
     def change_policy_choices(self, policy_dict):
         for choice in self.choices:
-            if choice.title.text.lower() in policy_dict:
-                choice.change_minister(policy_dict[choice.title.text.lower()])
+            if choice.title.text in policy_dict:
+                # print(f"changing {choice.title.text} to {policy_dict[choice.title.text]}")
+                choice.change_minister(policy_dict[choice.title.text])
     
     def show_tech_effects_of_policies(self, effect_dict):
         for choice in self.choices:
-            if choice.title.text.lower() in effect_dict:
-                choice.change_research_effects(effect_dict[choice.title.text.lower()])
+            if choice.title.text in effect_dict:
+                choice.change_research_effects(effect_dict[choice.title.text])
     
     def change_bankrupt_status(self, widget, value):
         self.parent.parent.attach_to.parent.change_bankrupt_status(int(value))
@@ -1942,6 +1990,7 @@ class StatusBar(BoxLayout):
 
     def change_policies_based_on_checkboxes(self, name, position):
         self.parent.research.change_minister_or_idea(position, name)
+        # print(f"changed to minister {position}: {name}")
         # update effects
         self.change_checkboxes_based_on_policies(True)
         self.update_tables()
