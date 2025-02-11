@@ -2,7 +2,7 @@
 from read_hoi_files import get_country_names
 from classes import GameConstants, HoITime
 from scan_hoi_files import scan_minister_personalities, scan_ideas, scan_ministers_for_country
-from scan_hoi_files import get_tech_dict, get_tech_teams, scan_policies_file, scan_scenario_file_for_country
+from scan_hoi_files import get_tech_dict, get_tech_teams, scan_policies_file, scan_politics_titles, scan_scenario_file_for_country
 
 
 class Politics:
@@ -21,13 +21,13 @@ class Politics:
     def get_tech_personalities_and_ideas_as_dict(self):
         tech_personalities_and_ideas = dict()
         for personality in self.tech_minister_personalities:
-            key = personality.position.lower()
+            key = personality.position
             if tech_personalities_and_ideas.get(key) is None:
                 tech_personalities_and_ideas[key] = [personality]
             else:
                 tech_personalities_and_ideas[key].append(personality)
         for idea in self.tech_ideas:
-            key = idea.position.lower()
+            key = idea.position
             if tech_personalities_and_ideas.get(key) is None:
                 tech_personalities_and_ideas[key] = [idea]
             else:
@@ -38,21 +38,26 @@ class Politics:
         initial_dict = self.get_tech_personalities_and_ideas_as_dict()
         final_dict = dict()
         for key, value in initial_dict.items():
-            final_dict[key] = [personality.name for personality in value]
-            final_dict[key].append("other")
+            final_dict[self.titles[key]] = [personality.public_name for personality in value]
+            final_dict[self.titles[key]].append("other")
         return final_dict
     
     def get_minister_personality_or_idea(self, personality_str, position):
+        if not personality_str:
+            return
         for personality in (self.minister_personalities + self.ideas):
-            if personality.name.lower() == personality_str.lower() and personality.position.lower() == "all":
+            if (personality.name == personality_str or personality.public_name == personality_str) and personality.position == "all":
                 return personality
-            if personality.name.lower() == personality_str.lower() and personality.position.lower() == position.lower():
+            if (personality.name == personality_str or personality.public_name == personality_str) and personality.position == position:
                 return personality
-            if personality.name.lower() == personality_str.lower():
+            if personality.name == personality_str:
                 print("Match for", personality.name, "but", personality.position, "!=", position)
                 return personality
+            if personality.public_name == personality_str:
+                print("Match for", personality.public_name, "but", personality.position, "!=", position)
+                return personality
         else:
-            print(f"Minister personality {personality_str} not found")
+            print(f"Minister personality {personality_str} not found in position {position}")
 
     def __init__(self):
         self.minister_personalities = scan_minister_personalities()
@@ -60,21 +65,23 @@ class Politics:
 
         self.filter_personalities_and_ideas_that_affect_research()
 
-        self.current_policies = {
-            "headofstate": None,
-            "headofgovernment": None,
-            "foreignminister": None,
-            "armamentminister": None,
-            "ministerofsecurity": None,
-            "ministerofintelligence": None,
-            "chiefofstaff": None,
-            "chiefofarmy": None,
-            "chiefofnavy": None,
-            "chiefofair": None,
-            "nationalidentity": None,
-            "socialpolicy": None,
-            "nationalculture": None
-        }
+        self.titles = scan_politics_titles()
+        self.current_policies = {key: None for key in self.titles}
+        # self.current_policies = {
+        #     "headofstate": None,
+        #     "headofgovernment": None,
+        #     "foreignminister": None,
+        #     "armamentminister": None,
+        #     "ministerofsecurity": None,
+        #     "ministerofintelligence": None,
+        #     "chiefofstaff": None,
+        #     "chiefofarmy": None,
+        #     "chiefofnavy": None,
+        #     "chiefofair": None,
+        #     "nationalidentity": None,
+        #     "socialpolicy": None,
+        #     "nationalculture": None
+        # }
         self.available_ministers = []
     
     def scan_available_ministers(self, country_code):
@@ -111,11 +118,23 @@ class Politics:
     
     def change_minister_or_idea(self, position, name):
         for pos in self.current_policies.keys():
-            if pos == position.lower() and name == "other":
+            if (pos == position or self.titles[pos] == position) and name == "other":
                 self.current_policies[pos] = None
-            elif pos == position.lower():
+            elif (pos == position or self.titles[pos] == position):
                 personality = self.get_minister_personality_or_idea(name, pos)
                 self.current_policies[pos] = personality
+
+    def get_current_policies_and_effects_for_checkboxes(self):
+        policy_dict = dict()
+        for position, personality in self.current_policies.items():
+            if personality is None:
+                policy_dict[self.titles[position]] = ["other", dict()]
+            elif (research_bonus := personality.get_research_bonus()):
+                policy_dict[self.titles[position]] = [personality.public_name, research_bonus]
+            else:
+                policy_dict[self.titles[position]] = ["other", dict()]
+        return policy_dict
+
 
 class Research:
     DEFAULT_YEAR = 1933
@@ -558,15 +577,8 @@ class Research:
     
 
     def get_current_policies_and_effects_for_checkboxes(self):
-        policy_dict = dict()
-        for position, personality in self.politics.current_policies.items():
-            if personality is None:
-                policy_dict[position] = ["other", dict()]
-            elif (research_bonus := personality.get_research_bonus()):
-                policy_dict[position] = [personality.name, research_bonus]
-            else:
-                policy_dict[position] = ["other", dict()]
-        return policy_dict
+        return self.politics.get_current_policies_and_effects_for_checkboxes()
+    
 
     def get_post_war_modified_ids(self, tech_ids):
         modified_ids = []
@@ -998,6 +1010,12 @@ if __name__ == "__main__":
 
     pol = r.politics
     curr = r.politics.current_policies
+
+    for t, m in curr.items():
+        if m is None:
+            print(t, "\t", "None")
+        else:
+            print(t, "\t", m.name, "\t", m.public_name)
 
     if len(sys.argv) > 1 and sys.argv[1] == "1":
         import time
