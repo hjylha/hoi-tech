@@ -94,6 +94,10 @@ def get_save_game_path():
     aod_path = get_aod_path()
     return aod_path / "scenarios" / "save games"
 
+def get_save_games():
+    save_game_folder = get_save_game_path()
+    return save_game_folder.glob("*.eug")
+
 
 def change_type_if_necessary(text):
     if text is None:
