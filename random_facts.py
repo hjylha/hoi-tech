@@ -1,7 +1,6 @@
 
 import sys
 
-import read_hoi_files as rhf
 import scan_hoi_files as shf
 from research import Research
 
@@ -9,7 +8,7 @@ from research import Research
 DEFAULT_END_YEAR = 1937
 DEFAULT_LEVEL = 3
 DEFAULT_DIFFICULTY = "VERYHARD"
-DEFAULT_RESEARCH_SPEED = 100
+DEFAULT_RESEARCH_SPEED = 150
 DEFAULT_NUM_TO_SHOW = 20
 
 
@@ -313,7 +312,6 @@ def show_ranked_teams(num_of_teams=DEFAULT_NUM_TO_SHOW):
     return ranking[:num_of_teams]
 
 
-
 def choose_random_fact(random_facts):
     print("Choose a random fact:")
     for i, fact in enumerate(random_facts):
@@ -339,80 +337,6 @@ def show_random_facts():
     if choice is None:
         return
     random_facts[choice][1]()
-
-
-
-# fcns to extract research order from save files
-def get_save_game_path_from_filename_input(filename):
-    save_folder = rhf.get_save_game_path()
-    if not filename:
-        return
-    if filename[-4:] == ".eug":
-        save_name = filename
-    else:
-        save_name = f"{filename}.eug"
-    save_game_path = save_folder / save_name
-    if not save_game_path.exists():
-        print(f"Save '{save_game_path}' does not exist.")
-        return
-    return save_game_path
-
-def select_save_game():
-    save_name_input = input("Type the name of the save: ")
-    return get_save_game_path_from_filename_input(save_name_input)
-
-
-def select_which_tech_is_it(tech_str, team_str, time_str, list_of_all_techs, already_selected_tech):
-    # tech_str, team_str, time_str = tech_n_team_n_time
-    print(f"{tech_str} --- {team_str} --- {time_str}")
-    while True:
-        try:
-            tech_id = int(input("What tech is this? Type the id: "))
-            if (tech := shf.get_tech_by_id(tech_id, already_selected_tech)) is not None:
-                print(f"{tech.tech_id} {tech.name} selected.")
-                yes_or_no = input("This tech is already researched. Add it anyway? (y/n) ")
-                if yes_or_no.lower().strip() == "y":
-                    return tech
-            elif (tech := shf.get_tech_by_id(tech_id, list_of_all_techs)) is not None:
-                print(f"{tech.tech_id} {tech.name} selected.")
-                yes_or_no = input("Is this the one? (y/n) ")
-                if yes_or_no.lower().strip() == "y":
-                    return tech
-        except ValueError:
-            pass
-
-
-def get_reseach_order_from_ttt(list_of_tech_n_team_n_time, list_of_all_techs):
-    research_order = []
-    for tech_str, team_str, time_str in list_of_tech_n_team_n_time:
-        possible_techs = shf.find_tech_by_name(tech_str, list_of_all_techs)
-        if len(possible_techs) == 1:
-            research_order.append([possible_techs[0], team_str, time_str])
-            continue
-        print(f"{len(possible_techs)} techs found.")
-        if len(possible_techs) > 1:
-            tech_ids = [str(tech.tech_id) for tech in possible_techs]
-            print(f"tech ids: {', '.join(tech_ids)}")
-        tech = select_which_tech_is_it(tech_str, team_str, time_str, list_of_all_techs, [t for t, _, _ in research_order])
-        research_order.append([tech, team_str, time_str])
-    return research_order
-
-
-def savepath_to_research_order_path(savepath):
-    db_path = Path(__file__).parent / "db"
-    order_filename = f"order_{savepath.stem}.csv"
-    return db_path / order_filename
-
-
-def write_research_order_to_file(research_order, filepath):
-    with open(filepath, "w", encoding = "ISO-8859-1") as f:
-        for tech, team_str, time_str in research_order:
-            f.write(f"{tech.tech_id};{tech.name};{team_str};{time_str}\n")
-
-
-def print_ttt(tech_n_team_n_time, num_of_lines=100):
-    for tech, team, time in tech_n_team_n_time[:num_of_lines]:
-        print(f"{tech} --- {team} --- {time}")
 
 
 if __name__ == "__main__":
