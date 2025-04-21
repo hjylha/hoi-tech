@@ -7,7 +7,7 @@ This app is a result of a bit of a deep dive into the technology research system
 ![App window](pics/app_infantry.PNG)
 
 The use of the app requires two things:
-- Python with the Kivy library
+- Python with the [Kivy](https://github.com/kivy/kivy) library
 - Access to the Iron Cross game files
 
 The app reads the file `aod_path.txt` (or `aod_path_linux.txt` if you are on linux) to find the game directory. So, in order to use the app, create that file and write the path of the game directory into it. For example, my `aod_path.txt` file contains just the line `C:\games\ArsenalofDemocracy`.
@@ -34,7 +34,7 @@ Note that the requirements for secret weapons technologies are misleading, becau
 
 - CTRL + 1 switches to Team Info view on the top left
 - CTRL + 2 switches to Fastest Tech view on the top left
-- CTRL + 3 switches to Fastest Tech view on the top left
+- CTRL + 3 switches to Biggest Tech Speed Increase view on the top left
 
 # A brief look into the research system
 
