@@ -9,6 +9,11 @@ gamepath_in = "aod_path.txt"
 gamepath_in_linux = "aod_path_linux.txt"
 scenario_file_paths_file = "scenario_file_paths.csv"
 
+the_encoding = "utf-8"
+text_encoding = "ISO-8859-1"
+csv_encoding = "cp1252"
+# special_encoding = "cp1251"
+
 
 def get_aod_path():
     if os.name == "nt":
@@ -129,9 +134,9 @@ def get_first_item_from_text(text):
     return (change_type_if_necessary(item), text[len(item):].strip())
 
 
-def read_name_file(filepath, language="English"):
+def read_name_file(filepath, language="English", encoding=text_encoding):
     names = dict()
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = encoding) as f:
         for i, line in enumerate(f):
             if i == 0:
                 language_index = line.split(";").index(language)
@@ -143,9 +148,9 @@ def read_name_file(filepath, language="English"):
             names[clean_line[0]] = clean_line[language_index]
     return names
 
-def read_names_from_file(search_terms, filepath, language="English"):
+def read_names_from_file(search_terms, filepath, language="English", encoding=text_encoding):
     names = dict()
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = encoding) as f:
         for i, line in enumerate(f):
             if i == 0:
                 language_index = line.split(";").index(language)
@@ -160,12 +165,12 @@ def read_names_from_file(search_terms, filepath, language="English"):
     return names
 
 
-def read_csv_file(filepath, check_filetype=False, delimiter=";"):
+def read_csv_file(filepath, check_filetype=False, delimiter=";", encoding=csv_encoding):
     if check_filetype and filepath.suffix != ".csv":
         print(f"{filepath} is not a csv file.")
         return
     csv_content_list = None
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = encoding) as f:
         csv_reader = csv.reader(f, delimiter=delimiter)
         csv_content_list = []
         for line in csv_reader:
@@ -261,12 +266,12 @@ def read_inside_brackets(opened_file, current_line):
 
 
 # def read_txt_file0(filepath, check_filetype=False):
-def read_txt_file(filepath, check_filetype=False):
+def read_txt_file(filepath, check_filetype=False, encoding=text_encoding):
     if check_filetype and filepath.suffix != ".txt":
         print(f"{filepath} is not a txt file.")
         return
     
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = encoding) as f:
         content, _ = read_inside_brackets(f, "")
     if isinstance(content, list) and len(content) == 1:
         content = content[0]
@@ -279,7 +284,7 @@ def read_txt_file(filepath, check_filetype=False):
 #         return
 #     content = dict()
     
-#     with open(filepath, "r", encoding = "ISO-8859-1") as f:
+#     with open(filepath, "r", encoding = the_encoding) as f:
 #         nested_keys = []
 #         nested_values = []
 #         previous_text = None
@@ -419,7 +424,7 @@ def read_misc_file():
     misc_filepath = get_misc_path()
     # misc_content = dict()
     # content_types = ["economy", "combat", "research"]
-    # with open(misc_filepath, "r", encoding = "ISO-8859-1") as f:
+    # with open(misc_filepath, "r", encoding = the_encoding) as f:
     #     current_type = None
     #     for line in f:
     #         clean_line = line.split("#")[0].strip()
@@ -497,7 +502,7 @@ def get_country_codes_from_scenario_files():
 
 
 def write_scenario_file_paths_to_file(filepath_dict):
-    with open(this_files_directory / scenario_file_paths_file, "w", encoding = "ISO-8859-1") as f:
+    with open(this_files_directory / scenario_file_paths_file, "w", encoding = the_encoding) as f:
         for country_code, filename in filepath_dict.items():
             f.write(f"{country_code};{filename}\n")
 
@@ -507,7 +512,7 @@ def read_scenario_file_paths_from_file():
         scenario_paths = get_country_codes_from_scenario_files()
         write_scenario_file_paths_to_file(scenario_paths)
     scenario_paths = dict()
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = the_encoding) as f:
         for line in f:
             try:
                 country_code, path_str = line.strip().split(";")
@@ -522,7 +527,7 @@ def get_scenario_file_path_for_country(country_code):
         scenario_paths = get_country_codes_from_scenario_files()
         write_scenario_file_paths_to_file(scenario_paths)
     scenario_file_directories = get_scenario_paths()
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = the_encoding) as f:
         for line in f:
             try:
                 country_code_candidate, path_str = line.strip().split(";")
@@ -538,7 +543,7 @@ def get_scenario_file_path_for_country(country_code):
 # def read_minister_modifiers():
 #     minister_modifier_file = get_minister_modifier_path()
 #     personalities_and_modifiers = dict()
-#     with open(minister_modifier_file, "r", encoding = "ISO-8859-1") as f:
+#     with open(minister_modifier_file, "r", encoding = the_encoding) as f:
 #         for line in f:
 
 #             clean_line = line.split("#")[0].strip()
@@ -551,7 +556,7 @@ def get_scenario_file_path_for_country(country_code):
 # def read_ideas():
 #     ideas_filepath = get_ideas_path()
 #     ideas = dict()
-#     with open(ideas_filepath, "r", encoding = "ISO-8859-1") as f:
+#     with open(ideas_filepath, "r", encoding = the_encoding) as f:
 #         for line in f:
 
 #             clean_line = line.split("#")[0].strip()
@@ -566,7 +571,7 @@ def get_tech_names():
     # tech_names_path = aod_path / "config" / "tech_names.csv"
     tech_names_path = get_tech_names_path()
     tech_names = dict()
-    with open(tech_names_path, "r", encoding = "ISO-8859-1") as f:
+    with open(tech_names_path, "r", encoding = csv_encoding) as f:
         for line in f:
             names = line.split(";")
             if names[0]:
@@ -583,7 +588,7 @@ def get_country_names():
     # country_names_path = aod_path / "config" / "world_names.csv"
     country_names_path = get_country_names_path()
     country_names = dict()
-    with open(country_names_path, "r", encoding = "ISO-8859-1") as f:
+    with open(country_names_path, "r", encoding = csv_encoding) as f:
         for line in f:
             names = line.split(";")
             if names[0].upper() in country_codes:
@@ -598,7 +603,7 @@ def get_country_names():
 def get_minister_and_policy_names():
     policy_name_file = get_policy_names_path()
     policy_and_minister_names = dict()
-    with open(policy_name_file, "r", encoding = "ISO-8859-1") as f:
+    with open(policy_name_file, "r", encoding = csv_encoding) as f:
         for line in f:
             names = line.split("#")[0].split(";")
             key = names[0].upper()
@@ -617,7 +622,7 @@ def get_government_titles():
     # title_dict = {"all": "all"}
     title_dict = dict()
     start_text = "HOIG_"
-    with open(titles_in_file, "r", encoding = "ISO-8859-1") as f:
+    with open(titles_in_file, "r", encoding = text_encoding) as f:
         for line in f:
             if start_text in line:
                 items = line.strip().split(";")
@@ -629,7 +634,7 @@ def get_idea_titles():
     titles_in_file = get_idea_titles_path()
     title_dict = dict()
     start_text = "HOINI_"
-    with open(titles_in_file, "r", encoding = "ISO-8859-1") as f:
+    with open(titles_in_file, "r", encoding = text_encoding) as f:
         for line in f:
             if start_text in line:
                 items = line.strip().split(";")
@@ -640,7 +645,7 @@ def get_idea_titles():
 
 def read_savefile_for_research_order(savefilepath):
     strings_from_file = []
-    with open(savefilepath, "r", encoding = "ISO-8859-1") as f:
+    with open(savefilepath, "r", encoding = text_encoding) as f:
         for line in f:
             if "has developed" in line:
                 strings_from_file.append(line.strip().split("=")[1].strip().strip('"'))

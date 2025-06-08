@@ -1,6 +1,7 @@
 
 from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
+from read_hoi_files import the_encoding, text_encoding, csv_encoding
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality
 
@@ -10,7 +11,7 @@ def scan_tech_file(filepath, tech_names):
 
     tech_category = filepath.stem[:filepath.stem.index("_tech")]
 
-    content = read_txt_file(filepath)["technology"]
+    content = read_txt_file(filepath, encoding=csv_encoding)["technology"]
 
     if tech_category != content["category"]:
         raise Exception(f"Category mismatch: {tech_category} /= {content['category']}")
@@ -212,7 +213,7 @@ def scan_tech_team_file(filepath):
     # tech_nation = country_names.get(nation_key.upper())
     # if tech_nation is None:
     #     tech_nation = nation_key.upper()
-    with open(filepath, "r", encoding = "ISO-8859-1") as f:
+    with open(filepath, "r", encoding = text_encoding) as f:
         for line in f:
             items = line.split(";")
             if items[0].strip():
