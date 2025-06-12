@@ -516,6 +516,62 @@ air_doct_deact_lines = [
     (left1_x + 0.06, 0.65, left1_x + 0.06, 0.635)
 ]
 
+super_weapon_lines = [
+    # nuclear
+    ((right1_x - 0.06, 0.945, right1_x - 0.06, 0.935), False),
+    ((right1_x - 0.06, 0.325, right1_x - 0.06, 0.315), False),
+    # tanks
+    ((right1_x - 0.01, 0.085, left1_x - 0.025, 0.085), False),
+    ((right2_x - 0.02, 0.102, right2_x - 0.01, 0.102, right2_x - 0.01, 0.067), False),
+    ((right2_x - 0.02, 0.067, right2_x - 0.01, 0.067), False),
+    ((right2_x - 0.01, 0.085, left2_x - 0.05, 0.085), True),
+    # bb, ca, cv, ssn
+    ((left2_x - 0.03, 0.965, left2_x, 0.965), False),
+    ((left2_x - 0.03, 0.905, left2_x, 0.905), False),
+    ((left2_x - 0.03, 0.845, left2_x, 0.845), False),
+    ((left2_x - 0.03, 0.785, left2_x, 0.785), False),
+    # r int, t int
+    ((left2_x - 0.03, 0.715, left2_x, 0.715), False),
+    ((left2_x - 0.03, 0.625, left2_x, 0.625), False),
+    # tac, str, nav, cas, cag
+    ((left2_x - 0.03, 0.525, left2_x, 0.525), False),
+    ((left2_x - 0.03, 0.47, left2_x, 0.47), False),
+    ((left2_x - 0.03, 0.415, left2_x, 0.415), False),
+    ((left2_x - 0.03, 0.36, left2_x, 0.36), False),
+    ((left2_x - 0.03, 0.305, left2_x, 0.305), False),
+    # asm, sam
+    ((left2_x - 0.03, 0.245, left2_x, 0.245), False),
+    ((left2_x - 0.03, 0.185, left2_x, 0.185), False),
+    # proper missiles
+    ((right4_x - 0.07, 0.945, right4_x  - 0.07, 0.935), False),
+    ((right4_x - 0.06, 0.855, right4_x  - 0.06, 0.845), False),
+    ((right4_x - 0.05, 0.765, right4_x  - 0.05, 0.755), False),
+    # t fighter
+    ((right4_x - 0.07, 0.535, right4_x - 0.07, 0.525), False),
+    # computers
+    ((right4_x - 0.07, 0.385, right4_x - 0.07, 0.375), False),
+    # radar
+    ((right4_x - 0.07, 0.165, right4_x - 0.07, 0.155), False),
+    # satellites
+    ((left4_x + 0.04, 0.945, left4_x + 0.04, 0.935), False),
+    # air cav
+    ((left4_x + 0.04, 0.245, left4_x + 0.04, 0.235), False),
+    # post-war missiles
+    ((left4_x - 0.01, 0.675, left4_x - 0.01, 0.575), False),
+    ((left4_x - 0.01, 0.645, left4_x + 0.02, 0.645), False),
+    ((left4_x - 0.01, 0.61, left4_x + 0.02, 0.61), False),
+    ((left4_x - 0.01, 0.575, left4_x + 0.02, 0.575), False),
+    # post-war subs
+    ((left4_x - 0.01, 0.445, left4_x - 0.01, 0.345), False),
+    ((left4_x - 0.01, 0.415, left4_x + 0.02, 0.415), False),
+    ((left4_x - 0.01, 0.38, left4_x + 0.02, 0.38), False),
+    ((left4_x - 0.01, 0.345, left4_x + 0.02, 0.345), False)
+]
+
+super_weapon_deact_lines = [
+
+]
+
 post_war_lines = [
     # PW inf -> PW LD
     ((right1_x - 0.01, 0.92, left2_x + 0.03, 0.92), True),

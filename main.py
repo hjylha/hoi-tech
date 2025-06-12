@@ -1169,7 +1169,10 @@ class LandDoctrineTechScreen(MainTechScreen):
 
 class SecretWeaponTechScreen(MainTechScreen):
     def draw_lines(self):
-        return super().draw_lines()
+        self.draw_lines_from_points(lines.super_weapon_lines, lines.super_weapon_deact_lines)
+    
+    def update_lines(self, widget, value):
+        self.update_lines_from_points(lines.super_weapon_lines, lines.super_weapon_deact_lines)
 
     def __init__(self, invention_buttons, **kwargs):
         super().__init__(**kwargs)
