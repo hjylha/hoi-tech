@@ -21,6 +21,7 @@ from research import Research
 from read_hoi_files import get_country_names
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
+from invention_positions import invention_positions
 from component_types import component_types
 import lines
 
@@ -254,6 +255,21 @@ class MinisterCheckBoxGroup(BoxLayout):
         self.effects = [Label(text=""), Label(text="")]
         for effect in self.effects:
             self.add_widget(effect)
+
+
+class InventionButton(Button):
+    SIZE_HINT = (0.12, 0.035)
+    
+    # COLORS
+    DEFAULT_COLOR = (0.35, 0.35, 0.5, 1)
+
+    def __init__(self, event_id, bg_color=DEFAULT_COLOR, size_hint=SIZE_HINT, **kwargs):
+        super().__init__(background_color=bg_color, size_hint=size_hint, **kwargs)
+        # self.orientation = "horizontal"
+        # self.size_hint = self.SIZE_HINT
+        self.event_id = event_id
+        self.text = f"Event {self.event_id}"
+        # self.disabled = True
 
 
 class TechnologyButton(BoxLayout):
@@ -1155,9 +1171,10 @@ class SecretWeaponTechScreen(MainTechScreen):
     def draw_lines(self):
         return super().draw_lines()
 
-    def __init__(self, **kwargs):
+    def __init__(self, invention_buttons, **kwargs):
         super().__init__(**kwargs)
-
+        for invention_button in invention_buttons:
+            self.add_widget(invention_button)
         # placeholder text
         # self.add_widget(Label(text="SecretWeaponTechScreen", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
@@ -1283,6 +1300,11 @@ class MainTechScreen_BoxLayout(BoxLayout):
         for tb in self.technologies.values():
             # self.add_widget(tb)
             tb.technology.bind(on_release=self.select_technology)
+        
+        invention_buttons = []
+        for key, value in invention_positions.items():
+            invention_button = InventionButton(key, pos_hint={"x": value[0], "y": value[1]})
+            invention_buttons.append(invention_button)
 
         self.category_layouts = {
             TECH_CATEGORIES[0][1]: InfantryTechScreen(),
@@ -1292,7 +1314,7 @@ class MainTechScreen_BoxLayout(BoxLayout):
             TECH_CATEGORIES[4][1]: PostWarTechScreen(),
             TECH_CATEGORIES[5][1]: IndustryTechScreen(),
             TECH_CATEGORIES[6][1]: LandDoctrineTechScreen(),
-            TECH_CATEGORIES[7][1]: SecretWeaponTechScreen(),
+            TECH_CATEGORIES[7][1]: SecretWeaponTechScreen(invention_buttons),
             TECH_CATEGORIES[8][1]: NavalDoctrineTechScreen(),
             TECH_CATEGORIES[9][1]: AirDoctrineTechScreen()
         }
