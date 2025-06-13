@@ -21,7 +21,7 @@ from research import Research
 from read_hoi_files import get_country_names
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
-from invention_positions import invention_positions
+from invention_positions import invention_positions, pw_invention_positions
 from component_types import component_types
 import lines
 
@@ -1132,9 +1132,10 @@ class PostWarTechScreen(MainTechScreen):
     def update_lines(self, widget, value):
         self.update_lines_from_points(lines.post_war_lines, lines.post_war_deact_lines)
 
-    def __init__(self, **kwargs):
+    def __init__(self, invention_buttons, **kwargs):
         super().__init__(**kwargs)
-
+        for invention_button in invention_buttons:
+            self.add_widget(invention_button)
         # placeholder text
         # self.add_widget(Label(text="OverviewTechScreen\nThis will probably remain empty", size_hint=(0.05, 0.05), pos_hint={"center_x": 0.5, "center_y": 0.5}))
 
@@ -1308,13 +1309,18 @@ class MainTechScreen_BoxLayout(BoxLayout):
         for key, value in invention_positions.items():
             invention_button = InventionButton(key, pos_hint={"x": value[0], "y": value[1]})
             invention_buttons.append(invention_button)
+        
+        pw_invention_buttons = []
+        for key, value in pw_invention_positions.items():
+            invention_button = InventionButton(key, pos_hint={"x": value[0], "y": value[1]})
+            pw_invention_buttons.append(invention_button)
 
         self.category_layouts = {
             TECH_CATEGORIES[0][1]: InfantryTechScreen(),
             TECH_CATEGORIES[1][1]: ArmorTechScreen(),
             TECH_CATEGORIES[2][1]: NavalTechScreen(),
             TECH_CATEGORIES[3][1]: AircraftTechScreen(),
-            TECH_CATEGORIES[4][1]: PostWarTechScreen(),
+            TECH_CATEGORIES[4][1]: PostWarTechScreen(pw_invention_buttons),
             TECH_CATEGORIES[5][1]: IndustryTechScreen(),
             TECH_CATEGORIES[6][1]: LandDoctrineTechScreen(),
             TECH_CATEGORIES[7][1]: SecretWeaponTechScreen(invention_buttons),

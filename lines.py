@@ -587,6 +587,8 @@ post_war_lines = [
     ((left2_x + 0.05, 0.78, left2_x + 0.05, 0.75), True),
     # neutralization -> counterintel
     ((right3_x + 0.02, 0.78, right3_x + 0.02, 0.75), True),
+    # event 8026 -> PW eco
+    ((left1_x, 0.565, right1_x - 0.01, 0.565), True),
     # PW eco -> recovery
     ((right1_x - 0.06, 0.55, right1_x - 0.06, 0.535), True),
     # free trade / mutual assist + just in time -> econ restruct

@@ -5,6 +5,7 @@ left2_x = 0.4
 left3_x = 0.61
 left4_x = 0.81
 
+
 invention_positions = {
     # Nuclear research
     8000: (left0_x + 0.01, 0.945),
@@ -63,4 +64,9 @@ invention_positions = {
     8028: (left4_x - 0.01, 0.675),
     # post-war submarines
     8027: (left4_x - 0.01, 0.445)
+}
+
+pw_invention_positions = {
+    # post-war economy
+    8026: (left1_x, 0.55)
 }
