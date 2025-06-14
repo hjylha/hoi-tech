@@ -83,24 +83,63 @@ def get_best_exploits_for_country(research, categories=(6, 8, 9), year_range=(19
         results_for_tech = []
         research.blueprints.add(tech_id)
         rs_impact = 2 * tech.get_research_speed_change()
-        min_time = 999_999
+        max_slope = 0
         for team in research.all_teams:
             if team.start_year > year_range[1] or team.end_year < year_range[0]:
                 continue
             days_to_research = research.calculate_how_many_days_to_complete(team, tech)
             rs_slope = round(rs_impact / days_to_research, 4)
             results_for_tech.append((rs_slope, tech_id, tech.name, team.name, days_to_research, team.start_year, team.end_year))
-            if days_to_research < min_time:
-                min_time = days_to_research
+            if rs_slope > max_slope:
+                max_slope = rs_slope
         results_for_tech = sorted(results_for_tech, key=lambda r: r[0], reverse=True)
         for row in results_for_tech:
-            if row[0] < 2 * min_time:
+            if row[0] > 0.5 * max_slope:
                 results.append(row)
+            else:
+                break
     return sorted(results, key=lambda r: r[0], reverse=True)
 
 
 def print_exploits(exploit_list):
     lengths = (8, 32, 25, 5, 4, 4)
+    directions = ("left", "left", "left", "right", "right", "right")
+    for row in exploit_list:
+        row_to_print = (row[0], f"{row[1]} {row[2]}", row[3], row[4], row[5], row[6])
+        print_row(row_to_print, lengths, directions)
+
+
+def get_best_approx_exploits_for_country(research, categories=(6, 8, 9), year_range=(1933, DEFAULT_END_YEAR), level=DEFAULT_LEVEL, difficulty=DEFAULT_DIFFICULTY):
+    diff_string = difficulty
+    research.change_difficulty(diff_string)
+    doctrine_ids = get_doctrines_to_check_for_exploits(research, categories, level)
+    results = []
+    for tech_id in doctrine_ids:
+        tech = research.techs[tech_id]
+        results_for_tech = []
+        research.blueprints.add(tech_id)
+        rs_impact = 2 * tech.get_research_speed_change()
+        max_slope = 0
+        for team in research.all_teams:
+            if team.start_year > year_range[1] or team.end_year < year_range[0]:
+                continue
+            time_comparison_value = research.calculate_approx_time_comparison_to_complete_tech(team, tech)
+            time_comparison_value = round(time_comparison_value, 4)
+            rs_slope = round(rs_impact / time_comparison_value, 4)
+            results_for_tech.append((rs_slope, tech_id, tech.name, team.name, time_comparison_value, team.start_year, team.end_year))
+            if rs_slope > max_slope:
+                max_slope = rs_slope
+        results_for_tech = sorted(results_for_tech, key=lambda r: r[0], reverse=True)
+        for row in results_for_tech:
+            if row[0] > 0.5 * max_slope:
+                results.append(row)
+            else:
+                break
+    return sorted(results, key=lambda r: r[0], reverse=True)
+
+
+def print_approx_exploits(exploit_list):
+    lengths = (8, 32, 25, 6, 4, 4)
     directions = ("left", "left", "left", "right", "right", "right")
     for row in exploit_list:
         row_to_print = (row[0], f"{row[1]} {row[2]}", row[3], row[4], row[5], row[6])
@@ -131,27 +170,49 @@ def run_exploit_test(num_to_show=DEFAULT_NUM_TO_SHOW):
 
     # difficulty = input(f"Difficulty (VE, E, N, H, VH) [default={DEFAULT_DIFFICULTY}]: ")
 
+    exact_calc_input = input("Use exact calculation? (Y/N) ")
+    if exact_calc_input.strip().lower() == "n":
+        exact_calc = False
+    else:
+        exact_calc = True
+
     research_speed = input(f"Research speed [default={r.research_speed}]: ")
     try:
         r.research_speed = int(research_speed)
     except ValueError:
         pass
 
+    if exact_calc:
+        res6 = get_best_exploits_for_country(r, categories=(6, ), year_range=(1933, end_year), level=requested_level)
+        res8 = get_best_exploits_for_country(r, categories=(8, ), year_range=(1933, end_year), level=requested_level)
+        res9 = get_best_exploits_for_country(r, categories=(9, ), year_range=(1933, end_year), level=requested_level)
 
-    res6 = get_best_exploits_for_country(r, categories=(6, ), year_range=(1933, end_year), level=requested_level)
-    res8 = get_best_exploits_for_country(r, categories=(8, ), year_range=(1933, end_year), level=requested_level)
-    res9 = get_best_exploits_for_country(r, categories=(9, ), year_range=(1933, end_year), level=requested_level)
+        print(f"Best land doctrine exploits for {cc}:")
+        print_exploits(res6[:num_to_show])
 
-    print(f"Best land doctrine exploits for {cc}:")
-    print_exploits(res6[:num_to_show])
+        print()
+        print(f"Best naval doctrine exploits for {cc}:")
+        print_exploits(res8[:num_to_show])
 
-    print()
-    print(f"Best naval doctrine exploits for {cc}:")
-    print_exploits(res8[:num_to_show])
+        print()
+        print(f"Best air doctrine exploits for {cc}:")
+        print_exploits(res9[:num_to_show])
+    else:
+        print("No exact calculation")
+        res6 = get_best_approx_exploits_for_country(r, categories=(6, ), year_range=(1933, end_year), level=requested_level)
+        res8 = get_best_approx_exploits_for_country(r, categories=(8, ), year_range=(1933, end_year), level=requested_level)
+        res9 = get_best_approx_exploits_for_country(r, categories=(9, ), year_range=(1933, end_year), level=requested_level)
 
-    print()
-    print(f"Best air doctrine exploits for {cc}:")
-    print_exploits(res9[:num_to_show])
+        print(f"Best land doctrine exploits for {cc}:")
+        print_approx_exploits(res6[:num_to_show])
+
+        print()
+        print(f"Best naval doctrine exploits for {cc}:")
+        print_approx_exploits(res8[:num_to_show])
+
+        print()
+        print(f"Best air doctrine exploits for {cc}:")
+        print_approx_exploits(res9[:num_to_show])
 
 
 # true random facts incoming
