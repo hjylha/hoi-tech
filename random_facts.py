@@ -298,10 +298,12 @@ def num_of_specilialites(techs):
     return specs
 
 
-def show_most_common_component_types(num_of_components=DEFAULT_NUM_TO_SHOW):
+def show_most_common_component_types(num_of_components=None):
     # specs = num_of_specilialites(shf.scan_techs())
     spec0 = sorted(list(num_of_specilialites(shf.scan_techs()).items()), key=lambda x: x[1], reverse=True)
     print("Most common component types among all technologies:")
+    if num_of_components is None:
+        num_of_components = len(spec0)
     for comp_type, num in spec0[:num_of_components]:
         print(f"{num} \t {comp_type}")
     return spec0[:num_of_components]
@@ -317,12 +319,36 @@ def sum_of_speciality_difficulties(techs, with_adjustment=1):
                 num_of_specs[component.type.lower()] = component.difficulty + 2 * with_adjustment
     return num_of_specs
 
-def show_sum_of_component_types(num_of_components=DEFAULT_NUM_TO_SHOW):
+def show_sum_of_component_types(num_of_components=None):
     spec1 = sorted(list(sum_of_speciality_difficulties(shf.scan_techs()).items()), key=lambda x: x[1], reverse=True)
     print(f"Component types with the largest sum of (adjusted) component difficulties:")
+    if num_of_components is None:
+        num_of_components = len(spec1)
     for comp_type, num in spec1[:num_of_components]:
         print(f"{num} \t {comp_type}")
     return spec1[:num_of_components]
+
+
+def get_most_common_specializations_in_teams():
+    teams = shf.scan_tech_teams()
+    dict_of_specializations = dict()
+    for team in teams:
+        for spec in team.specialities:
+            if dict_of_specializations.get(spec) is None:
+                dict_of_specializations[spec] = 1
+            else:
+                dict_of_specializations[spec] += 1
+    specs = [(spec, num) for spec, num in dict_of_specializations.items()]
+    return sorted(specs, key=lambda x: x[1], reverse=True)
+
+def show_most_common_specializations_in_teams(num_of_specialities=None):
+    specs = get_most_common_specializations_in_teams()
+    print(f"Specializations sorted based on how many tech teams have them:")
+    if num_of_specialities is None:
+        num_of_specialities = len(specs)
+    for comp_type, num in specs[:num_of_specialities]:
+        print(f"{num} \t {comp_type}")
+    return specs[:num_of_specialities]
 
 
 def sum_of_speciality_difficulties_for_team(team, sum_of_specs_overall):
@@ -391,8 +417,9 @@ def show_random_facts():
         (f"Show {DEFAULT_NUM_TO_SHOW} fastest teams to research all tech (with constant research speed {DEFAULT_RESEARCH_SPEED})", show_fastest_teams),
         (f"Show {DEFAULT_NUM_TO_SHOW} teams that should be fastest researching all tech (time ~= skill/difficulty)", show_ranked_teams),
         (f"Show {DEFAULT_NUM_TO_SHOW} technologies that are the slowest to research", show_slowest_tech),
-        (f"Show {DEFAULT_NUM_TO_SHOW} most common component types", show_most_common_component_types),
-        (f"Show {DEFAULT_NUM_TO_SHOW} most impactful component types (based on sum of component difficulties)", show_sum_of_component_types)
+        (f"Show most common component types", show_most_common_component_types),
+        (f"Show most impactful component types (based on sum of component difficulties)", show_sum_of_component_types),
+        (f"Show most common specializations that tech teams have", show_most_common_specializations_in_teams)
     ]
     choice = choose_random_fact([rf[0] for rf in random_facts])
     if choice is None:
