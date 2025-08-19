@@ -1,6 +1,8 @@
 
 import sys
+import random
 
+from read_hoi_files import get_country_names, get_save_game_path, read_txt_file
 import scan_hoi_files as shf
 from research import Research
 
@@ -10,6 +12,8 @@ DEFAULT_LEVEL = 3
 DEFAULT_DIFFICULTY = "VERYHARD"
 DEFAULT_RESEARCH_SPEED = 150
 DEFAULT_NUM_TO_SHOW = 20
+
+DEFAULT_SCENARIO = "1933"
 
 
 def format_string(s, length, direction="left"):
@@ -400,11 +404,36 @@ def show_random_facts():
     random_facts[choice][1]()
 
 
+def pick_random_countries(num_of_countries):
+    scenario_file_path = get_save_game_path().parent / f"{DEFAULT_SCENARIO}.eug"
+    scenario_dict = read_txt_file(scenario_file_path)
+    country_codes = scenario_dict["header"]["selectable"]
+    country_name_dict = get_country_names(country_codes)
+    # countries_to_choose_from = ["GER", "USA", "ENG"]
+    # countries_to_choose_from = country_codes
+    countries_to_choose_from = [country_name_dict[country_code] for country_code in country_codes]
+    if num_of_countries >= len(countries_to_choose_from):
+        return countries_to_choose_from
+    return random.sample(countries_to_choose_from, num_of_countries)
+
+def pick_and_show_random_countries(num_of_countries):
+    countries = pick_random_countries(num_of_countries)
+    print(f"Picked {num_of_countries} random countries from scenario {DEFAULT_SCENARIO}")
+    for i, country in enumerate(countries):
+        print(f"{i + 1}\t{country}")
+
 if __name__ == "__main__":
     try:
         if "exp" in sys.argv[1]:
             run_exploit_test()
         elif "rand" in sys.argv[1]:
             show_random_facts()
+        elif (num_of_countries := int(sys.argv[1])) > 0:
+            pick_and_show_random_countries(num_of_countries)
+            # countries = pick_random_countries(num_of_countries)
+            # for i, country in enumerate(countries):
+            #     print(f"{i + 1}\t{country}")
     except IndexError:
+        pass
+    except ValueError:
         pass
