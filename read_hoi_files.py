@@ -579,11 +579,11 @@ def get_tech_names():
     return tech_names
 
 
-def get_country_names():
+def get_country_names(country_codes=None):
     # aod_path = get_aod_path()
-
-    tech_team_files = get_tech_team_files(get_tech_path())
-    country_codes = [filepath.stem[-3:].upper() for filepath in tech_team_files]
+    if country_codes is None:
+        tech_team_files = get_tech_team_files(get_tech_path())
+        country_codes = [filepath.stem[-3:].upper() for filepath in tech_team_files]
 
     # country_names_path = aod_path / "config" / "world_names.csv"
     country_names_path = get_country_names_path()
