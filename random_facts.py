@@ -418,7 +418,10 @@ def pick_random_countries(num_of_countries):
 
 def pick_and_show_random_countries(num_of_countries):
     countries = pick_random_countries(num_of_countries)
-    print(f"Picked {num_of_countries} random countries from scenario {DEFAULT_SCENARIO}")
+    the_one_word_that_can_change = "countries"
+    if num_of_countries == 1:
+        the_one_word_that_can_change = "country"
+    print(f"Picked {num_of_countries} random {the_one_word_that_can_change} from scenario {DEFAULT_SCENARIO}")
     for i, country in enumerate(countries):
         print(f"{i + 1}\t{country}")
 
