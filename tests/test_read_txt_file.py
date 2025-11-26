@@ -31,7 +31,8 @@ def txt_file_content2():
     }
     layer1 = {
         "key1": [3, 5],
-        "key2": ["a", "b", "c"]
+        "key2": ["a", "b", "c"],
+        "key3": []
     }
     content["layer0"]["layer1"] = layer1
     return content
@@ -53,12 +54,17 @@ def txt_file_content3():
     content["layer0"]["layer1"] = layer1
     return content
 
+
 @pytest.fixture
 def txt_file_content_list0():
-    return [[1, 2, 3, 4], [5, 6, 7, 8]]
+    return []
 
 @pytest.fixture
 def txt_file_content_list1():
+    return [[1, 2, 3, 4], [5, 6, 7, 8]]
+
+@pytest.fixture
+def txt_file_content_list2():
     dict1 = {
         "key1": "normal value",
         "key2": 2,
@@ -230,3 +236,10 @@ def test_read_txt_file_list1(txt_file_content_list1):
     content = rhf.read_txt_file(test_txt_file_path)
     assert isinstance(content, list)
     assert content == txt_file_content_list1
+
+def test_read_txt_file_list2(txt_file_content_list2):
+    test_txt_file_path = Path(__file__).parent / "txt_file_for_testing_list2.txt"
+    assert test_txt_file_path.exists()
+    content = rhf.read_txt_file(test_txt_file_path)
+    assert isinstance(content, list)
+    assert content == txt_file_content_list2

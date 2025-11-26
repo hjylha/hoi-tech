@@ -202,7 +202,9 @@ def read_inside_brackets(opened_file, current_line):
         item, current_line = get_first_item_from_text(current_line)
         if item == "}":
             if not current_list_or_dict:
-                return [[previous_item], current_line]
+                if previous_item is not None:
+                    return [[previous_item], current_line]
+                return [[], current_line]
             # if previous_item == "}" or previous_key is not None:
             return [current_list_or_dict, current_line]
 
@@ -212,7 +214,8 @@ def read_inside_brackets(opened_file, current_line):
             #     current_list_or_dict.append(new_object)
             previous_item = "}"
             if previous_key is None:
-                current_list_or_dict.append(new_object)
+                if new_object is not None:
+                    current_list_or_dict.append(new_object)
                 continue
             
             num_of_values_for_key = key_value_counts.get(previous_key)

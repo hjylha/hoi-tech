@@ -1,0 +1,11 @@
+{{key1 = "normal value" key2=2
+key3 = 3.14}
+{
+    key1="not normal"
+    key2
+    =
+    1
+    key3=
+    3.14
+}
+}
