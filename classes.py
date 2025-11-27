@@ -222,11 +222,14 @@ class Tech:
 
 
 class TechTeam:
+    MIN_SKILL = 1
+    MAX_SKILL = 10
+
     def __init__(self, team_id, team_name, team_nation, skill, start_year, end_year, specialities, pic_path=None):
         self.team_id = team_id
         self.name = team_name
         self.nation = team_nation
-        self.skill = skill
+        self.skill = max(min(skill, self.MAX_SKILL), self.MIN_SKILL)
         self.start_year = start_year
         self.end_year = end_year
         self.specialities = specialities
