@@ -1,5 +1,5 @@
 
-from read_hoi_files import get_tech_path, get_tech_files, get_tech_team_files, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path
+from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path, get_tech_files, get_tech_team_files
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
