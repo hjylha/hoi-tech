@@ -72,6 +72,11 @@ def test_get_difficulty_path(aod_path):
         assert fp.get_difficulty_path().exists()
 
 
+def test_get_ministers_folder_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_ministers_folder_path().exists()
+
+
 def test_get_minister_modifier_path(aod_path):
     if aod_path.exists():
         assert fp.get_minister_modifier_path().exists()
@@ -86,6 +91,13 @@ def test_get_ministers_path(aod_path):
     if aod_path.exists():
         for code in ("AFG", "ENG", "FIN", "ITA", "SOV", "USA"):
             assert fp.get_ministers_path(code).exists()
+
+
+def test_get_ministers_files(aod_path):
+    if aod_path.exists():
+        ministers_folder_path = fp.get_ministers_folder_path()
+        uk_ministers = ministers_folder_path / "ministers_eng.csv"
+        assert uk_ministers in fp.get_ministers_files()
 
 
 def test_get_policies_path(aod_path):
@@ -121,3 +133,9 @@ def test_get_idea_titles_path(aod_path):
 def test_get_save_game_path(aod_path):
     if aod_path.exists():
         assert fp.get_save_game_path().exists()
+
+
+def test_get_scenarios(aod_path):
+    if aod_path.exists():
+        default_scenario_path = fp.get_scenarios_folder_path() / fp.DEFAULT_SCENARIO
+        assert default_scenario_path in fp.get_scenarios()

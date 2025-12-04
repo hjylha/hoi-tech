@@ -8,6 +8,8 @@ gamepath_in = "aod_path.txt"
 gamepath_in_linux = "aod_path_linux.txt"
 scenario_file_paths_file = "scenario_file_paths.csv"
 
+DEFAULT_SCENARIO = "1933.eug"
+
 
 
 def get_aod_path():
@@ -58,14 +60,20 @@ def get_misc_path():
 def get_difficulty_path():
     return get_db_folder_path() / "difficulty.csv"
 
+def get_ministers_folder_path():
+    return get_db_folder_path() / "ministers"
+
 def get_minister_modifier_path():
-    return get_db_folder_path() / "ministers" / "minister_modifiers.txt"
+    return get_ministers_folder_path() / "minister_modifiers.txt"
 
 def get_ideas_path():
     return get_db_folder_path() / "ideas" / "ideas.txt"
 
 def get_ministers_path(country_code):
-    return get_db_folder_path() / "ministers" / f"ministers_{country_code.lower()}.csv"
+    return get_ministers_folder_path() / f"ministers_{country_code.lower()}.csv"
+
+def get_ministers_files():
+    return get_ministers_folder_path().glob("ministers_*.csv")
 
 def get_policies_path():
     return get_db_folder_path() / "province_rev.inc"
@@ -91,3 +99,7 @@ def get_save_game_path():
 def get_save_games():
     save_game_folder = get_save_game_path()
     return save_game_folder.glob("*.eug")
+
+def get_scenarios():
+    scenario_folder = get_scenarios_folder_path()
+    return scenario_folder.glob("*.eug")
