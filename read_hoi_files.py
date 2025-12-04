@@ -5,6 +5,8 @@ import file_paths as fp
 import read_files as rf
 
 
+DEFAULT_SCENARIO = "1933.eug"
+
 the_encoding = "utf-8"
 text_encoding = "ISO-8859-1"
 csv_encoding = "cp1252"
@@ -288,3 +290,37 @@ def read_savefile_for_research_order(savefilepath):
         tech = tech.strip(" '.")
         tech_n_team_n_time.append((tech, team, time))
     return tech_n_team_n_time
+
+
+# countries_file should have rows of form
+# scenario_name;country_tag;country_name;tech_teams_filepath;ministers_filepath;country_inc_filepath
+def write_countries_file(countries_data):
+    pass
+
+
+def read_scenario_file_for_events(scenario_file_name):
+    event_file_paths = []
+    aod_path = get_aod_path()
+    scenario_file_path = aod_path / "scenarios" / scenario_file_name
+    scenario_dict = read_txt_file(scenario_file_path)
+    event_key = "event"
+    include_key = "include"
+    if isinstance(scenario_dict[event_key], str):
+        event_file_path = aod_path / scenario_dict[event_key].replace("\\", "/")
+        if event_file_path.exists():
+            event_file_paths.append(event_file_path)
+    if isinstance(scenario_dict[event_key], list):
+        for event_file_path_str in scenario_dict[event_key]:
+            event_file_path = aod_path / event_file_path_str.replace("\\", "/")
+            if event_file_path.exists():
+                event_file_paths.append(event_file_path)
+    for path_str in scenario_dict[include_key]:
+        if event_key in path_str:
+            include_event_file_path = aod_path / path_str.replace("\\", "/")
+            if include_event_file_path.exists():
+                included_dict = read_txt_file(include_event_file_path)
+                for event_file_path_str in included_dict[event_key]:
+                    event_file_path = aod_path / event_file_path_str.replace("\\", "/")
+                    if event_file_path.exists():
+                        event_file_paths.append(event_file_path)
+    return event_file_paths
