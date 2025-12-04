@@ -17,11 +17,17 @@ def get_aod_path():
     with open(this_files_directory / gamepath_in_linux, "r") as f:
         return Path(f.read().strip())
 
+def get_db_folder_path():
+    return get_aod_path() / "db"
+
+def get_config_folder_path():
+    return get_aod_path() / "config"
+
+def get_scenarios_folder_path():
+    return get_aod_path() / "scenarios"
 
 def get_tech_path():
-    aod_path = get_aod_path()
-    tech_path = aod_path / "db" / "tech"
-    return tech_path
+    return get_db_folder_path() / "tech"
 
 
 def get_tech_files(tech_path):
@@ -33,9 +39,9 @@ def get_tech_team_files(tech_path):
     return tech_team_path.glob("teams*.csv")
 
 def get_scenario_paths():
-    aod_path = get_aod_path()
-    scenario33_path = aod_path / "scenarios" / "1933"
-    scenario34_path = aod_path / "scenarios" / "1934"
+    scenario_folder_path = get_scenarios_folder_path()
+    scenario33_path = scenario_folder_path / "1933"
+    scenario34_path = scenario_folder_path / "1934"
     return [scenario33_path, scenario34_path]
 
 # this is not always correct
@@ -47,52 +53,40 @@ def get_scenario_path_for_country(country_code):
             return possible_path
 
 def get_misc_path():
-    aod_path = get_aod_path()
-    return aod_path / "db" / "misc.txt"
+    return get_db_folder_path() / "misc.txt"
 
 def get_difficulty_path():
-    aod_path = get_aod_path()
-    return aod_path / "db" / "difficulty.csv"
+    return get_db_folder_path() / "difficulty.csv"
 
 def get_minister_modifier_path():
-    aod_path = get_aod_path()
-    return aod_path / "db" / "ministers" / "minister_modifiers.txt"
+    return get_db_folder_path() / "ministers" / "minister_modifiers.txt"
 
 def get_ideas_path():
-    aod_path = get_aod_path()
-    return aod_path / "db" / "ideas" / "ideas.txt"
+    return get_db_folder_path() / "ideas" / "ideas.txt"
 
 def get_ministers_path(country_code):
-    aod_path = get_aod_path()
-    return aod_path / "db" / "ministers" / f"ministers_{country_code.lower()}.csv"
+    return get_db_folder_path() / "ministers" / f"ministers_{country_code.lower()}.csv"
 
 def get_policies_path():
-    aod_path = get_aod_path()
-    return aod_path / "db" / "province_rev.inc"
+    return get_db_folder_path() / "province_rev.inc"
 
 def get_tech_names_path():
-    aod_path = get_aod_path()
-    return aod_path / "config" / "tech_names.csv"
+    return get_config_folder_path() / "tech_names.csv"
 
 def get_country_names_path():
-    aod_path = get_aod_path()
-    return aod_path / "config" / "world_names.csv"
+    return get_config_folder_path() / "world_names.csv"
 
 def get_policy_names_path():
-    aod_path = get_aod_path()
-    return aod_path / "config" / "new_text.csv"
+    return get_config_folder_path() / "new_text.csv"
 
 def get_government_titles_path():
-    aod_path = get_aod_path()
-    return aod_path / "config" / "text.csv"
+    return get_config_folder_path() / "text.csv"
 
 def get_idea_titles_path():
-    aod_path = get_aod_path()
-    return aod_path / "config" / "boostertext.csv"
+    return get_config_folder_path() / "boostertext.csv"
 
 def get_save_game_path():
-    aod_path = get_aod_path()
-    return aod_path / "scenarios" / "save games"
+    return get_scenarios_folder_path() / "save games"
 
 def get_save_games():
     save_game_folder = get_save_game_path()

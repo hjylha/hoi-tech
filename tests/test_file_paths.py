@@ -9,10 +9,44 @@ import file_paths as fp
 def aod_path():
     return fp.get_aod_path()
 
+def test_get_aod_path(aod_path):
+    assert aod_path.exists()
+
+
+def test_get_db_folder_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_db_folder_path().exists()
+
+
+def test_get_config_folder_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_config_folder_path().exists()
+
+
+def test_get_scenarios_folder_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_scenarios_folder_path().exists()
+
 
 def test_get_tech_path(aod_path):
     if aod_path.exists():
         assert fp.get_tech_path().exists()
+
+
+def test_get_tech_files(aod_path):
+    if aod_path.exists():
+        tech_path = fp.get_tech_path()
+        industry_tech_path = tech_path / "industry_tech.txt"
+        tech_files = fp.get_tech_files(tech_path)
+        assert industry_tech_path in tech_files
+
+
+def test_get_tech_team_files(aod_path):
+    if aod_path.exists():
+        tech_path = fp.get_tech_path()
+        uk_tech_teams_path = tech_path / "teams" / "teams_eng.csv"
+        tech_team_files = fp.get_tech_team_files(tech_path)
+        assert uk_tech_teams_path in tech_team_files
 
 
 def test_get_scenario_paths(aod_path):
