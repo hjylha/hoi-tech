@@ -300,7 +300,7 @@ def write_countries_file(countries_data):
 
 def read_scenario_file_for_events(scenario_file_name):
     event_file_paths = []
-    aod_path = get_aod_path()
+    aod_path = fp.get_aod_path()
     scenario_file_path = aod_path / "scenarios" / scenario_file_name
     scenario_dict = read_txt_file(scenario_file_path)
     event_key = "event"
