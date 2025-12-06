@@ -16,17 +16,39 @@ csv_encoding = "cp1252"
 def read_name_file(filepath, language="English", encoding=text_encoding):
     names = dict()
     with open(filepath, "r", encoding = encoding) as f:
-        for i, line in enumerate(f):
-            if i == 0:
-                language_index = line.split(";").index(language)
-                continue
+        language_index = 1
+        language_confirmed = False
+        new_line = f.readline()
+        while new_line:
+            line = new_line.strip()
+            if not language_confirmed:
+                try:
+                    language_index = line.split(";").index(language)
+                    language_confirmed = True
+                    new_line = f.readline()
+                    continue
+                except ValueError:
+                    pass
             clean_line = line.split("#")[0].strip()
             if not clean_line:
+                new_line = f.readline()
                 continue
-            # key, name = clean_line[0], clean_line[language_index]
-            names[clean_line[0]] = clean_line[language_index]
+            items = clean_line.split(";")
+            names[items[0]] = items[language_index]
+            new_line = f.readline()
+
+        # for i, line in enumerate(f):
+        #     if i == 0:
+        #         language_index = line.split(";").index(language)
+        #         continue
+        #     clean_line = line.split("#")[0].strip()
+        #     if not clean_line:
+        #         continue
+        #     # key, name = clean_line[0], clean_line[language_index]
+        #     names[clean_line[0]] = clean_line[language_index]
     return names
 
+# TODO: FIX
 def read_names_from_file(search_terms, filepath, language="English", encoding=text_encoding):
     names = dict()
     with open(filepath, "r", encoding = encoding) as f:
@@ -298,10 +320,9 @@ def write_countries_file(countries_data):
     pass
 
 
-def read_scenario_file_for_events(scenario_file_name):
+def read_scenario_file_for_events(scenario_file_name, aod_path):
     event_file_paths = []
-    aod_path = fp.get_aod_path()
-    scenario_file_path = aod_path / "scenarios" / scenario_file_name
+    scenario_file_path = fp.get_scenarios_folder_path(aod_path) / scenario_file_name
     scenario_dict = read_txt_file(scenario_file_path)
     event_key = "event"
     include_key = "include"
@@ -324,3 +345,18 @@ def read_scenario_file_for_events(scenario_file_name):
                     if event_file_path.exists():
                         event_file_paths.append(event_file_path)
     return event_file_paths
+
+
+def get_texts_from_files(list_of_filepaths):
+    text_dict = dict()
+    for filepath in list_of_filepaths:
+        texts = read_name_file(filepath)
+        for key, text in texts.items():
+            text_dict[key] = text
+    return text_dict
+
+
+def get_event_texts(list_of_keys):
+    event_dict = dict()
+
+    return event_dict
