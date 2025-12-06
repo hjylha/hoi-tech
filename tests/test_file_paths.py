@@ -130,6 +130,13 @@ def test_get_idea_titles_path(aod_path):
         assert fp.get_idea_titles_path(aod_path).exists()
 
 
+def test_get_event_text_paths(aod_path):
+    if aod_path.exists():
+        paths = fp.get_event_text_paths(aod_path)
+        for filepath in paths:
+            assert filepath.exists()
+
+
 def test_get_save_game_path(aod_path):
     if aod_path.exists():
         assert fp.get_save_game_path(aod_path).exists()

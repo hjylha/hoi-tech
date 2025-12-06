@@ -95,6 +95,18 @@ def get_government_titles_path(aod_path=AOD_PATH):
 def get_idea_titles_path(aod_path=AOD_PATH):
     return get_config_folder_path(aod_path) / "boostertext.csv"
 
+def get_event_text_paths(aod_path=AOD_PATH):
+    config_path = get_config_folder_path(aod_path)
+    return [
+        config_path / "doomsdaytext.csv",
+        config_path / "event_text.csv",
+        config_path / "boostertext.csv",
+        config_path / "modtext.csv",
+        config_path / "new_text.csv",
+        config_path / "extra_text.csv",
+        config_path / "Additional" / "addon.csv"
+    ]
+
 def get_save_game_path(aod_path=AOD_PATH):
     return get_scenarios_folder_path(aod_path) / "save games"
 
