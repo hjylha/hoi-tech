@@ -26,10 +26,12 @@ def get_event_list(scenario_name, aod_path, show_empty_files=False):
     return event_list
 
 
-def get_event_dict(event_list, aod_path):    
-    event_text_files = get_event_text_paths(aod_path)
-    event_text_dict = get_texts_from_files(event_text_files)
+def get_event_dict(event_list, event_text_dict):    
+    # event_text_files = get_event_text_paths(aod_path)
+    # event_text_dict = get_texts_from_files(event_text_files)
+    missing_texts = [[], [], []]
 
+    id_key = "id"
     name = "name"
     desc = "desc"
     for event in event_list:
@@ -38,11 +40,15 @@ def get_event_dict(event_list, aod_path):
             actual_name = event_text_dict.get(name_key)
             if actual_name is not None:
                 event[name] = actual_name
+            else:
+                missing_texts[0].append(event[id_key])
         desc_key = event.get(desc)
         if desc_key is not None:
             actual_desc = event_text_dict.get(desc_key)
             if actual_desc is not None:
                 event[desc] = actual_desc
+            else:
+                missing_texts[1].append(event[id_key])
         letters = "abcde"
         for i, letter in enumerate(letters):
             key = f"action_{letter}"
@@ -56,7 +62,9 @@ def get_event_dict(event_list, aod_path):
                     actual_action_name = event_text_dict.get(action_name_key)
                     if actual_action_name is not None:
                         event[key][name] = actual_action_name
-
+                    else:
+                        if event[id_key] not in missing_texts[2]:
+                            missing_texts[2].append(event[id_key])
 
     event_dict = dict()
     for event in event_list:
@@ -65,7 +73,26 @@ def get_event_dict(event_list, aod_path):
             print(f"duplicate event id: {event_id}")
             continue
         event_dict[event_id] = event
-    return event_dict
+    return event_dict, missing_texts
+
+
+def suggest_events(search_text, event_dict, max_num_of_suggestions=9):
+    try:
+        event_id = int(search_text)
+        if event_dict.get(event_id) is not None:
+            return [event_dict[event_id]]
+    except ValueError:
+        pass
+    starts = []
+    other = []
+    for event_id, event in event_dict.items():
+        if event["name"].lower().startswith(search_text.lower()):
+            starts.append(event)
+            continue
+        if search_text.lower() in event["name"].lower():
+            other.append(event)
+    suggestions = starts + other
+    return suggestions[:max_num_of_suggestions]
 
 
 if __name__ == "__main__":
@@ -73,28 +100,24 @@ if __name__ == "__main__":
     event_text_files = get_event_text_paths(AOD_PATH)
     texts = get_texts_from_files(event_text_files)
     event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
-    event_dict = get_event_dict(event_list, AOD_PATH)
-    ed = dict()
-    for event in event_list:
-        event_id = event["id"]
-        if ed.get(event_id) is not None:
-            print(f"duplicate event id: {event_id}")
-            continue
-        ed[event_id] = event
-    name = "name"
-    desc = "desc"
-    for event in event_list:
-        name_key = event.get(name)
-        if name_key is not None:
-            actual_name = texts.get(name_key)
-            if actual_name is not None:
-                event[name] = actual_name
-        desc_key = event.get(desc)
-        if desc_key is not None:
-            actual_desc = texts.get(desc_key)
-            if actual_desc is not None:
-                event[desc] = actual_desc
+    event_dict, missing_texts = get_event_dict(event_list, texts)
+    no_name, no_desc, no_action = missing_texts
 
     bad_event_ids = [308008, 336154]
     double_action = [319021]
+
+    ask_to_search = True
+    while ask_to_search:
+        text_input = input("Enter search term:\n")
+        if not text_input:
+            break
+        suggestions = suggest_events(text_input, event_dict)
+        for event in suggestions:
+            country_code = event.get("country")
+            country_code = country_code.upper() if country_code else ""
+            print(f"{event["id"]} [{country_code}]: {event["name"]}")
+        print()
+        # continue_q = input("Do you want to search again? ")
+        # if not continue_q.strip().lower().startswith("y"):
+        #     ask_to_search = False
     
