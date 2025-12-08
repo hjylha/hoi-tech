@@ -1,6 +1,6 @@
 
 from file_paths import AOD_PATH, get_event_text_paths
-from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files
+from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -35,6 +35,8 @@ def get_event_dict(event_list, event_text_dict):
     name = "name"
     desc = "desc"
     for event in event_list:
+        if not event.get("trigger"):
+            event["trigger"] = dict()
         name_key = event.get(name)
         if name_key is not None:
             actual_name = event_text_dict.get(name_key)
@@ -97,6 +99,7 @@ def suggest_events(search_text, event_dict, max_num_of_suggestions=9):
 
 if __name__ == "__main__":
     SCENARIO_NAME = "1933.eug"
+    country_dict = get_country_names()
     event_text_files = get_event_text_paths(AOD_PATH)
     texts = get_texts_from_files(event_text_files)
     event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
@@ -112,10 +115,38 @@ if __name__ == "__main__":
         if not text_input:
             break
         suggestions = suggest_events(text_input, event_dict)
-        for event in suggestions:
-            country_code = event.get("country")
+        print()
+        if not suggestions:
+            print("No matching events found.")
+        elif len(suggestions) == 1:
+            ev = suggestions[0]
+            print(f"{ev["id"]}: {ev["name"]}")
+            country_code = ev.get("country")
             country_code = country_code.upper() if country_code else ""
-            print(f"{event["id"]} [{country_code}]: {event["name"]}")
+            country = country_dict.get(country_code)
+            if country:
+                print(f"Country: {country}")
+            is_invention = ev.get("invention")
+            is_invention = is_invention if is_invention else "no"
+            if is_invention.lower() == "yes":
+                print("invention event")
+
+            is_random = ev.get("random")
+            is_random = is_random if is_random else "no"
+            if is_random.lower() == "yes":
+                print("random event")
+            
+            path_str = str(ev["path"])[len(str(AOD_PATH)):]
+            print(f"In file: {path_str}")
+
+            desc = ev.get("desc")
+            if desc:
+                print(desc)
+        else:
+            for event in suggestions:
+                country_code = event.get("country")
+                country_code = country_code.upper() if country_code else ""
+                print(f"{event["id"]} [{country_code}]: {event["name"]}")
         print()
         # continue_q = input("Do you want to search again? ")
         # if not continue_q.strip().lower().startswith("y"):
