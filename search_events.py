@@ -112,7 +112,7 @@ def scan_events(scenario_name, aod_path):
         for key in action_keys:
             action = event[key]
             if isinstance(action, list):
-                notes += f"key is a list"
+                notes += f"{key} is a list"
                 for act in action:
                     actions.append(act)
                 continue
@@ -131,7 +131,7 @@ def scan_events(scenario_name, aod_path):
         is_persistent = True if is_persistent_str.lower() == "yes" else False
 
         country_code = event.get("country")
-        country_code = "" if country_code is None else country_code
+        country_code = "" if country_code is None else country_code.upper()
 
         country = country_dict.get(country_code)
         country = "" if country is None else country
