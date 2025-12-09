@@ -1,6 +1,7 @@
 
 from file_paths import AOD_PATH, get_event_text_paths
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names
+from classes import Event
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -76,6 +77,103 @@ def get_event_dict(event_list, event_text_dict):
             continue
         event_dict[event_id] = event
     return event_dict, missing_texts
+
+
+def scan_events(scenario_name, aod_path):
+    event_list = get_event_list(scenario_name, aod_path)
+    event_text_dict = get_texts_from_files(get_event_text_paths(AOD_PATH))
+    country_dict = get_country_names()
+
+    event_dict = dict()
+    for event in event_list:
+
+        notes = ""
+
+        trigger = event.get("trigger")
+        if trigger is None or not trigger:
+            trigger = dict()
+        # TODO: Trigger class?
+        name = event_text_dict.get(event["name"])
+        name = "" if name is None else name
+
+        desc_key = event.get("desc")
+        desc_key = "" if desc_key is None else desc_key
+        desc = event_text_dict.get(desc_key)
+        desc = "" if desc is None else desc
+
+        actions = []
+        action_keys = []
+        for key in event.keys():
+            if "action" in key:
+                action_keys.append(key)
+        action_keys = sorted(action_keys)
+        if "action_a" not in action_keys:
+            notes += "action_a not a key\n"
+        for key in action_keys:
+            action = event[key]
+            if isinstance(action, list):
+                notes += f"key is a list"
+                for act in action:
+                    actions.append(act)
+                continue
+            actions.append(action)
+
+        is_random_str = event.get("random")
+        is_random_str = "no" if not is_random_str else is_random_str
+        is_random = True if is_random_str.lower() == "yes" else False
+
+        is_invention_str = event.get("invention")
+        is_invention_str = "no" if not is_invention_str else is_invention_str
+        is_invention = True if is_invention_str.lower() == "yes" else False
+
+        is_persistent_str = event.get("persistent")
+        is_persistent_str = "no" if not is_persistent_str else is_persistent_str
+        is_persistent = True if is_persistent_str.lower() == "yes" else False
+
+        country_code = event.get("country")
+        country_code = "" if country_code is None else country_code
+
+        country = country_dict.get(country_code)
+        country = "" if country is None else country
+
+        date = event.get("date")
+        date = dict() if date is None else date
+
+        offset = event.get("offset")
+
+        death_date = event.get("deathdate")
+        death_date = dict() if death_date is None else death_date
+
+        picture = event.get("picture")
+        picture = "" if picture is None else picture
+
+        style = event.get("style")
+        style = "" if style is None else style
+        
+        proper_event = Event(
+            event["path"],
+            event["id"],
+            event["name"],
+            name,
+            actions,
+            is_random,
+            is_invention,
+            country_code,
+            country,
+            trigger,
+            desc_key, 
+            desc,
+            style,
+            picture,
+            date,
+            offset,
+            death_date,
+            is_persistent,
+            notes
+        )
+        event_dict[event["id"]] = proper_event
+
+    return event_dict
 
 
 def suggest_events(search_text, event_dict, max_num_of_suggestions=9):
