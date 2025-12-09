@@ -92,6 +92,15 @@ class HoITime:
         self.date += 1
 
 
+class Trigger:
+
+    def __init__(self, trigger_dict):
+        pass
+
+    def print_trigger(self):
+        pass
+
+
 # just some approximate value to use in time = difficulty / skill
 def get_approx_difficulty(tech_difficulty, research_speed_modifier, total_extra_bonus):
     return (tech_difficulty + 2) * (1 - 0.01 * total_extra_bonus) / research_speed_modifier
@@ -519,3 +528,92 @@ class Idea(MinisterOrIdea):
 
 # class NationalCulture(Idea):
 #     pass
+
+
+class Event:
+    EVENT_KEYS = [
+        "id",
+        "random",
+        "invention",
+        "country",
+        "trigger",
+        "name",
+        "desc",
+        "style",
+        "date",
+        "offset",
+        "deathdate",
+        "persistent",
+        "picture",
+        "action_a",
+        "action_b",
+        "action_c",
+        "action_d",
+        "action_e"
+    ]
+
+    def __init__(
+        self,
+        filepath,
+        event_id,
+        name_key,
+        name,
+        actions,
+        is_random=False,
+        is_invention=False,
+        country_code=None,
+        country=None,
+        trigger=None,
+        desc_key=None,
+        description="",
+        style=0,
+        picture="",
+        date=None,
+        offset=None,
+        deathdate=None,
+        is_persistent=False,
+        notes=""
+    ):
+        self.event_id = event_id
+        self.filepath = filepath
+        self.name_key = name_key
+        self.name = name
+        self.desc_key = desc_key
+        self.description = description
+
+        self.country_code = country_code
+        self.country = country
+
+        self.is_random = is_random
+        self.is_invention = is_invention
+        self.is_persistent = is_persistent
+
+        self.trigger = trigger
+
+        self.date = date
+        self.offset = offset
+        self.deathdate = deathdate
+
+        self.actions = actions
+
+        self.notes = notes
+
+        self.style = style
+        self.picture = picture
+    
+    def __str__(self):
+        return f"{self.event_id} [{self.country_code}]: {self.name}"
+
+    def print_event(self):
+        print(f"{self.event_id}: {self.name}")
+        if self.country:
+            print(f"Country: {self.country}")
+        if self.is_invention:
+            print("Invention event")
+        if self.is_random:
+            print("Random event")
+
+        print()
+        print("Description:")
+        print(self.description)
+
