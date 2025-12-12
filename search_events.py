@@ -102,6 +102,7 @@ def scan_events(scenario_name, aod_path):
         desc = "" if desc is None else desc
 
         actions = []
+        # TODO: Action class
         action_keys = []
         for key in event.keys():
             if "action" in key:
@@ -183,15 +184,37 @@ def suggest_events(search_text, event_dict, max_num_of_suggestions=9):
             return [event_dict[event_id]]
     except ValueError:
         pass
-    starts = []
-    other = []
+    search_text = search_text.lower()
+    name_starts = []
+    name_other = []
+    desc_starts = []
+    desc_other = []
+    action_things = []
     for event_id, event in event_dict.items():
-        if event["name"].lower().startswith(search_text.lower()):
-            starts.append(event)
+        if event["name"].lower().startswith(search_text):
+            name_starts.append(event)
             continue
-        if search_text.lower() in event["name"].lower():
-            other.append(event)
-    suggestions = starts + other
+        if search_text in event["name"].lower():
+            name_other.append(event)
+            continue
+        if event.get("desc") is None:
+            continue
+        if event["desc"].lower().startswith(search_text):
+            desc_starts.append(event)
+            continue
+        if search_text in event["desc"].lower():
+            desc_other.append(event)
+            continue
+        action_keys = [key for key in event.keys() if "action" in key]
+        for key in action_keys:
+            name = event[key].get("name")
+            if name is None:
+                continue
+            if search_text in name.lower():
+                action_things.append(event)
+                break
+    suggestions = name_starts + name_other + desc_starts + desc_other + action_things
+    
     return suggestions[:max_num_of_suggestions]
 
 
@@ -217,8 +240,10 @@ if __name__ == "__main__":
         if not suggestions:
             print("No matching events found.")
         elif len(suggestions) == 1:
+            indent_num = 2
+            # indent = "  "
             ev = suggestions[0]
-            print(f"{ev["id"]}: {ev["name"]}")
+            print(f"\n{ev["id"]}: {ev["name"]}")
             country_code = ev.get("country")
             country_code = country_code.upper() if country_code else ""
             country = country_dict.get(country_code)
@@ -234,18 +259,68 @@ if __name__ == "__main__":
             if is_random.lower() == "yes":
                 print("random event")
             
-            path_str = str(ev["path"])[len(str(AOD_PATH)):]
+            path_str = str(ev["path"])[len(str(AOD_PATH)) + 1:]
             print(f"In file: {path_str}")
+
+            if ev.get("trigger") is not None:
+                print("\nTrigger:")
+                trigger = ev["trigger"]
+                if not trigger:
+                    print(indent_num * " ", "-")
+                else:
+                    if isinstance(trigger, dict):
+                        for key, item in trigger.items():
+                            if key.upper() in ["NOT", "AND", "OR"]:
+                                print(indent_num * " ", key.upper())
+                                indent_num += 2
+                                if isinstance(item, dict):
+                                    for k, it in item.items():
+                                        print(indent_num * " ", k, "=", it)
+                                elif isinstance(item, list):
+                                    for it in item:
+                                        print(indent_num * " ", it)
+                                indent_num -= 2
+                            continue
+                            print(indent_num * " ", key, "=", item)
+                    elif isinstance(trigger, list):
+                        for item in trigger:
+                            print(indent_num * " ", item)
+                    else:
+                        print(f"PROBLEM: trigger is of type {type(trigger)}")
+                print()
+
+            if ev.get("date") is not None:
+                print("Date:")
+                print(ev["date"]["day"], ev["date"]["month"], ev["date"]["year"])
+            if ev.get("offset") is not None:
+                print(f"Offset: {ev['offset']}")
+            if ev.get("deathdate") is not None:
+                print("Deathdate:")
+                print(ev["deathdate"]["day"], ev["deathdate"]["month"], ev["deathdate"]["year"])
+            persistence = ev.get("persistent")
+            if persistence is not None and persistence.lower() == "yes":
+                print("persistent event")
 
             desc = ev.get("desc")
             if desc:
+                print()
                 print(desc)
+            
+            print("\nActions:")
+            action_keys = [key for key in ev.keys() if "action" in key]
+            for i, action in enumerate(action_keys):
+                if ev[action].get("name") is not None:
+                    num_of_effects = 0
+                    print(indent_num * " ", f"{i + 1}.", ev[action].get("name"))
+                    effects = ev[action].get("command")
+                    if effects is not None:
+                        print((indent_num + 2) * " ", len(effects), "effects")
         else:
             for event in suggestions:
                 country_code = event.get("country")
                 country_code = country_code.upper() if country_code else ""
                 print(f"{event["id"]} [{country_code}]: {event["name"]}")
-        print()
+        print("\n")
         # continue_q = input("Do you want to search again? ")
         # if not continue_q.strip().lower().startswith("y"):
         #     ask_to_search = False
