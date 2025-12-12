@@ -2,7 +2,8 @@
 import sys
 import random
 
-from read_hoi_files import get_country_names, get_save_game_path, read_txt_file
+from file_paths import get_save_game_path
+from read_hoi_files import get_country_names, read_txt_file
 import scan_hoi_files as shf
 from research import Research
 
