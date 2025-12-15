@@ -1,7 +1,7 @@
 
 from file_paths import AOD_PATH, get_event_text_paths
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names
-from classes import get_actions, Event
+from classes import Trigger, get_actions, Event, suggest_events_based_on_search_words
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -170,7 +170,7 @@ def scan_events(scenario_name, aod_path):
             is_invention,
             country_code,
             country,
-            trigger,
+            Trigger(trigger),
             desc_key, 
             desc,
             style,
@@ -182,6 +182,20 @@ def scan_events(scenario_name, aod_path):
             notes
         )
         event_dict[event["id"]] = proper_event
+    
+    for ev_id, ev in event_dict.items():
+        for action in ev.actions:
+            for effect in action.effects:
+                if effect.type and effect.type == "trigger":
+                    triggered_event_id = effect.which
+                    if event_dict.get(triggered_event_id) is None:
+                        print(f"Event {ev_id} triggers event {triggered_event_id}, which does not exist.")
+                        continue
+                    event_dict[triggered_event_id].triggered_by.append((ev_id, action.action_key))
+                    # if event_dict[triggered_event_id].triggered_by is not None:
+                    #     print(f"Event {triggered_event_id} triggered also by something else than event {ev_id}")
+                    # else:
+                    #     event_dict[triggered_event_id].triggered_by = (ev_id, action.action_key)
 
     return event_dict
 
@@ -316,6 +330,12 @@ if __name__ == "__main__":
     bad_event_ids = [308008, 336154]
     double_action = [319021]
 
+    def se():
+        return scan_events(SCENARIO_NAME, AOD_PATH)
+    
+    def pe(event):
+        event.print_event(AOD_PATH)
+
     ask_to_search = True
     while ask_to_search:
         text_input = input("Enter search term:\n")
@@ -327,81 +347,8 @@ if __name__ == "__main__":
             print("No matching events found.")
         elif len(suggestions) == 1:
             indent_num = 2
-            # indent = "  "
             ev = suggestions[0]
             print_event(ev, indent_num)
-            # print(f"\n{ev["id"]}: {ev["name"]}")
-            # country_code = ev.get("country")
-            # country_code = country_code.upper() if country_code else ""
-            # country = country_dict.get(country_code)
-            # if country:
-            #     print(f"Country: {country}")
-            # is_invention = ev.get("invention")
-            # is_invention = is_invention if is_invention else "no"
-            # if is_invention.lower() == "yes":
-            #     print("invention event")
-
-            # is_random = ev.get("random")
-            # is_random = is_random if is_random else "no"
-            # if is_random.lower() == "yes":
-            #     print("random event")
-            
-            # path_str = str(ev["path"])[len(str(AOD_PATH)) + 1:]
-            # print(f"In file: {path_str}")
-
-            # if ev.get("trigger") is not None:
-            #     print("\nTrigger:")
-            #     trigger = ev["trigger"]
-            #     if not trigger:
-            #         print(indent_num * " ", "-")
-            #     else:
-            #         if isinstance(trigger, dict):
-            #             for key, item in trigger.items():
-            #                 if key.upper() in ["NOT", "AND", "OR"]:
-            #                     print(indent_num * " ", key.upper())
-            #                     indent_num += 2
-            #                     if isinstance(item, dict):
-            #                         for k, it in item.items():
-            #                             print(indent_num * " ", k, "=", it)
-            #                     elif isinstance(item, list):
-            #                         for it in item:
-            #                             print(indent_num * " ", it)
-            #                     indent_num -= 2
-            #                     continue
-            #                 print(indent_num * " ", key, "=", item)
-            #         elif isinstance(trigger, list):
-            #             for item in trigger:
-            #                 print(indent_num * " ", item)
-            #         else:
-            #             print(f"PROBLEM: trigger is of type {type(trigger)}")
-            #     print()
-
-            # if ev.get("date") is not None:
-            #     print("Date:")
-            #     print(ev["date"]["day"], ev["date"]["month"], ev["date"]["year"])
-            # if ev.get("offset") is not None:
-            #     print(f"Offset: {ev['offset']}")
-            # if ev.get("deathdate") is not None:
-            #     print("Deathdate:")
-            #     print(ev["deathdate"]["day"], ev["deathdate"]["month"], ev["deathdate"]["year"])
-            # persistence = ev.get("persistent")
-            # if persistence is not None and persistence.lower() == "yes":
-            #     print("persistent event")
-
-            # desc = ev.get("desc")
-            # if desc:
-            #     print()
-            #     print(desc)
-            
-            # print("\nActions:")
-            # action_keys = [key for key in ev.keys() if "action" in key]
-            # for i, action in enumerate(action_keys):
-            #     if ev[action].get("name") is not None:
-            #         num_of_effects = 0
-            #         print(indent_num * " ", f"{i + 1}.", ev[action].get("name"))
-            #         effects = ev[action].get("command")
-            #         if effects is not None:
-            #             print((indent_num + 2) * " ", len(effects), "effects")
         else:
             for event in suggestions:
                 country_code = event.get("country")
