@@ -299,7 +299,9 @@ def print_event(event, indent_num=0):
             print(indent_num * " ", f"{i + 1}.", event[action].get("name"))
             effects = event[action].get("command")
             if effects is not None:
-                print((indent_num + 2) * " ", len(effects), "effects")
+                print((indent_num + 2) * " ", len(effects), "effects:")
+                for effect in effects:
+                    print((indent_num + 2) * " ", effect)
 
 
 if __name__ == "__main__":
