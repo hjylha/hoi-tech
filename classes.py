@@ -16,6 +16,8 @@ Effect = namedtuple("Effect", EFFECT_ATTRIBUTES)
 MODIFIER_ATTRIBUTES = ["type", "value", "option", "extra", "modifier_effect"]
 Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
+INDENT_SPACES = 2
+
 
 class GameConstants:
     # is difficulty needed here?
@@ -102,16 +104,41 @@ class TriggerConditions:
 
 
 class Trigger:
+    indent = INDENT_SPACES
 
     def __init__(self, trigger_dict):
-        pass
+        self.conditions = trigger_dict
 
-    def print_trigger(self):
-        pass
+    def print_trigger(self, indent_num=indent, empty_trigger=True):
+        if not self.conditions and empty_trigger:
+            print(indent_num * " ", "-")
+            return
+        if not self.conditions:
+            return
+        if isinstance(self.conditions, dict):
+            for key, item in self.conditions.items():
+                if key.upper() in ["NOT", "AND", "OR"]:
+                    print(indent_num * " ", key.upper())
+                    indent_num += self.indent
+                    if isinstance(item, dict):
+                        for k, it in item.items():
+                            print(indent_num * " ", k, "=", it)
+                    elif isinstance(item, list):
+                        for it in item:
+                            print(indent_num * " ", it)
+                    indent_num -= self.indent
+                    continue
+                print(indent_num * " ", key, "=", item)
+            return
+        if isinstance(self.conditions, list):
+            for item in self.conditions:
+                print(indent_num * " ", item)
+            return
+        print(f"PROBLEM: trigger is of type {type(self.conditions)}")
 
 
 class Action:
-    indent = 2
+    indent = INDENT_SPACES
 
     def __init__(self, action_key, name_key, name="", ai_chance=None, effects=None):
         self.action_key = action_key
@@ -130,7 +157,7 @@ class Action:
     def __str__(self):
         return f"{self.action_key}: {self.name}"
     
-    def print_action(self, ordinal=1, indent_num=0):
+    def print_action(self, ordinal=1, indent_num=indent):
         print(indent_num * " ", f"{ordinal}.", self.name)
         indent_num += self.indent
         if self.ai_chance is not None:
@@ -604,6 +631,7 @@ class Idea(MinisterOrIdea):
 
 
 class Event:
+    indent = INDENT_SPACES
     EVENT_KEYS = [
         "id",
         "random",
@@ -645,7 +673,8 @@ class Event:
         offset=None,
         deathdate=None,
         is_persistent=False,
-        notes=""
+        notes="",
+        triggered_by=None
     ):
         self.event_id = event_id
         self.filepath = filepath
@@ -662,6 +691,7 @@ class Event:
         self.is_persistent = is_persistent
 
         self.trigger = trigger
+        self.triggered_by = [] if triggered_by is None else triggered_by
 
         self.date = date
         self.offset = offset
@@ -674,19 +704,91 @@ class Event:
         self.style = style
         self.picture = picture
     
+    # def set_triggered_by(self, trigger_event_id, trigger_action_key):
+    #     self.triggered_by = (trigger_event_id, trigger_action_key)
+    
     def __str__(self):
         return f"{self.event_id} [{self.country_code}]: {self.name}"
 
-    def print_event(self):
-        print(f"{self.event_id}: {self.name}")
+    def print_event(self, aod_path, indent_num=0):
+        print(f"{indent_num * ' '} {self.event_id}: {self.name}")
         if self.country:
-            print(f"Country: {self.country}")
+            print(f"{indent_num * ' '} Country: {self.country}")
         if self.is_invention:
-            print("Invention event")
+            print(f"{indent_num * ' '} Invention event")
         if self.is_random:
-            print("Random event")
+            print(f"{indent_num * ' '} Random event")
+        
+        path_str = str(self.filepath)[len(str(aod_path)) + 1:]
+        print(f"{indent_num * ' '} In file: {path_str}")
 
         print()
-        print("Description:")
-        print(self.description)
+        print(indent_num * ' ', "Trigger:")
+        trigger_empty = True
+        if self.triggered_by:
+            trigger_empty = False
+            print((indent_num + self.indent) * " ", "Triggered by:")
+            for trigger_event_id, trigger_action_key in self.triggered_by:
+                print((indent_num + 2 * self.indent) * " ", f"event {trigger_event_id},", "action", trigger_action_key)
+        self.trigger.print_trigger(indent_num=indent_num + self.indent, empty_trigger=trigger_empty)
+        print()
 
+        if self.date:
+            print(indent_num * ' ', "Date:")
+            print(indent_num * ' ', self.date["day"], self.date["month"], self.date["year"])
+        if self.offset is not None:
+            print(f"{indent_num * ' '} Offset: {self.offset}")
+        if self.deathdate:
+            print(indent_num * ' ', "Deathdate:")
+            print(indent_num * ' ', event["deathdate"]["day"], event["deathdate"]["month"], event["deathdate"]["year"])
+        
+        if self.is_persistent:
+            print(indent_num * ' ', "Persistent event")
+
+        print()
+        print(f"{indent_num * ' '} Description:")
+        print(indent_num * ' ', self.description)
+
+        print()
+        print(indent_num * ' ', "Possible Actions:")
+        for i, action in enumerate(self.actions):
+            action.print_action(ordinal=i+1, indent_num=indent_num + self.indent)
+
+
+def suggest_events_based_on_search_words(search_text, event_dict):
+    try:
+        event_id = int(search_text)
+        if event_dict.get(event_id) is not None:
+            return [event_dict[event_id]]
+    except ValueError:
+        pass
+    search_text = search_text.lower()
+    name_starts = []
+    name_other = []
+    desc_starts = []
+    desc_other = []
+    action_things = []
+    for event_id, event in event_dict.items():
+        if event.name.lower().startswith(search_text):
+            name_starts.append(event)
+            continue
+        if search_text in event.name.lower():
+            name_other.append(event)
+            continue
+        if event.description is None:
+            continue
+        if event.description.lower().startswith(search_text):
+            desc_starts.append(event)
+            continue
+        if search_text in event.description.lower():
+            desc_other.append(event)
+            continue
+        for action in event.actions:
+            if not action.name:
+                continue
+            if search_text in action.name.lower():
+                action_things.append(event)
+                break
+    suggestions = name_starts + name_other + desc_starts + desc_other + action_things
+    
+    return suggestions
