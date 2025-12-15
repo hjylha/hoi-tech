@@ -92,6 +92,15 @@ class HoITime:
         self.date += 1
 
 
+class TriggerConditions:
+
+    def __init__(self, conditions):
+        pass
+
+    def print_conditions(self):
+        pass
+
+
 class Trigger:
 
     def __init__(self, trigger_dict):
@@ -99,6 +108,70 @@ class Trigger:
 
     def print_trigger(self):
         pass
+
+
+class Action:
+    indent = 2
+
+    def __init__(self, action_key, name_key, name="", ai_chance=None, effects=None):
+        self.action_key = action_key
+        self.name_key = name_key
+        self.name = name
+
+        self.ai_chance = ai_chance
+
+        effects = [] if not effects else effects
+        if isinstance(effects, dict):
+            effects = [effects]
+        self.effects = []
+        for effect in effects:
+            self.effects.append(Effect(effect.get("type"), effect.get("which"), effect.get("value"), effect.get("when"), effect.get("where")))
+        
+    def __str__(self):
+        return f"{self.action_key}: {self.name}"
+    
+    def print_action(self, ordinal=1, indent_num=0):
+        print(indent_num * " ", f"{ordinal}.", self.name)
+        indent_num += self.indent
+        if self.ai_chance is not None:
+            print(indent_num * " ", f"AI chance: {self.ai_chance} %")
+        print(indent_num * " ", "Effects:")
+        indent_num += self.indent
+        if not self.effects:
+            print(indent_num * " ", "-")
+            return
+        for effect in self.effects:
+            text_parts = []
+            type_part = f"type = {effect.type}" if effect.type is not None else ""
+            text_parts.append(type_part)
+            which_part = f"which = {effect.which}" if effect.which is not None else ""
+            text_parts.append(which_part)
+            value_part = f"value = {effect.value}" if effect.value is not None else ""
+            text_parts.append(value_part)
+            when_part = f"when = {effect.when}" if effect.when is not None else ""
+            text_parts.append(when_part)
+            where_part = f"where = {effect.where}" if effect.where is not None else ""
+            text_parts.append(where_part)
+            text_parts = [t for t in text_parts if t]
+            # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
+            print(indent_num * " ", ", ".join(text_parts))
+
+
+def get_actions(list_of_action_dicts, text_dict):
+    actions = []
+    key_to_action_key = "action_key"
+    key_to_name_key = "name"
+    key_to_ai_chance = "ai_chance"
+    key_to_effects = "command"
+    for action in list_of_action_dicts:
+        action_key = action[key_to_action_key]
+        name_key = action.get(key_to_name_key)
+        name = text_dict.get(name_key)
+        name = "" if name is None else name
+        ai_chance = action.get(key_to_ai_chance)
+        effects = action.get(key_to_effects)
+        actions.append(Action(action_key, name_key, name, ai_chance, effects))
+    return actions
 
 
 # just some approximate value to use in time = difficulty / skill
