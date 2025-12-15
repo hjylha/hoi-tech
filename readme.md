@@ -36,6 +36,37 @@ Note that the requirements for secret weapons technologies are misleading, becau
 - CTRL + 2 switches to Fastest Tech view on the top left
 - CTRL + 3 switches to Biggest Tech Speed Increase view on the top left
 
+#### Bonus
+
+The python file `random_fact.py` has some random stuff in it:
+
+You can run
+```
+python random_facts.py rand
+```
+and choose one of the random facts to be shown.
+
+You can run
+```
+python random_facts.py exp
+```
+and answer the prompts to see the best exploit possibilities for a country.
+
+Finally, you can replace `rand` or `exp` above with a number, which will pick that many countries from the 1933 scenario. For example, running
+```
+python random_facts.py 3
+```
+will give you 3 random countries from the 1933 scenario.
+
+
+But that is not all. You can search events by running
+```
+python search_events.py
+```
+and entering search terms or an event id. If you type in a number, it will try to find an event with that number as an id. Otherwise, it will look for the given search terms in names and descriptions of events.
+
+
+
 # A brief look into the research system
 
 Iron Cross is a grand strategy game allowing player to control practically any country in the world before, during and after World War II just like the game it is based on: Hearts of Iron 2. An important part of Iron Cross is advancing technology through research. The tech tree is the same for each country, though there are a few exclusive choices (and some of those have already been made for some countries). On the other hand, each country has their own tech teams that actually do the research. At any time, a country can have 1 - 5 tech teams researching technologies based on their size (or to be more accurate, their industrial capacity). 
