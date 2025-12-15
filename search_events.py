@@ -1,7 +1,7 @@
 
 from file_paths import AOD_PATH, get_event_text_paths
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names
-from classes import Event
+from classes import get_actions, Event
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -113,6 +113,7 @@ def scan_events(scenario_name, aod_path):
             if "action" in key:
                 action_keys.append(key)
         action_keys = sorted(action_keys)
+        action_key = "action_key"
         if "action_a" not in action_keys:
             notes += "action_a not a key\n"
         for key in action_keys:
@@ -120,9 +121,12 @@ def scan_events(scenario_name, aod_path):
             if isinstance(action, list):
                 notes += f"{key} is a list"
                 for act in action:
+                    act[action_key] = key
                     actions.append(act)
                 continue
+            action[action_key] = key
             actions.append(action)
+        actions = get_actions(actions, event_text_dict)
 
         is_random_str = event.get("random")
         is_random_str = "no" if not is_random_str else is_random_str
