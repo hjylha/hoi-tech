@@ -60,7 +60,12 @@ def get_event_dict(event_list, event_text_dict):
                 if isinstance(action, list):
                     for j, action_item in enumerate(action):
                         event[f"action_{letters[i + j]}"] = action_item
-                action_name_key = event[key].get(name)
+                
+                if isinstance(event[key].get("command"), dict):
+                    event[key]["command"] = [event[key]["command"]]
+                
+                name_keys = [k for k in event[key].keys() if k.lower() == name]
+                action_name_key = event[key][name_keys[0]] if name_keys else event[key].get(name)
                 if action_name_key is not None:
                     actual_action_name = event_text_dict.get(action_name_key)
                     if actual_action_name is not None:
