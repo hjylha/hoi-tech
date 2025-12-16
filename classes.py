@@ -740,7 +740,7 @@ class Event:
             print(f"{indent_num * ' '} Offset: {self.offset}")
         if self.deathdate:
             print(indent_num * ' ', "Deathdate:")
-            print(indent_num * ' ', event["deathdate"]["day"], event["deathdate"]["month"], event["deathdate"]["year"])
+            print(indent_num * ' ', self.deathdate["day"], self.deathdate["month"], self.deathdate["year"])
         
         if self.is_persistent:
             print(indent_num * ' ', "Persistent event")
