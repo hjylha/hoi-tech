@@ -366,7 +366,9 @@ def get_texts_from_files(list_of_filepaths):
     for filepath in list_of_filepaths:
         texts = read_name_file(filepath)
         for key, text in texts.items():
-            text_dict[key] = text
+            # empty string should probably not be a key
+            if key:
+                text_dict[key] = text
     return text_dict
 
 
