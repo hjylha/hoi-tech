@@ -328,13 +328,21 @@ def read_scenario_file_for_events(scenario_file_name, aod_path):
     include_key = "include"
     if isinstance(scenario_dict[event_key], str):
         event_file_path = aod_path / scenario_dict[event_key].replace("\\", "/")
-        if event_file_path.exists():
-            event_file_paths.append(event_file_path)
+        for event_filepath in event_file_path.parent.glob(event_file_path.name, case_sensitive=False):
+            if event_filepath.exists():
+                event_file_paths.append(event_filepath)
+                break
+        else:
+            print(f"File {str(event_file_path)} does not exist (1)")
     if isinstance(scenario_dict[event_key], list):
         for event_file_path_str in scenario_dict[event_key]:
             event_file_path = aod_path / event_file_path_str.replace("\\", "/")
-            if event_file_path.exists():
-                event_file_paths.append(event_file_path)
+            for event_filepath in event_file_path.parent.glob(event_file_path.name, case_sensitive=False):
+                if event_filepath.exists():
+                    event_file_paths.append(event_filepath)
+                    break
+            else:
+                print(f"File {str(event_file_path)} does not exist (2)")
     for path_str in scenario_dict[include_key]:
         if event_key in path_str:
             include_event_file_path = aod_path / path_str.replace("\\", "/")
@@ -342,8 +350,14 @@ def read_scenario_file_for_events(scenario_file_name, aod_path):
                 included_dict = read_txt_file(include_event_file_path)
                 for event_file_path_str in included_dict[event_key]:
                     event_file_path = aod_path / event_file_path_str.replace("\\", "/")
-                    if event_file_path.exists():
-                        event_file_paths.append(event_file_path)
+                    for event_filepath in event_file_path.parent.glob(event_file_path.name, case_sensitive=False):
+                        if event_filepath.exists():
+                            event_file_paths.append(event_filepath)
+                            break
+                    else:
+                        print(f"File {str(event_file_path)} does not exist (3)")
+            else:
+                print(f"Include file {include_event_file_path} does not exist")
     return event_file_paths
 
 
