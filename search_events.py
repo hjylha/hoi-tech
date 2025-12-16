@@ -200,7 +200,7 @@ def scan_events(scenario_name, aod_path):
     return event_dict
 
 
-def suggest_events(search_text, event_dict, max_num_of_suggestions=9):
+def suggest_events(search_text, event_dict, max_num_of_suggestions=999):
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
@@ -338,12 +338,19 @@ def search_events(event_dict):
     print("\n")
     return True
 
-def search_events_w_class(event_dict, aod_path, max_num_of_suggestions=9):
-    text_input = input("Enter search term:\n")
+def search_events_w_class(event_dict, country_dict, aod_path, max_num_of_suggestions=999):
+    text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
-    suggestions = suggest_events_based_on_search_words(text_input, event_dict)
+    possible_country_code = text_input.split(" ")[0].upper()
+    country_code = None
+    if country_dict.get(possible_country_code) is not None:
+        country_code = possible_country_code
+        text_input = text_input[4:]
+    suggestions = suggest_events_based_on_search_words(text_input, event_dict, country_code)
     print()
+    if country_code:
+        print(f"Searching restricted to events of {country_dict[country_code]} [{country_code}]\n")
     if not suggestions:
         print("No matching events found.")
     elif len(suggestions) == 1:
@@ -364,7 +371,7 @@ def search_events_w_class(event_dict, aod_path, max_num_of_suggestions=9):
 
 if __name__ == "__main__":
     SCENARIO_NAME = "1933.eug"
-    # country_dict = get_country_names()
+    country_dict = get_country_names()
     # event_text_files = get_event_text_paths(AOD_PATH)
     # texts = get_texts_from_files(event_text_files)
     # event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
@@ -390,7 +397,13 @@ if __name__ == "__main__":
         event.print_event(AOD_PATH)
 
     ask_to_search = True
+    explanation = """\n    You can filter by country by typing in country code first:
+    for example typing 'fin winter' looks for the word 'winter'
+    in event names and descriptions of Finnish events.
+    Empty search i.e. pressing Enter quits the program.
+    """
+    print(explanation)
     while ask_to_search:
         # ask_to_search = search_events(event_dict)
-        ask_to_search = search_events_w_class(ed, AOD_PATH)
+        ask_to_search = search_events_w_class(ed, country_dict, AOD_PATH)
     

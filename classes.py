@@ -769,7 +769,7 @@ class Event:
             action.print_action(indent_num=indent_num + self.indent)
 
 
-def suggest_events_based_on_search_words(search_text, event_dict):
+def suggest_events_based_on_search_words(search_text, event_dict, country_code=None):
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
@@ -783,6 +783,8 @@ def suggest_events_based_on_search_words(search_text, event_dict):
     desc_other = []
     action_things = []
     for event_id, event in event_dict.items():
+        if country_code and event.country_code != country_code:
+            continue
         if event.name.lower().startswith(search_text):
             name_starts.append(event)
             continue
