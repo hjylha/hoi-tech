@@ -318,44 +318,79 @@ def print_event(event, indent_num=0):
                     print((indent_num + 2) * " ", effect)
 
 
+def search_events(event_dict):
+    text_input = input("Enter search term:\n")
+    if not text_input:
+        return False
+    suggestions = suggest_events(text_input, event_dict)
+    print()
+    if not suggestions:
+        print("No matching events found.")
+    elif len(suggestions) == 1:
+        indent_num = 2
+        ev = suggestions[0]
+        print_event(ev, indent_num)
+    else:
+        for event in suggestions:
+            country_code = event.get("country")
+            country_code = country_code.upper() if country_code else ""
+            print(f"{event["id"]} [{country_code}]: {event["name"]}")
+    print("\n")
+    return True
+
+def search_events_w_class(event_dict, aod_path, max_num_of_suggestions=9):
+    text_input = input("Enter search term:\n")
+    if not text_input:
+        return False
+    suggestions = suggest_events_based_on_search_words(text_input, event_dict)
+    print()
+    if not suggestions:
+        print("No matching events found.")
+    elif len(suggestions) == 1:
+        indent_num = 2
+        ev = suggestions[0]
+        ev.print_event(aod_path, indent_num=1)
+    else:
+        for event in suggestions[:max_num_of_suggestions]:
+            country_code = event.country_code
+            country_code = country_code.upper() if country_code else ""
+            if event.name:
+                print(f"{event.event_id} [{country_code}]: {event.name}")
+            else:
+                print(f"{event.event_id} [{country_code}]: {event.name_key}  [name in file]")
+    print("\n")
+    return True
+
+
 if __name__ == "__main__":
     SCENARIO_NAME = "1933.eug"
-    country_dict = get_country_names()
-    event_text_files = get_event_text_paths(AOD_PATH)
-    texts = get_texts_from_files(event_text_files)
-    event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
-    event_dict, missing_texts = get_event_dict(event_list, texts)
-    no_name, no_desc, no_action = missing_texts
+    # country_dict = get_country_names()
+    # event_text_files = get_event_text_paths(AOD_PATH)
+    # texts = get_texts_from_files(event_text_files)
+    # event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
+    # event_dict, missing_texts = get_event_dict(event_list, texts)
+    # no_name, no_desc, no_action = missing_texts
+
+    def get_texts():
+        event_text_files = get_event_text_paths(AOD_PATH)
+        return event_text_files, get_texts_from_files(event_text_files)
+    
+    def gel():
+        return get_event_list(SCENARIO_NAME, AOD_PATH)
+    
+    def ged(el, texts):
+        return get_event_dict(el, texts)
+
+    ed = scan_events(SCENARIO_NAME, AOD_PATH)
 
     bad_event_ids = [308008, 336154]
     double_action = [319021]
-
-    def se():
-        return scan_events(SCENARIO_NAME, AOD_PATH)
     
     def pe(event):
         event.print_event(AOD_PATH)
 
     ask_to_search = True
     while ask_to_search:
-        text_input = input("Enter search term:\n")
-        if not text_input:
-            break
-        suggestions = suggest_events(text_input, event_dict)
-        print()
-        if not suggestions:
-            print("No matching events found.")
-        elif len(suggestions) == 1:
-            indent_num = 2
-            ev = suggestions[0]
-            print_event(ev, indent_num)
-        else:
-            for event in suggestions:
-                country_code = event.get("country")
-                country_code = country_code.upper() if country_code else ""
-                print(f"{event["id"]} [{country_code}]: {event["name"]}")
-        print("\n")
-        # continue_q = input("Do you want to search again? ")
-        # if not continue_q.strip().lower().startswith("y"):
-        #     ask_to_search = False
+        # ask_to_search = search_events(event_dict)
+        ask_to_search = search_events_w_class(ed, AOD_PATH)
     
