@@ -94,29 +94,40 @@ class HoITime:
         self.date += 1
 
 
-class TriggerConditions:
+class Condition:
+    indent = INDENT_SPACES
+    AND_OR_NOT = ("AND", "OR", "NOT")
+    
+    def __init__(self, condition_dict_or_list, connective=None):
+        self.connective = connective
+        self.condition = condition_dict_or_list
 
-    def __init__(self, conditions):
-        pass
-
-    def print_conditions(self):
+    def print_condition(self, indent_num):
         pass
 
 
 class Trigger:
     indent = INDENT_SPACES
-
-    def __init__(self, trigger_dict):
-        self.conditions = trigger_dict
+    AND_OR_NOT = ("AND", "OR", "NOT")
+    
+    def __init__(self, trigger_dict, connective=AND_OR_NOT[0]):
+        self.raw_conditions = trigger_dict
+        self.conditions = []
+        for key, value in trigger_dict.items():
+            if key.upper() in self.AND_OR_NOT:
+                self.conditions.append(Condition(value, key.upper()))
+                continue
+            self.conditions.append(Condition({key: value}))
+        
 
     def print_trigger(self, indent_num=indent, empty_trigger=True):
-        if not self.conditions and empty_trigger:
+        if not self.raw_conditions and empty_trigger:
             print(indent_num * " ", "-")
             return
-        if not self.conditions:
+        if not self.raw_conditions:
             return
-        if isinstance(self.conditions, dict):
-            for key, item in self.conditions.items():
+        if isinstance(self.raw_conditions, dict):
+            for key, item in self.raw_conditions.items():
                 if key.upper() in ["NOT", "AND", "OR"]:
                     print(indent_num * " ", key.upper())
                     indent_num += self.indent
@@ -130,11 +141,11 @@ class Trigger:
                     continue
                 print(indent_num * " ", key, "=", item)
             return
-        if isinstance(self.conditions, list):
-            for item in self.conditions:
+        if isinstance(self.raw_conditions, list):
+            for item in self.raw_conditions:
                 print(indent_num * " ", item)
             return
-        print(f"PROBLEM: trigger is of type {type(self.conditions)}")
+        print(f"PROBLEM: trigger is of type {type(self.raw_conditions)}")
 
 
 class Action:
