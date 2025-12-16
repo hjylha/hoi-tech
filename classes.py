@@ -158,7 +158,12 @@ class Action:
         return f"{self.action_key}: {self.name}"
     
     def print_action(self, ordinal=1, indent_num=indent):
-        print(indent_num * " ", f"{ordinal}.", self.name)
+        if self.name:
+            print(indent_num * " ", f"{ordinal}.", self.name)
+        elif self.name_key:
+            print(indent_num * " ", f"{ordinal}.", self.name_key, " [name in file]")
+        else:
+            print(indent_num * " ", f"{ordinal}.", " [no name]")
         indent_num += self.indent
         if self.ai_chance is not None:
             print(indent_num * " ", f"AI chance: {self.ai_chance} %")
