@@ -711,7 +711,10 @@ class Event:
         return f"{self.event_id} [{self.country_code}]: {self.name}"
 
     def print_event(self, aod_path, indent_num=0):
-        print(f"{indent_num * ' '} {self.event_id}: {self.name}")
+        if self.name:
+            print(f"{indent_num * ' '} {self.event_id}: {self.name}")
+        else:
+            print(f"{indent_num * ' '} {self.event_id}: {self.name_key}  [name in file]")
         if self.country:
             print(f"{indent_num * ' '} Country: {self.country}")
         if self.is_invention:
@@ -747,7 +750,10 @@ class Event:
 
         print()
         print(f"{indent_num * ' '} Description:")
-        print(indent_num * ' ', self.description)
+        if self.description:
+            print(indent_num * ' ', self.description)
+        else:
+            print(indent_num * ' ', "-")
 
         print()
         print(indent_num * ' ', "Possible Actions:")
