@@ -167,11 +167,14 @@ class Action:
         indent_num += self.indent
         if self.ai_chance is not None:
             print(indent_num * " ", f"AI chance: {self.ai_chance} %")
-        print(indent_num * " ", "Effects:")
-        indent_num += self.indent
+        
         if not self.effects:
+            print(indent_num * " ", "Effects:")
+            indent_num += self.indent
             print(indent_num * " ", "-")
             return
+        print(indent_num * " ", f"Effects ({len(self.effects)}):")
+        indent_num += self.indent
         for effect in self.effects:
             text_parts = []
             type_part = f"type = {effect.type}" if effect.type is not None else ""
