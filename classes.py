@@ -157,13 +157,13 @@ class Action:
     def __str__(self):
         return f"{self.action_key}: {self.name}"
     
-    def print_action(self, ordinal=1, indent_num=indent):
+    def print_action(self, indent_num=indent):
         if self.name:
-            print(indent_num * " ", f"{ordinal}.", self.name)
+            print(indent_num * " ", f"({self.action_key})", self.name)
         elif self.name_key:
-            print(indent_num * " ", f"{ordinal}.", self.name_key, " [name in file]")
+            print(indent_num * " ", f"({self.action_key})", self.name_key, " [name in file]")
         else:
-            print(indent_num * " ", f"{ordinal}.", " [no name]")
+            print(indent_num * " ", f"({self.action_key})", " [no name]")
         indent_num += self.indent
         if self.ai_chance is not None:
             print(indent_num * " ", f"AI chance: {self.ai_chance} %")
@@ -765,8 +765,8 @@ class Event:
 
         print()
         print(indent_num * ' ', "Possible Actions:")
-        for i, action in enumerate(self.actions):
-            action.print_action(ordinal=i+1, indent_num=indent_num + self.indent)
+        for action in self.actions:
+            action.print_action(indent_num=indent_num + self.indent)
 
 
 def suggest_events_based_on_search_words(search_text, event_dict):
