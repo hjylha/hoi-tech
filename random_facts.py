@@ -118,25 +118,48 @@ def get_best_approx_exploits_for_country(research, categories=(6, 8, 9), year_ra
     diff_string = difficulty
     research.change_difficulty(diff_string)
     doctrine_ids = get_doctrines_to_check_for_exploits(research, categories, level)
+    # shortest time is skill 9 all specs, tech difficulty 4: time ~ 5 * (4 + 2) / (2 * (6 + 9))
+    # rs slope is rs_change / time ~ 2 * 0.8 / time
+    max_impact = 2 * 0.8 * 0.2 * 2 * (6 + 9) / (4 + 2)
     results = []
     for tech_id in doctrine_ids:
         tech = research.techs[tech_id]
         results_for_tech = []
-        research.blueprints.add(tech_id)
-        rs_impact = 2 * tech.get_research_speed_change()
-        max_slope = 0
+        # research.blueprints.add(tech_id)
+        rs_change = 2 * tech.get_research_speed_change()
+        # max_slope = 0
+        max_comparison = 0
         for team in research.all_teams:
             if team.start_year > year_range[1] or team.end_year < year_range[0]:
                 continue
-            time_comparison_value = research.calculate_approx_time_comparison_to_complete_tech(team, tech)
-            time_comparison_value = round(time_comparison_value, 4)
-            rs_slope = round(rs_impact / time_comparison_value, 4)
-            results_for_tech.append((rs_slope, tech_id, tech.name, team.name, time_comparison_value, team.start_year, team.end_year))
-            if rs_slope > max_slope:
-                max_slope = rs_slope
+            
+            tech_time = 0
+            for component in tech.components:
+                difficulty = component.difficulty + 2
+                if component.type in team.specialities:
+                    skill = 2 * (team.skill + 6)
+                else:
+                    skill = team.skill + 6
+                tech_time += difficulty / skill
+            rs_slope = rs_change / tech_time
+            impact_comparison = round(100 * rs_slope / max_impact, 2)
+            results_for_tech.append((impact_comparison, tech_id, tech.name, team.name, team.start_year, team.end_year))
+            # time_comparison_value = research.calculate_approx_time_comparison_to_complete_tech(team, tech)
+            # time_comparison_value = round(time_comparison_value, 4)
+            # rs_slope = round(rs_change / time_comparison_value, 4)
+            # results_for_tech.append((rs_slope, tech_id, tech.name, team.name, time_comparison_value, team.start_year, team.end_year))
+            # if rs_slope > max_slope:
+            #     max_slope = rs_slope
+            if impact_comparison > max_comparison:
+                max_comparison = impact_comparison
         results_for_tech = sorted(results_for_tech, key=lambda r: r[0], reverse=True)
+        # for row in results_for_tech:
+        #     if row[0] > 0.5 * max_slope:
+        #         results.append(row)
+        #     else:
+        #         break
         for row in results_for_tech:
-            if row[0] > 0.5 * max_slope:
+            if row[0] > 0.5 * max_comparison:
                 results.append(row)
             else:
                 break
@@ -144,10 +167,13 @@ def get_best_approx_exploits_for_country(research, categories=(6, 8, 9), year_ra
 
 
 def print_approx_exploits(exploit_list):
-    lengths = (8, 32, 25, 6, 4, 4)
-    directions = ("left", "left", "left", "right", "right", "right")
+    # lengths = (8, 32, 25, 6, 4, 4)
+    # directions = ("left", "left", "left", "right", "right", "right")
+    lengths = (8, 32, 25, 4, 4)
+    directions = ("left", "left", "left", "right", "right")
     for row in exploit_list:
-        row_to_print = (row[0], f"{row[1]} {row[2]}", row[3], row[4], row[5], row[6])
+        # row_to_print = (row[0], f"{row[1]} {row[2]}", row[3], row[4], row[5], row[6])
+        row_to_print = (row[0], f"{row[1]} {row[2]}", row[3], row[4], row[5])
         print_row(row_to_print, lengths, directions)
 
 
@@ -175,17 +201,18 @@ def run_exploit_test(num_to_show=DEFAULT_NUM_TO_SHOW):
 
     # difficulty = input(f"Difficulty (VE, E, N, H, VH) [default={DEFAULT_DIFFICULTY}]: ")
 
-    exact_calc_input = input("Use exact calculation? (Y/N) ")
-    if exact_calc_input.strip().lower() == "n":
-        exact_calc = False
-    else:
+    exact_calc_input = input("Use exact calculation? (Y/N) [default=N] ")
+    if exact_calc_input.strip().lower() == "y":
         exact_calc = True
+    else:
+        exact_calc = False
 
-    research_speed = input(f"Research speed [default={r.research_speed}]: ")
-    try:
-        r.research_speed = int(research_speed)
-    except ValueError:
-        pass
+    if exact_calc:
+        research_speed = input(f"Research speed [default={r.research_speed}]: ")
+        try:
+            r.research_speed = int(research_speed)
+        except ValueError:
+            pass
 
     if exact_calc:
         res6 = get_best_exploits_for_country(r, categories=(6, ), year_range=(1933, end_year), level=requested_level)
