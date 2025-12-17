@@ -95,32 +95,92 @@ class HoITime:
 
 
 class Condition:
-    indent = INDENT_SPACES
-    AND_OR_NOT = ("AND", "OR", "NOT")
-    
-    def __init__(self, condition_dict_or_list, connective=None):
-        self.connective = connective
-        self.condition = condition_dict_or_list
+    AND_STR = "AND"
+    OR_STR = "OR"
+    NOT_STR = "NOT"
+    AND_OR_NOT = (AND_STR, OR_STR, NOT_STR)
 
-    def print_condition(self, indent_num):
-        pass
+    def __init__(self, condition_dict, connective=None):
+        self.connective = connective
+        self.condition = None
+        self.child_conditions = []
+        if len(condition_dict) == 1 and not isinstance(list(condition_dict.values())[0], list):
+            self.condition = condition_dict
+            return
+        for key, value in condition_dict.items():
+            if isinstance(value, list):
+                for item in value:
+                    if key.upper() in self.AND_OR_NOT:
+                        self.child_conditions.append(Condition(item, key.upper()))
+                    else:
+                        self.child_conditions.append(Condition({key: item}))
+                continue
+            if key.upper() in self.AND_OR_NOT:
+                self.child_conditions.append(Condition(value, key.upper()))
+                continue
+            self.child_conditions.append(Condition({key: value}))
+        
+
+    def print_condition(self, indent_num, indent_add):
+        if self.condition is not None:
+            if self.connective and self.connective == self.NOT_STR:
+                print(indent_num * " ", f"{self.NOT_STR} {{", end=" ")
+            else:
+                print(indent_num * " ", end="")
+            first = True
+            for key, value in self.condition.items():
+                if not first:
+                    print(", ", end="")
+                else:
+                    first = False
+                print(f"{key} = {value}", end="")
+            if self.connective and self.connective == self.NOT_STR:
+                print(" }", end="\n")
+            else:
+                print()
+            return
+        print(indent_num * " ", self.connective)
+        for condition in self.child_conditions:
+            condition.print_condition(indent_num + indent_add, indent_add)
+
+
+def get_conditions(trigger_dict):
+    AND_OR_NOT = ("AND", "OR", "NOT")
+    conditions = []
+    for key, value in trigger_dict.items():
+        if key.upper() in AND_OR_NOT and isinstance(value, list):
+            for item in value:
+                conditions.append(Condition(item, key.upper()))
+
+    return conditions
 
 
 class Trigger:
     indent = INDENT_SPACES
     AND_OR_NOT = ("AND", "OR", "NOT")
     
-    def __init__(self, trigger_dict, connective=AND_OR_NOT[0]):
+    def __init__(self, trigger_dict):
         self.raw_conditions = trigger_dict
-        self.conditions = []
-        for key, value in trigger_dict.items():
-            if key.upper() in self.AND_OR_NOT:
-                self.conditions.append(Condition(value, key.upper()))
-                continue
-            self.conditions.append(Condition({key: value}))
+        # if len(trigger_dict) == 1 and list(trigger_dict.keys())[0].upper() in self.AND_OR_NOT:
+        #     self.conditions = [Conditions]
+        self.conditions = get_conditions(trigger_dict)
+        # self.conditions = []
+        # for key, value in trigger_dict.items():
+        #     if key.upper() == self.AND_OR_NOT[2] and isinstance(value, list):
+        #         for item in value:
+        #             self.conditions.append(Conditions(item, key.upper()))
+        #         continue
+        #     if key.upper() in self.AND_OR_NOT:
+        #         self.conditions.append(Conditions(value, key.upper()))
+        #         continue
+        #     if isinstance(value, list):
+        #         for item in value:
+        #             self.conditions.append(Conditions({key: item}))
+        #         continue
+        #     self.conditions.append(Conditions({key: value}))
         
 
-    def print_trigger(self, indent_num=indent, empty_trigger=True):
+    def print_trigger(self, indent_num, indent_add, empty_trigger=True):
         if not self.raw_conditions and empty_trigger:
             print(indent_num * " ", "-")
             return
@@ -130,14 +190,14 @@ class Trigger:
             for key, item in self.raw_conditions.items():
                 if key.upper() in ["NOT", "AND", "OR"]:
                     print(indent_num * " ", key.upper())
-                    indent_num += self.indent
+                    indent_num += indent_add
                     if isinstance(item, dict):
                         for k, it in item.items():
                             print(indent_num * " ", k, "=", it)
                     elif isinstance(item, list):
                         for it in item:
                             print(indent_num * " ", it)
-                    indent_num -= self.indent
+                    indent_num -= indent_add
                     continue
                 print(indent_num * " ", key, "=", item)
             return
@@ -149,7 +209,6 @@ class Trigger:
 
 
 class Action:
-    indent = INDENT_SPACES
 
     def __init__(self, action_key, name_key, name="", ai_chance=None, effects=None):
         self.action_key = action_key
@@ -168,24 +227,24 @@ class Action:
     def __str__(self):
         return f"{self.action_key}: {self.name}"
     
-    def print_action(self, indent_num=indent):
+    def print_action(self, indent_num, indent_add):
         if self.name:
             print(indent_num * " ", f"({self.action_key})", self.name)
         elif self.name_key:
             print(indent_num * " ", f"({self.action_key})", self.name_key, " [name in file]")
         else:
             print(indent_num * " ", f"({self.action_key})", " [no name]")
-        indent_num += self.indent
+        indent_num += indent_add
         if self.ai_chance is not None:
             print(indent_num * " ", f"AI chance: {self.ai_chance} %")
         
         if not self.effects:
             print(indent_num * " ", "Effects:")
-            indent_num += self.indent
+            indent_num += indent_add
             print(indent_num * " ", "-")
             return
         print(indent_num * " ", f"Effects ({len(self.effects)}):")
-        indent_num += self.indent
+        indent_num += indent_add
         for effect in self.effects:
             text_parts = []
             type_part = f"type = {effect.type}" if effect.type is not None else ""
@@ -650,7 +709,6 @@ class Idea(MinisterOrIdea):
 
 
 class Event:
-    indent = INDENT_SPACES
     EVENT_KEYS = [
         "id",
         "random",
@@ -729,7 +787,7 @@ class Event:
     def __str__(self):
         return f"{self.event_id} [{self.country_code}]: {self.name}"
 
-    def print_event(self, aod_path, indent_num=0):
+    def print_event(self, aod_path, indent_num=0, indent_add=2):
         if self.name:
             print(f"{indent_num * ' '} {self.event_id}: {self.name}")
         else:
@@ -749,10 +807,10 @@ class Event:
         trigger_empty = True
         if self.triggered_by:
             trigger_empty = False
-            print((indent_num + self.indent) * " ", "Triggered by:")
+            print((indent_num + indent_add) * " ", "Triggered by:")
             for trigger_event_id, trigger_action_key in self.triggered_by:
-                print((indent_num + 2 * self.indent) * " ", f"event {trigger_event_id},", "action", trigger_action_key)
-        self.trigger.print_trigger(indent_num=indent_num + self.indent, empty_trigger=trigger_empty)
+                print((indent_num + 2 * indent_add) * " ", f"event {trigger_event_id},", "action", trigger_action_key)
+        self.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
         print()
 
         if self.date:
@@ -777,7 +835,7 @@ class Event:
         print()
         print(indent_num * ' ', "Possible Actions:")
         for action in self.actions:
-            action.print_action(indent_num=indent_num + self.indent)
+            action.print_action(indent_num + indent_add, indent_add)
 
 
 def suggest_events_based_on_search_words(search_text, event_dict, country_code=None):

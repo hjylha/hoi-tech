@@ -348,23 +348,24 @@ def search_events_w_class(event_dict, country_dict, aod_path, max_num_of_suggest
         country_code = possible_country_code
         text_input = text_input[4:]
     suggestions = suggest_events_based_on_search_words(text_input, event_dict, country_code)
+
+    indent_add = 2
     print()
     if country_code:
-        print(f"Searching restricted to events of {country_dict[country_code]} [{country_code}]\n")
+        print(f" Searching restricted to events of {country_dict[country_code]} [{country_code}]\n")
     if not suggestions:
-        print("No matching events found.")
+        print(" No matching events found.")
     elif len(suggestions) == 1:
-        indent_num = 2
         ev = suggestions[0]
-        ev.print_event(aod_path, indent_num=1)
+        ev.print_event(aod_path, 1, indent_add)
     else:
         for event in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
             country_code = country_code.upper() if country_code else ""
             if event.name:
-                print(f"{event.event_id} [{country_code}]: {event.name}")
+                print(f" {event.event_id} [{country_code}]: {event.name}")
             else:
-                print(f"{event.event_id} [{country_code}]: {event.name_key}  [name in file]")
+                print(f" {event.event_id} [{country_code}]: {event.name_key}  [name in file]")
     print("\n")
     return True
 
