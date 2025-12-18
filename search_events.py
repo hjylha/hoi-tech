@@ -1,7 +1,7 @@
 
 from file_paths import AOD_PATH, get_event_text_paths
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names
-from classes import Trigger, get_actions, Event, suggest_events_based_on_search_words
+from event import Trigger, get_actions, Event, suggest_events_based_on_search_words
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
