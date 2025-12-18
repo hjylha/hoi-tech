@@ -8,18 +8,18 @@ class Condition:
     NOT_STR = "NOT"
     AND_OR_NOT = (AND_STR, OR_STR, NOT_STR)
 
-    def __init__(self, condition_dict, connective=None):
+    def __init__(self, event_id, condition_dict, connective=None):
+        self.event_id = event_id
         self.connective = connective
         self.condition = None
         self.child_conditions = []
         if len(condition_dict) == 1 and not isinstance(list(condition_dict.values())[0], list):
             if self.NOT_STR in condition_dict:
-                self.connective = self.NOT_STR
-                self.condition = condition_dict[self.NOT_STR]
+                self.child_conditions = [Condition(event_id, condition_dict[self.NOT_STR], self.NOT_STR)]
                 return
             for key, value in condition_dict.items():
                 if key.upper() in self.AND_OR_NOT:
-                    self.child_conditions = [Condition(value, key.upper())]
+                    self.child_conditions = [Condition(event_id, value, key.upper())]
                     return
             self.condition = condition_dict
             return
@@ -29,14 +29,14 @@ class Condition:
             if isinstance(value, list):
                 for item in value:
                     if key.upper() in self.AND_OR_NOT:
-                        self.child_conditions.append(Condition(item, key.upper()))
+                        self.child_conditions.append(Condition(event_id, item, key.upper()))
                     else:
-                        self.child_conditions.append(Condition({key: item}))
+                        self.child_conditions.append(Condition(event_id, {key: item}))
                 continue
             if key.upper() in self.AND_OR_NOT:
-                self.child_conditions.append(Condition(value, key.upper()))
+                self.child_conditions.append(Condition(event_id, value, key.upper()))
                 continue
-            self.child_conditions.append(Condition({key: value}))
+            self.child_conditions.append(Condition(event_id, {key: value}))
         
 
     def print_condition(self, indent_num, indent_add):
@@ -69,11 +69,13 @@ class Condition:
 class Trigger(Condition):
     AND_OR_NOT = ("AND", "OR", "NOT")
     
-    def __init__(self, trigger_dict):
+    def __init__(self, event_id, trigger_dict):
         self.raw_conditions = trigger_dict
         if trigger_dict:
-            super().__init__(trigger_dict)
+            super().__init__(event_id, trigger_dict)
         else:
+            self.condition = None
+            self.event_id = event_id
             self.child_conditions = []        
 
     def print_trigger(self, indent_num, indent_add, empty_trigger=True):
@@ -103,6 +105,23 @@ class Trigger(Condition):
         #         print(indent_num * " ", item)
         #     return
         # print(f"PROBLEM: trigger is of type {type(self.raw_conditions)}")
+
+
+def get_conditions(condition, list_of_conditions):
+    if condition.condition:
+        list_of_conditions.append([condition.condition, condition.event_id])
+        return list_of_conditions
+    for cond in condition.child_conditions:
+        list_of_conditions = get_conditions(cond, list_of_conditions)
+    return list_of_conditions
+
+
+def get_all_conditions(event_dict):
+    conditions = []
+    for event in event_dict.values():
+        conditions_plus = get_conditions(event.trigger, [])
+        conditions += conditions_plus
+    return conditions
 
 
 class Action:

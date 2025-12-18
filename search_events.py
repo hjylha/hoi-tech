@@ -170,7 +170,7 @@ def scan_events(scenario_name, aod_path):
             is_invention,
             country_code,
             country,
-            Trigger(trigger),
+            Trigger(event["id"], trigger),
             desc_key, 
             desc,
             style,
