@@ -17,10 +17,14 @@ class Condition:
                 self.connective = self.NOT_STR
                 self.condition = condition_dict[self.NOT_STR]
                 return
+            for key, value in condition_dict.items():
+                if key.upper() in self.AND_OR_NOT:
+                    self.child_conditions = [Condition(value, key.upper())]
+                    return
             self.condition = condition_dict
             return
-        if self.connective is None:
-            self.connective = self.AND_STR
+        # if self.connective is None:
+        #     self.connective = self.AND_STR
         for key, value in condition_dict.items():
             if isinstance(value, list):
                 for item in value:
@@ -53,9 +57,13 @@ class Condition:
             else:
                 print()
             return
-        print(indent_num * " ", self.connective)
-        for condition in self.child_conditions:
-            condition.print_condition(indent_num + indent_add, indent_add)
+        if self.connective:
+            print(indent_num * " ", self.connective)
+            for condition in self.child_conditions:
+                condition.print_condition(indent_num + indent_add, indent_add)
+        else:
+            for condition in self.child_conditions:
+                condition.print_condition(indent_num, indent_add)
 
 
 class Trigger(Condition):
