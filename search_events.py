@@ -184,14 +184,15 @@ def scan_events(scenario_name, aod_path):
         event_dict[event["id"]] = proper_event
     
     for ev_id, ev in event_dict.items():
-        for action in ev.actions:
+        for i, action in enumerate(ev.actions):
             for effect in action.effects:
                 if effect.type and effect.type == "trigger":
                     triggered_event_id = effect.which
                     if event_dict.get(triggered_event_id) is None:
-                        print(f"Event {ev_id} triggers event {triggered_event_id}, which does not exist.")
+                        name_text = ev.name if ev.name else "[no name]"
+                        print(f"Event {ev_id} [{ev.country_code}]: {name_text} triggers event {triggered_event_id}, which does not exist.")
                         continue
-                    event_dict[triggered_event_id].triggered_by.append((ev_id, action.action_key))
+                    event_dict[triggered_event_id].triggered_by.append((ev, i))
                     # if event_dict[triggered_event_id].triggered_by is not None:
                     #     print(f"Event {triggered_event_id} triggered also by something else than event {ev_id}")
                     # else:

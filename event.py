@@ -268,8 +268,10 @@ class Event:
         if self.triggered_by:
             trigger_empty = False
             print((indent_num + indent_add) * " ", "Triggered by:")
-            for trigger_event_id, trigger_action_key in self.triggered_by:
-                print((indent_num + 2 * indent_add) * " ", f"event {trigger_event_id},", "action", trigger_action_key)
+            for trigger_event, action_index in self.triggered_by:
+                text_about_event = f"event {trigger_event.event_id} [{trigger_event.country}]: {trigger_event.name}"
+                text_about_action = f"action '{trigger_event.actions[action_index].name}' [{trigger_event.actions[action_index].action_key}]"
+                print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
         self.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
         print()
 
