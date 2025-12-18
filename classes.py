@@ -107,6 +107,8 @@ class Condition:
         if len(condition_dict) == 1 and not isinstance(list(condition_dict.values())[0], list):
             self.condition = condition_dict
             return
+        if self.connective is None:
+            self.connective = self.AND_STR
         for key, value in condition_dict.items():
             if isinstance(value, list):
                 for item in value:
@@ -124,9 +126,9 @@ class Condition:
     def print_condition(self, indent_num, indent_add):
         if self.condition is not None:
             if self.connective and self.connective == self.NOT_STR:
-                print(indent_num * " ", f"{self.NOT_STR} {{", end=" ")
+                print(indent_num * " ", f"{self.NOT_STR} (", end=" ")
             else:
-                print(indent_num * " ", end="")
+                print(indent_num * " ", end=" ")
             first = True
             for key, value in self.condition.items():
                 if not first:
@@ -135,7 +137,7 @@ class Condition:
                     first = False
                 print(f"{key} = {value}", end="")
             if self.connective and self.connective == self.NOT_STR:
-                print(" }", end="\n")
+                print(" )", end="\n")
             else:
                 print()
             return
@@ -144,41 +146,16 @@ class Condition:
             condition.print_condition(indent_num + indent_add, indent_add)
 
 
-def get_conditions(trigger_dict):
-    AND_OR_NOT = ("AND", "OR", "NOT")
-    conditions = []
-    for key, value in trigger_dict.items():
-        if key.upper() in AND_OR_NOT and isinstance(value, list):
-            for item in value:
-                conditions.append(Condition(item, key.upper()))
-
-    return conditions
-
-
-class Trigger:
+class Trigger(Condition):
     indent = INDENT_SPACES
     AND_OR_NOT = ("AND", "OR", "NOT")
     
     def __init__(self, trigger_dict):
         self.raw_conditions = trigger_dict
-        # if len(trigger_dict) == 1 and list(trigger_dict.keys())[0].upper() in self.AND_OR_NOT:
-        #     self.conditions = [Conditions]
-        self.conditions = get_conditions(trigger_dict)
-        # self.conditions = []
-        # for key, value in trigger_dict.items():
-        #     if key.upper() == self.AND_OR_NOT[2] and isinstance(value, list):
-        #         for item in value:
-        #             self.conditions.append(Conditions(item, key.upper()))
-        #         continue
-        #     if key.upper() in self.AND_OR_NOT:
-        #         self.conditions.append(Conditions(value, key.upper()))
-        #         continue
-        #     if isinstance(value, list):
-        #         for item in value:
-        #             self.conditions.append(Conditions({key: item}))
-        #         continue
-        #     self.conditions.append(Conditions({key: value}))
-        
+        if trigger_dict:
+            super().__init__(trigger_dict)
+        else:
+            self.child_conditions = []        
 
     def print_trigger(self, indent_num, indent_add, empty_trigger=True):
         if not self.raw_conditions and empty_trigger:
@@ -186,26 +163,27 @@ class Trigger:
             return
         if not self.raw_conditions:
             return
-        if isinstance(self.raw_conditions, dict):
-            for key, item in self.raw_conditions.items():
-                if key.upper() in ["NOT", "AND", "OR"]:
-                    print(indent_num * " ", key.upper())
-                    indent_num += indent_add
-                    if isinstance(item, dict):
-                        for k, it in item.items():
-                            print(indent_num * " ", k, "=", it)
-                    elif isinstance(item, list):
-                        for it in item:
-                            print(indent_num * " ", it)
-                    indent_num -= indent_add
-                    continue
-                print(indent_num * " ", key, "=", item)
-            return
-        if isinstance(self.raw_conditions, list):
-            for item in self.raw_conditions:
-                print(indent_num * " ", item)
-            return
-        print(f"PROBLEM: trigger is of type {type(self.raw_conditions)}")
+        self.print_condition(indent_num, 2 * indent_add)
+        # if isinstance(self.raw_conditions, dict):
+        #     for key, item in self.raw_conditions.items():
+        #         if key.upper() in ["NOT", "AND", "OR"]:
+        #             print(indent_num * " ", key.upper())
+        #             indent_num += indent_add
+        #             if isinstance(item, dict):
+        #                 for k, it in item.items():
+        #                     print(indent_num * " ", k, "=", it)
+        #             elif isinstance(item, list):
+        #                 for it in item:
+        #                     print(indent_num * " ", it)
+        #             indent_num -= indent_add
+        #             continue
+        #         print(indent_num * " ", key, "=", item)
+        #     return
+        # if isinstance(self.raw_conditions, list):
+        #     for item in self.raw_conditions:
+        #         print(indent_num * " ", item)
+        #     return
+        # print(f"PROBLEM: trigger is of type {type(self.raw_conditions)}")
 
 
 class Action:
