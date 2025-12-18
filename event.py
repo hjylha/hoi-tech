@@ -13,6 +13,10 @@ class Condition:
         self.condition = None
         self.child_conditions = []
         if len(condition_dict) == 1 and not isinstance(list(condition_dict.values())[0], list):
+            if self.NOT_STR in condition_dict:
+                self.connective = self.NOT_STR
+                self.condition = condition_dict[self.NOT_STR]
+                return
             self.condition = condition_dict
             return
         if self.connective is None:
