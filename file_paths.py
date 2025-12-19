@@ -95,6 +95,9 @@ def get_government_titles_path(aod_path=AOD_PATH):
 def get_idea_titles_path(aod_path=AOD_PATH):
     return get_config_folder_path(aod_path) / "boostertext.csv"
 
+def get_province_names_path(aod_path=AOD_PATH):
+    return get_config_folder_path(aod_path) / "province_names.csv"
+
 def get_event_text_paths(aod_path=AOD_PATH):
     config_path = get_config_folder_path(aod_path)
     return [
