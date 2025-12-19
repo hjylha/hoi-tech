@@ -43,3 +43,11 @@ def test_get_idea_titles(aod_path):
     if aod_path.exists():
         titles = rhf.get_idea_titles()
         assert titles["SOCIAL_POLICY"] == "Social Policy"
+
+
+def test_get_province_names(aod_path):
+    if aod_path.exists():
+        province_names = rhf.get_province_names()
+        assert province_names[19] == "London"
+        assert province_names[300] == "Berlin"
+        assert province_names[606] == "Washington D.C."

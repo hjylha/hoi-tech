@@ -296,6 +296,10 @@ def get_idea_titles():
                 title_dict[key] = items[1]
     return title_dict
 
+def get_province_names():
+    names_in_file = fp.get_province_names_path()
+    return {int(k[4:]): name for k, name in read_name_file(names_in_file).items()}
+
 
 def read_savefile_for_research_order(savefilepath):
     strings_from_file = []
