@@ -110,6 +110,12 @@ def get_event_text_paths(aod_path=AOD_PATH):
         config_path / "Additional" / "addon.csv"
     ]
 
+def get_all_text_files_paths(aod_path=AOD_PATH):
+    config_path = get_config_folder_path(aod_path)
+    paths = list(config_path.glob("*.csv"))
+    paths.append(config_path / "Additional" / "addon.csv")
+    return paths
+
 def get_save_game_path(aod_path=AOD_PATH):
     return get_scenarios_folder_path(aod_path) / "save games"
 

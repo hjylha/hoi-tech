@@ -142,6 +142,14 @@ def test_get_event_text_paths(aod_path):
             assert filepath.exists()
 
 
+def test_get_all_text_files_paths(aod_path):
+    if aod_path.exists():
+        paths = fp.get_all_text_files_paths(aod_path)
+        assert len(paths) == 18
+        assert aod_path / "config" / "text.csv" in paths
+        for filepath in paths:
+            assert filepath.exists()
+
 def test_get_save_game_path(aod_path):
     if aod_path.exists():
         assert fp.get_save_game_path(aod_path).exists()
