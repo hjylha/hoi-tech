@@ -1,7 +1,7 @@
 
 import sys
-from file_paths import AOD_PATH, get_event_text_paths
-from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names
+from file_paths import AOD_PATH, get_event_text_paths, get_all_text_files_paths
+from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words
 
 
@@ -372,6 +372,42 @@ def search_events_w_class(event_dict, country_dict, aod_path, max_num_of_suggest
     return True
 
 
+def search_texts(text_dict, max_num_of_suggestions=9, max_text_length=50):
+    text_input = input("Enter search term(s):\n").lower()
+    if not text_input:
+        return False
+    starts = []
+    others = []
+    for k, v_list in text_dict.items():
+        if k.lower().startswith(text_input):
+            for t, p in v_list:
+                starts.append((k, t, p))
+            continue
+        if text_input in k.lower():
+            for t, p in v_list:
+                others.append((k, t, p))
+        for t, p in v_list:
+            if t.lower().startswith(text_input):
+                starts.append((k, t, p))
+                continue
+            if text_input in t.lower():
+                others.append((k, t, p))
+    suggestions = starts
+    for triple in others:
+        if triple not in suggestions:
+            suggestions.append(triple)
+    
+    print()
+    if not suggestions:
+        print("Nothing found")
+    for key, text, path in suggestions[:max_num_of_suggestions]:
+        text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
+        print(key, text_to_print, f"[{path.name}]")
+    print("\n")
+
+    return True
+
+
 if __name__ == "__main__":
     SCENARIO_NAME = "1933.eug"
     country_dict = get_country_names()
@@ -407,6 +443,12 @@ if __name__ == "__main__":
     """
 
     if "d" in sys.argv:
+        ask_to_search = False
+    
+    if "t" in sys.argv:
+        text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths())
+        while ask_to_search:
+            ask_to_search = search_texts(text_dict)
         ask_to_search = False
 
     if ask_to_search:
