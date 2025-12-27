@@ -13,10 +13,9 @@ csv_encoding = "cp1252"
 # special_encoding = "cp1251"
 
 
-def read_name_file(filepath, language="English", encoding=text_encoding):
+def read_name_file(filepath, language="English", language_index=1, encoding=text_encoding, show_errors=False):
     names = dict()
     with open(filepath, "r", encoding = encoding) as f:
-        language_index = 1
         language_confirmed = False
         new_line = f.readline()
         while new_line:
@@ -34,6 +33,9 @@ def read_name_file(filepath, language="English", encoding=text_encoding):
                 new_line = f.readline()
                 continue
             items = clean_line.split(";")
+            if names.get(items[0]) is not None and names[items[0]] != items[language_index]:
+                if show_errors:
+                    print(f"PROBLEM: key {items[0]} is already in file {filepath.name}")
             names[items[0]] = items[language_index]
             new_line = f.readline()
 
@@ -46,6 +48,37 @@ def read_name_file(filepath, language="English", encoding=text_encoding):
         #         continue
         #     # key, name = clean_line[0], clean_line[language_index]
         #     names[clean_line[0]] = clean_line[language_index]
+    return names
+
+def read_name_file_w_duplicates(filepath, names=None, language="English", language_index=1, encoding=text_encoding):
+    if names is None:
+        names = dict()
+    with open(filepath, "r", encoding = encoding) as f:
+        language_confirmed = False
+        new_line = f.readline()
+        while new_line:
+            line = new_line.strip()
+            if not language_confirmed:
+                try:
+                    language_index = line.split(";").index(language)
+                    language_confirmed = True
+                    new_line = f.readline()
+                    continue
+                except ValueError:
+                    pass
+            clean_line = line.split("#")[0].strip()
+            if not clean_line:
+                new_line = f.readline()
+                continue
+            items = clean_line.split(";")
+            key = items[0]
+            name = items[language_index]
+            if names.get(key) is None:
+                names[key] = [(name, filepath)]
+            else:
+                names[key].append((name, filepath))
+            new_line = f.readline()
+
     return names
 
 # TODO: FIX
@@ -373,6 +406,12 @@ def get_texts_from_files(list_of_filepaths):
             # empty string should probably not be a key
             if key:
                 text_dict[key] = text
+    return text_dict
+
+def get_texts_from_files_w_duplicates(list_of_filepaths):
+    text_dict = dict()
+    for filepath in list_of_filepaths:
+        text_dict = read_name_file_w_duplicates(filepath, text_dict)
     return text_dict
 
 
