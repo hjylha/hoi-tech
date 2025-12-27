@@ -147,6 +147,7 @@ def test_get_all_text_files_paths(aod_path):
         paths = fp.get_all_text_files_paths(aod_path)
         assert len(paths) == 18
         assert aod_path / "config" / "text.csv" in paths
+        assert aod_path / "config" / "Additional" / "addon.csv" in paths
         for filepath in paths:
             assert filepath.exists()
 
