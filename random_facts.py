@@ -44,27 +44,34 @@ def print_row(row, lengths, directions):
 
 # Fcns to try to find the optimal doctrines for exploits
 def get_doctrines_to_check_for_exploits(research, categories=(6, 8, 9), level=DEFAULT_LEVEL):
-    doctrines = set()
+    # doctrines = set()
+    doctrines = []
     for tech_id in research.completed_techs:
-        if tech_id // 1000 in categories:
-            doctrines.add(tech_id)
+        if tech_id // 1000 in categories and tech_id not in doctrines:
+            # doctrines.add(tech_id)
+            doctrines.append(tech_id)
         # if "doctrine" not in research.techs[tech_id].category:
         #     continue
     if level < 1:
         return doctrines
     old_doctrines = doctrines.copy()
     for layer in range(level):
-        new_doctrines = set()
+        # new_doctrines = set()
+        new_doctrines = []
         if layer == 0:
             for tech_id in research.active_techs:
-                if tech_id // 1000 in categories:
-                    doctrines.add(tech_id)
-                    new_doctrines.add(tech_id)
+                if tech_id // 1000 in categories and tech_id not in doctrines:
+                    # doctrines.add(tech_id)
+                    # new_doctrines.add(tech_id)
+                    doctrines.append(tech_id)
+                    new_doctrines.append(tech_id)
         for t_id in old_doctrines:
             for tech_id in research.techs[t_id].allows:
-                if tech_id // 1000 in categories:
-                    doctrines.add(tech_id)
-                    new_doctrines.add(tech_id)
+                if tech_id // 1000 in categories and tech_id not in doctrines:
+                    # doctrines.add(tech_id)
+                    # new_doctrines.add(tech_id)
+                    doctrines.append(tech_id)
+                    new_doctrines.append(tech_id)
         old_doctrines = new_doctrines.copy()
     return doctrines
         
@@ -103,7 +110,17 @@ def get_best_exploits_for_country(research, categories=(6, 8, 9), year_range=(19
                 results.append(row)
             else:
                 break
-    return sorted(results, key=lambda r: r[0], reverse=True)
+    result_dict = dict()
+    for res in results:
+        if result_dict.get(res[0]) is None:
+            result_dict[res[0]] = [res]
+        else:
+            result_dict[res[0]].append(res)
+    final_results = []
+    for num in sorted(result_dict.keys(), reverse=True):
+        final_results += sorted(result_dict[num], key=lambda r: doctrine_ids.index(r[1]))
+    return final_results
+    # return sorted(results, key=lambda r: r[0], reverse=True)
 
 
 def print_exploits(exploit_list):
@@ -180,8 +197,17 @@ def print_approx_exploits(exploit_list):
 def run_exploit_test(num_to_show=DEFAULT_NUM_TO_SHOW):
     r = Research()
 
-    cc = input("Country Code: ").upper()
-    r.add_country(cc)
+    cc = input("Country Code: ").strip().upper()
+    ccs = []
+    if "," in cc:
+        ccs = [w.strip() for w in cc.split(",")]
+    elif " " in cc:
+        ccs = [w.strip() for w in cc.split(" ")]
+    else:
+        r.add_country(cc)
+    if ccs:
+        for cc in ccs:
+            r.add_country(cc)
 
     end_year = input(f"End year for exploits [default={DEFAULT_END_YEAR}]: ")
     try:
