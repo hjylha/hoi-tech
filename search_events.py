@@ -400,9 +400,15 @@ def search_texts(text_dict, max_num_of_suggestions=9, max_text_length=50):
     print()
     if not suggestions:
         print("Nothing found")
-    for key, text, path in suggestions[:max_num_of_suggestions]:
-        text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
-        print(key, text_to_print, f"[{path.name}]")
+    if len(suggestions) == 1:
+        key, text, path = suggestions[0]
+        print(key)
+        print(text)
+        print(f"[{path.name}]")
+    else:
+        for key, text, path in suggestions[:max_num_of_suggestions]:
+            text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
+            print(key, text_to_print, f"[{path.name}]")
     print("\n")
 
     return True
