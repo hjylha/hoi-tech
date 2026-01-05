@@ -3,6 +3,7 @@ import sys
 from file_paths import AOD_PATH, get_event_text_paths, get_all_text_files_paths
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words
+from print_effects_and_triggers import print_event
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -243,7 +244,7 @@ def suggest_events(search_text, event_dict, max_num_of_suggestions=999):
     return suggestions[:max_num_of_suggestions]
 
 
-def print_event(event, indent_num=0):
+def print_event_as_dict(event, indent_num=0):
     print(f"{event["id"]}: {event["name"]}")
     country_code = event.get("country")
     country_code = country_code.upper() if country_code else ""
@@ -331,7 +332,7 @@ def search_events(event_dict):
     elif len(suggestions) == 1:
         indent_num = 2
         ev = suggestions[0]
-        print_event(ev, indent_num)
+        print_event_as_dict(ev, indent_num)
     else:
         for event in suggestions:
             country_code = event.get("country")
@@ -340,7 +341,8 @@ def search_events(event_dict):
     print("\n")
     return True
 
-def search_events_w_class(event_dict, country_dict, aod_path, max_num_of_suggestions=999):
+
+def search_events_w_class(event_dict, country_dict, aod_path, text_dict, max_num_of_suggestions=999):
     text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
@@ -359,7 +361,8 @@ def search_events_w_class(event_dict, country_dict, aod_path, max_num_of_suggest
         print(" No matching events found.")
     elif len(suggestions) == 1:
         ev = suggestions[0]
-        ev.print_event(aod_path, 1, indent_add)
+        # ev.print_event(aod_path, 1, indent_add)
+        print_event(ev, aod_path, 1, indent_add, text_dict)
     else:
         for event in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
@@ -372,7 +375,7 @@ def search_events_w_class(event_dict, country_dict, aod_path, max_num_of_suggest
     return True
 
 
-def search_texts(text_dict, max_num_of_suggestions=9, max_text_length=50):
+def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
     text_input = input("Enter search term(s):\n").lower()
     if not text_input:
         return False
@@ -422,6 +425,8 @@ if __name__ == "__main__":
     # event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
     # event_dict, missing_texts = get_event_dict(event_list, texts)
     # no_name, no_desc, no_action = missing_texts
+    text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths())
+    text_dict_last = {key: value[-1][0] for key, value in text_dict.items()}
 
     def get_texts():
         event_text_files = get_event_text_paths(AOD_PATH)
@@ -452,7 +457,7 @@ if __name__ == "__main__":
         ask_to_search = False
     
     if "t" in sys.argv:
-        text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths())
+        
         while ask_to_search:
             ask_to_search = search_texts(text_dict)
         ask_to_search = False
@@ -461,5 +466,5 @@ if __name__ == "__main__":
         print(explanation)
     while ask_to_search:
         # ask_to_search = search_events(event_dict)
-        ask_to_search = search_events_w_class(ed, country_dict, AOD_PATH)
+        ask_to_search = search_events_w_class(ed, country_dict, AOD_PATH, text_dict_last)
     
