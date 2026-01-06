@@ -238,6 +238,25 @@ def addcore_as_str(effect, text_dict, **kwargs):
     # added province id for "clarity"
     return text_dict[the_key].replace("%s", f"{text_dict[province_key]} [{effect.which}]")
 
+def add_prov_resource_as_str(effect, text_dict, **kwargs):
+    resource_dict = {
+        "energy": "RESOURCE_ENERGY",
+        "metal": "RESOURCE_METAL",
+        "oil": "RESOURCE_OIL",
+        "rare_materials": "RESOURCE_RARE_MATERIALS",
+        "money": "RESOURCE_MONEY",
+        "supplies": "RESOURCE_SUPPLY",
+        # "manpower": "RESOURCE_MANPOWER"
+    }
+    the_key = "EE_ADD_PROV_RESOURCE"
+    resource = text_dict[resource_dict[effect.where]]
+    province = text_dict.get(f"PROV{effect.which}")
+    province = province if province else str(effect.which)
+    sign = "+" if effect.value > 0 else ""
+    raw_text = text_dict[the_key].split("%s")
+    text = f"{raw_text[0]}{resource}{raw_text[1]}{province}{raw_text[2]}"
+    return text.replace("%+.1f\\%%\\n", f"{sign}{effect.value}")
+
 def alliance_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
         return
@@ -378,6 +397,7 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
     function_dict = {
         "access": access_as_str,
         "addcore": addcore_as_str,
+        "add_prov_resource": add_prov_resource_as_str,
         "alliance": alliance_as_str,
         "belligerence": belligerence_change_as_str,
         "dissent": dissent_change_as_str,
