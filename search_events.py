@@ -376,29 +376,45 @@ def search_events_w_class(event_dict, country_dict, aod_path, text_dict, max_num
 
 
 def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
-    text_input = input("Enter search term(s):\n").lower()
+    exact_keyword = False
+    text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
-    starts = []
-    others = []
-    for k, v_list in text_dict.items():
-        if k.lower().startswith(text_input):
-            for t, p in v_list:
-                starts.append((k, t, p))
-            continue
-        if text_input in k.lower():
-            for t, p in v_list:
-                others.append((k, t, p))
-        for t, p in v_list:
-            if t.lower().startswith(text_input):
-                starts.append((k, t, p))
+    if text_input.strip()[0] == '"' and text_input.strip()[-1] == '"':
+        text_input = text_input[1:-1]
+        exact_keyword = True
+    if exact_keyword:
+        suggestions = []
+        for k, v_list in text_dict.items():
+            if k == text_input:
+                for t, p in v_list:
+                    suggestions.append((k, t, p))
                 continue
-            if text_input in t.lower():
-                others.append((k, t, p))
-    suggestions = starts
-    for triple in others:
-        if triple not in suggestions:
-            suggestions.append(triple)
+            for t, p in v_list:
+                if t == text_input:
+                    suggestions.append((k, t, p))
+    else:
+        text_input = text_input.lower()
+        starts = []
+        others = []
+        for k, v_list in text_dict.items():
+            if k.lower().startswith(text_input):
+                for t, p in v_list:
+                    starts.append((k, t, p))
+                continue
+            if text_input in k.lower():
+                for t, p in v_list:
+                    others.append((k, t, p))
+            for t, p in v_list:
+                if t.lower().startswith(text_input):
+                    starts.append((k, t, p))
+                    continue
+                if text_input in t.lower():
+                    others.append((k, t, p))
+        suggestions = starts
+        for triple in others:
+            if triple not in suggestions:
+                suggestions.append(triple)
     
     print()
     if not suggestions:
