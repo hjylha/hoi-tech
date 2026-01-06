@@ -232,6 +232,13 @@ def access_as_str(effect, text_dict, country_dict=None, **kwargs):
     the_key = "EE_ACCESS"
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
+def activate_unit_type_as_str(effect, text_dict, **kwargs):
+    unit_dict = {
+        "infantry": SNAME_INFANTRY
+    }
+    the_key = "EE_ACTIVATE_UNIT_TYPE"
+    return f"{text_dict[the_key]}: {text_dict[f"SNAME_{effect.which.upper()}"]}"
+
 def addcore_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADDCORE"
     province_key = f"PROV{effect.which}"
@@ -353,6 +360,11 @@ def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     text = f"{raw_text[0]}{country_dict[effect.which]}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%d", str(effect.value))
 
+def relative_manpower_as_str(effect, text_dict, **kwargs):
+    the_key = "DOMESTIC_PRA_MAN"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
+
 def research_mod_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RESEARCH_MOD"
     sign = "+" if effect.value > 0 else ""
@@ -401,6 +413,7 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
         return effect_as_str_default(effect)
     function_dict = {
         "access": access_as_str,
+        "activate_unit_type": activate_unit_type_as_str,
         "addcore": addcore_as_str,
         "add_prov_resource": add_prov_resource_as_str,
         "alliance": alliance_as_str,
@@ -415,6 +428,7 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
         "peacetime_ic_mod": peacetime_ic_change_as_str,
         "rarematerialspool": rarematerialspool_as_str,
         "relation": relation_change_as_str,
+        "relative_manpower": relative_manpower_as_str,
         "research_mod": research_mod_as_str,
         "resource": resource_as_str,
         "set_domestic": set_domestic_as_str,
