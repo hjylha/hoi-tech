@@ -213,19 +213,20 @@ from event import Condition
 def domestic_change_as_str(effect, text_dict, current_value=None):
     # are these correct?
     slider_dict = {
-        "democratic": "DOMNAME_DEM_L",
-        "political_left": "DOMNAME_DOMNAME_POL_L",
-        "freedom": "DOMNAME_FRE_L",
-        "free_market": "DOMNAME_FRM_L",
-        "professional_army": "DOMNAME_PRO_L",
-        "defense_lobby": "DOMNAME_DEF_L",
-        "interventionism": "DOMNAME_INT_L"
+        "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
+        "political_left": ["DOMNAME_DOMNAME_POL_L", "DOMNAME_POL_R"],
+        "freedom": ["DOMNAME_FRE_L", "DOMNAME_FRE_R"],
+        "free_market": ["DOMNAME_FRM_L", "DOMNAME_FRM_R"],
+        "professional_army": ["DOMNAME_PRO_L", "DOMNAME_PRO_R"],
+        "defense_lobby": ["DOMNAME_DEF_L", "DOMNAME_DEF_R"],
+        "interventionism": ["DOMNAME_INT_L", "DOMNAME_INT_R"]
     }
     the_key = "EE_DOMESTIC"
     extra_key = "EE_DOMESTIC_CURRENT"
-    slider_key = slider_dict[effect.which]
+    direction = 0 if effect.value > 0 else 1
+    slider_key = slider_dict[effect.which][direction]
     current_value_str = "?" if current_value is None else str(current_value)
-    part1 = text_dict[the_key].replace("%d", str(effect.value)).replace("%s", text_dict[slider_key])
+    part1 = text_dict[the_key].replace("%d", str(abs(effect.value))).replace("%s", text_dict[slider_key])
     part2 = text_dict[extra_key].replace("%d", current_value_str)
     return f"{part1} {part2}"
 
@@ -240,7 +241,7 @@ def peacetime_ic_change_as_str(effect, text_dict):
     return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value}%")
 
 
-def effect_as_str(effect, text_dict, **kwargs):
+def effect_as_str(effect, text_dict, event_dict=None, **kwargs):
     if effect.type == "domestic":
         return domestic_change_as_str(effect, text_dict)
     if effect.type == "manpowerpool":
@@ -248,8 +249,8 @@ def effect_as_str(effect, text_dict, **kwargs):
     if effect.type == "peacetime_ic_mod":
         return peacetime_ic_change_as_str(effect, text_dict)
     #TODO: this is my own
-    if effect.type == "trigger" and "event_dict" in kwargs:
-        return f"Triggers event {effect.which}: {event_dict[effect.which].name}"
+    if effect.type == "trigger" and isinstance(event_dict, dict):
+        return f"Triggers event {effect.which} [{event_dict[effect.which].country}]: {event_dict[effect.which].name}"
     text_parts = []
     type_part = f"type = {effect.type}" if effect.type is not None else ""
     text_parts.append(type_part)
@@ -266,8 +267,8 @@ def effect_as_str(effect, text_dict, **kwargs):
     return ", ".join(text_parts)
     
 
-def print_effect(effect, indent_num, text_dict, **kwargs):
-    print(indent_num * " ", effect_as_str(effect, text_dict))
+def print_effect(effect, indent_num, text_dict, event_dict, **kwargs):
+    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, **kwargs))
     
 
 # Trigger keys: (AI/ai)
@@ -350,11 +351,11 @@ def print_effect(effect, indent_num, text_dict, **kwargs):
 # war
 # year
 
-def print_condition(condition, **kwargs):
-    pass
+# def print_condition(condition, **kwargs):
+#     pass
 
 
-def print_condition(condition, indent_num, indent_add):
+def print_condition(condition, indent_num, indent_add, **kwargs):
     if condition.condition is not None:
         if condition.connective and condition.connective == condition.NOT_STR:
             print(indent_num * " ", f"{condition.NOT_STR} (", end=" ")
@@ -380,7 +381,7 @@ def print_condition(condition, indent_num, indent_add):
         for condition in condition.child_conditions:
             condition.print_condition(indent_num, indent_add)
 
-def print_trigger(event, indent_num, indent_add, empty_trigger=True):
+def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
     if not event.trigger.raw_conditions and empty_trigger:
         print(indent_num * " ", "-")
         return
@@ -388,7 +389,7 @@ def print_trigger(event, indent_num, indent_add, empty_trigger=True):
         return
     event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -407,9 +408,9 @@ def print_action(action, indent_num, indent_add, text_dict):
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
     for effect in action.effects:
-        print_effect(effect, indent_num, text_dict)
+        print_effect(effect, indent_num, text_dict, event_dict, **kwargs)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
@@ -435,7 +436,7 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict):
             text_about_action = f"action '{trigger_event.actions[action_index].name}' [{trigger_event.actions[action_index].action_key}]"
             print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
     # event.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
-    print_trigger(event, indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
+    print_trigger(event, indent_num + indent_add, indent_add, empty_trigger=trigger_empty, **kwargs)
     print()
 
     if event.date:
@@ -461,4 +462,4 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict):
     print(indent_num * ' ', "Possible Actions:")
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
-        print_action(action, indent_num, indent_add, text_dict)
+        print_action(action, indent_num, indent_add, text_dict, event_dict, **kwargs)
