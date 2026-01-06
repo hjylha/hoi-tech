@@ -210,11 +210,37 @@ from event import Condition
 # waketeam
 # war
 
+def access_as_str(effect, text_dict, country_dict):
+    the_key = "EE_ACCESS"
+    return text_dict[the_key].replace("%s", country_dict[effect.which])
+
+def addcore_as_str(effect, text_dict):
+    the_key = "EE_ADDCORE"
+    province_key = f"PROV{effect.which}"
+    # added province id for "clarity"
+    return text_dict[the_key].replace("%s", f"{text_dict[province_key]} [{effect.which}]")
+
+def alliance_as_str(effect, text_dict, country_dict):
+    the_key = "EE_ALL"
+    return text_dict[the_key].replace("%s", country_dict[effect.which])
+
+def belligerence_change_as_str(effect, text_dict, country_dict):
+    the_key = "EE_BELLIGERENCE"
+    raw_text = text_dict[the_key].split("%s")
+    country = country_dict[effect.which]
+    sign = "+" if effect.value > 0 else ""
+    text = raw_text[0] + country + raw_text[1] + sign + raw_text[2]
+    return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
+
+def dissent_change_as_str(effect, text_dict):
+    the_key = "EE_DISSENT"
+    return text_dict[the_key].replace("%d", str(effect.value))
+
 def domestic_change_as_str(effect, text_dict, current_value=None):
     # are these correct?
     slider_dict = {
         "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
-        "political_left": ["DOMNAME_DOMNAME_POL_L", "DOMNAME_POL_R"],
+        "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
         "freedom": ["DOMNAME_FRE_L", "DOMNAME_FRE_R"],
         "free_market": ["DOMNAME_FRM_L", "DOMNAME_FRM_R"],
         "professional_army": ["DOMNAME_PRO_L", "DOMNAME_PRO_R"],
@@ -229,6 +255,21 @@ def domestic_change_as_str(effect, text_dict, current_value=None):
     part1 = text_dict[the_key].replace("%d", str(abs(effect.value))).replace("%s", text_dict[slider_key])
     part2 = text_dict[extra_key].replace("%d", current_value_str)
     return f"{part1} {part2}"
+
+def set_domestic_as_str(effect, text_dict):
+    slider_dict = {
+        "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
+        "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
+        "freedom": ["DOMNAME_FRE_L", "DOMNAME_FRE_R"],
+        "free_market": ["DOMNAME_FRM_L", "DOMNAME_FRM_R"],
+        "professional_army": ["DOMNAME_PRO_L", "DOMNAME_PRO_R"],
+        "defense_lobby": ["DOMNAME_DEF_L", "DOMNAME_DEF_R"],
+        "interventionism": ["DOMNAME_INT_L", "DOMNAME_INT_R"]
+    }
+    slider = text_dict[slider_dict[effect.which][0]]
+    # the game does not seem to use this
+    the_key = "EE_SET_DOMESTIC"
+    return text_dict[the_key].replace("%s", slider).replace("%d", str(effect.value))
 
 def manpowerpool_change_as_str(effect, text_dict):
     the_key = "EE_MANPOWER"
@@ -247,6 +288,14 @@ def relation_change_as_str(effect, text_dict, country_dict):
     text = raw_text[0] + country_dict[effect.which] + raw_text[1] + sign + raw_text[2]
     return text.replace("%d", str(effect.value))
 
+def sleepevent_as_str(effect, text_dict, event_dict):
+    the_key = "EE_SLEEP"
+    raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
+    # my own additions
+    name_w_quotes = f"'{event_dict[effect.which].name}'"
+    add = f" [{event_dict[effect.which].country} {effect.which}]"
+    return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
+
 def trigger_as_str(effect, text_dict, event_dict):
     the_key = "EE_TRIGGER"
     raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
@@ -257,14 +306,28 @@ def trigger_as_str(effect, text_dict, event_dict):
 
 
 def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, **kwargs):
+    if effect.type == "access" and isinstance(country_dict, dict):
+        return access_as_str(effect, text_dict, country_dict)
+    if effect.type == "addcore":
+        return addcore_as_str(effect, text_dict)
+    if effect.type == "alliance" and isinstance(country_dict, dict):
+        return alliance_as_str(effect, text_dict, country_dict)
+    if effect.type == "belligerence" and isinstance(country_dict, dict):
+        return belligerence_change_as_str(effect, text_dict, country_dict)
+    if effect.type == "dissent":
+        return dissent_change_as_str(effect, text_dict)
     if effect.type == "domestic":
         return domestic_change_as_str(effect, text_dict)
+    if effect.type == "set_domestic":
+        return set_domestic_as_str(effect, text_dict)
     if effect.type == "manpowerpool":
         return manpowerpool_change_as_str(effect, text_dict)
     if effect.type == "peacetime_ic_mod":
         return peacetime_ic_change_as_str(effect, text_dict)
     if effect.type == "relation" and isinstance(country_dict, dict):
         return relation_change_as_str(effect, text_dict, country_dict)
+    if effect.type == "sleepevent" and isinstance(event_dict, dict):
+        return sleepevent_as_str(effect, text_dict, event_dict)
     if effect.type == "trigger" and isinstance(event_dict, dict):
         return trigger_as_str(effect, text_dict, event_dict)
     text_parts = []
