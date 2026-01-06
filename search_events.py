@@ -362,7 +362,7 @@ def search_events_w_class(event_dict, country_dict, aod_path, text_dict, max_num
     elif len(suggestions) == 1:
         ev = suggestions[0]
         # ev.print_event(aod_path, 1, indent_add)
-        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict)
+        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict, country_dict)
     else:
         for event in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code

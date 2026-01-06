@@ -240,17 +240,33 @@ def peacetime_ic_change_as_str(effect, text_dict):
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value}%")
 
+def relation_change_as_str(effect, text_dict, country_dict):
+    the_key = "EE_RELATION"
+    sign = "+" if effect.value > 0 else ""
+    raw_text = text_dict[the_key].split("%s")
+    text = raw_text[0] + country_dict[effect.which] + raw_text[1] + sign + raw_text[2]
+    return text.replace("%d", str(effect.value))
 
-def effect_as_str(effect, text_dict, event_dict=None, **kwargs):
+def trigger_as_str(effect, text_dict, event_dict):
+    the_key = "EE_TRIGGER"
+    raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
+    # my own additions
+    name_w_quotes = f"'{event_dict[effect.which].name}'"
+    add = f" [{event_dict[effect.which].country} {effect.which}]"
+    return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
+
+
+def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, **kwargs):
     if effect.type == "domestic":
         return domestic_change_as_str(effect, text_dict)
     if effect.type == "manpowerpool":
         return manpowerpool_change_as_str(effect, text_dict)
     if effect.type == "peacetime_ic_mod":
         return peacetime_ic_change_as_str(effect, text_dict)
-    #TODO: this is my own
+    if effect.type == "relation" and isinstance(country_dict, dict):
+        return relation_change_as_str(effect, text_dict, country_dict)
     if effect.type == "trigger" and isinstance(event_dict, dict):
-        return f"Triggers event {effect.which} [{event_dict[effect.which].country}]: {event_dict[effect.which].name}"
+        return trigger_as_str(effect, text_dict, event_dict)
     text_parts = []
     type_part = f"type = {effect.type}" if effect.type is not None else ""
     text_parts.append(type_part)
@@ -267,8 +283,8 @@ def effect_as_str(effect, text_dict, event_dict=None, **kwargs):
     return ", ".join(text_parts)
     
 
-def print_effect(effect, indent_num, text_dict, event_dict, **kwargs):
-    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, **kwargs))
+def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, **kwargs):
+    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, country_dict, **kwargs))
     
 
 # Trigger keys: (AI/ai)
@@ -389,7 +405,7 @@ def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
         return
     event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict, event_dict, **kwargs):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict=None, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -408,9 +424,9 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, **kwargs
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
     for effect in action.effects:
-        print_effect(effect, indent_num, text_dict, event_dict, **kwargs)
+        print_effect(effect, indent_num, text_dict, event_dict, country_dict, **kwargs)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, **kwargs):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, country_dict, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
@@ -462,4 +478,4 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
     print(indent_num * ' ', "Possible Actions:")
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
-        print_action(action, indent_num, indent_add, text_dict, event_dict, **kwargs)
+        print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, **kwargs)
