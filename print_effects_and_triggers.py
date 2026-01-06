@@ -353,6 +353,11 @@ def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     text = f"{raw_text[0]}{country_dict[effect.which]}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%d", str(effect.value))
 
+def research_mod_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_RESEARCH_MOD"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}")
+
 def resource_as_str(effect, text_dict, **kwargs):
     # how many things are here?
     resource_dict = {
@@ -410,6 +415,7 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
         "peacetime_ic_mod": peacetime_ic_change_as_str,
         "rarematerialspool": rarematerialspool_as_str,
         "relation": relation_change_as_str,
+        "research_mod": research_mod_as_str,
         "resource": resource_as_str,
         "set_domestic": set_domestic_as_str,
         "sleepevent": sleepevent_as_str,
