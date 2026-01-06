@@ -380,9 +380,12 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
     text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
-    if text_input.strip()[0] == '"' and text_input.strip()[-1] == '"':
-        text_input = text_input[1:-1]
-        exact_keyword = True
+    try:
+        if text_input.strip()[0] == '"' and text_input.strip()[-1] == '"':
+            text_input = text_input.strip()[1:-1]
+            exact_keyword = True
+    except IndexError:
+        pass
     if exact_keyword:
         suggestions = []
         for k, v_list in text_dict.items():

@@ -328,12 +328,37 @@ class Event:
 
 
 def suggest_events_based_on_search_words(search_text, event_dict, country_code=None):
+    exact_keyword = False
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
             return [event_dict[event_id]]
     except ValueError:
         pass
+    try:
+        if search_text.strip()[0] == '"' and search_text.strip()[-1] == '"':
+            search_text = search_text.strip()[1:-1]
+            exact_keyword = True
+    except IndexError:
+        pass
+    if exact_keyword:
+        suggestions = []
+        for event_id, event in event_dict.items():
+            if country_code and event.country_code != country_code:
+                continue
+            if event.name == search_text:
+                suggestions.append(event)
+                continue
+            if event.description == search_text:
+                suggestions.append(event)
+                continue
+            for action in event.actions:
+                if not action.name:
+                    continue
+                if action.name == search_text:
+                    suggestions.append(event)
+                    break
+        return suggestions
     search_text = search_text.lower()
     name_starts = []
     name_other = []
