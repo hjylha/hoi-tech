@@ -342,7 +342,7 @@ def search_events(event_dict):
     return True
 
 
-def search_events_w_class(event_dict, country_dict, aod_path, text_dict, max_num_of_suggestions=999):
+def search_events_w_class(event_dict, country_dict, aod_path, text_dict, max_num_of_suggestions=999, force_default=False):
     text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
@@ -362,7 +362,7 @@ def search_events_w_class(event_dict, country_dict, aod_path, text_dict, max_num
     elif len(suggestions) == 1:
         ev = suggestions[0]
         # ev.print_event(aod_path, 1, indent_add)
-        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict, country_dict)
+        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict, country_dict, force_default)
     else:
         for event in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
@@ -447,6 +447,7 @@ if __name__ == "__main__":
         event.print_event(AOD_PATH)
 
     ask_to_search = True
+    force_default = False
     explanation = """\n    You can filter by country by typing in country code first:
     for example typing 'fin winter' looks for the word 'winter'
     in event names and descriptions of Finnish events.
@@ -455,6 +456,9 @@ if __name__ == "__main__":
 
     if "d" in sys.argv:
         ask_to_search = False
+    
+    if "raw" in sys.argv:
+        force_default = True
     
     if "t" in sys.argv:
         
@@ -466,5 +470,5 @@ if __name__ == "__main__":
         print(explanation)
     while ask_to_search:
         # ask_to_search = search_events(event_dict)
-        ask_to_search = search_events_w_class(ed, country_dict, AOD_PATH, text_dict_last)
+        ask_to_search = search_events_w_class(ed, country_dict, AOD_PATH, text_dict_last, force_default=force_default)
     

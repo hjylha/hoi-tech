@@ -395,30 +395,6 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
         "sleepevent": sleepevent_as_str,
         "trigger": trigger_as_str
     }
-    # if effect.type == "access" and isinstance(country_dict, dict):
-    #     return access_as_str(effect, text_dict, country_dict)
-    # if effect.type == "addcore":
-    #     return addcore_as_str(effect, text_dict)
-    # if effect.type == "alliance" and isinstance(country_dict, dict):
-    #     return alliance_as_str(effect, text_dict, country_dict)
-    # if effect.type == "belligerence" and isinstance(country_dict, dict):
-    #     return belligerence_change_as_str(effect, text_dict, country_dict)
-    # if effect.type == "dissent":
-    #     return dissent_change_as_str(effect, text_dict)
-    # if effect.type == "domestic":
-    #     return domestic_change_as_str(effect, text_dict)
-    # if effect.type == "set_domestic":
-    #     return set_domestic_as_str(effect, text_dict)
-    # if effect.type == "manpowerpool":
-    #     return manpowerpool_change_as_str(effect, text_dict)
-    # if effect.type == "peacetime_ic_mod":
-    #     return peacetime_ic_change_as_str(effect, text_dict)
-    # if effect.type == "relation" and isinstance(country_dict, dict):
-    #     return relation_change_as_str(effect, text_dict, country_dict)
-    # if effect.type == "sleepevent" and isinstance(event_dict, dict):
-    #     return sleepevent_as_str(effect, text_dict, event_dict)
-    # if effect.type == "trigger" and isinstance(event_dict, dict):
-    #     return trigger_as_str(effect, text_dict, event_dict)
     the_function = function_dict.get(effect.type.lower())
     if the_function is not None:
         return the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
@@ -426,8 +402,8 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
     return effect_as_str_default(effect)
     
 
-def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, **kwargs):
-    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, country_dict, **kwargs))
+def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, force_default=False, **kwargs):
+    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, country_dict, force_default, **kwargs))
     
 
 # Trigger keys: (AI/ai)
@@ -548,7 +524,7 @@ def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
         return
     event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict=None, **kwargs):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict=None, force_default=False, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -567,9 +543,9 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, country_
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
     for effect in action.effects:
-        print_effect(effect, indent_num, text_dict, event_dict, country_dict, **kwargs)
+        print_effect(effect, indent_num, text_dict, event_dict, country_dict, force_default, **kwargs)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, country_dict, **kwargs):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, country_dict, force_default=False, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
@@ -621,4 +597,4 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
     print(indent_num * ' ', "Possible Actions:")
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
-        print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, **kwargs)
+        print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, force_default, **kwargs)
