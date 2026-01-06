@@ -210,21 +210,43 @@ from event import Condition
 # waketeam
 # war
 
-def access_as_str(effect, text_dict, country_dict):
+def effect_as_str_default(effect, **kwargs):
+    text_parts = []
+    type_part = f"type = {effect.type}" if effect.type is not None else ""
+    text_parts.append(type_part)
+    which_part = f"which = {effect.which}" if effect.which is not None else ""
+    text_parts.append(which_part)
+    value_part = f"value = {effect.value}" if effect.value is not None else ""
+    text_parts.append(value_part)
+    when_part = f"when = {effect.when}" if effect.when is not None else ""
+    text_parts.append(when_part)
+    where_part = f"where = {effect.where}" if effect.where is not None else ""
+    text_parts.append(where_part)
+    text_parts = [t for t in text_parts if t]
+    # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
+    return ", ".join(text_parts)
+
+def access_as_str(effect, text_dict, country_dict=None, **kwargs):
+    if country_dict is None:
+        return
     the_key = "EE_ACCESS"
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
-def addcore_as_str(effect, text_dict):
+def addcore_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADDCORE"
     province_key = f"PROV{effect.which}"
     # added province id for "clarity"
     return text_dict[the_key].replace("%s", f"{text_dict[province_key]} [{effect.which}]")
 
-def alliance_as_str(effect, text_dict, country_dict):
+def alliance_as_str(effect, text_dict, country_dict=None, **kwargs):
+    if country_dict is None:
+        return
     the_key = "EE_ALL"
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
-def belligerence_change_as_str(effect, text_dict, country_dict):
+def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
+    if country_dict is None:
+        return
     the_key = "EE_BELLIGERENCE"
     raw_text = text_dict[the_key].split("%s")
     country = country_dict[effect.which]
@@ -232,11 +254,11 @@ def belligerence_change_as_str(effect, text_dict, country_dict):
     text = raw_text[0] + country + raw_text[1] + sign + raw_text[2]
     return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
 
-def dissent_change_as_str(effect, text_dict):
+def dissent_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_DISSENT"
     return text_dict[the_key].replace("%d", str(effect.value))
 
-def domestic_change_as_str(effect, text_dict, current_value=None):
+def domestic_change_as_str(effect, text_dict, current_value=None, **kwargs):
     # are these correct?
     slider_dict = {
         "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
@@ -256,7 +278,8 @@ def domestic_change_as_str(effect, text_dict, current_value=None):
     part2 = text_dict[extra_key].replace("%d", current_value_str)
     return f"{part1} {part2}"
 
-def set_domestic_as_str(effect, text_dict):
+# almost the same?
+def set_domestic_as_str(effect, text_dict, **kwargs):
     slider_dict = {
         "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
         "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
@@ -271,24 +294,66 @@ def set_domestic_as_str(effect, text_dict):
     the_key = "EE_SET_DOMESTIC"
     return text_dict[the_key].replace("%s", slider).replace("%d", str(effect.value))
 
-def manpowerpool_change_as_str(effect, text_dict):
+def energypool_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_ENERGY_POOL"
+    return text_dict[the_key].replace("%d", str(effect.value))
+
+def manpowerpool_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MANPOWER"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s", sign).replace("%d", str(effect.value))
 
-def peacetime_ic_change_as_str(effect, text_dict):
+def metalpool_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_METAL_POOL"
+    return text_dict[the_key].replace("%d", str(effect.value))
+
+def money_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_MONEY"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%+.1f", f"{sign}{effect.value}")
+
+def oilpool_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_OIL_POOL"
+    return text_dict[the_key].replace("%d", str(effect.value))
+
+def peacetime_ic_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_PEACETIME_IC_MOD"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value}%")
 
-def relation_change_as_str(effect, text_dict, country_dict):
+def rarematerialspool_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_RARE_MATERIALS_POOL"
+    return text_dict[the_key].replace("%d", str(effect.value))
+
+def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
+    if country_dict is None:
+        return
     the_key = "EE_RELATION"
     sign = "+" if effect.value > 0 else ""
     raw_text = text_dict[the_key].split("%s")
-    text = raw_text[0] + country_dict[effect.which] + raw_text[1] + sign + raw_text[2]
+    text = f"{raw_text[0]}{country_dict[effect.which]}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%d", str(effect.value))
 
-def sleepevent_as_str(effect, text_dict, event_dict):
+def resource_as_str(effect, text_dict, **kwargs):
+    # how many things are here?
+    resource_dict = {
+        "energy": "RESOURCE_ENERGY",
+        "metal": "RESOURCE_METAL",
+        "oil": "RESOURCE_OIL",
+        "rare_materials": "RESOURCE_RARE_MATERIALS",
+        "money": "RESOURCE_MONEY",
+        "supplies": "RESOURCE_SUPPLY",
+        # "manpower": "RESOURCE_MANPOWER"
+    }
+    the_key = "EE_RESOURCE"
+    sign = "+" if effect.value > 0 else ""
+    raw_text = text_dict[the_key].split("%s")
+    text = f"{raw_text[0]}{text_dict[resource_dict[effect.which]]}{raw_text[1]}{sign}{raw_text[2]}"
+    return text.replace("%.1f\\%%", f"{effect.value}%")
+
+def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
+    if event_dict is None:
+        return
     the_key = "EE_SLEEP"
     raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
     # my own additions
@@ -296,7 +361,9 @@ def sleepevent_as_str(effect, text_dict, event_dict):
     add = f" [{event_dict[effect.which].country} {effect.which}]"
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
 
-def trigger_as_str(effect, text_dict, event_dict):
+def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
+    if event_dict is None:
+        return
     the_key = "EE_TRIGGER"
     raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
     # my own additions
@@ -305,45 +372,58 @@ def trigger_as_str(effect, text_dict, event_dict):
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
 
 
-def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, **kwargs):
-    if effect.type == "access" and isinstance(country_dict, dict):
-        return access_as_str(effect, text_dict, country_dict)
-    if effect.type == "addcore":
-        return addcore_as_str(effect, text_dict)
-    if effect.type == "alliance" and isinstance(country_dict, dict):
-        return alliance_as_str(effect, text_dict, country_dict)
-    if effect.type == "belligerence" and isinstance(country_dict, dict):
-        return belligerence_change_as_str(effect, text_dict, country_dict)
-    if effect.type == "dissent":
-        return dissent_change_as_str(effect, text_dict)
-    if effect.type == "domestic":
-        return domestic_change_as_str(effect, text_dict)
-    if effect.type == "set_domestic":
-        return set_domestic_as_str(effect, text_dict)
-    if effect.type == "manpowerpool":
-        return manpowerpool_change_as_str(effect, text_dict)
-    if effect.type == "peacetime_ic_mod":
-        return peacetime_ic_change_as_str(effect, text_dict)
-    if effect.type == "relation" and isinstance(country_dict, dict):
-        return relation_change_as_str(effect, text_dict, country_dict)
-    if effect.type == "sleepevent" and isinstance(event_dict, dict):
-        return sleepevent_as_str(effect, text_dict, event_dict)
-    if effect.type == "trigger" and isinstance(event_dict, dict):
-        return trigger_as_str(effect, text_dict, event_dict)
-    text_parts = []
-    type_part = f"type = {effect.type}" if effect.type is not None else ""
-    text_parts.append(type_part)
-    which_part = f"which = {effect.which}" if effect.which is not None else ""
-    text_parts.append(which_part)
-    value_part = f"value = {effect.value}" if effect.value is not None else ""
-    text_parts.append(value_part)
-    when_part = f"when = {effect.when}" if effect.when is not None else ""
-    text_parts.append(when_part)
-    where_part = f"where = {effect.where}" if effect.where is not None else ""
-    text_parts.append(where_part)
-    text_parts = [t for t in text_parts if t]
-    # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
-    return ", ".join(text_parts)
+def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_default=False, **kwargs):
+    if force_default:
+        return effect_as_str_default(effect)
+    function_dict = {
+        "access": access_as_str,
+        "addcore": addcore_as_str,
+        "alliance": alliance_as_str,
+        "belligerence": belligerence_change_as_str,
+        "dissent": dissent_change_as_str,
+        "domestic": domestic_change_as_str,
+        "energypool": energypool_as_str,
+        "manpowerpool": manpowerpool_change_as_str,
+        "metalpool": metalpool_as_str,
+        "money": money_as_str,
+        "oilpool": oilpool_as_str,
+        "peacetime_ic_mod": peacetime_ic_change_as_str,
+        "rarematerialspool": rarematerialspool_as_str,
+        "relation": relation_change_as_str,
+        "resource": resource_as_str,
+        "set_domestic": set_domestic_as_str,
+        "sleepevent": sleepevent_as_str,
+        "trigger": trigger_as_str
+    }
+    # if effect.type == "access" and isinstance(country_dict, dict):
+    #     return access_as_str(effect, text_dict, country_dict)
+    # if effect.type == "addcore":
+    #     return addcore_as_str(effect, text_dict)
+    # if effect.type == "alliance" and isinstance(country_dict, dict):
+    #     return alliance_as_str(effect, text_dict, country_dict)
+    # if effect.type == "belligerence" and isinstance(country_dict, dict):
+    #     return belligerence_change_as_str(effect, text_dict, country_dict)
+    # if effect.type == "dissent":
+    #     return dissent_change_as_str(effect, text_dict)
+    # if effect.type == "domestic":
+    #     return domestic_change_as_str(effect, text_dict)
+    # if effect.type == "set_domestic":
+    #     return set_domestic_as_str(effect, text_dict)
+    # if effect.type == "manpowerpool":
+    #     return manpowerpool_change_as_str(effect, text_dict)
+    # if effect.type == "peacetime_ic_mod":
+    #     return peacetime_ic_change_as_str(effect, text_dict)
+    # if effect.type == "relation" and isinstance(country_dict, dict):
+    #     return relation_change_as_str(effect, text_dict, country_dict)
+    # if effect.type == "sleepevent" and isinstance(event_dict, dict):
+    #     return sleepevent_as_str(effect, text_dict, event_dict)
+    # if effect.type == "trigger" and isinstance(event_dict, dict):
+    #     return trigger_as_str(effect, text_dict, event_dict)
+    the_function = function_dict.get(effect.type.lower())
+    if the_function is not None:
+        return the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
+    
+    return effect_as_str_default(effect)
     
 
 def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, **kwargs):
