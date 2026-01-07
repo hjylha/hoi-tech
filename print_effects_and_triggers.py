@@ -233,11 +233,12 @@ def access_as_str(effect, text_dict, country_dict=None, **kwargs):
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
 def activate_unit_type_as_str(effect, text_dict, **kwargs):
-    unit_dict = {
-        "infantry": SNAME_INFANTRY
-    }
+    # unit_dict = {
+    #     "infantry": SNAME_INFANTRY
+    # }
     the_key = "EE_ACTIVATE_UNIT_TYPE"
-    return f"{text_dict[the_key]}: {text_dict[f"SNAME_{effect.which.upper()}"]}"
+    unit_name = text_dict[f"SNAME_{effect.which.upper()}"]
+    return f"{text_dict[the_key]}: {unit_name}"
 
 def addcore_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADDCORE"
@@ -638,3 +639,14 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
         print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, force_default, **kwargs)
+    
+
+def list_tech_effects(tech, text_dict, **kwargs):
+    effect_strs = []
+    research_speed_change = []
+    for effect in tech.effects:
+        if effect.type == "research_mod":
+            research_speed_change.append(effect_as_str(effect, text_dict))
+            continue
+        effect_strs.append(effect_as_str(effect, text_dict))
+    return research_speed_change + effect_strs
