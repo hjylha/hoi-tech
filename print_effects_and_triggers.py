@@ -336,12 +336,21 @@ def allow_building_as_str(effect, text_dict, **kwargs):
         "infrastructure": "Infrastructure",
         "flak": "Anti-Air",
         "nuclear_reactor": "Nuclear Reactor",
-        "nuclear_power": "Nuclear Power plant"
+        "nuclear_power": "Nuclear Power plant",
+        "synthetic_oil": "Synthetic Oil plant"
     }
     the_key = "EE_ALLOW_BUILDING"
     building_name = building_dict.get(effect.which)
-    building_name = building_name if building_name else effect.which
+    building_name = building_name if building_name else f"{effect.which}*"
     return text_dict[the_key].replace("%s", building_name)
+
+def allow_convoy_escorts_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_ALLOW_CONVOY_ESCORTS"
+    return text_dict[the_key]
+
+def allow_dig_in_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_ALLOW_DIG_IN"
+    return text_dict[the_key]
 
 def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -502,6 +511,9 @@ STR_FUNCTION_DICT = {
     # "air_detection": air_detection_as_str,
     "alliance": alliance_as_str,
     "allow_building": allow_building_as_str,
+    "allow_convoy_escorts": allow_convoy_escorts_as_str,
+    "allow_dig_in": allow_dig_in_as_str,
+
     "belligerence": belligerence_change_as_str,
     "dissent": dissent_change_as_str,
     "domestic": domestic_change_as_str,
