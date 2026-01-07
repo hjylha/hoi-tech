@@ -210,6 +210,19 @@ from event import Condition
 # waketeam
 # war
 
+def get_unit_short_name(unit_key, text_dict):
+    return text_dict[f"SNAME_{unit_key.upper()}"]
+
+
+def stat_boosts_as_str(effect, text_dict, **kwargs):
+    the_key = f"EE_{effect.type.upper()}"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    sign = "+" if effect.value > 0 else ""
+    when_part = effect.when if effect.when else ""
+    on_upgrade = text_dict.get(f"EE_{when_part.upper()}")
+    on_upgrade = on_upgrade if on_upgrade else ""
+    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value} {on_upgrade}"
+
 def effect_as_str_default(effect, **kwargs):
     text_parts = []
     type_part = f"type = {effect.type}" if effect.type is not None else ""
@@ -226,25 +239,40 @@ def effect_as_str_default(effect, **kwargs):
     # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
     return ", ".join(text_parts)
 
+def aa_batteries_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_AA_BATTERIES"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]} {sign}{effect.value}"
+
+def abomb_production_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_ABOMB_ALLOWED"
+    return text_dict[the_key]
+
 def access_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
         return
     the_key = "EE_ACCESS"
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
+def activate_as_str(effect, text_dict, **kwargs):
+    pass
+
+def activate_division_as_str(effect, text_dict, **kwargs):
+    pass
+
 def activate_unit_type_as_str(effect, text_dict, **kwargs):
     # unit_dict = {
     #     "infantry": SNAME_INFANTRY
     # }
     the_key = "EE_ACTIVATE_UNIT_TYPE"
-    unit_name = text_dict[f"SNAME_{effect.which.upper()}"]
+    unit_name = get_unit_short_name(effect.which, text_dict)
     return f"{text_dict[the_key]}: {unit_name}"
 
-def addcore_as_str(effect, text_dict, **kwargs):
-    the_key = "EE_ADDCORE"
-    province_key = f"PROV{effect.which}"
-    # added province id for "clarity"
-    return text_dict[the_key].replace("%s", f"{text_dict[province_key]} [{effect.which}]")
+def add_corps_as_str(effect, text_dict, **kwargs):
+    pass
+
+def add_division_as_str(effect, text_dict, **kwargs):
+    pass
 
 def add_prov_resource_as_str(effect, text_dict, **kwargs):
     resource_dict = {
@@ -265,11 +293,55 @@ def add_prov_resource_as_str(effect, text_dict, **kwargs):
     text = f"{raw_text[0]}{resource}{raw_text[1]}{province}{raw_text[2]}"
     return text.replace("%+.1f\\%%\\n", f"{sign}{effect.value}")
 
+def addcore_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_ADDCORE"
+    province_key = f"PROV{effect.which}"
+    # added province id for "clarity"
+    return text_dict[the_key].replace("%s", f"{text_dict[province_key]} [{effect.which}]")
+
+def ai_as_str(effect, text_dict, **kwargs):
+    pass
+
+def ai_prepare_war_as_str(effect, text_dict, **kwargs):
+    pass
+
+def air_attack_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_AIR_ATTACK"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    sign = "+" if effect.value > 0 else ""
+    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}"
+
+def air_defense_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_AIR_DEFENSE"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    sign = "+" if effect.value > 0 else ""
+    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}"
+
+def air_detection_as_str(effect, text_dict, **kwargs):
+    the_key = "EE_AIR_DETECTION"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    sign = "+" if effect.value > 0 else ""
+    on_upgrade = text_dict["EE_ON_UPGRADE"] if effect.when == "on_upgrade" else ""
+    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value} {on_upgrade}"
+
 def alliance_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
         return
     the_key = "EE_ALL"
     return text_dict[the_key].replace("%s", country_dict[effect.which])
+
+def allow_building_as_str(effect, text_dict, **kwargs):
+    building_dict = {
+        "ic": "Industrial Capacity",
+        "infrastructure": "Infrastructure",
+        "flak": "Anti-Air",
+        "nuclear_reactor": "Nuclear Reactor",
+        "nuclear_power": "Nuclear Power plant"
+    }
+    the_key = "EE_ALLOW_BUILDING"
+    building_name = building_dict.get(effect.which)
+    building_name = building_name if building_name else effect.which
+    return text_dict[the_key].replace("%s", building_name)
 
 def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -409,34 +481,75 @@ def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
 
 
+STR_FUNCTION_DICT = {
+    "aa_batteries": aa_batteries_as_str,
+    "abomb_production": abomb_production_as_str,
+    "access": access_as_str,
+    "activate": activate_as_str,
+    "activate_division": activate_division_as_str,
+    "activate_unit_type": activate_unit_type_as_str,
+    "add_corps": add_corps_as_str,
+    "add_division": add_division_as_str,
+    "add_prov_resource": add_prov_resource_as_str,
+    "addcore": addcore_as_str,
+    "ai": ai_as_str,
+    "ai_prepare_war": ai_prepare_war_as_str,
+    "air_attack": stat_boosts_as_str,
+    "air_defense": stat_boosts_as_str,
+    "air_detection": stat_boosts_as_str,
+    # "air_attack": air_attack_as_str,
+    # "air_defense": air_defense_as_str,
+    # "air_detection": air_detection_as_str,
+    "alliance": alliance_as_str,
+    "allow_building": allow_building_as_str,
+    "belligerence": belligerence_change_as_str,
+    "dissent": dissent_change_as_str,
+    "domestic": domestic_change_as_str,
+    "energypool": energypool_as_str,
+    "manpowerpool": manpowerpool_change_as_str,
+    "metalpool": metalpool_as_str,
+    "money": money_as_str,
+    "oilpool": oilpool_as_str,
+    "peacetime_ic_mod": peacetime_ic_change_as_str,
+    "rarematerialspool": rarematerialspool_as_str,
+    "relation": relation_change_as_str,
+    "relative_manpower": relative_manpower_as_str,
+    "research_mod": research_mod_as_str,
+    "resource": resource_as_str,
+    "set_domestic": set_domestic_as_str,
+    "sleepevent": sleepevent_as_str,
+    "trigger": trigger_as_str
+}
+
+
 def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_default=False, **kwargs):
     if force_default:
         return effect_as_str_default(effect)
-    function_dict = {
-        "access": access_as_str,
-        "activate_unit_type": activate_unit_type_as_str,
-        "addcore": addcore_as_str,
-        "add_prov_resource": add_prov_resource_as_str,
-        "alliance": alliance_as_str,
-        "belligerence": belligerence_change_as_str,
-        "dissent": dissent_change_as_str,
-        "domestic": domestic_change_as_str,
-        "energypool": energypool_as_str,
-        "manpowerpool": manpowerpool_change_as_str,
-        "metalpool": metalpool_as_str,
-        "money": money_as_str,
-        "oilpool": oilpool_as_str,
-        "peacetime_ic_mod": peacetime_ic_change_as_str,
-        "rarematerialspool": rarematerialspool_as_str,
-        "relation": relation_change_as_str,
-        "relative_manpower": relative_manpower_as_str,
-        "research_mod": research_mod_as_str,
-        "resource": resource_as_str,
-        "set_domestic": set_domestic_as_str,
-        "sleepevent": sleepevent_as_str,
-        "trigger": trigger_as_str
-    }
-    the_function = function_dict.get(effect.type.lower())
+    # function_dict = {
+    #     "access": access_as_str,
+    #     "activate_unit_type": activate_unit_type_as_str,
+    #     "addcore": addcore_as_str,
+    #     "add_prov_resource": add_prov_resource_as_str,
+    #     "alliance": alliance_as_str,
+    #     "belligerence": belligerence_change_as_str,
+    #     "dissent": dissent_change_as_str,
+    #     "domestic": domestic_change_as_str,
+    #     "energypool": energypool_as_str,
+    #     "manpowerpool": manpowerpool_change_as_str,
+    #     "metalpool": metalpool_as_str,
+    #     "money": money_as_str,
+    #     "oilpool": oilpool_as_str,
+    #     "peacetime_ic_mod": peacetime_ic_change_as_str,
+    #     "rarematerialspool": rarematerialspool_as_str,
+    #     "relation": relation_change_as_str,
+    #     "relative_manpower": relative_manpower_as_str,
+    #     "research_mod": research_mod_as_str,
+    #     "resource": resource_as_str,
+    #     "set_domestic": set_domestic_as_str,
+    #     "sleepevent": sleepevent_as_str,
+    #     "trigger": trigger_as_str
+    # }
+    the_function = STR_FUNCTION_DICT.get(effect.type.lower())
     if the_function is not None:
         return the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
     
