@@ -226,7 +226,8 @@ def get_unit_short_name(unit_key, text_dict):
 
 def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
     exceptions = {
-        "defensiveness": "EE_GROUND_DEFENSE"
+        "defensiveness": "EE_GROUND_DEFENSE",
+        "max_organization": "EE_MAX_ORG"
     }
     the_key = exceptions.get(effect.type)
     if the_key is None:
@@ -246,6 +247,16 @@ def unit_stat_pct_boost_as_str(effect, text_dict, **kwargs):
     on_upgrade = text_dict.get(f"EE_{when_part.upper()}")
     on_upgrade = on_upgrade if on_upgrade else ""
     return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}% {on_upgrade}"
+
+def combat_event_chance_as_str(effect, text_dict, **kwargs):
+    the_key = f"EE_{effect.type.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
+
+def pct_change_as_str(effect, text_dict, **kwargs):
+    the_key = f"EE_{effect.type.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
 
 def effect_as_str_default(effect, **kwargs):
     text_parts = []
@@ -278,8 +289,11 @@ def access_as_str(effect, text_dict, country_dict=None, **kwargs):
     the_key = "EE_ACCESS"
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
-def activate_as_str(effect, text_dict, **kwargs):
-    pass
+def activate_as_str(effect, text_dict, tech_dict=None, **kwargs):
+    if tech_dict is None:
+        return
+    the_key = "EE_ACTIVATE_TECH"
+    return text_dict[the_key].replace("%s", f"{effect.which} {tech_dict[effect.which].name}")
 
 def activate_division_as_str(effect, text_dict, **kwargs):
     pass
@@ -454,8 +468,12 @@ def country_as_str(effect, text_dict, **kwargs):
 def damage_division_as_str(effect, text_dict, **kwargs):
 	pass
 
-def deactivate_as_str(effect, text_dict, **kwargs):
-	pass
+def deactivate_as_str(effect, text_dict, tech_dict=None, **kwargs):
+    if tech_dict is None:
+        return
+    the_key = "EE_DEACTIVATE_TECH"
+    return f"{text_dict[the_key]}: \n  {effect.which} {tech_dict[effect.which].name}"
+    
 
 def delay_as_str(effect, text_dict, **kwargs):
 	pass
@@ -881,16 +899,16 @@ STR_FUNCTION_DICT = {
     "allow_building": allow_building_as_str,
     "allow_convoy_escorts": allow_convoy_escorts_as_str,
     "allow_dig_in": allow_dig_in_as_str,
-    "ambush": ambush_as_str,
+    "ambush": pct_change_as_str,
     "armamentminister": armamentminister_as_str,
     "army_detection": army_detection_as_str,
-    "assault": assault_as_str,
-    "attrition_mod": attrition_mod_as_str,
+    "assault": pct_change_as_str,
+    "attrition_mod": pct_change_as_str,
     "belligerence": belligerence_change_as_str,
     "blizzard_attack": unit_stat_pct_boost_as_str,
     "blizzard_defense": unit_stat_pct_boost_as_str,
     "blizzard_move": unit_stat_pct_boost_as_str,
-    "breakthrough": breakthrough_as_str,
+    "breakthrough": pct_change_as_str,
     "build_cost": build_cost_as_str,
     "build_division": build_division_as_str,
     "build_time": build_time_as_str,
@@ -911,12 +929,12 @@ STR_FUNCTION_DICT = {
     "convoy": convoy_as_str,
     "convoy_def_eff": convoy_def_eff_as_str,
     "convoy_prod_mod": convoy_prod_mod_as_str,
-    "counterattack": counterattack_as_str,
+    "counterattack": pct_change_as_str,
     "country": country_as_str,
     "damage_division": damage_division_as_str,
     "deactivate": deactivate_as_str,
     "defensiveness": unit_stat_boosts_as_str,
-    "delay": delay_as_str,
+    "delay": pct_change_as_str,
     "delete_unit": delete_unit_as_str,
     "desert_attack": unit_stat_pct_boost_as_str,
     "desert_defense": unit_stat_pct_boost_as_str,
@@ -926,7 +944,7 @@ STR_FUNCTION_DICT = {
     "domestic": domestic_change_as_str,
     "double_nuke_prod": double_nuke_prod_as_str,
     "enable_task": enable_task_as_str,
-    "encirclement": encirclement_as_str,
+    "encirclement": pct_change_as_str,
     "end_access": end_access_as_str,
     "end_guarantee": end_guarantee_as_str,
     "end_mastery": end_mastery_as_str,
@@ -976,7 +994,7 @@ STR_FUNCTION_DICT = {
     "make_puppet": make_puppet_as_str,
     "manpowerpool": manpowerpool_change_as_str,
     "max_amphib_mod": max_amphib_mod_as_str,
-    "max_organization": max_organization_as_str,
+    "max_organization": unit_stat_boosts_as_str,
     "max_positioning": max_positioning_as_str,
     "max_reactor_size": max_reactor_size_as_str,
     "metalpool": metalpool_as_str,
@@ -984,7 +1002,7 @@ STR_FUNCTION_DICT = {
     "ministerofintelligence": ministerofintelligence_as_str,
     "ministerofsecurity": ministerofsecurity_as_str,
     "money": money_as_str,
-    "morale": morale_as_str,
+    "morale": unit_stat_boosts_as_str,
     "mountain_attack": unit_stat_pct_boost_as_str,
     "mountain_defense": unit_stat_pct_boost_as_str,
     "mountain_move": unit_stat_pct_boost_as_str,
@@ -1053,12 +1071,12 @@ STR_FUNCTION_DICT = {
     "swamp_defense": unit_stat_pct_boost_as_str,
     "swamp_move": unit_stat_pct_boost_as_str,
     "switch_allegiance": switch_allegiance_as_str,
-    "tactical_withdrawal": tactical_withdrawal_as_str,
+    "tactical_withdrawal": pct_change_as_str,
     "task_efficiency": task_efficiency_as_str,
     "tc_mod": tc_mod_as_str,
     "tc_occupied_mod": tc_occupied_mod_as_str,
     "transport_pool": transport_pool_as_str,
-    "trickleback_mod": trickleback_mod_as_str,
+    "trickleback_mod": pct_change_as_str,
     "trigger": trigger_as_str,
     "urban_attack": unit_stat_pct_boost_as_str,
     "urban_defense": unit_stat_pct_boost_as_str,
@@ -1071,7 +1089,7 @@ STR_FUNCTION_DICT = {
 }
 
 
-def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_default=False, **kwargs):
+def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, tech_dict=None, force_default=False, **kwargs):
     if force_default:
         return effect_as_str_default(effect)
     the_function = STR_FUNCTION_DICT.get(effect.type.lower())
@@ -1079,15 +1097,15 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
         print("PROBLEM:", effect.type)
     # if the_function is not None:
     #     the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
-    the_text = STR_FUNCTION_DICT.get(effect.type.lower())(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
+    the_text = STR_FUNCTION_DICT.get(effect.type.lower())(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, tech_dict=tech_dict, **kwargs)
     if the_text:
         return the_text
     
     return effect_as_str_default(effect)
     
 
-def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, force_default=False, **kwargs):
-    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, country_dict, force_default, **kwargs))
+def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, tech_dict=None, force_default=False, **kwargs):
+    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, country_dict, tech_dict, force_default=force_default, **kwargs))
     
 
 # Trigger keys: (AI/ai)
@@ -1208,7 +1226,7 @@ def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
         return
     event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict=None, force_default=False, **kwargs):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict=None, tech_dict=None, force_default=False, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -1227,9 +1245,9 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, country_
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
     for effect in action.effects:
-        print_effect(effect, indent_num, text_dict, event_dict, country_dict, force_default, **kwargs)
+        print_effect(effect, indent_num, text_dict, event_dict, country_dict, tech_dict, force_default=force_default, **kwargs)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, country_dict, force_default=False, **kwargs):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, country_dict, tech_dict, force_default=False, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
@@ -1281,15 +1299,17 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
     print(indent_num * ' ', "Possible Actions:")
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
-        print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, force_default, **kwargs)
+        print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, tech_dict, force_default=force_default, **kwargs)
     
 
-def list_tech_effects(tech, text_dict, **kwargs):
+def list_tech_effects(tech, text_dict, tech_dict, **kwargs):
     effect_strs = []
     research_speed_change = []
     for effect in tech.effects:
         if effect.type == "research_mod":
             research_speed_change.append(effect_as_str(effect, text_dict))
             continue
-        effect_strs.append(effect_as_str(effect, text_dict))
+        effect_str = effect_as_str(effect, text_dict, tech_dict=tech_dict)
+        for eff_str in effect_str.split("\n"):
+            effect_strs.append(eff_str)
     return research_speed_change + effect_strs
