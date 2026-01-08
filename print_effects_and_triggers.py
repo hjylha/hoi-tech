@@ -214,7 +214,7 @@ def get_unit_short_name(unit_key, text_dict):
     return text_dict[f"SNAME_{unit_key.upper()}"]
 
 
-def stat_boosts_as_str(effect, text_dict, **kwargs):
+def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
     unit_name = get_unit_short_name(effect.which, text_dict)
     sign = "+" if effect.value > 0 else ""
@@ -351,6 +351,21 @@ def allow_convoy_escorts_as_str(effect, text_dict, **kwargs):
 def allow_dig_in_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ALLOW_DIG_IN"
     return text_dict[the_key]
+
+def ambush_as_str(effect, text_dict, **kwargs):
+    pass
+
+def armamentminister_as_str(effect, text_dict, **kwargs):
+    pass
+
+def army_detection_as_str(effect, text_dict, **kwargs):
+    pass
+
+def assault_as_str(effect, text_dict, **kwargs):
+    pass
+
+def attrition_mod_as_str(effect, text_dict, **kwargs):
+    pass
 
 def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -503,9 +518,9 @@ STR_FUNCTION_DICT = {
     "addcore": addcore_as_str,
     "ai": ai_as_str,
     "ai_prepare_war": ai_prepare_war_as_str,
-    "air_attack": stat_boosts_as_str,
-    "air_defense": stat_boosts_as_str,
-    "air_detection": stat_boosts_as_str,
+    "air_attack": unit_stat_boosts_as_str,
+    "air_defense": unit_stat_boosts_as_str,
+    "air_detection": unit_stat_boosts_as_str,
     # "air_attack": air_attack_as_str,
     # "air_defense": air_defense_as_str,
     # "air_detection": air_detection_as_str,
@@ -513,7 +528,11 @@ STR_FUNCTION_DICT = {
     "allow_building": allow_building_as_str,
     "allow_convoy_escorts": allow_convoy_escorts_as_str,
     "allow_dig_in": allow_dig_in_as_str,
-
+    "ambush": ambush_as_str,
+    "armamentminister": armamentminister_as_str,
+    "army_detection": army_detection_as_str,
+    "assault": assault_as_str,
+    "attrition_mod": attrition_mod_as_str,
     "belligerence": belligerence_change_as_str,
     "dissent": dissent_change_as_str,
     "domestic": domestic_change_as_str,
@@ -563,7 +582,9 @@ def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_d
     # }
     the_function = STR_FUNCTION_DICT.get(effect.type.lower())
     if the_function is not None:
-        return the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
+        the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
+        if the_text:
+            return the_text
     
     return effect_as_str_default(effect)
     
