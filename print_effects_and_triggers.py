@@ -248,15 +248,21 @@ def unit_stat_pct_boost_as_str(effect, text_dict, **kwargs):
     on_upgrade = on_upgrade if on_upgrade else ""
     return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}% {on_upgrade}"
 
-def combat_event_chance_as_str(effect, text_dict, **kwargs):
+def change_as_str(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
     sign = "+" if effect.value > 0 else ""
-    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
+    return text_dict[the_key].replace("%d", f"{sign}{effect.value}")
 
 def pct_change_as_str(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
+
+def pct_change_as_str_w_plus(effect, text_dict, **kwargs):
+    the_key = f"EE_{effect.type.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%+.1f\\%%\\n", f"{sign}{effect.value}%")
+
 
 def effect_as_str_default(effect, **kwargs):
     text_parts = []
@@ -380,7 +386,10 @@ def armamentminister_as_str(effect, text_dict, **kwargs):
     pass
 
 def army_detection_as_str(effect, text_dict, **kwargs):
-    pass
+    the_key = "EE_ARMY_DETECTION"
+    second_key = f"EE_{effect.which.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}%"
 
 def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -469,10 +478,6 @@ def delete_unit_as_str(effect, text_dict, **kwargs):
 
 def disorg_division_as_str(effect, text_dict, **kwargs):
 	pass
-
-def dissent_change_as_str(effect, text_dict, **kwargs):
-    the_key = "EE_DISSENT"
-    return text_dict[the_key].replace("%d", str(effect.value))
 
 def domestic_change_as_str(effect, text_dict, current_value=None, **kwargs):
     # are these correct?
@@ -605,7 +610,10 @@ def inherit_as_str(effect, text_dict, **kwargs):
 	pass
 
 def intelligence_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_INTELLIGENCE"
+    second_key = f"EE_{effect.which.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}%"
 
 def land_fort_eff_as_str(effect, text_dict, **kwargs):
 	pass
@@ -690,8 +698,6 @@ def province_manpower_as_str(effect, text_dict, **kwargs):
 def province_revoltrisk_as_str(effect, text_dict, **kwargs):
 	pass
 
-def radar_eff_as_str(effect, text_dict, **kwargs):
-	pass
 
 def rarematerialspool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RARE_MATERIALS_POOL"
@@ -804,7 +810,10 @@ def surface_detection_as_str(effect, text_dict, **kwargs):
 	pass
 
 def surprise_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SURPRISE"
+    second_key = f"WHICH_TYPE_{effect.which.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}%"
 
 def switch_allegiance_as_str(effect, text_dict, **kwargs):
 	pass
@@ -911,7 +920,7 @@ STR_FUNCTION_DICT = {
     "desert_defense": unit_stat_pct_boost_as_str,
     "desert_move": unit_stat_pct_boost_as_str,
     "disorg_division": disorg_division_as_str,
-    "dissent": dissent_change_as_str,
+    "dissent": change_as_str,
     "domestic": domestic_change_as_str,
     "double_nuke_prod": double_nuke_prod_as_str,
     "enable_task": enable_task_as_str,
@@ -994,7 +1003,7 @@ STR_FUNCTION_DICT = {
     "province_keypoints": province_keypoints_as_str,
     "province_manpower": province_manpower_as_str,
     "province_revoltrisk": province_revoltrisk_as_str,
-    "radar_eff": radar_eff_as_str,
+    "radar_eff": pct_change_as_str_w_plus,
     "rain_attack": unit_stat_pct_boost_as_str,
     "rain_defense": unit_stat_pct_boost_as_str,
     "rain_move": unit_stat_pct_boost_as_str,
