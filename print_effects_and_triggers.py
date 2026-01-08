@@ -211,7 +211,14 @@ from event import Condition
 # war
 
 def get_unit_short_name(unit_key, text_dict):
-    return text_dict[f"SNAME_{unit_key.upper()}"]
+    exceptions = {
+        "anti_air": "SNAME_ANTIAIR",
+        "anti_tank": "SNAME_ANTITANK"
+    }
+    the_key = exceptions.get(unit_key)
+    if the_key is None:
+        the_key = f"SNAME_{unit_key.upper()}"
+    return text_dict[the_key]
 
 
 def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
@@ -222,6 +229,15 @@ def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
     on_upgrade = text_dict.get(f"EE_{when_part.upper()}")
     on_upgrade = on_upgrade if on_upgrade else ""
     return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value} {on_upgrade}"
+
+def unit_stat_pct_boost_as_str(effect, text_dict, **kwargs):
+    the_key = f"EE_{effect.type.upper()}"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    sign = "+" if effect.value > 0 else ""
+    when_part = effect.when if effect.when else ""
+    on_upgrade = text_dict.get(f"EE_{when_part.upper()}")
+    on_upgrade = on_upgrade if on_upgrade else ""
+    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}% {on_upgrade}"
 
 def effect_as_str_default(effect, **kwargs):
     text_parts = []
@@ -377,6 +393,102 @@ def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     text = raw_text[0] + country + raw_text[1] + sign + raw_text[2]
     return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
 
+def breakthrough_as_str(effect, text_dict, **kwargs):
+	pass
+
+def build_cost_as_str(effect, text_dict, **kwargs):
+	pass
+
+def build_division_as_str(effect, text_dict, **kwargs):
+	pass
+
+def build_time_as_str(effect, text_dict, **kwargs):
+	pass
+
+def building_eff_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def building_prod_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def capital_as_str(effect, text_dict, **kwargs):
+	pass
+
+def carrier_level_as_str(effect, text_dict, **kwargs):
+	pass
+
+def change_policy_as_str(effect, text_dict, **kwargs):
+	pass
+
+def chiefofair_as_str(effect, text_dict, **kwargs):
+	pass
+
+def chiefofarmy_as_str(effect, text_dict, **kwargs):
+	pass
+
+def chiefofnavy_as_str(effect, text_dict, **kwargs):
+	pass
+
+def chiefofstaff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def civil_war_as_str(effect, text_dict, **kwargs):
+	pass
+
+def clrflag_as_str(effect, text_dict, **kwargs):
+	pass
+
+def coast_fort_eff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def construct_as_str(effect, text_dict, **kwargs):
+	pass
+
+def control_as_str(effect, text_dict, **kwargs):
+	pass
+
+def convoy_as_str(effect, text_dict, **kwargs):
+	pass
+
+def convoy_def_eff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def convoy_prod_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def counterattack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def country_as_str(effect, text_dict, **kwargs):
+	pass
+
+def damage_division_as_str(effect, text_dict, **kwargs):
+	pass
+
+def deactivate_as_str(effect, text_dict, **kwargs):
+	pass
+
+def defensiveness_as_str(effect, text_dict, **kwargs):
+	pass
+
+def delay_as_str(effect, text_dict, **kwargs):
+	pass
+
+def delete_unit_as_str(effect, text_dict, **kwargs):
+	pass
+
+def desert_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def desert_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def desert_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def disorg_division_as_str(effect, text_dict, **kwargs):
+	pass
+
 def dissent_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_DISSENT"
     return text_dict[the_key].replace("%d", str(effect.value))
@@ -417,36 +529,279 @@ def set_domestic_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SET_DOMESTIC"
     return text_dict[the_key].replace("%s", slider).replace("%d", str(effect.value))
 
+def double_nuke_prod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def enable_task_as_str(effect, text_dict, **kwargs):
+	pass
+
+def encirclement_as_str(effect, text_dict, **kwargs):
+	pass
+
+def end_access_as_str(effect, text_dict, **kwargs):
+	pass
+
+def end_guarantee_as_str(effect, text_dict, **kwargs):
+	pass
+
+def end_mastery_as_str(effect, text_dict, **kwargs):
+	pass
+
+def end_non_aggression_as_str(effect, text_dict, **kwargs):
+	pass
+
+def end_puppet_as_str(effect, text_dict, **kwargs):
+	pass
+
+def end_trades_as_str(effect, text_dict, **kwargs):
+	pass
+
 def energypool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ENERGY_POOL"
     return text_dict[the_key].replace("%d", str(effect.value))
+
+def escort_pool_as_str(effect, text_dict, **kwargs):
+	pass
+
+def extra_tc_as_str(effect, text_dict, **kwargs):
+	pass
+
+def foreignminister_as_str(effect, text_dict, **kwargs):
+	pass
+
+def forest_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def fort_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_energy_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_ic_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_metal_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_money_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_oil_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_rare_materials_as_str(effect, text_dict, **kwargs):
+	pass
+
+def free_supplies_as_str(effect, text_dict, **kwargs):
+	pass
+
+def frozen_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def frozen_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def frozen_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def fuel_consumption_as_str(effect, text_dict, **kwargs):
+	pass
+
+def gain_tech_as_str(effect, text_dict, **kwargs):
+	pass
+
+def ground_def_eff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def guarantee_as_str(effect, text_dict, **kwargs):
+	pass
+
+def hard_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def headofgovernment_as_str(effect, text_dict, **kwargs):
+	pass
+
+def headofstate_as_str(effect, text_dict, **kwargs):
+	pass
+
+def hill_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def hill_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def hill_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def hq_supply_eff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def independence_as_str(effect, text_dict, **kwargs):
+	pass
+
+def industrial_modifier_as_str(effect, text_dict, **kwargs):
+	pass
+
+def industrial_multiplier_as_str(effect, text_dict, **kwargs):
+	pass
+
+def info_may_cause_as_str(effect, text_dict, **kwargs):
+	pass
+
+def inherit_as_str(effect, text_dict, **kwargs):
+	pass
+
+def intelligence_as_str(effect, text_dict, **kwargs):
+	pass
+
+def jungle_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def jungle_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def jungle_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def land_fort_eff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def leave_alliance_as_str(effect, text_dict, **kwargs):
+	pass
+
+def local_clrflag_as_str(effect, text_dict, **kwargs):
+	pass
+
+def local_setflag_as_str(effect, text_dict, **kwargs):
+	pass
+
+def make_puppet_as_str(effect, text_dict, **kwargs):
+	pass
 
 def manpowerpool_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MANPOWER"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s", sign).replace("%d", str(effect.value))
 
+def max_amphib_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def max_organization_as_str(effect, text_dict, **kwargs):
+	pass
+
+def max_positioning_as_str(effect, text_dict, **kwargs):
+	pass
+
+def max_reactor_size_as_str(effect, text_dict, **kwargs):
+	pass
+
 def metalpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_METAL_POOL"
     return text_dict[the_key].replace("%d", str(effect.value))
+
+def min_positioning_as_str(effect, text_dict, **kwargs):
+	pass
+
+def ministerofintelligence_as_str(effect, text_dict, **kwargs):
+	pass
+
+def ministerofsecurity_as_str(effect, text_dict, **kwargs):
+	pass
 
 def money_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MONEY"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%+.1f", f"{sign}{effect.value}")
 
+def morale_as_str(effect, text_dict, **kwargs):
+	pass
+
+def mountain_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def mountain_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def mountain_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def muddy_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def naval_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def naval_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def new_model_as_str(effect, text_dict, **kwargs):
+	pass
+
+def night_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def night_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def night_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def non_aggression_as_str(effect, text_dict, **kwargs):
+	pass
+
+def nuclear_carrier_as_str(effect, text_dict, **kwargs):
+	pass
+
+def nuke_damage_as_str(effect, text_dict, **kwargs):
+	pass
+
 def oilpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_OIL_POOL"
     return text_dict[the_key].replace("%d", str(effect.value))
+
+def paradrop_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def peace_as_str(effect, text_dict, **kwargs):
+	pass
 
 def peacetime_ic_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_PEACETIME_IC_MOD"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value}%")
 
+def province_keypoints_as_str(effect, text_dict, **kwargs):
+	pass
+
+def province_manpower_as_str(effect, text_dict, **kwargs):
+	pass
+
+def province_revoltrisk_as_str(effect, text_dict, **kwargs):
+	pass
+
+def radar_eff_as_str(effect, text_dict, **kwargs):
+	pass
+
+def rain_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def rain_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def rain_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def range_as_str(effect, text_dict, **kwargs):
+	pass
+
 def rarematerialspool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RARE_MATERIALS_POOL"
     return text_dict[the_key].replace("%d", str(effect.value))
+
+def regime_falls_as_str(effect, text_dict, **kwargs):
+	pass
 
 def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -462,10 +817,22 @@ def relative_manpower_as_str(effect, text_dict, **kwargs):
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
 
+def remove_division_as_str(effect, text_dict, **kwargs):
+	pass
+
+def removecore_as_str(effect, text_dict, **kwargs):
+	pass
+
+def repair_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
 def research_mod_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RESEARCH_MOD"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}")
+
+def research_sabotaged_as_str(effect, text_dict, **kwargs):
+	pass
 
 def resource_as_str(effect, text_dict, **kwargs):
     # how many things are here?
@@ -484,6 +851,33 @@ def resource_as_str(effect, text_dict, **kwargs):
     text = f"{raw_text[0]}{text_dict[resource_dict[effect.which]]}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%.1f\\%%", f"{effect.value}%")
 
+def revolt_as_str(effect, text_dict, **kwargs):
+	pass
+
+def river_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def sce_frequency_as_str(effect, text_dict, **kwargs):
+	pass
+
+def scrap_model_as_str(effect, text_dict, **kwargs):
+	pass
+
+def secedeprovince_as_str(effect, text_dict, **kwargs):
+	pass
+
+def set_leader_skill_as_str(effect, text_dict, **kwargs):
+	pass
+
+def set_relation_as_str(effect, text_dict, **kwargs):
+	pass
+
+def setflag_as_str(effect, text_dict, **kwargs):
+	pass
+
+def shore_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
 def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
     if event_dict is None:
         return
@@ -494,6 +888,90 @@ def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
     add = f" [{event_dict[effect.which].country} {effect.which}]"
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
 
+def sleepleader_as_str(effect, text_dict, **kwargs):
+	pass
+
+def sleepminister_as_str(effect, text_dict, **kwargs):
+	pass
+
+def sleepteam_as_str(effect, text_dict, **kwargs):
+	pass
+
+def snow_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def snow_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def snow_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def soft_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def speed_as_str(effect, text_dict, **kwargs):
+	pass
+
+def steal_tech_as_str(effect, text_dict, **kwargs):
+	pass
+
+def storm_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def storm_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def storm_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def strategic_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def supplies_as_str(effect, text_dict, **kwargs):
+	pass
+
+def supply_consumption_as_str(effect, text_dict, **kwargs):
+	pass
+
+def supply_dist_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def surface_detection_as_str(effect, text_dict, **kwargs):
+	pass
+
+def surprise_as_str(effect, text_dict, **kwargs):
+	pass
+
+def swamp_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def swamp_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def swamp_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def switch_allegiance_as_str(effect, text_dict, **kwargs):
+	pass
+
+def tactical_withdrawal_as_str(effect, text_dict, **kwargs):
+	pass
+
+def task_efficiency_as_str(effect, text_dict, **kwargs):
+	pass
+
+def tc_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def tc_occupied_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
+def transport_pool_as_str(effect, text_dict, **kwargs):
+	pass
+
+def trickleback_mod_as_str(effect, text_dict, **kwargs):
+	pass
+
 def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
     if event_dict is None:
         return
@@ -503,6 +981,30 @@ def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
     name_w_quotes = f"'{event_dict[effect.which].name}'"
     add = f" [{event_dict[effect.which].country} {effect.which}]"
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
+
+def urban_attack_as_str(effect, text_dict, **kwargs):
+	pass
+
+def urban_defense_as_str(effect, text_dict, **kwargs):
+	pass
+
+def urban_move_as_str(effect, text_dict, **kwargs):
+	pass
+
+def visibility_as_str(effect, text_dict, **kwargs):
+	pass
+
+def vp_as_str(effect, text_dict, **kwargs):
+	pass
+
+def wakeleader_as_str(effect, text_dict, **kwargs):
+	pass
+
+def waketeam_as_str(effect, text_dict, **kwargs):
+	pass
+
+def war_as_str(effect, text_dict, **kwargs):
+	pass
 
 
 STR_FUNCTION_DICT = {
@@ -534,57 +1036,201 @@ STR_FUNCTION_DICT = {
     "assault": assault_as_str,
     "attrition_mod": attrition_mod_as_str,
     "belligerence": belligerence_change_as_str,
+    "blizzard_attack": unit_stat_pct_boost_as_str,
+    "blizzard_defense": unit_stat_pct_boost_as_str,
+    "blizzard_move": unit_stat_pct_boost_as_str,
+    "breakthrough": breakthrough_as_str,
+    "build_cost": build_cost_as_str,
+    "build_division": build_division_as_str,
+    "build_time": build_time_as_str,
+    "building_eff_mod": building_eff_mod_as_str,
+    "building_prod_mod": building_prod_mod_as_str,
+    "capital": capital_as_str,
+    "carrier_level": carrier_level_as_str,
+    "change_policy": change_policy_as_str,
+    "chiefofair": chiefofair_as_str,
+    "chiefofarmy": chiefofarmy_as_str,
+    "chiefofnavy": chiefofnavy_as_str,
+    "chiefofstaff": chiefofstaff_as_str,
+    "civil_war": civil_war_as_str,
+    "clrflag": clrflag_as_str,
+    "coast_fort_eff": coast_fort_eff_as_str,
+    "construct": construct_as_str,
+    "control": control_as_str,
+    "convoy": convoy_as_str,
+    "convoy_def_eff": convoy_def_eff_as_str,
+    "convoy_prod_mod": convoy_prod_mod_as_str,
+    "counterattack": counterattack_as_str,
+    "country": country_as_str,
+    "damage_division": damage_division_as_str,
+    "deactivate": deactivate_as_str,
+    "defensiveness": defensiveness_as_str,
+    "delay": delay_as_str,
+    "delete_unit": delete_unit_as_str,
+    "desert_attack": unit_stat_pct_boost_as_str,
+    "desert_defense": unit_stat_pct_boost_as_str,
+    "desert_move": unit_stat_pct_boost_as_str,
+    "disorg_division": disorg_division_as_str,
     "dissent": dissent_change_as_str,
     "domestic": domestic_change_as_str,
+    "double_nuke_prod": double_nuke_prod_as_str,
+    "enable_task": enable_task_as_str,
+    "encirclement": encirclement_as_str,
+    "end_access": end_access_as_str,
+    "end_guarantee": end_guarantee_as_str,
+    "end_mastery": end_mastery_as_str,
+    "end_non_aggression": end_non_aggression_as_str,
+    "end_puppet": end_puppet_as_str,
+    "end_trades": end_trades_as_str,
     "energypool": energypool_as_str,
+    "escort_pool": escort_pool_as_str,
+    "extra_tc": extra_tc_as_str,
+    "foreignminister": foreignminister_as_str,
+    "forest_defense": forest_defense_as_str,
+    "fort_attack": unit_stat_pct_boost_as_str,
+    "free_energy": free_energy_as_str,
+    "free_ic": free_ic_as_str,
+    "free_metal": free_metal_as_str,
+    "free_money": free_money_as_str,
+    "free_oil": free_oil_as_str,
+    "free_rare_materials": free_rare_materials_as_str,
+    "free_supplies": free_supplies_as_str,
+    "frozen_attack": unit_stat_pct_boost_as_str,
+    "frozen_defense": unit_stat_pct_boost_as_str,
+    "frozen_move": unit_stat_pct_boost_as_str,
+    "fuel_consumption": fuel_consumption_as_str,
+    "gain_tech": gain_tech_as_str,
+    "ground_def_eff": ground_def_eff_as_str,
+    "guarantee": guarantee_as_str,
+    "hard_attack": unit_stat_boosts_as_str,
+    "headofgovernment": headofgovernment_as_str,
+    "headofstate": headofstate_as_str,
+    "hill_attack": unit_stat_pct_boost_as_str,
+    "hill_defense": unit_stat_pct_boost_as_str,
+    "hill_move": unit_stat_pct_boost_as_str,
+    "hq_supply_eff": hq_supply_eff_as_str,
+    "independence": independence_as_str,
+    "industrial_modifier": industrial_modifier_as_str,
+    "industrial_multiplier": industrial_multiplier_as_str,
+    "info_may_cause": info_may_cause_as_str,
+    "inherit": inherit_as_str,
+    "intelligence": intelligence_as_str,
+    "jungle_attack": unit_stat_pct_boost_as_str,
+    "jungle_defense": unit_stat_pct_boost_as_str,
+    "jungle_move": unit_stat_pct_boost_as_str,
+    "land_fort_eff": land_fort_eff_as_str,
+    "leave_alliance": leave_alliance_as_str,
+    "local_clrflag": local_clrflag_as_str,
+    "local_setflag": local_setflag_as_str,
+    "make_puppet": make_puppet_as_str,
     "manpowerpool": manpowerpool_change_as_str,
+    "max_amphib_mod": max_amphib_mod_as_str,
+    "max_organization": max_organization_as_str,
+    "max_positioning": max_positioning_as_str,
+    "max_reactor_size": max_reactor_size_as_str,
     "metalpool": metalpool_as_str,
+    "min_positioning": min_positioning_as_str,
+    "ministerofintelligence": ministerofintelligence_as_str,
+    "ministerofsecurity": ministerofsecurity_as_str,
     "money": money_as_str,
+    "morale": morale_as_str,
+    "mountain_attack": unit_stat_pct_boost_as_str,
+    "mountain_defense": unit_stat_pct_boost_as_str,
+    "mountain_move": unit_stat_pct_boost_as_str,
+    "muddy_move": unit_stat_pct_boost_as_str,
+    "naval_attack": unit_stat_boosts_as_str,
+    "naval_defense": unit_stat_boosts_as_str,
+    "new_model": new_model_as_str,
+    "night_attack": unit_stat_pct_boost_as_str,
+    "night_defense": unit_stat_pct_boost_as_str,
+    "night_move": unit_stat_pct_boost_as_str,
+    "non_aggression": non_aggression_as_str,
+    "nuclear_carrier": nuclear_carrier_as_str,
+    "nuke_damage": nuke_damage_as_str,
     "oilpool": oilpool_as_str,
+    "paradrop_attack": paradrop_attack_as_str,
+    "peace": peace_as_str,
     "peacetime_ic_mod": peacetime_ic_change_as_str,
+    "province_keypoints": province_keypoints_as_str,
+    "province_manpower": province_manpower_as_str,
+    "province_revoltrisk": province_revoltrisk_as_str,
+    "radar_eff": radar_eff_as_str,
+    "rain_attack": unit_stat_pct_boost_as_str,
+    "rain_defense": unit_stat_pct_boost_as_str,
+    "rain_move": unit_stat_pct_boost_as_str,
+    "range": unit_stat_boosts_as_str,
     "rarematerialspool": rarematerialspool_as_str,
+    "regime_falls": regime_falls_as_str,
     "relation": relation_change_as_str,
     "relative_manpower": relative_manpower_as_str,
+    "remove_division": remove_division_as_str,
+    "removecore": removecore_as_str,
+    "repair_mod": repair_mod_as_str,
     "research_mod": research_mod_as_str,
+    "research_sabotaged": research_sabotaged_as_str,
     "resource": resource_as_str,
+    "revolt": revolt_as_str,
+    "river_attack": unit_stat_pct_boost_as_str,
+    "sce_frequency": sce_frequency_as_str,
+    "scrap_model": scrap_model_as_str,
+    "secedeprovince": secedeprovince_as_str,
     "set_domestic": set_domestic_as_str,
+    "set_leader_skill": set_leader_skill_as_str,
+    "set_relation": set_relation_as_str,
+    "setflag": setflag_as_str,
+    "shore_attack": unit_stat_pct_boost_as_str,
     "sleepevent": sleepevent_as_str,
-    "trigger": trigger_as_str
+    "sleepleader": sleepleader_as_str,
+    "sleepminister": sleepminister_as_str,
+    "sleepteam": sleepteam_as_str,
+    "snow_attack": unit_stat_pct_boost_as_str,
+    "snow_defense": unit_stat_pct_boost_as_str,
+    "snow_move": unit_stat_pct_boost_as_str,
+    "soft_attack": unit_stat_boosts_as_str,
+    "speed": unit_stat_boosts_as_str,
+    "steal_tech": steal_tech_as_str,
+    "storm_attack": unit_stat_pct_boost_as_str,
+    "storm_defense": unit_stat_pct_boost_as_str,
+    "storm_move": unit_stat_pct_boost_as_str,
+    "strategic_attack": unit_stat_boosts_as_str,
+    "supplies": supplies_as_str,
+    "supply_consumption": supply_consumption_as_str,
+    "supply_dist_mod": supply_dist_mod_as_str,
+    "surface_detection": surface_detection_as_str,
+    "surprise": surprise_as_str,
+    "swamp_attack": unit_stat_pct_boost_as_str,
+    "swamp_defense": unit_stat_pct_boost_as_str,
+    "swamp_move": unit_stat_pct_boost_as_str,
+    "switch_allegiance": switch_allegiance_as_str,
+    "tactical_withdrawal": tactical_withdrawal_as_str,
+    "task_efficiency": task_efficiency_as_str,
+    "tc_mod": tc_mod_as_str,
+    "tc_occupied_mod": tc_occupied_mod_as_str,
+    "transport_pool": transport_pool_as_str,
+    "trickleback_mod": trickleback_mod_as_str,
+    "trigger": trigger_as_str,
+    "urban_attack": unit_stat_pct_boost_as_str,
+    "urban_defense": unit_stat_pct_boost_as_str,
+    "urban_move": unit_stat_pct_boost_as_str,
+    "visibility": visibility_as_str,
+    "vp": vp_as_str,
+    "wakeleader": wakeleader_as_str,
+    "waketeam": waketeam_as_str,
+    "war": war_as_str
 }
 
 
 def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, force_default=False, **kwargs):
     if force_default:
         return effect_as_str_default(effect)
-    # function_dict = {
-    #     "access": access_as_str,
-    #     "activate_unit_type": activate_unit_type_as_str,
-    #     "addcore": addcore_as_str,
-    #     "add_prov_resource": add_prov_resource_as_str,
-    #     "alliance": alliance_as_str,
-    #     "belligerence": belligerence_change_as_str,
-    #     "dissent": dissent_change_as_str,
-    #     "domestic": domestic_change_as_str,
-    #     "energypool": energypool_as_str,
-    #     "manpowerpool": manpowerpool_change_as_str,
-    #     "metalpool": metalpool_as_str,
-    #     "money": money_as_str,
-    #     "oilpool": oilpool_as_str,
-    #     "peacetime_ic_mod": peacetime_ic_change_as_str,
-    #     "rarematerialspool": rarematerialspool_as_str,
-    #     "relation": relation_change_as_str,
-    #     "relative_manpower": relative_manpower_as_str,
-    #     "research_mod": research_mod_as_str,
-    #     "resource": resource_as_str,
-    #     "set_domestic": set_domestic_as_str,
-    #     "sleepevent": sleepevent_as_str,
-    #     "trigger": trigger_as_str
-    # }
     the_function = STR_FUNCTION_DICT.get(effect.type.lower())
-    if the_function is not None:
-        the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
-        if the_text:
-            return the_text
+    if the_function is None:
+        print("PROBLEM:", effect.type)
+    # if the_function is not None:
+    #     the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
+    the_text = STR_FUNCTION_DICT.get(effect.type.lower())(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
+    if the_text:
+        return the_text
     
     return effect_as_str_default(effect)
     
