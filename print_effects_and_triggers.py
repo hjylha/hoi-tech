@@ -225,7 +225,12 @@ def get_unit_short_name(unit_key, text_dict):
 
 
 def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
-    the_key = f"EE_{effect.type.upper()}"
+    exceptions = {
+        "defensiveness": "EE_GROUND_DEFENSE"
+    }
+    the_key = exceptions.get(effect.type)
+    if the_key is None:
+        the_key = f"EE_{effect.type.upper()}"
     unit_name = get_unit_short_name(effect.which, text_dict)
     sign = "+" if effect.value > 0 else ""
     when_part = effect.when if effect.when else ""
@@ -450,9 +455,6 @@ def damage_division_as_str(effect, text_dict, **kwargs):
 	pass
 
 def deactivate_as_str(effect, text_dict, **kwargs):
-	pass
-
-def defensiveness_as_str(effect, text_dict, **kwargs):
 	pass
 
 def delay_as_str(effect, text_dict, **kwargs):
@@ -913,7 +915,7 @@ STR_FUNCTION_DICT = {
     "country": country_as_str,
     "damage_division": damage_division_as_str,
     "deactivate": deactivate_as_str,
-    "defensiveness": defensiveness_as_str,
+    "defensiveness": unit_stat_boosts_as_str,
     "delay": delay_as_str,
     "delete_unit": delete_unit_as_str,
     "desert_attack": unit_stat_pct_boost_as_str,
