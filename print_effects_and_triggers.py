@@ -356,7 +356,12 @@ def allow_building_as_str(effect, text_dict, **kwargs):
         "flak": "Anti-Air",
         "nuclear_reactor": "Nuclear Reactor",
         "nuclear_power": "Nuclear Power plant",
-        "synthetic_oil": "Synthetic Oil plant"
+        "synthetic_oil": "Synthetic Oil plant",
+        "coastal_fort": "Coastal Fortifications",
+        "land_fort": "Land Fortifications",
+        "air_base": "Air Base",
+        "naval_base": "Naval Base",
+        "radar_station": "Radar Station"
     }
     the_key = "EE_ALLOW_BUILDING"
     building_name = building_dict.get(effect.which)
@@ -371,19 +376,10 @@ def allow_dig_in_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ALLOW_DIG_IN"
     return text_dict[the_key]
 
-def ambush_as_str(effect, text_dict, **kwargs):
-    pass
-
 def armamentminister_as_str(effect, text_dict, **kwargs):
     pass
 
 def army_detection_as_str(effect, text_dict, **kwargs):
-    pass
-
-def assault_as_str(effect, text_dict, **kwargs):
-    pass
-
-def attrition_mod_as_str(effect, text_dict, **kwargs):
     pass
 
 def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
@@ -395,9 +391,6 @@ def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     sign = "+" if effect.value > 0 else ""
     text = raw_text[0] + country + raw_text[1] + sign + raw_text[2]
     return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
-
-def breakthrough_as_str(effect, text_dict, **kwargs):
-	pass
 
 def build_cost_as_str(effect, text_dict, **kwargs):
 	pass
@@ -459,9 +452,6 @@ def convoy_def_eff_as_str(effect, text_dict, **kwargs):
 def convoy_prod_mod_as_str(effect, text_dict, **kwargs):
 	pass
 
-def counterattack_as_str(effect, text_dict, **kwargs):
-	pass
-
 def country_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -473,10 +463,6 @@ def deactivate_as_str(effect, text_dict, tech_dict=None, **kwargs):
         return
     the_key = "EE_DEACTIVATE_TECH"
     return f"{text_dict[the_key]}: \n  {effect.which} {tech_dict[effect.which].name}"
-    
-
-def delay_as_str(effect, text_dict, **kwargs):
-	pass
 
 def delete_unit_as_str(effect, text_dict, **kwargs):
 	pass
@@ -528,9 +514,6 @@ def double_nuke_prod_as_str(effect, text_dict, **kwargs):
 	pass
 
 def enable_task_as_str(effect, text_dict, **kwargs):
-	pass
-
-def encirclement_as_str(effect, text_dict, **kwargs):
 	pass
 
 def end_access_as_str(effect, text_dict, **kwargs):
@@ -647,9 +630,6 @@ def manpowerpool_change_as_str(effect, text_dict, **kwargs):
 def max_amphib_mod_as_str(effect, text_dict, **kwargs):
 	pass
 
-def max_organization_as_str(effect, text_dict, **kwargs):
-	pass
-
 def max_positioning_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -673,9 +653,6 @@ def money_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MONEY"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%+.1f", f"{sign}{effect.value}")
-
-def morale_as_str(effect, text_dict, **kwargs):
-	pass
 
 def new_model_as_str(effect, text_dict, **kwargs):
 	pass
@@ -832,9 +809,6 @@ def surprise_as_str(effect, text_dict, **kwargs):
 def switch_allegiance_as_str(effect, text_dict, **kwargs):
 	pass
 
-def tactical_withdrawal_as_str(effect, text_dict, **kwargs):
-	pass
-
 def task_efficiency_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -845,9 +819,6 @@ def tc_occupied_mod_as_str(effect, text_dict, **kwargs):
 	pass
 
 def transport_pool_as_str(effect, text_dict, **kwargs):
-	pass
-
-def trickleback_mod_as_str(effect, text_dict, **kwargs):
 	pass
 
 def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
