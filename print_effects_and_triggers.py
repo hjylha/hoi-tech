@@ -213,7 +213,10 @@ from event import Condition
 def get_unit_short_name(unit_key, text_dict):
     exceptions = {
         "anti_air": "SNAME_ANTIAIR",
-        "anti_tank": "SNAME_ANTITANK"
+        "anti_tank": "SNAME_ANTITANK",
+        "land": "WHICH_TYPE_LAND",
+        "air": "WHICH_TYPE_AIR",
+        "naval": "WHICH_TYPE_NAVAL"
     }
     the_key = exceptions.get(unit_key)
     if the_key is None:
@@ -320,25 +323,6 @@ def ai_as_str(effect, text_dict, **kwargs):
 
 def ai_prepare_war_as_str(effect, text_dict, **kwargs):
     pass
-
-def air_attack_as_str(effect, text_dict, **kwargs):
-    the_key = "EE_AIR_ATTACK"
-    unit_name = get_unit_short_name(effect.which, text_dict)
-    sign = "+" if effect.value > 0 else ""
-    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}"
-
-def air_defense_as_str(effect, text_dict, **kwargs):
-    the_key = "EE_AIR_DEFENSE"
-    unit_name = get_unit_short_name(effect.which, text_dict)
-    sign = "+" if effect.value > 0 else ""
-    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}"
-
-def air_detection_as_str(effect, text_dict, **kwargs):
-    the_key = "EE_AIR_DETECTION"
-    unit_name = get_unit_short_name(effect.which, text_dict)
-    sign = "+" if effect.value > 0 else ""
-    on_upgrade = text_dict["EE_ON_UPGRADE"] if effect.when == "on_upgrade" else ""
-    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value} {on_upgrade}"
 
 def alliance_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -477,15 +461,6 @@ def delay_as_str(effect, text_dict, **kwargs):
 def delete_unit_as_str(effect, text_dict, **kwargs):
 	pass
 
-def desert_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def desert_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def desert_move_as_str(effect, text_dict, **kwargs):
-	pass
-
 def disorg_division_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -569,12 +544,6 @@ def extra_tc_as_str(effect, text_dict, **kwargs):
 def foreignminister_as_str(effect, text_dict, **kwargs):
 	pass
 
-def forest_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def fort_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
 def free_energy_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -596,15 +565,6 @@ def free_rare_materials_as_str(effect, text_dict, **kwargs):
 def free_supplies_as_str(effect, text_dict, **kwargs):
 	pass
 
-def frozen_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def frozen_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def frozen_move_as_str(effect, text_dict, **kwargs):
-	pass
-
 def fuel_consumption_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -617,22 +577,10 @@ def ground_def_eff_as_str(effect, text_dict, **kwargs):
 def guarantee_as_str(effect, text_dict, **kwargs):
 	pass
 
-def hard_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
 def headofgovernment_as_str(effect, text_dict, **kwargs):
 	pass
 
 def headofstate_as_str(effect, text_dict, **kwargs):
-	pass
-
-def hill_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def hill_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def hill_move_as_str(effect, text_dict, **kwargs):
 	pass
 
 def hq_supply_eff_as_str(effect, text_dict, **kwargs):
@@ -654,15 +602,6 @@ def inherit_as_str(effect, text_dict, **kwargs):
 	pass
 
 def intelligence_as_str(effect, text_dict, **kwargs):
-	pass
-
-def jungle_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def jungle_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def jungle_move_as_str(effect, text_dict, **kwargs):
 	pass
 
 def land_fort_eff_as_str(effect, text_dict, **kwargs):
@@ -718,34 +657,7 @@ def money_as_str(effect, text_dict, **kwargs):
 def morale_as_str(effect, text_dict, **kwargs):
 	pass
 
-def mountain_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def mountain_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def mountain_move_as_str(effect, text_dict, **kwargs):
-	pass
-
-def muddy_move_as_str(effect, text_dict, **kwargs):
-	pass
-
-def naval_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def naval_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
 def new_model_as_str(effect, text_dict, **kwargs):
-	pass
-
-def night_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def night_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def night_move_as_str(effect, text_dict, **kwargs):
 	pass
 
 def non_aggression_as_str(effect, text_dict, **kwargs):
@@ -782,18 +694,6 @@ def province_revoltrisk_as_str(effect, text_dict, **kwargs):
 	pass
 
 def radar_eff_as_str(effect, text_dict, **kwargs):
-	pass
-
-def rain_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def rain_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def rain_move_as_str(effect, text_dict, **kwargs):
-	pass
-
-def range_as_str(effect, text_dict, **kwargs):
 	pass
 
 def rarematerialspool_as_str(effect, text_dict, **kwargs):
@@ -854,9 +754,6 @@ def resource_as_str(effect, text_dict, **kwargs):
 def revolt_as_str(effect, text_dict, **kwargs):
 	pass
 
-def river_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
 def sce_frequency_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -873,9 +770,6 @@ def set_relation_as_str(effect, text_dict, **kwargs):
 	pass
 
 def setflag_as_str(effect, text_dict, **kwargs):
-	pass
-
-def shore_attack_as_str(effect, text_dict, **kwargs):
 	pass
 
 def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
@@ -897,34 +791,7 @@ def sleepminister_as_str(effect, text_dict, **kwargs):
 def sleepteam_as_str(effect, text_dict, **kwargs):
 	pass
 
-def snow_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def snow_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def snow_move_as_str(effect, text_dict, **kwargs):
-	pass
-
-def soft_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def speed_as_str(effect, text_dict, **kwargs):
-	pass
-
 def steal_tech_as_str(effect, text_dict, **kwargs):
-	pass
-
-def storm_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def storm_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def storm_move_as_str(effect, text_dict, **kwargs):
-	pass
-
-def strategic_attack_as_str(effect, text_dict, **kwargs):
 	pass
 
 def supplies_as_str(effect, text_dict, **kwargs):
@@ -940,15 +807,6 @@ def surface_detection_as_str(effect, text_dict, **kwargs):
 	pass
 
 def surprise_as_str(effect, text_dict, **kwargs):
-	pass
-
-def swamp_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def swamp_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def swamp_move_as_str(effect, text_dict, **kwargs):
 	pass
 
 def switch_allegiance_as_str(effect, text_dict, **kwargs):
@@ -981,15 +839,6 @@ def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
     name_w_quotes = f"'{event_dict[effect.which].name}'"
     add = f" [{event_dict[effect.which].country} {effect.which}]"
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
-
-def urban_attack_as_str(effect, text_dict, **kwargs):
-	pass
-
-def urban_defense_as_str(effect, text_dict, **kwargs):
-	pass
-
-def urban_move_as_str(effect, text_dict, **kwargs):
-	pass
 
 def visibility_as_str(effect, text_dict, **kwargs):
 	pass
@@ -1086,7 +935,7 @@ STR_FUNCTION_DICT = {
     "escort_pool": escort_pool_as_str,
     "extra_tc": extra_tc_as_str,
     "foreignminister": foreignminister_as_str,
-    "forest_defense": forest_defense_as_str,
+    "forest_defense": unit_stat_pct_boost_as_str,
     "fort_attack": unit_stat_pct_boost_as_str,
     "free_energy": free_energy_as_str,
     "free_ic": free_ic_as_str,
