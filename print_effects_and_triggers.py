@@ -635,7 +635,14 @@ def double_nuke_prod_as_str(effect, text_dict, **kwargs):
 	pass
 
 def enable_task_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_ENABLE_TASK"
+    exceptions = {
+        "amphibious_assault": "MISSION_AMPHIBOUS_ASSAULT"
+    }
+    mission_key = exceptions.get(effect.which)
+    mission_key = mission_key if mission_key else f"MISSION_{effect.which.upper()}"
+    # mission_key = f"MISSION_{effect.which.upper()}"
+    return text_dict[the_key].replace("%s", text_dict[mission_key])
 
 def end_access_as_str(effect, text_dict, **kwargs):
 	pass
@@ -708,7 +715,9 @@ def headofstate_as_str(effect, text_dict, **kwargs):
 	pass
 
 def hq_supply_eff_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_HQ_SUPPLY_EFF"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def independence_as_str(effect, text_dict, **kwargs):
 	pass
@@ -946,7 +955,15 @@ def switch_allegiance_as_str(effect, text_dict, **kwargs):
 	pass
 
 def task_efficiency_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_TASK_EFFICIENCY"
+    raw_text = text_dict[the_key].replace("%+.1f\\%%\\n", "%d")
+    exceptions = {
+        "amphibious_assault": "MISSION_AMPHIBOUS_ASSAULT"
+    }
+    mission_key = exceptions.get(effect.which)
+    mission_key = mission_key if mission_key else f"MISSION_{effect.which.upper()}"
+    # mission_key = f"MISSION_{effect.which.upper()}"
+    return replace_string_and_number(raw_text, text_dict[mission_key], effect.value)
 
 def transport_pool_as_str(effect, text_dict, **kwargs):
 	pass
