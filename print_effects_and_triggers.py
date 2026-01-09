@@ -238,7 +238,7 @@ DIVISION_NUMBERS = {
     "garrison": 9,
     "hq": 10,
     "militia": 11,
-    "fighter": 12,
+    "multi_role": 12,
     "interceptor": 13,
     "strategic_bomber": 14,
     "tactical_bomber": 15,
@@ -262,7 +262,7 @@ DIVISION_NUMBERS = {
 BRIGADE_NUMBERS = {
     "artillery": 1,
     "sp_artillery": 2,
-    "rocket_artilley": 3,
+    "rocket_artillery": 3,
     "sp_rct_artillery": 4,
     "anti_tank": 5,
     "tank_destroyer": 6,
@@ -800,7 +800,7 @@ def new_model_as_str(effect, text_dict, **kwargs):
     try:
         model_key = f"MODEL_{DIVISION_NUMBERS[effect.which]}_{effect.value}"
     except KeyError:
-        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which]}_{effect.value}"
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which.lower()]}_{effect.value}"
     return f"{unit_name}: {text_dict[the_key]}: {text_dict[model_key]}"
 
 def non_aggression_as_str(effect, text_dict, **kwargs):
@@ -901,7 +901,7 @@ def scrap_model_as_str(effect, text_dict, **kwargs):
     try:
         model_key = f"MODEL_{DIVISION_NUMBERS[effect.which]}_{effect.value}"
     except KeyError:
-        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which]}_{effect.value}"
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which.lower()]}_{effect.value}"
     raw_text = text_dict[the_key].split("%s")
     return f"{raw_text[0]}{unit_name}{raw_text[1]}{text_dict[model_key]}{raw_text[2]}"
 
@@ -1085,7 +1085,7 @@ STR_FUNCTION_DICT = {
     "frozen_attack": unit_stat_pct_boost_as_str,
     "frozen_defense": unit_stat_pct_boost_as_str,
     "frozen_move": unit_stat_pct_boost_as_str,
-    "fuel_consumption": fuel_consumption_as_str,
+    "fuel_consumption": unit_stat_boosts_as_str,
     "gain_tech": gain_tech_as_str,
     "ground_def_eff": ground_def_eff_as_str,
     "guarantee": guarantee_as_str,
@@ -1181,7 +1181,7 @@ STR_FUNCTION_DICT = {
     "storm_move": unit_stat_pct_boost_as_str,
     "strategic_attack": unit_stat_boosts_as_str,
     "supplies": supplies_as_str,
-    "supply_consumption": supply_consumption_as_str,
+    "supply_consumption": unit_stat_boosts_as_str,
     "supply_dist_mod": pct_change_as_str,
     "surface_detection": unit_stat_boosts_as_str,
     "surprise": surprise_as_str,
