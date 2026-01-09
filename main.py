@@ -1362,7 +1362,7 @@ class TechInfoPanels(BoxLayout):
             self.techinfopanel.rect = Rectangle(size=self.techinfopanel.size, pos=self.techinfopanel.pos)
         self.techinfopanel.bind(pos=update_layout, size=update_layout)
 
-        self.requirement_scrollview = ScrollView(size_hint=(0.22, None))
+        self.requirement_scrollview = ScrollView(size_hint=(0.2, None))
         self.requirement_panel = RequirementPanel(orientation="vertical", size_hint=(1, None))
         # self.requirement_panel.height = self.requirement_panel.minimum_height + 50
         self.requirement_panel.bind(minimum_height=self.requirement_panel.setter("height"))
@@ -1370,7 +1370,7 @@ class TechInfoPanels(BoxLayout):
         # self.add_widget(RequirementPanel(orientation="vertical", size_hint=(0.25, 1)))
         self.add_widget(self.requirement_scrollview)
 
-        self.extra_layout = BoxLayout(size_hint=(0.22, 1))
+        self.extra_layout = BoxLayout(size_hint=(0.26, 1))
         self.effects_scrollview = ScrollView(size_hint=(1, None))
         # self.effects_scrollview = ScrollView(size_hint=(0.25, None))
         self.effects_panel = EffectsPanel(orientation="vertical", size_hint=(1, None))
@@ -1388,7 +1388,7 @@ class TechInfoPanels(BoxLayout):
             self.extra_layout.rect = Rectangle(size=self.extra_layout.size, pos=self.extra_layout.pos)
         self.extra_layout.bind(pos=update_layout, size=update_layout)
 
-        self.researchbuttons_panel = ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.22, 1))
+        self.researchbuttons_panel = ResearchButtonsPanel(cols=2, padding=(dp(5), dp(5), dp(5), dp(5)), spacing=dp(10), size_hint=(0.2, 1))
         self.add_widget(self.researchbuttons_panel)
         # for i in range(4):
         #     self.add_widget(Button(text=f"InfoPanel {i+1}", size_hint=(0.25, 1)))
