@@ -217,6 +217,7 @@ BUILDING_DICT = {
     "nuclear_reactor": "Nuclear Reactor",
     "nuclear_power": "Nuclear Power plant",
     "synthetic_oil": "Synthetic Oil plant",
+    "synthetic_rares": "Synthetic Material plant",
     "coastal_fort": "Coastal Fortifications",
     "land_fort": "Land Fortifications",
     "air_base": "Air Base",
@@ -282,6 +283,16 @@ def pct_change_as_str_w_plus(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%+.1f\\%%\\n", f"{sign}{effect.value} %")
+
+
+def free_resources_as_str(effect, text_dict, **kwargs):
+    exceptions = {
+        "free_rare_materials": "EE_FREE_RAREMAT"
+    }
+    the_key = exceptions.get(effect.type)
+    the_key = the_key if the_key else f"EE_{effect.type.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%+.0f", f"{sign}{effect.value}")
 
 
 def effect_as_str_default(effect, **kwargs):
@@ -429,7 +440,10 @@ def build_time_as_str(effect, text_dict, **kwargs):
     # return replace_string_and_number(placeholder_text, unit_name, effect.value)
 
 def building_eff_mod_as_str(effect, text_dict, **kwargs):
-    pass
+    the_key = "EE_BUILDING_EFF_MOD"
+    building_name = BUILDING_DICT[effect.which]
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s", building_name).replace("%+.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def building_prod_mod_as_str(effect, text_dict, **kwargs):
     the_key = "EE_BUILDING_PROD_MOD"
@@ -626,7 +640,10 @@ def industrial_modifier_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def industrial_multiplier_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_INDUSTRIAL_MULTIPLIER"
+    second_key = f"EE_{effect.which.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}"
 
 def info_may_cause_as_str(effect, text_dict, tech_dict=None, **kwargs):
     the_key = "EE_INFO_MAY_CAUSE"
@@ -829,12 +846,6 @@ def supplies_as_str(effect, text_dict, **kwargs):
 def supply_consumption_as_str(effect, text_dict, **kwargs):
 	pass
 
-def supply_dist_mod_as_str(effect, text_dict, **kwargs):
-	pass
-
-def surface_detection_as_str(effect, text_dict, **kwargs):
-	pass
-
 def surprise_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SURPRISE"
     second_key = f"WHICH_TYPE_{effect.which.upper()}"
@@ -845,12 +856,6 @@ def switch_allegiance_as_str(effect, text_dict, **kwargs):
 	pass
 
 def task_efficiency_as_str(effect, text_dict, **kwargs):
-	pass
-
-def tc_mod_as_str(effect, text_dict, **kwargs):
-	pass
-
-def tc_occupied_mod_as_str(effect, text_dict, **kwargs):
 	pass
 
 def transport_pool_as_str(effect, text_dict, **kwargs):
@@ -963,13 +968,13 @@ STR_FUNCTION_DICT = {
     "foreignminister": foreignminister_as_str,
     "forest_defense": unit_stat_pct_boost_as_str,
     "fort_attack": unit_stat_pct_boost_as_str,
-    "free_energy": free_energy_as_str,
-    "free_ic": free_ic_as_str,
-    "free_metal": free_metal_as_str,
-    "free_money": free_money_as_str,
-    "free_oil": free_oil_as_str,
-    "free_rare_materials": free_rare_materials_as_str,
-    "free_supplies": free_supplies_as_str,
+    "free_energy": free_resources_as_str,
+    "free_ic": free_resources_as_str,
+    "free_metal": free_resources_as_str,
+    "free_money": free_resources_as_str,
+    "free_oil": free_resources_as_str,
+    "free_rare_materials": free_resources_as_str,
+    "free_supplies": free_resources_as_str,
     "frozen_attack": unit_stat_pct_boost_as_str,
     "frozen_defense": unit_stat_pct_boost_as_str,
     "frozen_move": unit_stat_pct_boost_as_str,
