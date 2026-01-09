@@ -225,6 +225,87 @@ BUILDING_DICT = {
     "radar_station": "Radar Station"
 }
 
+DIVISION_NUMBERS = {
+    "infantry": 0,
+    "cavalry": 1,
+    "motorized": 2,
+    "mechanized": 3,
+    "light_armor": 4,
+    "armor": 5,
+    "paratrooper": 6,
+    "marine": 7,
+    "bergsjaeger": 8,
+    "garrison": 9,
+    "hq": 10,
+    "militia": 11,
+    "fighter": 12,
+    "interceptor": 13,
+    "strategic_bomber": 14,
+    "tactical_bomber": 15,
+    "naval_bomber": 16,
+    "cas": 17,
+    "transport_plane": 18,
+    "flying_bomb": 19,
+    "flying_rocket": 20,
+    "battleship": 21,
+    "light_cruiser": 22,
+    "heavy_cruiser": 23,
+    "battlecruiser": 24,
+    "destroyer": 25,
+    "carrier": 26,
+    "escort_carrier": 27,
+    "submarine": 28,
+    "nuclear_submarine": 29,
+    "transport": 30
+}
+
+BRIGADE_NUMBERS = {
+    "artillery": 1,
+    "sp_artillery": 2,
+    "rocket_artilley": 3,
+    "sp_rct_artillery": 4,
+    "anti_tank": 5,
+    "tank_destroyer": 6,
+    "light_armor_brigade": 7,
+    "heavy_armor": 8,
+    "super_heavy_armor": 9,
+    "armored_car": 10,
+    "anti_air": 11,
+    "police": 12,
+    "engineer": 13,
+    "cag": 14,
+    "escort": 15,
+    "naval_asw": 16,
+    "naval_anti_air_s": 17,
+    "naval_radar_s": 18,
+    "naval_fire_controll_s": 19,
+    "naval_improved_hull_s": 20,
+    "naval_torpedoes_s": 21,
+    "naval_anti_air_l": 22,
+    "naval_radar_l": 23,
+    "naval_fire_controll_l": 24,
+    "naval_improved_hull_l": 25,
+    "naval_torpedoes_l": 26,
+    "naval_mines": 27,
+    "naval_sa_l": 28,
+    "naval_spotter_l": 29,
+    "naval_spotter_s": 30,
+    "b_u1": 31,
+    "b_u2": 32,
+    "b_u3": 33,
+    "b_u4": 34,
+    "b_u5": 35,
+    "b_u6": 36,
+    "b_u7": 37,
+    "b_u8": 38,
+    "b_u9": 39,
+    "b_u10": 40,
+    "b_u11": 41,
+    "b_u12": 42,
+    "b_u13": 43,
+    "b_u14": 44
+}
+
 def get_unit_short_name(unit_key, text_dict):
     exceptions = {
         "anti_air": "SNAME_ANTIAIR",
@@ -240,9 +321,10 @@ def get_unit_short_name(unit_key, text_dict):
         the_key = f"SNAME_{unit_key.upper()}"
     return text_dict[the_key]
 
-def replace_string_and_number(original_text, replacement_text, replacement_number):
+def replace_string_and_number(original_text, replacement_text, replacement_number, percentage=False):
+    pct = " %" if percentage else ""
     sign = "+" if replacement_number > 0 else ""
-    return original_text.replace("%s", replacement_text).replace("%d", f"{sign}{replacement_number}")
+    return original_text.replace("%s", replacement_text).replace("%d", f"{sign}{replacement_number}{pct}")
 
 
 def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
@@ -420,24 +502,22 @@ def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
 
 def build_cost_as_str(effect, text_dict, **kwargs):
-    pass
     # RELATIVE ruins everything
-    # key1 = "EE_BUILD_COST"
-    # key2 = "T_IC"
-    # placeholder_text = f"%s: {text_dict[key1]} %d {text_dict[key2]}"
-    # unit_name = get_unit_short_name(effect.which, text_dict)
-    # return replace_string_and_number(placeholder_text, unit_name, effect.value)
+    key1 = "EE_BUILD_COST"
+    key2 = "T_IC"
+    placeholder_text = f"%s: {text_dict[key1]} %d {text_dict[key2]}"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    return replace_string_and_number(placeholder_text, unit_name, effect.value, True)
 
 def build_division_as_str(effect, text_dict, **kwargs):
 	pass
 
 def build_time_as_str(effect, text_dict, **kwargs):
-    pass
-    # key1 = "EE_BUILD_TIME"
-    # key2 = "T_DAYS"
-    # placeholder_text = f"%s: {text_dict[key1]} %d {text_dict[key2]}"
-    # unit_name = get_unit_short_name(effect.which, text_dict)
-    # return replace_string_and_number(placeholder_text, unit_name, effect.value)
+    key1 = "EE_BUILD_TIME"
+    key2 = "T_DAYS"
+    placeholder_text = f"%s: {text_dict[key1]} %d {text_dict[key2]}"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    return replace_string_and_number(placeholder_text, unit_name, effect.value, True)
 
 def building_eff_mod_as_str(effect, text_dict, **kwargs):
     the_key = "EE_BUILDING_EFF_MOD"
@@ -706,7 +786,13 @@ def money_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%+.1f", f"{sign}{effect.value}")
 
 def new_model_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_NEW_MODEL"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    try:
+        model_key = f"MODEL_{DIVISION_NUMBERS[effect.which]}_{effect.value}"
+    except KeyError:
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which]}_{effect.value}"
+    return f"{unit_name}: {text_dict[the_key]}: {text_dict[model_key]}"
 
 def non_aggression_as_str(effect, text_dict, **kwargs):
 	pass
@@ -720,9 +806,6 @@ def nuke_damage_as_str(effect, text_dict, **kwargs):
 def oilpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_OIL_POOL"
     return text_dict[the_key].replace("%d", str(effect.value))
-
-def paradrop_attack_as_str(effect, text_dict, **kwargs):
-	pass
 
 def peace_as_str(effect, text_dict, **kwargs):
 	pass
@@ -804,7 +887,14 @@ def sce_frequency_as_str(effect, text_dict, **kwargs):
 	pass
 
 def scrap_model_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SCRAP_MODEL"
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    try:
+        model_key = f"MODEL_{DIVISION_NUMBERS[effect.which]}_{effect.value}"
+    except KeyError:
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which]}_{effect.value}"
+    raw_text = text_dict[the_key].split("%s")
+    return f"{raw_text[0]}{unit_name}{raw_text[1]}{text_dict[model_key]}{raw_text[2]}"
 
 def secedeprovince_as_str(effect, text_dict, **kwargs):
 	pass
@@ -1028,7 +1118,7 @@ STR_FUNCTION_DICT = {
     "nuclear_carrier": nuclear_carrier_as_str,
     "nuke_damage": nuke_damage_as_str,
     "oilpool": oilpool_as_str,
-    "paradrop_attack": paradrop_attack_as_str,
+    "paradrop_attack": unit_stat_pct_boost_as_str,
     "peace": peace_as_str,
     "peacetime_ic_mod": peacetime_ic_change_as_str,
     "province_keypoints": province_keypoints_as_str,
