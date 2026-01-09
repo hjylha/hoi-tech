@@ -630,12 +630,25 @@ class Research:
         # TODO: improve this
         effects = []
         for effect in tech.effects:
-            type_part = effect.type if effect.type is not None else ""
-            which_part = effect.which if effect.which is not None else ""
-            value_part = effect.value if effect.value is not None else ""
-            when_part = effect.when if effect.when is not None else ""
-            where_part = effect.where if effect.where is not None else ""
-            effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
+            text_parts = []
+            type_part = f"type = {effect.type}" if effect.type is not None else ""
+            text_parts.append(type_part)
+            which_part = f"which = {effect.which}" if effect.which is not None else ""
+            text_parts.append(which_part)
+            value_part = f"value = {effect.value}" if effect.value is not None else ""
+            text_parts.append(value_part)
+            when_part = f"when = {effect.when}" if effect.when is not None else ""
+            text_parts.append(when_part)
+            where_part = f"where = {effect.where}" if effect.where is not None else ""
+            text_parts.append(where_part)
+            text_parts = [t for t in text_parts if t]
+            effect_line = ", ".join(text_parts)
+            # type_part = effect.type if effect.type is not None else ""
+            # which_part = effect.which if effect.which is not None else ""
+            # value_part = effect.value if effect.value is not None else ""
+            # when_part = effect.when if effect.when is not None else ""
+            # where_part = effect.where if effect.where is not None else ""
+            # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
             effects.append(effect_line.lower())
         return effects
 
