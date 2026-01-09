@@ -675,30 +675,6 @@ def extra_tc_as_str(effect, text_dict, **kwargs):
 def foreignminister_as_str(effect, text_dict, **kwargs):
 	pass
 
-def free_energy_as_str(effect, text_dict, **kwargs):
-	pass
-
-def free_ic_as_str(effect, text_dict, **kwargs):
-	pass
-
-def free_metal_as_str(effect, text_dict, **kwargs):
-	pass
-
-def free_money_as_str(effect, text_dict, **kwargs):
-	pass
-
-def free_oil_as_str(effect, text_dict, **kwargs):
-	pass
-
-def free_rare_materials_as_str(effect, text_dict, **kwargs):
-	pass
-
-def free_supplies_as_str(effect, text_dict, **kwargs):
-	pass
-
-def fuel_consumption_as_str(effect, text_dict, **kwargs):
-	pass
-
 def gain_tech_as_str(effect, text_dict, **kwargs):
 	pass
 
@@ -768,20 +744,26 @@ def manpowerpool_change_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", sign).replace("%d", str(effect.value))
 
 def max_amphib_mod_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_MAX_AMPHIB_MOD"
+    return text_dict[the_key].replace("%.0f\\n", str(effect.value))
 
 def max_positioning_as_str(effect, text_dict, **kwargs):
-	pass
+    raw_text = text_dict["EE_MAX_POSITIONING"].replace("%+.1f\\%%\\n", "%d")
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    return replace_string_and_number(raw_text, unit_name, effect.value)
 
 def max_reactor_size_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_MAX_REACTOR_SIZE"
+    return f"{text_dict[the_key]} {effect.value}"
 
 def metalpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_METAL_POOL"
     return text_dict[the_key].replace("%d", str(effect.value))
 
 def min_positioning_as_str(effect, text_dict, **kwargs):
-	pass
+    raw_text = text_dict["EE_MIN_POSITIONING"].replace("%+.1f\\%%\\n", "%d")
+    unit_name = get_unit_short_name(effect.which, text_dict)
+    return replace_string_and_number(raw_text, unit_name, effect.value)
 
 def ministerofintelligence_as_str(effect, text_dict, **kwargs):
 	pass
@@ -940,9 +922,6 @@ def steal_tech_as_str(effect, text_dict, **kwargs):
 	pass
 
 def supplies_as_str(effect, text_dict, **kwargs):
-	pass
-
-def supply_consumption_as_str(effect, text_dict, **kwargs):
 	pass
 
 def surprise_as_str(effect, text_dict, **kwargs):
