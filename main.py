@@ -18,12 +18,14 @@ from kivy.graphics import Color, Line, Rectangle
 from kivy.metrics import dp
 
 from research import Research
-from read_hoi_files import get_country_names
+from read_hoi_files import get_country_names, get_texts_from_files
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from invention_positions import invention_positions, pw_invention_positions
 from component_types import component_types
 import lines
+from file_paths import get_all_text_files_paths
+from print_effects_and_triggers import list_tech_effects
 
 
 DIFFICULTIES = (
@@ -1408,7 +1410,8 @@ class TechScreen(BoxLayout):
         is_required_ins = self.research.list_is_required_in(tech)
         deactivations = self.research.list_deactivations(tech)
         deactivated_by = self.research.list_is_deactivated_by(tech, False)
-        effects = self.research.list_effects(tech)
+        # effects = self.research.list_effects(tech)
+        effects = list_tech_effects(tech, self.text_dict, self.research.techs)
         has_blueprint = tech.tech_id in self.research.blueprints
         self.techinfopanel.update_tech_info(tech, has_blueprint, requirements, is_required_ins, deactivations, deactivated_by, effects)
         return [requirements, deactivations, is_required_ins]
@@ -1546,6 +1549,7 @@ class TechScreen(BoxLayout):
         super().__init__(**kwargs)
 
         self.research = None
+        self.text_dict = get_texts_from_files(get_all_text_files_paths())
 
         self.active_category = TECH_CATEGORIES[0][1]
 
