@@ -214,6 +214,8 @@ def get_unit_short_name(unit_key, text_dict):
     exceptions = {
         "anti_air": "SNAME_ANTIAIR",
         "anti_tank": "SNAME_ANTITANK",
+        "light_armor_brigade": "SNAME_LIGHT_ARMOR_BRI",
+        "sp_rct_artillery": "SNAME_SP_ROCKET_ARTILLERY",
         "land": "WHICH_TYPE_LAND",
         "air": "WHICH_TYPE_AIR",
         "naval": "WHICH_TYPE_NAVAL"
@@ -222,6 +224,10 @@ def get_unit_short_name(unit_key, text_dict):
     if the_key is None:
         the_key = f"SNAME_{unit_key.upper()}"
     return text_dict[the_key]
+
+def replace_string_and_number(original_text, replacement_text, replacement_number):
+    sign = "+" if replacement_number > 0 else ""
+    return original_text.replace("%s", replacement_text).replace("%d", f"{sign}{replacement_number}")
 
 
 def unit_stat_boosts_as_str(effect, text_dict, **kwargs):
@@ -246,7 +252,7 @@ def unit_stat_pct_boost_as_str(effect, text_dict, **kwargs):
     when_part = effect.when if effect.when else ""
     on_upgrade = text_dict.get(f"EE_{when_part.upper()}")
     on_upgrade = on_upgrade if on_upgrade else ""
-    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value}% {on_upgrade}"
+    return f"{unit_name}: {text_dict[the_key]} {sign}{effect.value} % {on_upgrade}"
 
 def change_as_str(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
@@ -256,12 +262,12 @@ def change_as_str(effect, text_dict, **kwargs):
 def pct_change_as_str(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
     sign = "+" if effect.value > 0 else ""
-    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def pct_change_as_str_w_plus(effect, text_dict, **kwargs):
     the_key = f"EE_{effect.type.upper()}"
     sign = "+" if effect.value > 0 else ""
-    return text_dict[the_key].replace("%+.1f\\%%\\n", f"{sign}{effect.value}%")
+    return text_dict[the_key].replace("%+.1f\\%%\\n", f"{sign}{effect.value} %")
 
 
 def effect_as_str_default(effect, **kwargs):
@@ -389,7 +395,7 @@ def army_detection_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ARMY_DETECTION"
     second_key = f"EE_{effect.which.upper()}"
     sign = "+" if effect.value > 0 else ""
-    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}%"
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     if country_dict is None:
@@ -402,13 +408,24 @@ def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
 
 def build_cost_as_str(effect, text_dict, **kwargs):
-	pass
+    pass
+    # RELATIVE ruins everything
+    # key1 = "EE_BUILD_COST"
+    # key2 = "T_IC"
+    # placeholder_text = f"%s: {text_dict[key1]} %d {text_dict[key2]}"
+    # unit_name = get_unit_short_name(effect.which, text_dict)
+    # return replace_string_and_number(placeholder_text, unit_name, effect.value)
 
 def build_division_as_str(effect, text_dict, **kwargs):
 	pass
 
 def build_time_as_str(effect, text_dict, **kwargs):
-	pass
+    pass
+    # key1 = "EE_BUILD_TIME"
+    # key2 = "T_DAYS"
+    # placeholder_text = f"%s: {text_dict[key1]} %d {text_dict[key2]}"
+    # unit_name = get_unit_short_name(effect.which, text_dict)
+    # return replace_string_and_number(placeholder_text, unit_name, effect.value)
 
 def building_eff_mod_as_str(effect, text_dict, **kwargs):
 	pass
