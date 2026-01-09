@@ -210,6 +210,20 @@ from event import Condition
 # waketeam
 # war
 
+BUILDING_DICT = {
+    "ic": "Industrial Capacity",
+    "infrastructure": "Infrastructure",
+    "flak": "Anti-Air",
+    "nuclear_reactor": "Nuclear Reactor",
+    "nuclear_power": "Nuclear Power plant",
+    "synthetic_oil": "Synthetic Oil plant",
+    "coastal_fort": "Coastal Fortifications",
+    "land_fort": "Land Fortifications",
+    "air_base": "Air Base",
+    "naval_base": "Naval Base",
+    "radar_station": "Radar Station"
+}
+
 def get_unit_short_name(unit_key, text_dict):
     exceptions = {
         "anti_air": "SNAME_ANTIAIR",
@@ -362,21 +376,8 @@ def alliance_as_str(effect, text_dict, country_dict=None, **kwargs):
     return text_dict[the_key].replace("%s", country_dict[effect.which])
 
 def allow_building_as_str(effect, text_dict, **kwargs):
-    building_dict = {
-        "ic": "Industrial Capacity",
-        "infrastructure": "Infrastructure",
-        "flak": "Anti-Air",
-        "nuclear_reactor": "Nuclear Reactor",
-        "nuclear_power": "Nuclear Power plant",
-        "synthetic_oil": "Synthetic Oil plant",
-        "coastal_fort": "Coastal Fortifications",
-        "land_fort": "Land Fortifications",
-        "air_base": "Air Base",
-        "naval_base": "Naval Base",
-        "radar_station": "Radar Station"
-    }
     the_key = "EE_ALLOW_BUILDING"
-    building_name = building_dict.get(effect.which)
+    building_name = BUILDING_DICT.get(effect.which)
     building_name = building_name if building_name else f"{effect.which}*"
     return text_dict[the_key].replace("%s", building_name)
 
@@ -428,10 +429,14 @@ def build_time_as_str(effect, text_dict, **kwargs):
     # return replace_string_and_number(placeholder_text, unit_name, effect.value)
 
 def building_eff_mod_as_str(effect, text_dict, **kwargs):
-	pass
+    pass
 
 def building_prod_mod_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_BUILDING_PROD_MOD"
+    some_text = text_dict[the_key].replace("%+.1f\\%%\\n", "%d %")
+    building_name = BUILDING_DICT.get(effect.which)
+    building_name = building_name if building_name else f"{effect.which}*"
+    return replace_string_and_number(some_text, building_name, effect.value)
 
 def capital_as_str(effect, text_dict, **kwargs):
 	pass
@@ -615,13 +620,17 @@ def independence_as_str(effect, text_dict, **kwargs):
 	pass
 
 def industrial_modifier_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_INDUSTRIAL_MODIFIER"
+    second_key = f"EE_{effect.which.upper()}"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def industrial_multiplier_as_str(effect, text_dict, **kwargs):
 	pass
 
-def info_may_cause_as_str(effect, text_dict, **kwargs):
-	pass
+def info_may_cause_as_str(effect, text_dict, tech_dict=None, **kwargs):
+    the_key = "EE_INFO_MAY_CAUSE"
+    return text_dict[the_key].replace("'%s'", f"{effect.which} {tech_dict[effect.which].name}")
 
 def inherit_as_str(effect, text_dict, **kwargs):
 	pass
@@ -630,7 +639,7 @@ def intelligence_as_str(effect, text_dict, **kwargs):
     the_key = "EE_INTELLIGENCE"
     second_key = f"EE_{effect.which.upper()}"
     sign = "+" if effect.value > 0 else ""
-    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}%"
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def land_fort_eff_as_str(effect, text_dict, **kwargs):
 	pass
@@ -704,7 +713,7 @@ def peace_as_str(effect, text_dict, **kwargs):
 def peacetime_ic_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_PEACETIME_IC_MOD"
     sign = "+" if effect.value > 0 else ""
-    return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value}%")
+    return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value} %")
 
 def province_keypoints_as_str(effect, text_dict, **kwargs):
 	pass
@@ -735,7 +744,7 @@ def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
 def relative_manpower_as_str(effect, text_dict, **kwargs):
     the_key = "DOMESTIC_PRA_MAN"
     sign = "+" if effect.value > 0 else ""
-    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}%")
+    return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def remove_division_as_str(effect, text_dict, **kwargs):
 	pass
@@ -769,7 +778,7 @@ def resource_as_str(effect, text_dict, **kwargs):
     sign = "+" if effect.value > 0 else ""
     raw_text = text_dict[the_key].split("%s")
     text = f"{raw_text[0]}{text_dict[resource_dict[effect.which]]}{raw_text[1]}{sign}{raw_text[2]}"
-    return text.replace("%.1f\\%%", f"{effect.value}%")
+    return text.replace("%.1f\\%%", f"{effect.value} %")
 
 def revolt_as_str(effect, text_dict, **kwargs):
 	pass
@@ -830,7 +839,7 @@ def surprise_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SURPRISE"
     second_key = f"WHICH_TYPE_{effect.which.upper()}"
     sign = "+" if effect.value > 0 else ""
-    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value}%"
+    return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def switch_allegiance_as_str(effect, text_dict, **kwargs):
 	pass
@@ -1031,7 +1040,7 @@ STR_FUNCTION_DICT = {
     "relative_manpower": relative_manpower_as_str,
     "remove_division": remove_division_as_str,
     "removecore": removecore_as_str,
-    "repair_mod": repair_mod_as_str,
+    "repair_mod": pct_change_as_str,
     "research_mod": research_mod_as_str,
     "research_sabotaged": research_sabotaged_as_str,
     "resource": resource_as_str,
@@ -1061,8 +1070,8 @@ STR_FUNCTION_DICT = {
     "strategic_attack": unit_stat_boosts_as_str,
     "supplies": supplies_as_str,
     "supply_consumption": supply_consumption_as_str,
-    "supply_dist_mod": supply_dist_mod_as_str,
-    "surface_detection": surface_detection_as_str,
+    "supply_dist_mod": pct_change_as_str,
+    "surface_detection": unit_stat_boosts_as_str,
     "surprise": surprise_as_str,
     "swamp_attack": unit_stat_pct_boost_as_str,
     "swamp_defense": unit_stat_pct_boost_as_str,
@@ -1070,8 +1079,8 @@ STR_FUNCTION_DICT = {
     "switch_allegiance": switch_allegiance_as_str,
     "tactical_withdrawal": pct_change_as_str,
     "task_efficiency": task_efficiency_as_str,
-    "tc_mod": tc_mod_as_str,
-    "tc_occupied_mod": tc_occupied_mod_as_str,
+    "tc_mod": pct_change_as_str,
+    "tc_occupied_mod": pct_change_as_str,
     "transport_pool": transport_pool_as_str,
     "trickleback_mod": pct_change_as_str,
     "trigger": trigger_as_str,
