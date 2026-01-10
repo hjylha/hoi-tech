@@ -540,7 +540,8 @@ def capital_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key].replace("%s", f"{effect.which} {province}")} (if possible)"
 
 def carrier_level_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CARRIER_LEVEL"
+    return f"{text_dict[the_key]}: {effect.value}"
 
 def change_policy_as_str(effect, text_dict, **kwargs):
 	pass
@@ -564,7 +565,9 @@ def clrflag_as_str(effect, text_dict, **kwargs):
 	pass
 
 def coast_fort_eff_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_COAST_FORT_EFF"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]}: {sign}{effect.value}"
 
 def construct_as_str(effect, text_dict, **kwargs):
     province = text_dict.get(f"PROV{effect.where}")
@@ -646,7 +649,7 @@ def set_domestic_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", slider).replace("%d", str(effect.value))
 
 def double_nuke_prod_as_str(effect, text_dict, **kwargs):
-	pass
+    return text_dict["EE_NUKE_PROD"]
 
 def enable_task_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ENABLE_TASK"
@@ -743,7 +746,9 @@ def intelligence_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def land_fort_eff_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_LAND_FORT_EFF"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]}: {sign}{effect.value}"
 
 def leave_alliance_as_str(effect, text_dict, **kwargs):
 	pass
