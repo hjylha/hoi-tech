@@ -222,7 +222,8 @@ BUILDING_DICT = {
     "land_fort": "Land Fortifications",
     "air_base": "Air Base",
     "naval_base": "Naval Base",
-    "radar_station": "Radar Station"
+    "radar_station": "Radar Station",
+    "rocket_test": "Rocket Test Site"
 }
 
 DIVISION_NUMBERS = {
@@ -572,10 +573,15 @@ def convoy_as_str(effect, text_dict, **kwargs):
 	pass
 
 def convoy_def_eff_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CONVOY_DEF_EFF"
+    sign = "+" if effect.value > 0 else ""
+    return f"{text_dict[the_key]}: {sign}{effect.value}"
 
 def convoy_prod_mod_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CONVOY_PROD_MOD"
+    sign = "+" if effect.value > 0 else ""
+    name = f"Convoy {effect.which.capitalize()}"
+    return text_dict[the_key].replace("%s", name).replace("%+.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def country_as_str(effect, text_dict, **kwargs):
 	pass
@@ -675,8 +681,12 @@ def extra_tc_as_str(effect, text_dict, **kwargs):
 def foreignminister_as_str(effect, text_dict, **kwargs):
 	pass
 
-def gain_tech_as_str(effect, text_dict, **kwargs):
-	pass
+def gain_tech_as_str(effect, text_dict, tech_dict=None, **kwargs):
+    the_key = "EE_GAIN_TECH"
+    the_tech = tech_dict.get(effect.which)
+    if not the_tech:
+        return text_dict[the_key].replace("'%s'", str(effect.which))
+    return text_dict[the_key].replace("'%s'", f"{the_tech.tech_id} {the_tech.name}")
 
 def ground_def_eff_as_str(effect, text_dict, **kwargs):
 	pass
@@ -789,10 +799,15 @@ def non_aggression_as_str(effect, text_dict, **kwargs):
 	pass
 
 def nuclear_carrier_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_NUCLEAR_CARRIER_NEW"
+    # unit_name = get_unit_short_name(effect.which, text_dict)
+    unit_name = text_dict[f"NAME_{effect.which.upper()}"]
+    return text_dict[the_key].replace("%s", unit_name)
 
 def nuke_damage_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_NUKE_DAMAGE"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("+", f"{sign}{effect.value} %")
 
 def oilpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_OIL_POOL"
@@ -843,9 +858,6 @@ def remove_division_as_str(effect, text_dict, **kwargs):
 def removecore_as_str(effect, text_dict, **kwargs):
 	pass
 
-def repair_mod_as_str(effect, text_dict, **kwargs):
-	pass
-
 def research_mod_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RESEARCH_MOD"
     sign = "+" if effect.value > 0 else ""
@@ -875,7 +887,9 @@ def revolt_as_str(effect, text_dict, **kwargs):
 	pass
 
 def sce_frequency_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_HQ_COMBAT_EVENT_CHANCE"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%+.1f\\n", f"{sign}{effect.value}")
 
 def scrap_model_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SCRAP_MODEL"
@@ -922,7 +936,9 @@ def steal_tech_as_str(effect, text_dict, **kwargs):
 	pass
 
 def supplies_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SUPPLY_POOL"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%d", f"{sign}{effect.value}")
 
 def surprise_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SURPRISE"
@@ -961,7 +977,9 @@ def visibility_as_str(effect, text_dict, **kwargs):
 	pass
 
 def vp_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_VP"
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}")
 
 def wakeleader_as_str(effect, text_dict, **kwargs):
 	pass
@@ -1178,7 +1196,7 @@ STR_FUNCTION_DICT = {
     "urban_attack": unit_stat_pct_boost_as_str,
     "urban_defense": unit_stat_pct_boost_as_str,
     "urban_move": unit_stat_pct_boost_as_str,
-    "visibility": visibility_as_str,
+    "visibility": unit_stat_boosts_as_str,
     "vp": vp_as_str,
     "wakeleader": wakeleader_as_str,
     "waketeam": waketeam_as_str,
