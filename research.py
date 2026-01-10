@@ -834,10 +834,13 @@ class Research:
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
         return team.calculate_how_many_days_to_complete(tech, research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
     
-    def calculate_completion_days_with_improvements(self, team, tech):
+    def calculate_detailed_completion_times_for_tech(self, team, tech):
         has_blueprint = int(tech.tech_id in self.blueprints)
         extra_bonus = -100 * self.get_policy_effect_for_tech(tech)
-        completion_info = team.calculate_detailed_completion_times_for_tech(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
+        return team.calculate_detailed_completion_times_for_tech(tech, self.research_speed, self.constants, extra_bonus, has_blueprint, self.num_of_rocket_sites, self.reactor_size, self.teams_get_paid)
+    
+    def calculate_completion_days_with_improvements(self, team, tech):
+        completion_info = self.calculate_detailed_completion_times_for_tech(team, tech)
         # days_and_research_speeds = [0, 0, 999999]
         days = 0
         unacceptable_lower_bound = -1
@@ -903,7 +906,7 @@ class Research:
         for team, days_num in sorted_teams:
             days_plus_more = self.calculate_completion_days_with_improvements(team, tech)
             if days_plus_more[0] != days_num:
-                raise Exception(f"Tech completion time mismatch: {days_plus_more[0]} /= {days_num}")
+                raise Exception(f"Tech completion time mismatch (Team: {team.name}): {days_plus_more[0]} /= {days_num}")
             sorted_teams_w_improvements.append([team, days_num, days_plus_more[1], days_plus_more[2]])
         return sorted_teams_w_improvements
 
