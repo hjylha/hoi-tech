@@ -831,7 +831,10 @@ def peacetime_ic_change_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", sign).replace("%.1f\\%%", f"{effect.value} %")
 
 def province_keypoints_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_KEYPOINTS"
+    province = text_dict.get(f"PROV{effect.which}")
+    province = province if province else str(effect.which)
+    return replace_string_and_number(text_dict[the_key], province, effect.value)
 
 def province_manpower_as_str(effect, text_dict, **kwargs):
     the_key = "EE_P_MAN"
@@ -841,7 +844,10 @@ def province_manpower_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}").replace("%s", province)
 
 def province_revoltrisk_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_P_RR"
+    province = text_dict.get(f"PROV{effect.which}")
+    province = province if province else str(effect.which)
+    return replace_string_and_number(text_dict[the_key].replace("%s%d", "%d"), province, effect.value)
 
 
 def rarematerialspool_as_str(effect, text_dict, **kwargs):
