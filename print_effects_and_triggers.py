@@ -534,7 +534,10 @@ def building_prod_mod_as_str(effect, text_dict, **kwargs):
     return replace_string_and_number(some_text, building_name, effect.value)
 
 def capital_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CAPITAL"
+    province = text_dict.get(f"PROV{effect.which}")
+    province = province if province else str(effect.which)
+    return f"{text_dict[the_key].replace("%s", f"{effect.which} {province}")} (if possible)"
 
 def carrier_level_as_str(effect, text_dict, **kwargs):
 	pass
@@ -689,7 +692,8 @@ def gain_tech_as_str(effect, text_dict, tech_dict=None, **kwargs):
     return text_dict[the_key].replace("'%s'", f"{the_tech.tech_id} {the_tech.name}")
 
 def ground_def_eff_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_GROUND_DEF_EFF"
+    return f"{text_dict[the_key]}: {effect.value}"
 
 def guarantee_as_str(effect, text_dict, **kwargs):
 	pass
@@ -825,7 +829,11 @@ def province_keypoints_as_str(effect, text_dict, **kwargs):
 	pass
 
 def province_manpower_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_P_MAN"
+    sign = "+" if effect.value > 0 else ""
+    province = text_dict.get(f"PROV{effect.which}")
+    province = province if province else str(effect.which)
+    return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}").replace("%s", province)
 
 def province_revoltrisk_as_str(effect, text_dict, **kwargs):
 	pass
@@ -844,7 +852,7 @@ def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
     the_key = "EE_RELATION"
     sign = "+" if effect.value > 0 else ""
     raw_text = text_dict[the_key].split("%s")
-    text = f"{raw_text[0]}{country_dict[effect.which]}{raw_text[1]}{sign}{raw_text[2]}"
+    text = f"{raw_text[0]}{country_dict[effect.which.upper()]}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%d", str(effect.value))
 
 def relative_manpower_as_str(effect, text_dict, **kwargs):
