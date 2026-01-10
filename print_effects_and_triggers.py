@@ -567,7 +567,12 @@ def coast_fort_eff_as_str(effect, text_dict, **kwargs):
 	pass
 
 def construct_as_str(effect, text_dict, **kwargs):
-	pass
+    province = text_dict.get(f"PROV{effect.where}")
+    province = province if province else str(effect.where)
+    building_name = BUILDING_DICT.get(effect.which)
+    building_name = building_name if building_name else f"{effect.which}*"
+    sign = "+" if effect.value > 0 else ""
+    return f"{building_name} in {province}: {sign}{effect.value}"
 
 def control_as_str(effect, text_dict, **kwargs):
 	pass
