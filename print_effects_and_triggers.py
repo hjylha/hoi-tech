@@ -335,7 +335,13 @@ def get_unit_name(unit_key, text_dict, do_short=True):
     if the_key is None:
         the_key = f"SNAME_{unit_key.upper()}"
     return text_dict[the_key]
-    
+
+def get_model_name(unit_key, model_num, text_dict):
+    try:
+        model_key = f"MODEL_{DIVISION_NUMBERS[unit_key]}_{model_num}"
+    except KeyError:
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[unit_key]}_{model_num}"
+    return text_dict[model_key]
 
 def replace_string_and_number(original_text, replacement_text, replacement_number, percentage=False):
     pct = " %" if percentage else ""
@@ -447,7 +453,8 @@ def add_corps_as_str(effect, text_dict, **kwargs):
 def add_division_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADD_DIVISION"
     unit_name = get_unit_name(effect.value, text_dict, False)
-    return text_dict[the_key].replace("%s", unit_name)
+    model_name = get_model_name(effect.value, effect.when, text_dict)
+    return f"{text_dict[the_key].replace("%s", unit_name)} [{model_name}]"
 
 def add_prov_resource_as_str(effect, text_dict, **kwargs):
     resource_dict = {
@@ -820,11 +827,8 @@ def money_as_str(effect, text_dict, **kwargs):
 def new_model_as_str(effect, text_dict, **kwargs):
     the_key = "EE_NEW_MODEL"
     unit_name = get_unit_name(effect.which, text_dict)
-    try:
-        model_key = f"MODEL_{DIVISION_NUMBERS[effect.which]}_{effect.value}"
-    except KeyError:
-        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which.lower()]}_{effect.value}"
-    return f"{unit_name}: {text_dict[the_key]}: {text_dict[model_key]}"
+    model_name = get_model_name(effect.which, effect.value, text_dict)
+    return f"{unit_name}: {text_dict[the_key]}: {model_name}"
 
 def non_aggression_as_str(effect, text_dict, **kwargs):
 	pass
@@ -935,12 +939,9 @@ def sce_frequency_as_str(effect, text_dict, **kwargs):
 def scrap_model_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SCRAP_MODEL"
     unit_name = get_unit_name(effect.which, text_dict)
-    try:
-        model_key = f"MODEL_{DIVISION_NUMBERS[effect.which]}_{effect.value}"
-    except KeyError:
-        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[effect.which.lower()]}_{effect.value}"
+    model_name = get_model_name(effect.which, effect.value, text_dict)
     raw_text = text_dict[the_key].split("%s")
-    return f"{raw_text[0]}{unit_name}{raw_text[1]}{text_dict[model_key]}{raw_text[2]}"
+    return f"{raw_text[0]}{unit_name}{raw_text[1]}{model_name}{raw_text[2]}"
 
 def secedeprovince_as_str(effect, text_dict, **kwargs):
 	pass
