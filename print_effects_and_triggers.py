@@ -338,9 +338,9 @@ def get_unit_name(unit_key, text_dict, do_short=True):
 
 def get_model_name(unit_key, model_num, text_dict):
     try:
-        model_key = f"MODEL_{DIVISION_NUMBERS[unit_key]}_{model_num}"
+        model_key = f"MODEL_{DIVISION_NUMBERS[unit_key.lower()]}_{model_num}"
     except KeyError:
-        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[unit_key]}_{model_num}"
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[unit_key.lower()]}_{model_num}"
     return text_dict[model_key]
 
 def replace_string_and_number(original_text, replacement_text, replacement_number, percentage=False):
