@@ -44,9 +44,9 @@ def is_aod_filepath_ok(aod_filepath):
 
 
 def create_aod_path_file(aod_filepath):
-    gamepath_file = get_gamepath_filepath()
+    gamepath_file = fp.get_gamepath_filepath()
     with open(gamepath_file, "w") as f:
-        f.write(aod_filepath)
+        f.write(str(aod_filepath))
 
 
 def ask_for_aod_path():
@@ -72,6 +72,7 @@ def make_sure_aod_path_is_known():
         pass
     aod_path = ask_for_aod_path()
     if aod_path:
+        create_aod_path_file(aod_path)
         return True
     return False
 

@@ -21,7 +21,11 @@ def get_aod_path():
     with open(gamepath_in_file, "r") as f:
         return Path(f.read().strip())
 
-AOD_PATH = get_aod_path()
+try:
+    AOD_PATH = get_aod_path()
+except FileNotFoundError:
+    # TODO: do something better
+    AOD_PATH = None
 
 
 def get_db_folder_path(aod_path=AOD_PATH):
