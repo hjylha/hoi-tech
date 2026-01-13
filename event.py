@@ -238,7 +238,8 @@ class Event:
         deathdate=None,
         is_persistent=False,
         notes="",
-        triggered_by=None
+        triggered_by=None,
+        deactivated_by=None
     ):
         self.event_id = event_id
         self.filepath = filepath
@@ -256,6 +257,8 @@ class Event:
 
         self.trigger = trigger
         self.triggered_by = [] if triggered_by is None else triggered_by
+
+        self.deactivated_by = [] if deactivated_by is None else deactivated_by
 
         self.date = date
         self.offset = offset
