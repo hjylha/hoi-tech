@@ -11,11 +11,14 @@ scenario_file_paths_file = "scenario_file_paths.csv"
 DEFAULT_SCENARIO = "1933.eug"
 
 
-def get_aod_path():
+def get_gamepath_filepath():
     if os.name == "nt":
-        with open(this_files_directory / gamepath_in, "r") as f:
-            return Path(f.read().strip())
-    with open(this_files_directory / gamepath_in_linux, "r") as f:
+        return this_files_directory / gamepath_in
+    return this_files_directory / gamepath_in_linux
+
+def get_aod_path():
+    gamepath_in_file = get_gamepath_filepath()
+    with open(gamepath_in_file, "r") as f:
         return Path(f.read().strip())
 
 AOD_PATH = get_aod_path()
