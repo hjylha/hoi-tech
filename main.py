@@ -940,6 +940,7 @@ class RequirementPanel(BoxLayout):
 
 class EffectsPanel(BoxLayout):
     max_length_of_text_line = 45
+    text_height = 19
 
     def show_effects(self, effects):
         text_lines = []
@@ -954,14 +955,14 @@ class EffectsPanel(BoxLayout):
                     end_index = self.max_length_of_text_line - rev_index
                     text_lines.append(text_left[:end_index])
                     text_left = f"  {text_left[end_index:]}"
-        self.effects_label.height = dp(len(text_lines) * 20)
+        self.effects_label.height = dp(len(text_lines) * self.text_height)
         self.effects_label.text = "\n".join(text_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.add_widget(Label(text="Effects:", size_hint=(1, None), height=dp(20)))
+        self.add_widget(Label(text="Effects:", size_hint=(1, None), height=dp(20), padding=(dp(2), dp(2), dp(2), dp(2))))
         placeholder_text = "\n".join([f"... {i+1}" for i in range(20)])
-        self.effects_label = Label(text=placeholder_text, size_hint=(1, None), height=dp(400))
+        self.effects_label = Label(text=placeholder_text, size_hint=(1, None), height=dp(20 * self.text_height))
         self.add_widget(self.effects_label)
 
 
