@@ -959,11 +959,16 @@ def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
     if event_dict is None:
         return
     the_key = "EE_SLEEP"
-    raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
-    # my own additions
-    name_w_quotes = f"'{event_dict[effect.which].name}'"
-    add = f" [{event_dict[effect.which].country} {effect.which}]"
-    return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
+    try:
+        the_event = event_dict[effect.which]
+        raw_text = text_dict[the_key].replace("%s", the_event.name)
+        # my own additions
+        name_w_quotes = f"'{the_event.name}'"
+        add = f" [{the_event.country} {effect.which}]"
+        return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
+    except KeyError:
+        return text_dict[the_key].replace("'%s' Event", f"Event {effect.which} [EVENT NOT FOUND]")
+    
 
 def sleepleader_as_str(effect, text_dict, **kwargs):
 	pass
@@ -1431,6 +1436,15 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
             print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
     # event.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
     print_trigger(event, indent_num + indent_add, indent_add, empty_trigger=trigger_empty, **kwargs)
+    print()
+
+    if event.deactivated_by:
+        print(indent_num * " ", "Deactivated by:")
+        for deactivating_event, action_index in event.deactivated_by:
+            text_about_event = f"event {deactivating_event.event_id} [{deactivating_event.country}]: {deactivating_event.name}"
+            text_about_action = f"action '{deactivating_event.actions[action_index].name}' [{deactivating_event.actions[action_index].action_key}]"
+            print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
+
     print()
 
     if event.date:
