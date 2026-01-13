@@ -224,6 +224,7 @@ class Tech:
 class TechTeam:
     MIN_SKILL = 1
     MAX_SKILL = 10
+    NUM_OF_DECIMALS = 6
 
     def __init__(self, team_id, team_name, team_nation, skill, start_year, end_year, specialities, pic_path=None):
         self.team_id = team_id
@@ -328,7 +329,7 @@ class TechTeam:
                 num_of_rocket_sites,
                 reactor_size,
                 has_money)
-        daily_progress = round(daily_progress, 4)
+        daily_progress = round(daily_progress, self.NUM_OF_DECIMALS)
         return math.ceil(20 / daily_progress)
 
     def calculate_how_many_days_to_complete(
@@ -353,7 +354,7 @@ class TechTeam:
                 num_of_rocket_sites,
                 reactor_size,
                 has_money)
-            daily_progress = round(daily_progress, 4)
+            daily_progress = round(daily_progress, self.NUM_OF_DECIMALS)
             days_to_complete_component = math.ceil(20 / daily_progress)
             days_gone += days_to_complete_component
         return days_gone
@@ -388,7 +389,7 @@ class TechTeam:
             tdm, gdm, pm = get_components_difficulty_modifiers(component, game_constants.current_difficulty, total_extra_bonus)
             difficulty_multiplier = calculate_components_difficulty_multiplier_from_modifiers(research_speed_modifier, tdm, gdm, pm)
             one_day_progress = calculate_1_day_progress_from_multipliers(game_constants, skill_issue, difficulty_multiplier, has_blueprint)
-            one_day_progress = round(one_day_progress, 4)
+            one_day_progress = round(one_day_progress, self.NUM_OF_DECIMALS)
             days_to_complete_component = math.ceil(tech.COMPONENT_SIZE / one_day_progress)
             component_result.append(days_to_complete_component)
 
