@@ -196,6 +196,13 @@ def scan_events(scenario_name, aod_path):
                         print(f"Event {ev_id} [{ev.country_code}]: {name_text} triggers event {triggered_event_id}, which does not exist.")
                         continue
                     event_dict[triggered_event_id].triggered_by.append((ev, i))
+                elif effect.type and effect.type == "sleepevent":
+                    deactivated_event_id = effect.which
+                    if event_dict.get(deactivated_event_id) is None:
+                        name_text = ev.name if ev.name else "[no name]"
+                        print(f"Event {ev_id} [{ev.country_code}]: {name_text} deactivates event {deactivated_event_id}, which does not exist.")
+                        continue
+                    event_dict[deactivated_event_id].deactivated_by.append((ev, i))
                     # if event_dict[triggered_event_id].triggered_by is not None:
                     #     print(f"Event {triggered_event_id} triggered also by something else than event {ev_id}")
                     # else:
@@ -475,8 +482,21 @@ if __name__ == "__main__":
     Empty search i.e. pressing Enter quits the program.
     """
 
+    
+
+
     if "d" in sys.argv:
         ask_to_search = False
+
+        from print_effects_and_triggers import effect_as_str
+        def_effs = []
+        for tech in tech_dict.values():
+            for eff in tech.effects:
+                eff_str = effect_as_str(eff, text_dict_last, ed, country_dict, tech_dict)
+                if "=" in eff_str:
+                    def_effs.append(eff_str)
+        
+        evs_w_d_effs = []
     
     if "raw" in sys.argv:
         force_default = True
