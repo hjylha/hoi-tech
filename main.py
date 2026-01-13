@@ -939,22 +939,30 @@ class RequirementPanel(BoxLayout):
 
 
 class EffectsPanel(BoxLayout):
+    max_length_of_text_line = 45
+
     def show_effects(self, effects):
-        self.clear_widgets()
-
-        self.add_widget(Label(text="Effects:", size_hint=(1, None), height=dp(20)))
+        text_lines = []
         for effect in effects:
-            self.add_widget(Label(text=effect, size_hint=(1, None), height=dp(20)))
-
+            text_left = effect
+            while text_left:
+                if len(text_left) <= self.max_length_of_text_line:
+                    text_lines.append(text_left)
+                    break
+                else:
+                    rev_index = text_left[:self.max_length_of_text_line][::-1].index(" ")
+                    end_index = self.max_length_of_text_line - rev_index
+                    text_lines.append(text_left[:end_index])
+                    text_left = f"  {text_left[end_index:]}"
+        self.effects_label.height = dp(len(text_lines) * 20)
+        self.effects_label.text = "\n".join(text_lines)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.add_widget(Label(text="Effects:", size_hint=(1, None), height=dp(20)))
-        for i in range(20):
-            self.add_widget(Label(text=f"... {i+1}", size_hint=(1, None), height=dp(20)))
-        # self.add_widget(Label(text="...", size_hint=(1, 0.25)))
-        # self.add_widget(Label(text="...", size_hint=(1, 0.25)))
-        # self.add_widget(Label(text="...", size_hint=(1, 0.25)))
+        placeholder_text = "\n".join([f"... {i+1}" for i in range(20)])
+        self.effects_label = Label(text=placeholder_text, size_hint=(1, None), height=dp(400))
+        self.add_widget(self.effects_label)
 
 
 class ResearchButtonsPanel(GridLayout):
