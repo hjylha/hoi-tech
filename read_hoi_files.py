@@ -415,6 +415,9 @@ def get_texts_from_files_w_duplicates(list_of_filepaths):
         text_dict = read_name_file_w_duplicates(filepath, text_dict)
     return text_dict
 
+def get_all_texts_from_files():
+    return get_texts_from_files(fp.get_all_text_files_paths(AOD_PATH))
+
 
 def get_event_texts(list_of_keys):
     event_dict = dict()
