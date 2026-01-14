@@ -1,6 +1,7 @@
 
 import sys
-from file_paths import AOD_PATH, get_event_text_paths, get_all_text_files_paths
+from file_paths import get_event_text_paths, get_all_text_files_paths
+from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
 from scan_hoi_files import get_tech_dict
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words
@@ -452,7 +453,7 @@ if __name__ == "__main__":
     # event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
     # event_dict, missing_texts = get_event_dict(event_list, texts)
     # no_name, no_desc, no_action = missing_texts
-    text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths())
+    text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
     text_dict_last = {key: value[-1][0] for key, value in text_dict.items()}
     tech_dict = get_tech_dict()
 
