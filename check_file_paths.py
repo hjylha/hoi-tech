@@ -73,13 +73,15 @@ def make_sure_aod_path_is_known():
     aod_path = ask_for_aod_path()
     if aod_path:
         create_aod_path_file(aod_path)
+        print(f"Iron Cross folder saved: {aod_path}")
         return True
     return False
 
 
-if __name__ == "__main__":
-    is_it_ok = make_sure_aod_path_is_known()
-    if is_it_ok:
-        print(f"All is well. Iron Cross can be found in folder: {fp.get_aod_path()}")
-    else:
-        print("Things are very bad, at least when it comes to knowing where Iron Cross files are.")
+is_it_ok = make_sure_aod_path_is_known()
+if is_it_ok:
+    print(f"Iron Cross located in folder: {fp.get_aod_path()}")
+else:
+    raise Exception("Things are very bad, at least when it comes to knowing where Iron Cross files are.")
+
+AOD_PATH = fp.get_aod_path()
