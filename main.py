@@ -1,6 +1,15 @@
 
 from pathlib import Path
 
+from research import Research
+from read_hoi_files import get_country_names, get_all_texts_from_files
+from arrows import get_arrow_points, scale_arrows
+from tech_positions import tech_positions
+from invention_positions import invention_positions, pw_invention_positions
+from component_types import component_types
+import lines
+from print_effects_and_triggers import list_tech_effects
+
 from kivy.app import App
 from kivy.core.window import Window
 # from kivy.uix.widget import Widget
@@ -16,15 +25,6 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.scrollview import ScrollView
 from kivy.graphics import Color, Line, Rectangle
 from kivy.metrics import dp
-
-from research import Research
-from read_hoi_files import get_country_names, get_all_texts_from_files
-from arrows import get_arrow_points, scale_arrows
-from tech_positions import tech_positions
-from invention_positions import invention_positions, pw_invention_positions
-from component_types import component_types
-import lines
-from print_effects_and_triggers import list_tech_effects
 
 
 DIFFICULTIES = (
