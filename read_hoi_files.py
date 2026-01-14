@@ -3,6 +3,7 @@ import csv
 
 import file_paths as fp
 import read_files as rf
+from check_file_paths import AOD_PATH
 
 
 DEFAULT_SCENARIO = "1933.eug"
@@ -107,8 +108,8 @@ def read_txt_file(filepath, check_filetype=False, encoding=text_encoding):
     return rf.read_txt_file(filepath, encoding, check_filetype=check_filetype)
 
 
-def read_misc_file():
-    misc_filepath = fp.get_misc_path()
+def read_misc_file(aod_path=AOD_PATH):
+    misc_filepath = fp.get_misc_path(aod_path)
     # misc_content = dict()
     # content_types = ["economy", "combat", "research"]
     # with open(misc_filepath, "r", encoding = the_encoding) as f:
@@ -133,13 +134,13 @@ def read_misc_file():
     #             misc_content[current_type].append(item)
     return read_txt_file(misc_filepath)
 
-def get_blueprint_bonus_and_tech_speed_modifier():
-    misc_content = read_misc_file()
+def get_blueprint_bonus_and_tech_speed_modifier(aod_path=AOD_PATH):
+    misc_content = read_misc_file(aod_path)
     return misc_content["research"][0], misc_content["research"][5]
 
 
-def read_difficulty_file():
-    difficulty_path = fp.get_difficulty_path()
+def read_difficulty_file(aod_path=AOD_PATH):
+    difficulty_path = fp.get_difficulty_path(aod_path)
     data = read_csv_file(difficulty_path)
     important_rows = []
     starts = ["CATEGORY", "HUMAN", "RESEARCH"]
@@ -158,9 +159,9 @@ def read_difficulty_file():
     return {diff: int(modifier) for diff, modifier in zip(important_rows[0], important_rows[2])}
 
 
-def get_country_codes_from_scenario_files():
+def get_country_codes_from_scenario_files(aod_path=AOD_PATH):
     scenario_paths = dict()
-    path33, path34 = fp.get_scenario_paths()
+    path33, path34 = fp.get_scenario_paths(aod_path)
     paths33 = path33.glob("*.inc")
     paths34 = path34.glob("*.inc")
     for p in paths33:
@@ -213,7 +214,7 @@ def get_scenario_file_path_for_country(country_code):
     if not filepath.exists():
         scenario_paths = get_country_codes_from_scenario_files()
         write_scenario_file_paths_to_file(scenario_paths)
-    scenario_file_directories = fp.get_scenario_paths()
+    scenario_file_directories = fp.get_scenario_paths(AOD_PATH)
     with open(filepath, "r", encoding = the_encoding) as f:
         for line in f:
             try:
@@ -253,10 +254,10 @@ def get_scenario_file_path_for_country(country_code):
 #     return ideas
 
 
-def get_tech_names():
+def get_tech_names(aod_path=AOD_PATH):
     # aod_path = get_aod_path()
     # tech_names_path = aod_path / "config" / "tech_names.csv"
-    tech_names_path = fp.get_tech_names_path()
+    tech_names_path = fp.get_tech_names_path(aod_path)
     tech_names = dict()
     with open(tech_names_path, "r", encoding = csv_encoding) as f:
         for line in f:
@@ -266,14 +267,14 @@ def get_tech_names():
     return tech_names
 
 
-def get_country_names(country_codes=None):
+def get_country_names(aod_path=AOD_PATH, country_codes=None):
     # aod_path = get_aod_path()
     if country_codes is None:
-        tech_team_files = fp.get_tech_team_files(fp.get_tech_path())
+        tech_team_files = fp.get_tech_team_files(fp.get_tech_path(aod_path))
         country_codes = [filepath.stem[-3:].upper() for filepath in tech_team_files]
 
     # country_names_path = aod_path / "config" / "world_names.csv"
-    country_names_path = fp.get_country_names_path()
+    country_names_path = fp.get_country_names_path(aod_path)
     country_names = dict()
     with open(country_names_path, "r", encoding = csv_encoding) as f:
         for line in f:
@@ -287,8 +288,8 @@ def get_country_names(country_codes=None):
     return country_names
 
 
-def get_minister_and_policy_names():
-    policy_name_file = fp.get_policy_names_path()
+def get_minister_and_policy_names(aod_path=AOD_PATH):
+    policy_name_file = fp.get_policy_names_path(aod_path)
     policy_and_minister_names = dict()
     with open(policy_name_file, "r", encoding = csv_encoding) as f:
         for line in f:
@@ -304,8 +305,8 @@ def format_title(title_w_all_caps_and_underscores):
     return "".join(words)
 
 
-def get_government_titles():
-    titles_in_file = fp.get_government_titles_path()
+def get_government_titles(aod_path=AOD_PATH):
+    titles_in_file = fp.get_government_titles_path(aod_path)
     # title_dict = {"all": "all"}
     title_dict = dict()
     start_text = "HOIG_"
@@ -317,8 +318,8 @@ def get_government_titles():
                 title_dict[key] = items[1]
     return title_dict
 
-def get_idea_titles():
-    titles_in_file = fp.get_idea_titles_path()
+def get_idea_titles(aod_path=AOD_PATH):
+    titles_in_file = fp.get_idea_titles_path(aod_path)
     title_dict = dict()
     start_text = "HOINI_"
     with open(titles_in_file, "r", encoding = text_encoding) as f:
@@ -329,8 +330,8 @@ def get_idea_titles():
                 title_dict[key] = items[1]
     return title_dict
 
-def get_province_names():
-    names_in_file = fp.get_province_names_path()
+def get_province_names(aod_path=AOD_PATH):
+    names_in_file = fp.get_province_names_path(aod_path)
     return {int(k[4:]): name for k, name in read_name_file(names_in_file).items()}
 
 
@@ -357,7 +358,7 @@ def write_countries_file(countries_data):
     pass
 
 
-def read_scenario_file_for_events(scenario_file_name, aod_path):
+def read_scenario_file_for_events(scenario_file_name, aod_path=AOD_PATH):
     event_file_paths = []
     scenario_file_path = fp.get_scenarios_folder_path(aod_path) / scenario_file_name
     scenario_dict = read_txt_file(scenario_file_path)
