@@ -1,5 +1,6 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_policies_path, get_tech_files, get_tech_team_files
+from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
@@ -167,7 +168,7 @@ def scan_tech_file(filepath, tech_names):
 
 def scan_techs():
     techs = []
-    tech_files = get_tech_files(get_tech_path())
+    tech_files = get_tech_files(get_tech_path(AOD_PATH))
     tech_names = get_tech_names()
 
     for tech_file in tech_files:
@@ -255,7 +256,7 @@ def scan_tech_teams():
 
 def get_tech_teams(country_code):
     # tech_teams = []
-    team_filepath = get_tech_path() / "teams" / f"teams_{country_code.lower()}.csv"
+    team_filepath = get_tech_path(AOD_PATH) / "teams" / f"teams_{country_code.lower()}.csv"
     return scan_tech_team_file(team_filepath)
 
 
@@ -284,7 +285,7 @@ def ensure_lists_are_lists(should_be_list):
 def scan_minister_personalities():
     public_name_dict = get_minister_and_policy_names()
     # minister_titles = get_government_titles()
-    minister_modifier_path = get_minister_modifier_path()
+    minister_modifier_path = get_minister_modifier_path(AOD_PATH)
     personalities = []
     content = read_txt_file(minister_modifier_path)
     m_personalities = content["minister_personalities"]["personality"]
@@ -315,7 +316,7 @@ def scan_minister_personalities():
 def scan_ideas():
     public_name_dict = get_minister_and_policy_names()
     # idea_titles = get_idea_titles()
-    ideas_path = get_ideas_path()
+    ideas_path = get_ideas_path(AOD_PATH)
     content = read_txt_file(ideas_path)
     raw_ideas = content["national_ideas"]["national_idea"]
     ideas = []
@@ -370,7 +371,7 @@ def scan_minister_csv(filepath, minister_personalities):
     return {country_code_from_file: ministers}
 
 def scan_ministers_for_country(country_code):
-    ministers_path = get_ministers_path(country_code)
+    ministers_path = get_ministers_path(country_code, AOD_PATH)
     if not ministers_path.exists():
         print(f"Filepath {ministers_path} not found")
     minister_personalities = scan_minister_personalities()
@@ -379,7 +380,7 @@ def scan_ministers_for_country(country_code):
 
 
 def scan_policies_file():
-    policy_path = get_policies_path()
+    policy_path = get_policies_path(AOD_PATH)
     country_data = read_txt_file(policy_path)["country"]
     policy_dict = dict()
     for country_dict in country_data:
