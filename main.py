@@ -18,13 +18,12 @@ from kivy.graphics import Color, Line, Rectangle
 from kivy.metrics import dp
 
 from research import Research
-from read_hoi_files import get_country_names, get_texts_from_files
+from read_hoi_files import get_country_names, get_all_texts_from_files
 from arrows import get_arrow_points, scale_arrows
 from tech_positions import tech_positions
 from invention_positions import invention_positions, pw_invention_positions
 from component_types import component_types
 import lines
-from file_paths import get_all_text_files_paths
 from print_effects_and_triggers import list_tech_effects
 
 
@@ -1558,7 +1557,7 @@ class TechScreen(BoxLayout):
         super().__init__(**kwargs)
 
         self.research = None
-        self.text_dict = get_texts_from_files(get_all_text_files_paths())
+        self.text_dict = get_all_texts_from_files()
 
         self.active_category = TECH_CATEGORIES[0][1]
 
