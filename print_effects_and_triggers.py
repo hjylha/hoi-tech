@@ -424,11 +424,10 @@ def abomb_production_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ABOMB_ALLOWED"
     return text_dict[the_key]
 
-def access_as_str(effect, text_dict, country_dict=None, **kwargs):
-    if country_dict is None:
-        return
+def access_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ACCESS"
-    return text_dict[the_key].replace("%s", country_dict[effect.which])
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def activate_as_str(effect, text_dict, tech_dict=None, **kwargs):
     if tech_dict is None:
@@ -453,8 +452,17 @@ def add_corps_as_str(effect, text_dict, **kwargs):
 def add_division_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADD_DIVISION"
     unit_name = get_unit_name(effect.value, text_dict, False)
-    model_name = get_model_name(effect.value, effect.when, text_dict)
-    return f"{text_dict[the_key].replace("%s", unit_name)} [{model_name}]"
+    if effect.where:
+        brigade_name = get_unit_name(effect.where, text_dict)
+        brigade_text = f" with {brigade_name}"
+    else:
+        brigade_text = ""
+    if effect.when:
+        model_name = get_model_name(effect.value, effect.when, text_dict)
+        model_text = f" [{model_name}{brigade_text}]"
+    else:
+        model_text = f"[UNKNOWN MODEL{brigade_text}]"
+    return f"{text_dict[the_key].replace("%s", unit_name)}{model_text}"
 
 def add_prov_resource_as_str(effect, text_dict, **kwargs):
     resource_dict = {
@@ -487,11 +495,9 @@ def ai_as_str(effect, text_dict, **kwargs):
 def ai_prepare_war_as_str(effect, text_dict, **kwargs):
     pass
 
-def alliance_as_str(effect, text_dict, country_dict=None, **kwargs):
-    if country_dict is None:
-        return
+def alliance_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ALL"
-    return text_dict[the_key].replace("%s", country_dict[effect.which])
+    return text_dict[the_key].replace("%s", text_dict[effect.which.upper()])
 
 def allow_building_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ALLOW_BUILDING"
@@ -516,12 +522,13 @@ def army_detection_as_str(effect, text_dict, **kwargs):
     sign = "+" if effect.value > 0 else ""
     return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
-def belligerence_change_as_str(effect, text_dict, country_dict=None, **kwargs):
-    if country_dict is None:
-        return
+def belligerence_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_BELLIGERENCE"
     raw_text = text_dict[the_key].split("%s")
-    country = country_dict[effect.which]
+    if effect.which is None:
+        country = "[Current country]"
+    else:
+        country = text_dict[effect.which.upper()]
     sign = "+" if effect.value > 0 else ""
     text = raw_text[0] + country + raw_text[1] + sign + raw_text[2]
     return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
@@ -883,13 +890,15 @@ def rarematerialspool_as_str(effect, text_dict, **kwargs):
 def regime_falls_as_str(effect, text_dict, **kwargs):
 	pass
 
-def relation_change_as_str(effect, text_dict, country_dict=None, **kwargs):
-    if country_dict is None:
-        return
+def relation_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RELATION"
     sign = "+" if effect.value > 0 else ""
     raw_text = text_dict[the_key].split("%s")
-    text = f"{raw_text[0]}{country_dict[effect.which.upper()]}{raw_text[1]}{sign}{raw_text[2]}"
+    try:
+        country = text_dict[effect.which.upper()]
+    except AttributeError:
+        country = f"[{effect.which}]"
+    text = f"{raw_text[0]}{country}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%d", str(effect.value))
 
 def relative_manpower_as_str(effect, text_dict, **kwargs):
@@ -1014,14 +1023,15 @@ def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
     if event_dict is None:
         return
     the_key = "EE_TRIGGER"
-    raw_text = text_dict[the_key].replace("%s", event_dict[effect.which].name)
-    # my own additions
-    name_w_quotes = f"'{event_dict[effect.which].name}'"
-    add = f" [{event_dict[effect.which].country} {effect.which}]"
+    try:
+        event_name = event_dict[effect.which].name
+        add = f" [{event_dict[effect.which].country} {effect.which}]"
+    except KeyError:
+        event_name = f"{effect.which} [EVENT NOT FOUND]"
+        add = ""
+    raw_text = text_dict[the_key].replace("%s", event_name)
+    name_w_quotes = f"'{event_name}'"
     return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
-
-def visibility_as_str(effect, text_dict, **kwargs):
-	pass
 
 def vp_as_str(effect, text_dict, **kwargs):
     the_key = "EE_VP"
@@ -1251,23 +1261,23 @@ STR_FUNCTION_DICT = {
 }
 
 
-def effect_as_str(effect, text_dict, event_dict=None, country_dict=None, tech_dict=None, force_default=False, **kwargs):
+def effect_as_str(effect, text_dict, event_dict=None, tech_dict=None, force_default=False, **kwargs):
     if force_default:
         return effect_as_str_default(effect)
     the_function = STR_FUNCTION_DICT.get(effect.type.lower())
     if the_function is None:
         print("PROBLEM:", effect.type)
     # if the_function is not None:
-    #     the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, **kwargs)
-    the_text = STR_FUNCTION_DICT.get(effect.type.lower())(effect, text_dict=text_dict, event_dict=event_dict, country_dict=country_dict, tech_dict=tech_dict, **kwargs)
+    #     the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, **kwargs)
+    the_text = STR_FUNCTION_DICT.get(effect.type.lower())(effect, text_dict=text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
     if the_text:
         return the_text
     
     return effect_as_str_default(effect)
     
 
-def print_effect(effect, indent_num, text_dict, event_dict=None, country_dict=None, tech_dict=None, force_default=False, **kwargs):
-    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, country_dict, tech_dict, force_default=force_default, **kwargs))
+def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None, force_default=False, **kwargs):
+    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs))
     
 
 # Trigger keys: (AI/ai)
@@ -1388,7 +1398,7 @@ def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
         return
     event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict=None, tech_dict=None, force_default=False, **kwargs):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, force_default=False, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -1407,9 +1417,9 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, country_
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
     for effect in action.effects:
-        print_effect(effect, indent_num, text_dict, event_dict, country_dict, tech_dict, force_default=force_default, **kwargs)
+        print_effect(effect, indent_num, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, country_dict, tech_dict, force_default=False, **kwargs):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, tech_dict, force_default=False, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
@@ -1470,7 +1480,7 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
     print(indent_num * ' ', "Possible Actions:")
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
-        print_action(action, indent_num, indent_add, text_dict, event_dict, country_dict, tech_dict, force_default=force_default, **kwargs)
+        print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs)
     
 
 def list_tech_effects(tech, text_dict, tech_dict, **kwargs):

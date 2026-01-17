@@ -351,13 +351,13 @@ def search_events(event_dict):
     return True
 
 
-def search_events_w_class(event_dict, country_dict, aod_path, text_dict, tech_dict, max_num_of_suggestions=999, force_default=False):
+def search_events_w_class(event_dict, aod_path, text_dict, tech_dict, max_num_of_suggestions=999, force_default=False):
     text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
     possible_country_code = text_input.split(" ")[0].upper()
     country_code = None
-    if country_dict.get(possible_country_code) is not None:
+    if text_dict.get(possible_country_code) is not None:
         country_code = possible_country_code
         text_input = text_input[4:]
     suggestions = suggest_events_based_on_search_words(text_input, event_dict, country_code)
@@ -365,13 +365,13 @@ def search_events_w_class(event_dict, country_dict, aod_path, text_dict, tech_di
     indent_add = 2
     print()
     if country_code:
-        print(f" Searching restricted to events of {country_dict[country_code]} [{country_code}]\n")
+        print(f" Searching restricted to events of {text_dict[country_code]} [{country_code}]\n")
     if not suggestions:
         print(" No matching events found.")
     elif len(suggestions) == 1:
         ev = suggestions[0]
         # ev.print_event(aod_path, 1, indent_add)
-        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict, country_dict, tech_dict, force_default=force_default)
+        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict, tech_dict, force_default=force_default)
     else:
         for event in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
@@ -493,11 +493,25 @@ if __name__ == "__main__":
         def_effs = []
         for tech in tech_dict.values():
             for eff in tech.effects:
-                eff_str = effect_as_str(eff, text_dict_last, ed, country_dict, tech_dict)
+                eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict)
                 if "=" in eff_str:
                     def_effs.append(eff_str)
         
         evs_w_d_effs = []
+        evs_w_issues = []
+        for ev in ed.values():
+            for act in ev.actions:
+                for eff in act.effects:
+                    try:
+                        eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict)
+                        if "=" in eff_str:
+                            evs_w_d_effs.append(ev)
+                            break
+                            break
+                    except KeyError:
+                        evs_w_issues.append(ev)
+                        break
+                        break
     
     if "raw" in sys.argv:
         force_default = True
@@ -512,5 +526,5 @@ if __name__ == "__main__":
         print(explanation)
     while ask_to_search:
         # ask_to_search = search_events(event_dict)
-        ask_to_search = search_events_w_class(ed, country_dict, AOD_PATH, text_dict_last, tech_dict, force_default=force_default)
+        ask_to_search = search_events_w_class(ed, AOD_PATH, text_dict_last, tech_dict, force_default=force_default)
     
