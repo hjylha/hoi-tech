@@ -455,14 +455,26 @@ def add_division_as_str(effect, text_dict, **kwargs):
     division_name_text = ""
     if effect.which:
         division_name_text = f" [{effect.which}]"
-    if effect.where:
-        brigade_name = get_unit_name(effect.where, text_dict)
-        brigade_text = f" with {brigade_name}"
-    else:
-        brigade_text = ""
-    if effect.when:
-        model_name = get_model_name(effect.value, effect.when, text_dict)
-        model_text = f" [{model_name}{brigade_text}]"
+    
+    brigade_text = ""
+    redo_brigade_text = False
+    if effect.where is not None:
+        try:
+            brigade_name = get_unit_name(effect.where, text_dict)
+            brigade_text = f" with {brigade_name}"
+        except KeyError:
+            redo_brigade_text = True
+        except AttributeError:
+            redo_brigade_text = True
+    if redo_brigade_text:
+        brigade_text = f" with UNKNOWN BRIGADE {effect.where}"
+        
+    if effect.when is not None:
+        try:
+            model_name = get_model_name(effect.value, effect.when, text_dict)
+            model_text = f" [{model_name}{brigade_text}]"
+        except KeyError:
+            model_text = f" [UNKNOWN MODEL {effect.when}{brigade_text}]"
     else:
         model_text = f"[UNKNOWN MODEL{brigade_text}]"
     return f"{text_dict[the_key].replace("%s", unit_name)}{division_name_text}{model_text}"
