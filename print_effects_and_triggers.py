@@ -452,12 +452,15 @@ def activate_as_str(effect, text_dict, tech_dict=None, **kwargs):
     return text_dict[the_key].replace("%s", f"{effect.which} {tech_dict[effect.which].name}")
 
 def activate_division_as_str(effect, text_dict, **kwargs):
-    pass
+    the_key = "EE_ACTIVATE_DIVISION"
+    province = get_province(effect.where, text_dict)
+    province = str(province) if isinstance(province, int) else f"{province} [{effect.where}]"
+    # TODO: find out what this means (and what about effect.when)
+    division_info = f"[type: {effect.which}, id: {effect.value}]"
+    raw_text = text_dict[the_key].split("%s")
+    return f"{raw_text[0]}{division_info}{raw_text[1]}{province}{raw_text[2]}"
 
 def activate_unit_type_as_str(effect, text_dict, **kwargs):
-    # unit_dict = {
-    #     "infantry": SNAME_INFANTRY
-    # }
     the_key = "EE_ACTIVATE_UNIT_TYPE"
     unit_name = get_unit_name(effect.which, text_dict)
     return f"{text_dict[the_key]}: {unit_name}"
@@ -527,10 +530,13 @@ def addcore_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", f"{province_text} [{effect.which}]")
 
 def ai_as_str(effect, text_dict, **kwargs):
-    pass
+    # TODO: is this it?
+    return f"{effect.type.upper()}: {effect.which}"
 
 def ai_prepare_war_as_str(effect, text_dict, **kwargs):
-    pass
+    # TODO: what does this do anyway?
+    country = text_dict[effect.which.upper()]
+    return f"AI prepares for war: {country}"
 
 def alliance_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ALL"
@@ -568,7 +574,7 @@ def belligerence_change_as_str(effect, text_dict, **kwargs):
         country = text_dict[effect.which.upper()]
     sign = "+" if effect.value > 0 else ""
     text = raw_text[0] + country + raw_text[1] + sign + raw_text[2]
-    return text.replace("%.1f\\%", str(effect.value)).replace("\\n", "")
+    return text.replace("%.1f\\%%\\n", str(effect.value))
 
 def build_cost_as_str(effect, text_dict, **kwargs):
     # RELATIVE ruins everything
@@ -716,7 +722,6 @@ def enable_task_as_str(effect, text_dict, **kwargs):
     }
     mission_key = exceptions.get(effect.which)
     mission_key = mission_key if mission_key else f"MISSION_{effect.which.upper()}"
-    # mission_key = f"MISSION_{effect.which.upper()}"
     return text_dict[the_key].replace("%s", text_dict[mission_key])
 
 def end_access_as_str(effect, text_dict, **kwargs):
@@ -821,7 +826,9 @@ def local_setflag_as_str(effect, text_dict, **kwargs):
 	return f"Set flag [{effect.type}]: {effect.which}"
 
 def make_puppet_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_MAKE_PUPPET"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def manpowerpool_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MANPOWER"
@@ -872,7 +879,6 @@ def non_aggression_as_str(effect, text_dict, **kwargs):
 
 def nuclear_carrier_as_str(effect, text_dict, **kwargs):
     the_key = "EE_NUCLEAR_CARRIER_NEW"
-    # unit_name = get_unit_name(effect.which, text_dict)
     unit_name = text_dict[f"NAME_{effect.which.upper()}"]
     return text_dict[the_key].replace("%s", unit_name)
 
@@ -1061,7 +1067,6 @@ def task_efficiency_as_str(effect, text_dict, **kwargs):
     }
     mission_key = exceptions.get(effect.which)
     mission_key = mission_key if mission_key else f"MISSION_{effect.which.upper()}"
-    # mission_key = f"MISSION_{effect.which.upper()}"
     return replace_string_and_number(raw_text, text_dict[mission_key], effect.value)
 
 def transport_pool_as_str(effect, text_dict, **kwargs):
@@ -1117,9 +1122,6 @@ STR_FUNCTION_DICT = {
     "air_attack": unit_stat_boosts_as_str,
     "air_defense": unit_stat_boosts_as_str,
     "air_detection": unit_stat_boosts_as_str,
-    # "air_attack": air_attack_as_str,
-    # "air_defense": air_defense_as_str,
-    # "air_detection": air_detection_as_str,
     "alliance": alliance_as_str,
     "allow_building": allow_building_as_str,
     "allow_convoy_escorts": allow_convoy_escorts_as_str,
