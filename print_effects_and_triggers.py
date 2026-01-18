@@ -800,10 +800,10 @@ def leave_alliance_as_str(effect, text_dict, **kwargs):
 	pass
 
 def local_clrflag_as_str(effect, text_dict, **kwargs):
-	pass
+	return f"Clear flag [{effect.type}]: {effect.which}"
 
 def local_setflag_as_str(effect, text_dict, **kwargs):
-	pass
+	return f"Set flag [{effect.type}]: {effect.which}"
 
 def make_puppet_as_str(effect, text_dict, **kwargs):
 	pass
