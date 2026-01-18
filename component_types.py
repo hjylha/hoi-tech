@@ -34,3 +34,6 @@ component_types = {
     "training": "TRAINING",
     "nuclear_engineering": "NUC_ENGI"
 }
+
+# component names in file tech_names.csv
+# key: f"RT_{component_type.upper()}"
