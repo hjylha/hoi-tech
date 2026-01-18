@@ -453,9 +453,15 @@ def activate_unit_type_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]}: {unit_name}"
 
 def add_corps_as_str(effect, text_dict, **kwargs):
-    pass
+    the_key = "EE_ADD_CORPS"
+    corps_name = effect.which
+    province = get_province(effect.where, text_dict)
+    raw_text = text_dict[the_key].split("%s")
+    bonus_text = f"value: {effect.value}, when: {effect.when}"
+    return f"{raw_text[0]}{corps_name}{raw_text[1]}{province}{raw_text[2]} [{bonus_text}]"
 
 def add_division_as_str(effect, text_dict, **kwargs):
+    # TODO: THERE IS SOME WEIRDNESS WITH add_division
     the_key = "EE_ADD_DIVISION"
     unit_name = get_unit_name(effect.value, text_dict, False)
     division_name_text = ""
@@ -736,7 +742,9 @@ def energypool_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%d", str(effect.value))
 
 def escort_pool_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_ESCORT_POOL"
+    country = text_dict[effect.which.upper()]
+    return replace_string_and_number(text_dict[the_key], country, effect.value)
 
 def extra_tc_as_str(effect, text_dict, **kwargs):
 	pass
@@ -932,7 +940,10 @@ def remove_division_as_str(effect, text_dict, **kwargs):
 	pass
 
 def removecore_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_REMCORE"
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return text_dict[the_key].replace("%s", f"{province_text}")
 
 def research_mod_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RESEARCH_MOD"
@@ -940,7 +951,8 @@ def research_mod_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value}")
 
 def research_sabotaged_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_RESEARCH_SABOTAGED"
+    return text_dict[the_key]
 
 def resource_as_str(effect, text_dict, **kwargs):
     # how many things are here?
@@ -987,7 +999,9 @@ def set_leader_skill_as_str(effect, text_dict, **kwargs):
 	pass
 
 def set_relation_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SET_RELATION"
+    country = text_dict[effect.which.upper()]
+    return replace_string_and_number(text_dict[the_key], country, effect.value)
 
 def setflag_as_str(effect, text_dict, **kwargs):
 	pass
@@ -1017,7 +1031,13 @@ def sleepteam_as_str(effect, text_dict, **kwargs):
 	pass
 
 def steal_tech_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_STEAL_TECH"
+    country = str(effect.which)
+    if not isinstance(effect.which, int):
+        country = text_dict[effect.which.upper()]
+    
+    raw_text = text_dict[the_key].replace("'%s'", "?")
+    return raw_text.replace("%s", country)
 
 def supplies_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SUPPLY_POOL"
@@ -1045,7 +1065,9 @@ def task_efficiency_as_str(effect, text_dict, **kwargs):
     return replace_string_and_number(raw_text, text_dict[mission_key], effect.value)
 
 def transport_pool_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_TRANSPORT_POOL"
+    country = text_dict[effect.which.upper()]
+    return replace_string_and_number(text_dict[the_key], country, effect.value)
 
 def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
     if event_dict is None:
@@ -1073,7 +1095,10 @@ def waketeam_as_str(effect, text_dict, **kwargs):
 	pass
 
 def war_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_WAR"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
+
 
 
 STR_FUNCTION_DICT = {
