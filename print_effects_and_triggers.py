@@ -1024,14 +1024,14 @@ def trigger_as_str(effect, text_dict, event_dict=None, **kwargs):
         return
     the_key = "EE_TRIGGER"
     try:
-        event_name = event_dict[effect.which].name
-        add = f" [{event_dict[effect.which].country} {effect.which}]"
+        the_event = event_dict[effect.which]
+        raw_text = text_dict[the_key].replace("%s", the_event.name)
+        # my own additions
+        name_w_quotes = f"'{the_event.name}'"
+        add = f" [{the_event.country} {effect.which}]"
+        return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
     except KeyError:
-        event_name = f"{effect.which} [EVENT NOT FOUND]"
-        add = ""
-    raw_text = text_dict[the_key].replace("%s", event_name)
-    name_w_quotes = f"'{event_name}'"
-    return raw_text[:raw_text.index(name_w_quotes) + len(name_w_quotes)] + add + raw_text[raw_text.index(name_w_quotes) + len(name_w_quotes):]
+        return text_dict[the_key].replace("'%s' Event", f"Event {effect.which} [EVENT NOT FOUND]")
 
 def vp_as_str(effect, text_dict, **kwargs):
     the_key = "EE_VP"
