@@ -519,6 +519,20 @@ if __name__ == "__main__":
         evs_w_d_effs = sorted(evs_w_d_effs, key=lambda ev: ev.event_id, reverse=True)
         # evs_w_d_effs.pop().print_event(AOD_PATH)
     
+        def s_et(keyword):
+            evs = []
+            for ev in ed.values():
+                stop_searching = False
+                for a in ev.actions:
+                    if stop_searching:
+                        break
+                    for eff in a.effects:
+                        if eff.type == keyword:
+                            evs.append(ev)
+                            stop_searching = True
+                            break
+            return sorted(evs, key=lambda ev: ev.event_id, reverse=True)
+    
     if "raw" in sys.argv:
         force_default = True
     
