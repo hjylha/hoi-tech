@@ -343,6 +343,12 @@ def get_model_name(unit_key, model_num, text_dict):
         model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[unit_key.lower()]}_{model_num}"
     return text_dict[model_key]
 
+def get_province(province_num, text_dict):
+    province = text_dict.get(f"PROV{province_num}")
+    if province is not None:
+        return province
+    return province_num
+
 def replace_string_and_number(original_text, replacement_text, replacement_number, percentage=False):
     pct = " %" if percentage else ""
     sign = "+" if replacement_number > 0 else ""
@@ -491,18 +497,18 @@ def add_prov_resource_as_str(effect, text_dict, **kwargs):
     }
     the_key = "EE_ADD_PROV_RESOURCE"
     resource = text_dict[resource_dict[effect.where]]
-    province = text_dict.get(f"PROV{effect.which}")
-    province = province if province else str(effect.which)
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
     sign = "+" if effect.value > 0 else ""
     raw_text = text_dict[the_key].split("%s")
-    text = f"{raw_text[0]}{resource}{raw_text[1]}{province}{raw_text[2]}"
+    text = f"{raw_text[0]}{resource}{raw_text[1]}{province_text}{raw_text[2]}"
     return text.replace("%+.1f\\%%\\n", f"{sign}{effect.value}")
 
 def addcore_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADDCORE"
-    province_key = f"PROV{effect.which}"
-    # added province id for "clarity"
-    return text_dict[the_key].replace("%s", f"{text_dict[province_key]} [{effect.which}]")
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return text_dict[the_key].replace("%s", f"{province_text} [{effect.which}]")
 
 def ai_as_str(effect, text_dict, **kwargs):
     pass
@@ -581,9 +587,9 @@ def building_prod_mod_as_str(effect, text_dict, **kwargs):
 
 def capital_as_str(effect, text_dict, **kwargs):
     the_key = "EE_CAPITAL"
-    province = text_dict.get(f"PROV{effect.which}")
-    province = province if province else str(effect.which)
-    return f"{text_dict[the_key].replace("%s", f"{effect.which} {province}")} (if possible)"
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return f"{text_dict[the_key].replace("%s", f"{effect.which} {province_text}")} (if possible)"
 
 def carrier_level_as_str(effect, text_dict, **kwargs):
     the_key = "EE_CARRIER_LEVEL"
@@ -616,8 +622,8 @@ def coast_fort_eff_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]}: {sign}{effect.value}"
 
 def construct_as_str(effect, text_dict, **kwargs):
-    province = text_dict.get(f"PROV{effect.where}")
-    province = province if province else str(effect.where)
+    province = get_province(effect.where, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.where}]"
     building_name = BUILDING_DICT.get(effect.which)
     building_name = building_name if building_name else f"{effect.which}*"
     sign = "+" if effect.value > 0 else ""
@@ -783,7 +789,8 @@ def info_may_cause_as_str(effect, text_dict, tech_dict=None, **kwargs):
     return text_dict[the_key].replace("'%s'", f"{effect.which} {tech_dict[effect.which].name}")
 
 def inherit_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_INHERIT"
+    return text_dict[the_key].replace("%s", text_dict[effect.which.upper()])
 
 def intelligence_as_str(effect, text_dict, **kwargs):
     the_key = "EE_INTELLIGENCE"
@@ -880,22 +887,22 @@ def peacetime_ic_change_as_str(effect, text_dict, **kwargs):
 
 def province_keypoints_as_str(effect, text_dict, **kwargs):
     the_key = "EE_KEYPOINTS"
-    province = text_dict.get(f"PROV{effect.which}")
-    province = province if province else str(effect.which)
-    return replace_string_and_number(text_dict[the_key], province, effect.value)
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return replace_string_and_number(text_dict[the_key], province_text, effect.value)
 
 def province_manpower_as_str(effect, text_dict, **kwargs):
     the_key = "EE_P_MAN"
     sign = "+" if effect.value > 0 else ""
-    province = text_dict.get(f"PROV{effect.which}")
-    province = province if province else str(effect.which)
-    return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}").replace("%s", province)
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}").replace("%s", province_text)
 
 def province_revoltrisk_as_str(effect, text_dict, **kwargs):
     the_key = "EE_P_RR"
-    province = text_dict.get(f"PROV{effect.which}")
-    province = province if province else str(effect.which)
-    return replace_string_and_number(text_dict[the_key].replace("%s%d", "%d"), province, effect.value)
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return replace_string_and_number(text_dict[the_key].replace("%s%d", "%d"), province_text, effect.value)
 
 
 def rarematerialspool_as_str(effect, text_dict, **kwargs):
@@ -968,7 +975,13 @@ def scrap_model_as_str(effect, text_dict, **kwargs):
     return f"{raw_text[0]}{unit_name}{raw_text[1]}{model_name}{raw_text[2]}"
 
 def secedeprovince_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SECEDE"
+    raw_text = text_dict[the_key].split("%s")
+    # TODO: is province id needed?
+    province = get_province(effect.value, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.value}]"
+    country = text_dict[effect.which.upper()]
+    return f"{raw_text[0]}{province_text}{raw_text[1]}{country}{raw_text[2]} (if possible)"
 
 def set_leader_skill_as_str(effect, text_dict, **kwargs):
 	pass
