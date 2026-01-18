@@ -226,6 +226,16 @@ BUILDING_DICT = {
     "rocket_test": "Rocket Test Site"
 }
 
+SLIDER_DICT = {
+    "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
+    "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
+    "freedom": ["DOMNAME_FRE_L", "DOMNAME_FRE_R"],
+    "free_market": ["DOMNAME_FRM_L", "DOMNAME_FRM_R"],
+    "professional_army": ["DOMNAME_PRO_L", "DOMNAME_PRO_R"],
+    "defense_lobby": ["DOMNAME_DEF_L", "DOMNAME_DEF_R"],
+    "interventionism": ["DOMNAME_INT_L", "DOMNAME_INT_R"]
+    }
+
 DIVISION_NUMBERS = {
     "infantry": 0,
     "cavalry": 1,
@@ -601,8 +611,15 @@ def carrier_level_as_str(effect, text_dict, **kwargs):
     the_key = "EE_CARRIER_LEVEL"
     return f"{text_dict[the_key]}: {effect.value}"
 
-def change_policy_as_str(effect, text_dict, **kwargs):
-	pass
+def change_policy_as_str(effect, text_dict, current_value=None, **kwargs):
+    the_key = "EE_DOMESTIC"
+    extra_key = "EE_DOMESTIC_CURRENT"
+    direction = 0 if effect.value > 0 else 1
+    slider_key = SLIDER_DICT[effect.which][direction]
+    current_value_str = "?" if current_value is None else str(current_value)
+    part1 = text_dict[the_key].replace("%d", str(abs(effect.value))).replace("%s", text_dict[slider_key])
+    part2 = text_dict[extra_key].replace("%d", current_value_str)
+    return f"{part1} {part2}"
 
 def chiefofair_as_str(effect, text_dict, **kwargs):
 	pass
@@ -617,7 +634,9 @@ def chiefofstaff_as_str(effect, text_dict, **kwargs):
 	pass
 
 def civil_war_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CIVIL_WAR"
+    new_country = text_dict[effect.which.upper()]
+    return f"{text_dict[the_key]} [opponent: {new_country}]"
 
 def clrflag_as_str(effect, text_dict, **kwargs):
     return f"Clear flag [{effect.type}]: {effect.which}"
@@ -671,20 +690,10 @@ def disorg_division_as_str(effect, text_dict, **kwargs):
 	pass
 
 def domestic_change_as_str(effect, text_dict, current_value=None, **kwargs):
-    # are these correct?
-    slider_dict = {
-        "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
-        "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
-        "freedom": ["DOMNAME_FRE_L", "DOMNAME_FRE_R"],
-        "free_market": ["DOMNAME_FRM_L", "DOMNAME_FRM_R"],
-        "professional_army": ["DOMNAME_PRO_L", "DOMNAME_PRO_R"],
-        "defense_lobby": ["DOMNAME_DEF_L", "DOMNAME_DEF_R"],
-        "interventionism": ["DOMNAME_INT_L", "DOMNAME_INT_R"]
-    }
     the_key = "EE_DOMESTIC"
     extra_key = "EE_DOMESTIC_CURRENT"
     direction = 0 if effect.value > 0 else 1
-    slider_key = slider_dict[effect.which][direction]
+    slider_key = SLIDER_DICT[effect.which][direction]
     current_value_str = "?" if current_value is None else str(current_value)
     part1 = text_dict[the_key].replace("%d", str(abs(effect.value))).replace("%s", text_dict[slider_key])
     part2 = text_dict[extra_key].replace("%d", current_value_str)
@@ -692,16 +701,7 @@ def domestic_change_as_str(effect, text_dict, current_value=None, **kwargs):
 
 # almost the same?
 def set_domestic_as_str(effect, text_dict, **kwargs):
-    slider_dict = {
-        "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
-        "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
-        "freedom": ["DOMNAME_FRE_L", "DOMNAME_FRE_R"],
-        "free_market": ["DOMNAME_FRM_L", "DOMNAME_FRM_R"],
-        "professional_army": ["DOMNAME_PRO_L", "DOMNAME_PRO_R"],
-        "defense_lobby": ["DOMNAME_DEF_L", "DOMNAME_DEF_R"],
-        "interventionism": ["DOMNAME_INT_L", "DOMNAME_INT_R"]
-    }
-    slider = text_dict[slider_dict[effect.which][0]]
+    slider = text_dict[SLIDER_DICT[effect.which][0]]
     # the game does not seem to use this
     the_key = "EE_SET_DOMESTIC"
     return text_dict[the_key].replace("%s", slider).replace("%d", str(effect.value))
