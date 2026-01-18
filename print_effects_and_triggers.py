@@ -620,7 +620,7 @@ def civil_war_as_str(effect, text_dict, **kwargs):
 	pass
 
 def clrflag_as_str(effect, text_dict, **kwargs):
-	pass
+    return f"Clear flag [{effect.type}]: {effect.which}"
 
 def coast_fort_eff_as_str(effect, text_dict, **kwargs):
     the_key = "EE_COAST_FORT_EFF"
@@ -1004,7 +1004,7 @@ def set_relation_as_str(effect, text_dict, **kwargs):
     return replace_string_and_number(text_dict[the_key], country, effect.value)
 
 def setflag_as_str(effect, text_dict, **kwargs):
-	pass
+    return f"Set flag [{effect.type}]: {effect.which}"
 
 def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
     if event_dict is None:
