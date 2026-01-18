@@ -452,6 +452,9 @@ def add_corps_as_str(effect, text_dict, **kwargs):
 def add_division_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ADD_DIVISION"
     unit_name = get_unit_name(effect.value, text_dict, False)
+    division_name_text = ""
+    if effect.which:
+        division_name_text = f" [{effect.which}]"
     if effect.where:
         brigade_name = get_unit_name(effect.where, text_dict)
         brigade_text = f" with {brigade_name}"
@@ -462,7 +465,7 @@ def add_division_as_str(effect, text_dict, **kwargs):
         model_text = f" [{model_name}{brigade_text}]"
     else:
         model_text = f"[UNKNOWN MODEL{brigade_text}]"
-    return f"{text_dict[the_key].replace("%s", unit_name)}{model_text}"
+    return f"{text_dict[the_key].replace("%s", unit_name)}{division_name_text}{model_text}"
 
 def add_prov_resource_as_str(effect, text_dict, **kwargs):
     resource_dict = {
