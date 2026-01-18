@@ -500,18 +500,24 @@ if __name__ == "__main__":
         evs_w_d_effs = []
         evs_w_issues = []
         for ev in ed.values():
+            has_error = False
+            has_default = False
             for act in ev.actions:
+                if has_default or has_error:
+                    break
                 for eff in act.effects:
                     try:
                         eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict)
                         if "=" in eff_str:
                             evs_w_d_effs.append(ev)
-                            break
+                            has_default = True
                             break
                     except KeyError:
+                        has_error = True
                         evs_w_issues.append(ev)
                         break
-                        break
+        evs_w_d_effs = sorted(evs_w_d_effs, key=lambda ev: ev.event_id, reverse=True)
+        # evs_w_d_effs.pop().print_event(AOD_PATH)
     
     if "raw" in sys.argv:
         force_default = True
