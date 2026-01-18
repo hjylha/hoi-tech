@@ -661,7 +661,8 @@ def construct_as_str(effect, text_dict, **kwargs):
     return f"{building_name} in {province}: {sign}{effect.value}"
 
 def control_as_str(effect, text_dict, **kwargs):
-	pass
+    # TODO: how is this different from secedeprovince?
+    return f"{secedeprovince_as_str(effect, text_dict, **kwargs)} [control]"
 
 def convoy_as_str(effect, text_dict, **kwargs):
 	pass
@@ -678,7 +679,9 @@ def convoy_prod_mod_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", name).replace("%+.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def country_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_TAG"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def damage_division_as_str(effect, text_dict, **kwargs):
 	pass
@@ -725,22 +728,39 @@ def enable_task_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", text_dict[mission_key])
 
 def end_access_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_END_ACCESS"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def end_guarantee_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_END_GUARANTEE"
+    raw_text = text_dict[the_key].split("%s")
+    country1 = text_dict[effect.which.upper()]
+    country2 = text_dict[effect.where.upper()]
+    return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
 def end_mastery_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_END_MASTERY"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def end_non_aggression_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_END_NON_AGGRESSION"
+    raw_text = text_dict[the_key]
+    country1 = text_dict[effect.which.upper()]
+    country2 = text_dict[effect.where.upper()]
+    return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
 def end_puppet_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_END_PUPPET"
+    return text_dict[the_key]
 
 def end_trades_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_END_TRADES"
+    raw_text = text_dict[the_key]
+    country1 = text_dict[effect.which.upper()]
+    country2 = text_dict[effect.where.upper()]
+    return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
 def energypool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ENERGY_POOL"
@@ -752,7 +772,8 @@ def escort_pool_as_str(effect, text_dict, **kwargs):
     return replace_string_and_number(text_dict[the_key], country, effect.value)
 
 def extra_tc_as_str(effect, text_dict, **kwargs):
-	pass
+    raw_text = change_as_str(effect, text_dict, **kwargs)
+    return raw_text.replace("%s", "")
 
 def foreignminister_as_str(effect, text_dict, **kwargs):
 	pass
@@ -769,7 +790,11 @@ def ground_def_eff_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]}: {effect.value}"
 
 def guarantee_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_GUARANTEE"
+    country1 = text_dict[effect.which.upper()]
+    country2 = text_dict[effect.where.upper()]
+    raw_text = text_dict[the_key].split("%s")
+    return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
 def headofgovernment_as_str(effect, text_dict, **kwargs):
 	pass
@@ -783,7 +808,10 @@ def hq_supply_eff_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def independence_as_str(effect, text_dict, **kwargs):
-	pass
+    # TODO: does effect.value do anything?
+    the_key = "EE_INDY"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def industrial_modifier_as_str(effect, text_dict, **kwargs):
     the_key = "EE_INDUSTRIAL_MODIFIER"
@@ -817,7 +845,8 @@ def land_fort_eff_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]}: {sign}{effect.value}"
 
 def leave_alliance_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_LEAVE_ALLIANCE"
+    return text_dict[the_key]
 
 def local_clrflag_as_str(effect, text_dict, **kwargs):
 	return f"Clear flag [{effect.type}]: {effect.which}"
@@ -892,7 +921,10 @@ def oilpool_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%d", str(effect.value))
 
 def peace_as_str(effect, text_dict, **kwargs):
-	pass
+    # TODO: does effect.value do anything?
+    the_key = "EE_PEACE"
+    country = text_dict[effect.which.upper()]
+    return text_dict[the_key].replace("%s", country)
 
 def peacetime_ic_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_PEACETIME_IC_MOD"
@@ -978,7 +1010,10 @@ def resource_as_str(effect, text_dict, **kwargs):
     return text.replace("%.1f\\%%", f"{effect.value} %")
 
 def revolt_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_N_REVOLT"
+    province = get_province(effect.which, text_dict)
+    province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
+    return text_dict[the_key].replace("%s", province_text)
 
 def sce_frequency_as_str(effect, text_dict, **kwargs):
     the_key = "EE_HQ_COMBAT_EVENT_CHANCE"
@@ -993,16 +1028,19 @@ def scrap_model_as_str(effect, text_dict, **kwargs):
     return f"{raw_text[0]}{unit_name}{raw_text[1]}{model_name}{raw_text[2]}"
 
 def secedeprovince_as_str(effect, text_dict, **kwargs):
+    # TODO: how is this different from control?
     the_key = "EE_SECEDE"
     raw_text = text_dict[the_key].split("%s")
-    # TODO: is province id needed?
     province = get_province(effect.value, text_dict)
     province_text = str(province) if isinstance(province, int) else f"{province} [{effect.value}]"
     country = text_dict[effect.which.upper()]
     return f"{raw_text[0]}{province_text}{raw_text[1]}{country}{raw_text[2]} (if possible)"
 
 def set_leader_skill_as_str(effect, text_dict, **kwargs):
-	pass
+    # TODO: add leaders
+    leader_name = effect.which
+    new_skill = effect.value
+    return f"Skill of leader {leader_name} is set to {new_skill}"
 
 def set_relation_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SET_RELATION"
@@ -1057,7 +1095,12 @@ def surprise_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key]} {text_dict[second_key]} {sign}{effect.value} %"
 
 def switch_allegiance_as_str(effect, text_dict, **kwargs):
-	pass
+    # TODO: is there something better?
+    the_key = "EE_SWITCH_ALLEGIANCE"
+    the_unit = effect.which
+    country = text_dict[effect.where.upper()]
+    raw_text = text_dict[the_key].split("%s")
+    return f"{raw_text[0]}{the_unit}{raw_text[1]}{country}{raw_text[2]}"
 
 def task_efficiency_as_str(effect, text_dict, **kwargs):
     the_key = "EE_TASK_EFFICIENCY"
