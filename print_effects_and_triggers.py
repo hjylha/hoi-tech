@@ -210,6 +210,17 @@ from event import Condition
 # waketeam
 # war
 
+RESOURCES_LIST = (
+    "oil",
+    "metal",
+    "energy",
+    "rare_materials",
+    "supplies",
+    # TODO: should money and manpower be in this list?
+    "money",
+    "manpower"
+)
+
 BUILDING_DICT = {
     "ic": "Industrial Capacity",
     "infrastructure": "Infrastructure",
@@ -316,6 +327,25 @@ BRIGADE_NUMBERS = {
     "b_u13": 43,
     "b_u14": 44
 }
+
+def get_resource_name(resource, text_dict):
+    if resource == "supplies":
+        the_key = "RESOURCE_SUPPLY"
+    else:
+        the_key = f"RESOURCE_{resource.upper()}"
+    return text_dict[the_key]
+
+def get_resources(num):
+    resource_indices = []
+    num_to_divide = num
+    index_exponent = 4 * len(str(num))
+    while num_to_divide >= 1:
+        divider = pow(2, index_exponent)
+        if divider <= num_to_divide:
+            resource_indices.append(index_exponent)
+            num_to_divide -= divider
+        index_exponent -= 1
+    return tuple([RESOURCES_LIST[i] for i in resource_indices[::-1]])
 
 def get_unit_name(unit_key, text_dict, do_short=True):
     if not do_short:
@@ -515,7 +545,7 @@ def add_prov_resource_as_str(effect, text_dict, **kwargs):
         # "manpower": "RESOURCE_MANPOWER"
     }
     the_key = "EE_ADD_PROV_RESOURCE"
-    resource = text_dict[resource_dict[effect.where]]
+    resource = get_resource_name(effect.where, text_dict)
     province = get_province(effect.which, text_dict)
     province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
     sign = "+" if effect.value > 0 else ""
@@ -557,7 +587,10 @@ def allow_dig_in_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key]
 
 def armamentminister_as_str(effect, text_dict, **kwargs):
-    pass
+    the_key = "EE_ARMMIN"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def army_detection_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ARMY_DETECTION"
@@ -628,16 +661,28 @@ def change_policy_as_str(effect, text_dict, current_value=None, **kwargs):
     return f"{part1} {part2}"
 
 def chiefofair_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CAIR"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def chiefofarmy_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CARMY"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def chiefofnavy_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_CNAVY"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def chiefofstaff_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_STAFF"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def civil_war_as_str(effect, text_dict, **kwargs):
     the_key = "EE_CIVIL_WAR"
@@ -665,7 +710,14 @@ def control_as_str(effect, text_dict, **kwargs):
     return f"{secedeprovince_as_str(effect, text_dict, **kwargs)} [control]"
 
 def convoy_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_N_CONVOY"
+    province_from = get_province(effect.which, text_dict)
+    province_to = get_province(effect.value, text_dict)
+    # TODO: how does effect.when translate to resources?
+    resources = ", ".join(get_resource_name(res, text_dict) for res in get_resources(effect.when))
+    raw_text = text_dict[the_key].split("%s")
+    return f"{raw_text[0]}{resources}{raw_text[1]}{province_from}{raw_text[2]}{province_to}{raw_text[3]}"
+
 
 def convoy_def_eff_as_str(effect, text_dict, **kwargs):
     the_key = "EE_CONVOY_DEF_EFF"
@@ -764,7 +816,8 @@ def end_trades_as_str(effect, text_dict, **kwargs):
 
 def energypool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ENERGY_POOL"
-    return text_dict[the_key].replace("%d", str(effect.value))
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%d", f"{sign}{effect.value}")
 
 def escort_pool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ESCORT_POOL"
@@ -776,7 +829,10 @@ def extra_tc_as_str(effect, text_dict, **kwargs):
     return raw_text.replace("%s", "")
 
 def foreignminister_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_FGNMIN"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def gain_tech_as_str(effect, text_dict, tech_dict=None, **kwargs):
     the_key = "EE_GAIN_TECH"
@@ -797,10 +853,16 @@ def guarantee_as_str(effect, text_dict, **kwargs):
     return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
 def headofgovernment_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_HOG"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def headofstate_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_HOS"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def hq_supply_eff_as_str(effect, text_dict, **kwargs):
     the_key = "EE_HQ_SUPPLY_EFF"
@@ -879,7 +941,8 @@ def max_reactor_size_as_str(effect, text_dict, **kwargs):
 
 def metalpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_METAL_POOL"
-    return text_dict[the_key].replace("%d", str(effect.value))
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%d", f"{sign}{effect.value}")
 
 def min_positioning_as_str(effect, text_dict, **kwargs):
     raw_text = text_dict["EE_MIN_POSITIONING"].replace("%+.1f\\%%\\n", "%d")
@@ -887,10 +950,16 @@ def min_positioning_as_str(effect, text_dict, **kwargs):
     return replace_string_and_number(raw_text, unit_name, effect.value)
 
 def ministerofintelligence_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_INTMIN"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def ministerofsecurity_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SECMIN"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def money_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MONEY"
@@ -904,7 +973,11 @@ def new_model_as_str(effect, text_dict, **kwargs):
     return f"{unit_name}: {text_dict[the_key]}: {model_name}"
 
 def non_aggression_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_NON_AGGRESSION"
+    raw_text = text_dict[the_key]
+    country1 = text_dict[effect.which.upper()]
+    country2 = text_dict[effect.where.upper()]
+    return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
 def nuclear_carrier_as_str(effect, text_dict, **kwargs):
     the_key = "EE_NUCLEAR_CARRIER_NEW"
@@ -918,7 +991,8 @@ def nuke_damage_as_str(effect, text_dict, **kwargs):
 
 def oilpool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_OIL_POOL"
-    return text_dict[the_key].replace("%d", str(effect.value))
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%d", f"{sign}{effect.value}")
 
 def peace_as_str(effect, text_dict, **kwargs):
     # TODO: does effect.value do anything?
@@ -950,13 +1024,14 @@ def province_revoltrisk_as_str(effect, text_dict, **kwargs):
     province_text = str(province) if isinstance(province, int) else f"{province} [{effect.which}]"
     return replace_string_and_number(text_dict[the_key].replace("%s%d", "%d"), province_text, effect.value)
 
-
 def rarematerialspool_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RARE_MATERIALS_POOL"
-    return text_dict[the_key].replace("%d", str(effect.value))
+    sign = "+" if effect.value > 0 else ""
+    return text_dict[the_key].replace("%d", f"{sign}{effect.value}")
 
 def regime_falls_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_REGIME_FALLS"
+    return text_dict[the_key]
 
 def relation_change_as_str(effect, text_dict, **kwargs):
     the_key = "EE_RELATION"
@@ -993,20 +1068,11 @@ def research_sabotaged_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key]
 
 def resource_as_str(effect, text_dict, **kwargs):
-    # how many things are here?
-    resource_dict = {
-        "energy": "RESOURCE_ENERGY",
-        "metal": "RESOURCE_METAL",
-        "oil": "RESOURCE_OIL",
-        "rare_materials": "RESOURCE_RARE_MATERIALS",
-        "money": "RESOURCE_MONEY",
-        "supplies": "RESOURCE_SUPPLY",
-        # "manpower": "RESOURCE_MANPOWER"
-    }
     the_key = "EE_RESOURCE"
     sign = "+" if effect.value > 0 else ""
     raw_text = text_dict[the_key].split("%s")
-    text = f"{raw_text[0]}{text_dict[resource_dict[effect.which]]}{raw_text[1]}{sign}{raw_text[2]}"
+    resource = get_resource_name(effect.which, text_dict)
+    text = f"{raw_text[0]}{resource}{raw_text[1]}{sign}{raw_text[2]}"
     return text.replace("%.1f\\%%", f"{effect.value} %")
 
 def revolt_as_str(effect, text_dict, **kwargs):
@@ -1066,13 +1132,22 @@ def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
     
 
 def sleepleader_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SLEADER"
+    # TODO: get leader names
+    leader_name = str(effect.which)
+    return text_dict[the_key].replace("%s", leader_name)
 
 def sleepminister_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_SMINISTER"
+    # TODO: get minister names
+    minister = str(effect.which)
+    return text_dict[the_key].replace("%s", minister)
 
 def sleepteam_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_STEAM"
+    # TODO: get tech team names
+    tech_team = str(effect.which)
+    return text_dict[the_key].replace("%s", tech_team)
 
 def steal_tech_as_str(effect, text_dict, **kwargs):
     the_key = "EE_STEAL_TECH"
@@ -1137,10 +1212,16 @@ def vp_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}")
 
 def wakeleader_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_WAKE_LEADER"
+    # TODO: get leader names
+    leader_name = str(effect.which)
+    return text_dict[the_key].replace("%s", leader_name)
 
 def waketeam_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_WTEAM"
+    # TODO: get tech team names
+    tech_team = str(effect.which)
+    return text_dict[the_key].replace("%s", tech_team)
 
 def war_as_str(effect, text_dict, **kwargs):
     the_key = "EE_WAR"
