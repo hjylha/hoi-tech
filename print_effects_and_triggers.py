@@ -535,15 +535,6 @@ def add_division_as_str(effect, text_dict, **kwargs):
     return f"{text_dict[the_key].replace("%s", unit_name)}{division_name_text}{model_text}"
 
 def add_prov_resource_as_str(effect, text_dict, **kwargs):
-    resource_dict = {
-        "energy": "RESOURCE_ENERGY",
-        "metal": "RESOURCE_METAL",
-        "oil": "RESOURCE_OIL",
-        "rare_materials": "RESOURCE_RARE_MATERIALS",
-        "money": "RESOURCE_MONEY",
-        "supplies": "RESOURCE_SUPPLY",
-        # "manpower": "RESOURCE_MANPOWER"
-    }
     the_key = "EE_ADD_PROV_RESOURCE"
     resource = get_resource_name(effect.where, text_dict)
     province = get_province(effect.which, text_dict)
@@ -618,7 +609,9 @@ def build_cost_as_str(effect, text_dict, **kwargs):
     return replace_string_and_number(placeholder_text, unit_name, effect.value, True)
 
 def build_division_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_BUILD_DIVISION"
+    unit_name = get_unit_name(effect.which, text_dict)
+    return text_dict[the_key].replace("%s", unit_name)
 
 def build_time_as_str(effect, text_dict, **kwargs):
     key1 = "EE_BUILD_TIME"
@@ -736,7 +729,11 @@ def country_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", country)
 
 def damage_division_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_DAMAGE_DIVISION"
+    raw_text = text_dict[the_key].replace("%s%d\\%%", "%d")
+    # TODO: find out what this means
+    the_unit_info = f"[type: {effect.which}, id: {effect.value}]"
+    return replace_string_and_number(raw_text, the_unit_info, -effect.where, percentage=True)
 
 def deactivate_as_str(effect, text_dict, tech_dict=None, **kwargs):
     if tech_dict is None:
@@ -745,10 +742,15 @@ def deactivate_as_str(effect, text_dict, tech_dict=None, **kwargs):
     return f"{text_dict[the_key]}: \n  {effect.which} {tech_dict[effect.which].name}"
 
 def delete_unit_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_DELETE_UNIT"
+    # TODO: is there anything more to this?
+    return text_dict[the_key].replace("%s", str(effect.which))
 
 def disorg_division_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_DISORG_DIVISION"
+    raw_text = text_dict[the_key].replace("%s%d\\%%", "%d")
+    # TODO: is effect.which sufficient?
+    return replace_string_and_number(raw_text, str(effect.which), -effect.where, percentage=True)
 
 def domestic_change_as_str(effect, text_dict, current_value=None, **kwargs):
     the_key = "EE_DOMESTIC"
@@ -1050,7 +1052,10 @@ def relative_manpower_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s%.1f\\%%\\n", f"{sign}{effect.value} %")
 
 def remove_division_as_str(effect, text_dict, **kwargs):
-	pass
+    the_key = "EE_REMOVE_DIVISION"
+    # TODO: find out what this actually means
+    the_unit_info = f"[type: {effect.which}, id: {effect.value}]"
+    return text_dict[the_key].replace("%s", the_unit_info)
 
 def removecore_as_str(effect, text_dict, **kwargs):
     the_key = "EE_REMCORE"
