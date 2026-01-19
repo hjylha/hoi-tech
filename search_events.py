@@ -532,6 +532,10 @@ if __name__ == "__main__":
                             stop_searching = True
                             break
             return sorted(evs, key=lambda ev: ev.event_id, reverse=True)
+
+        print(f"Technology effects in default form: {len(def_effs)}")
+        print(f"Events with KeyErrors: {len(evs_w_issues)}")
+        print(f"Events with effects in default form: {len(evs_w_d_effs)}")
     
     if "raw" in sys.argv:
         force_default = True
