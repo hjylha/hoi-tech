@@ -78,7 +78,7 @@ def get_ministers_path(country_code, aod_path):
 def get_ministers_files(aod_path):
     return get_ministers_folder_path(aod_path).glob("ministers_*.csv")
 
-def get_policies_path(aod_path):
+def get_province_rev_path(aod_path):
     return get_db_folder_path(aod_path) / "province_rev.inc"
 
 def get_tech_names_path(aod_path):

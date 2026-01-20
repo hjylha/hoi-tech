@@ -100,9 +100,9 @@ def test_get_ministers_files(aod_path):
         assert uk_ministers in fp.get_ministers_files(aod_path)
 
 
-def test_get_policies_path(aod_path):
+def test_get_province_rev_path(aod_path):
     if aod_path.exists():
-        assert fp.get_policies_path(aod_path).exists()
+        assert fp.get_province_rev_path(aod_path).exists()
 
 
 def test_get_tech_names_path(aod_path):
