@@ -105,6 +105,48 @@ def test_get_province_rev_path(aod_path):
         assert fp.get_province_rev_path(aod_path).exists()
 
 
+def test_get_leaders_folder_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_leaders_folder_path(aod_path).exists()
+
+
+def test_get_leaders_files(aod_path):
+    if aod_path.exists():
+        leaders_folder_path = fp.get_leaders_folder_path(aod_path)
+        swe_leaders = leaders_folder_path / "sweden.csv"
+        leaders_files = list(fp.get_leaders_files(aod_path))
+        assert swe_leaders in leaders_files
+        assert len(leaders_files) >= 100
+
+
+def test_get_units_folder_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_units_folder_path(aod_path).exists()
+
+
+def test_get_divisions_files(aod_path):
+    if aod_path.exists():
+        units_folder_path = fp.get_units_folder_path(aod_path)
+        infantry_file = units_folder_path / "divisions" / "infantry.txt"
+        division_files = list(fp.get_divisions_files(aod_path))
+        assert infantry_file in division_files
+        assert len(division_files) >= 30
+
+
+def test_get_brigades_files(aod_path):
+    if aod_path.exists():
+        units_folder_path = fp.get_units_folder_path(aod_path)
+        artillery_file = units_folder_path / "brigades" / "artillery.txt"
+        brigade_files = list(fp.get_brigades_files(aod_path))
+        assert artillery_file in brigade_files
+        assert len(brigade_files) >= 50
+
+
+def test_get_unit_modifiers_filepath(aod_path):
+    if aod_path.exists():
+        assert fp.get_unit_modifiers_filepath(aod_path).exists()
+
+
 def test_get_tech_names_path(aod_path):
     if aod_path.exists():
         assert fp.get_tech_names_path(aod_path).exists()

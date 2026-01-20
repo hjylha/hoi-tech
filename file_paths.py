@@ -81,6 +81,26 @@ def get_ministers_files(aod_path):
 def get_province_rev_path(aod_path):
     return get_db_folder_path(aod_path) / "province_rev.inc"
 
+def get_leaders_folder_path(aod_path):
+    return get_db_folder_path(aod_path) / "leaders"
+
+def get_leaders_files(aod_path):
+    return get_leaders_folder_path(aod_path).glob("*.csv")
+
+def get_units_folder_path(aod_path):
+    return get_db_folder_path(aod_path) / "units"
+
+def get_divisions_files(aod_path):
+    divisions_folder = get_units_folder_path(aod_path) / "divisions"
+    return divisions_folder.glob("*.txt")
+
+def get_brigades_files(aod_path):
+    divisions_folder = get_units_folder_path(aod_path) / "brigades"
+    return divisions_folder.glob("*.txt")
+
+def get_unit_modifiers_filepath(aod_path):
+    return get_units_folder_path(aod_path) / "modifiers.csv"
+
 def get_tech_names_path(aod_path):
     return get_config_folder_path(aod_path) / "tech_names.csv"
 
