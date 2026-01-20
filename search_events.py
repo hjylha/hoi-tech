@@ -532,10 +532,43 @@ if __name__ == "__main__":
                             stop_searching = True
                             break
             return sorted(evs, key=lambda ev: ev.event_id, reverse=True)
-
+        
+        tech_eff_num = 0
+        effect_types_in_tech = set()
+        for tech in tech_dict.values():
+            for eff in tech.effects:
+                effect_types_in_tech.add(eff.type)
+                tech_eff_num += 1
+        
+        print()
+        print(f"Technologies: {len(tech_dict)}")
+        print(f"Total number of technology effects: {tech_eff_num}")
+        print(f"Total number of effect types in technologies: {len(effect_types_in_tech)}")
         print(f"Technology effects in default form: {len(def_effs)}")
+        print()
+
+        event_eff_num = 0
+        effect_types_in_events = set()
+        for ev in ed.values():
+            for action in ev.actions:
+                for eff in action.effects:
+                    event_eff_num += 1
+                    effect_types_in_events.add(eff.type)
+        
+        print(f"Events: {len(ed)}")
+        print(f"Total number of event effects: {event_eff_num}")
+        print(f"Total number of effect types in events: {len(effect_types_in_events)}")
         print(f"Events with KeyErrors: {len(evs_w_issues)}")
         print(f"Events with effects in default form: {len(evs_w_d_effs)}")
+        print()
+
+        all_effect_types = set()
+        for eff_type in effect_types_in_events:
+            all_effect_types.add(eff_type)
+        for eff_type in effect_types_in_tech:
+            all_effect_types.add(eff_type)
+        print(f"Total number of effect types: {len(all_effect_types)}")
+        print()
     
     if "raw" in sys.argv:
         force_default = True
