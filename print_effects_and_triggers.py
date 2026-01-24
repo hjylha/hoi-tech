@@ -1,4 +1,6 @@
 
+from collections import Counter
+
 from classes import Effect
 from event import Condition
 
@@ -1582,7 +1584,7 @@ def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
         return
     event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, force_default=False, **kwargs):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -1600,10 +1602,18 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dic
         return
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
-    for effect in action.effects:
-        print_effect(effect, indent_num, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs)
+    effects_as_str = [effect_as_str(effect, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs) for effect in action.effects]
+    counts = Counter(effects_as_str)
+    skip_duplicates = {key: False for key, num in counts.items() if num > max_num_of_duplicate_effects}
+    for effect_str in effects_as_str:
+        if skip_duplicates.get(effect_str):
+            continue
+        if effect_str in skip_duplicates:
+            skip_duplicates[effect_str] = True
+            print(indent_num * " ", f"{counts[effect_str]} times the following:")
+        print(indent_num * " ", effect_str)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, tech_dict, force_default=False, **kwargs):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, tech_dict, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
