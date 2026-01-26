@@ -245,7 +245,7 @@ def scan_tech_team_file(filepath):
 
 def scan_tech_teams():
     tech_teams = []
-    team_files = get_tech_team_files(get_tech_path())
+    team_files = get_tech_team_files(get_tech_path(AOD_PATH))
     # country_names = get_country_names()
     for team_file in team_files:
         teams = scan_tech_team_file(team_file)
