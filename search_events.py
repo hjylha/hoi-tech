@@ -519,7 +519,7 @@ if __name__ == "__main__":
         evs_w_d_effs = sorted(evs_w_d_effs, key=lambda ev: ev.event_id, reverse=True)
         # evs_w_d_effs.pop().print_event(AOD_PATH)
     
-        def s_et(keyword):
+        def s_ee(keyword):
             evs = []
             for ev in ed.values():
                 stop_searching = False
@@ -531,6 +531,13 @@ if __name__ == "__main__":
                             evs.append(ev)
                             stop_searching = True
                             break
+            return sorted(evs, key=lambda ev: ev.event_id, reverse=True)
+        
+        def s_ec(keyword):
+            evs = []
+            for ev in ed.values():
+                if ev.trigger.get_condition_keys([], keyword):
+                    evs.append(ev)
             return sorted(evs, key=lambda ev: ev.event_id, reverse=True)
         
         tech_eff_num = 0

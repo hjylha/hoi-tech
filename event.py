@@ -37,6 +37,21 @@ class Condition:
                 self.child_conditions.append(Condition(event_id, value, key.upper()))
                 continue
             self.child_conditions.append(Condition(event_id, {key: value}))
+
+    def get_condition_keys(self, list_of_condition_keys, keyword=""):
+        if self.condition:
+            new_keys = tuple([key.lower() for key in self.condition.keys()])
+            for key in new_keys:
+                if keyword in key:
+                    break
+            else:
+                return list_of_condition_keys
+            if new_keys not in list_of_condition_keys:
+                list_of_condition_keys.append(new_keys)
+            return list_of_condition_keys
+        for condition in self.child_conditions:
+            list_of_condition_keys = condition.get_condition_keys(list_of_condition_keys, keyword)
+        return list_of_condition_keys
         
 
     def print_condition(self, indent_num, indent_add):
