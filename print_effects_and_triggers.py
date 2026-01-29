@@ -1557,7 +1557,12 @@ def access_cond_as_str(condition, text_dict, **kwargs):
     return f"{country0} has granted military access to {country1}"
 
 def ai_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    yes_or_no = list(condition.values())[0]
+    if yes_or_no.lower() == "yes":
+        return "Country is controlled by AI player"
+    if yes_or_no.lower() == "no":
+        return "Country is controlled by human player"
+    raise Exception(f"MASSIVE ERROR=with ai: {condition}")
 
 def alliance_cond_as_str(condition, text_dict, **kwargs):
     countries = condition["alliance"]["country"]
@@ -1628,11 +1633,14 @@ def energy_cond_as_str(condition, text_dict, **kwargs):
 def escort_carrier_cond_as_str(condition, text_dict, **kwargs):
     pass
 
-def event_cond_as_str(condition, text_dict, **kwargs):
-    pass
+def event_cond_as_str(condition, text_dict, event_dict, **kwargs):
+    event_id = condition["event"]
+    event = event_dict[event_id]
+    return f"Event {event_id} '{event.name}' has happened"
 
 def exists_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    country = text_dict[condition["exists"]]
+    return f"Country {country} exists"
 
 def flag_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1673,8 +1681,10 @@ def intel_diff_cond_as_str(condition, text_dict, **kwargs):
 def interceptor_cond_as_str(condition, text_dict, **kwargs):
     pass
 
-def is_tech_active_cond_as_str(condition, text_dict, **kwargs):
-    pass
+def is_tech_active_cond_as_str(condition, text_dict, tech_dict, **kwargs):
+    tech_id = condition["is_tech_active"]
+    tech = tech_dict[tech_id]
+    return f"Technology {tech_id} '{tech.name}' is not active"
 
 def ispuppet_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1737,7 +1747,10 @@ def oil_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def owned_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    province_num = condition["owned"]["province"]
+    province = get_province(province_num, text_dict)
+    country = text_dict[condition["owned"]["data"]]
+    return f"{country} owns province {province} [{province_num}]"
 
 def paratrooper_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1766,8 +1779,10 @@ def supplies_cond_as_str(condition, text_dict, **kwargs):
 def tactical_bomber_cond_as_str(condition, text_dict, **kwargs):
     pass
 
-def technology_cond_as_str(condition, text_dict, **kwargs):
-    pass
+def technology_cond_as_str(condition, text_dict, tech_dict, **kwargs):
+    tech_id = condition["technology"]
+    tech = tech_dict[tech_id]
+    return f"Country has the technology {tech_id} '{tech.name}'"
 
 def transport_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1868,7 +1883,7 @@ STR_FUNCTION_DICT_FOR_CONDITIONS = {
     "year": year_cond_as_str,
 }
 
-def condition_as_str(condition, text_dict, force_default=False, **kwargs):
+def condition_as_str(condition, text_dict, event_dict, tech_dict, force_default=False, **kwargs):
     if force_default:
         return condition_as_str_default(condition, text_dict, **kwargs)
     if len(condition.keys()) > 1:
@@ -1877,13 +1892,13 @@ def condition_as_str(condition, text_dict, force_default=False, **kwargs):
     the_function = STR_FUNCTION_DICT_FOR_CONDITIONS[the_key]
     if the_function is None:
         print("PROBLEM:", the_key)
-    the_text = the_function(condition, text_dict, **kwargs)
+    the_text = the_function(condition, text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
     if the_text:
         return the_text
     return condition_as_str_default(condition, text_dict, **kwargs)
 
 
-def print_condition(condition, indent_num, indent_add, text_dict, **kwargs):
+def print_condition(condition, indent_num, indent_add, text_dict, event_dict, tech_dict, **kwargs):
     if condition.condition is not None:
         if condition.connective and condition.connective == condition.NOT_STR:
             print(indent_num * " ", f"{condition.NOT_STR} (", end=" ")
@@ -1897,7 +1912,7 @@ def print_condition(condition, indent_num, indent_add, text_dict, **kwargs):
             else:
                 first = False
             # print(f"{key} = {value}", end="")
-            print(condition_as_str(condition.condition, text_dict), end="")
+            print(condition_as_str(condition.condition, text_dict, event_dict=event_dict, tech_dict=tech_dict), end="")
         if condition.connective and condition.connective == condition.NOT_STR:
             print(" )", end="\n")
         else:
@@ -1906,20 +1921,20 @@ def print_condition(condition, indent_num, indent_add, text_dict, **kwargs):
     if condition.connective:
         print(indent_num * " ", condition.connective)
         for cond in condition.child_conditions:
-            print_condition(cond, indent_num + indent_add, indent_add, text_dict)
+            print_condition(cond, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict)
             # cond.print_condition(indent_num + indent_add, indent_add)
     else:
         for cond in condition.child_conditions:
-            print_condition(cond, indent_num + indent_add, indent_add, text_dict)
+            print_condition(cond, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict)
             # cond.print_condition(indent_num, indent_add)
 
-def print_trigger(event, indent_num, indent_add, text_dict, empty_trigger=True, **kwargs):
+def print_trigger(event, indent_num, indent_add, text_dict, event_dict, tech_dict, empty_trigger=True, **kwargs):
     if not event.trigger.raw_conditions and empty_trigger:
         print(indent_num * " ", "-")
         return
     if not event.trigger.raw_conditions:
         return
-    print_condition(event.trigger, indent_num, 2 * indent_add, text_dict)
+    print_condition(event.trigger, indent_num, 2 * indent_add, text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
     # event.trigger.print_condition(indent_num, 2 * indent_add)
 
 def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
@@ -1977,7 +1992,7 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
             text_about_action = f"action '{trigger_event.actions[action_index].name}' [{trigger_event.actions[action_index].action_key}]"
             print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
     # event.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
-    print_trigger(event, indent_num + indent_add, indent_add, text_dict, empty_trigger=trigger_empty, **kwargs)
+    print_trigger(event, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict, empty_trigger=trigger_empty, **kwargs)
     print()
 
     if event.deactivated_by:
