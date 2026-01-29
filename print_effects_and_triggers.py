@@ -1236,8 +1236,7 @@ def war_as_str(effect, text_dict, **kwargs):
     return text_dict[the_key].replace("%s", country)
 
 
-
-STR_FUNCTION_DICT = {
+STR_FUNCTION_DICT_FOR_EFFECTS = {
     "aa_batteries": aa_batteries_as_str,
     "abomb_production": abomb_production_as_str,
     "access": access_as_str,
@@ -1450,12 +1449,12 @@ STR_FUNCTION_DICT = {
 def effect_as_str(effect, text_dict, event_dict=None, tech_dict=None, force_default=False, **kwargs):
     if force_default:
         return effect_as_str_default(effect)
-    the_function = STR_FUNCTION_DICT.get(effect.type.lower())
+    the_function = STR_FUNCTION_DICT_FOR_EFFECTS.get(effect.type.lower())
     if the_function is None:
         print("PROBLEM:", effect.type)
     # if the_function is not None:
     #     the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, **kwargs)
-    the_text = STR_FUNCTION_DICT.get(effect.type.lower())(effect, text_dict=text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
+    the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
     if the_text:
         return the_text
     
@@ -1546,11 +1545,345 @@ def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None,
 # war
 # year
 
-# def print_condition(condition, **kwargs):
-#     pass
+def condition_as_str_default(condition, text_dict, **kwargs):
+    condition_as_str = ""
+    conditions_as_str = [f"{key}={value}" for key, value in condition.items()]
+    return "  ".join(conditions_as_str)
+
+def access_cond_as_str(condition, text_dict, **kwargs):
+    countries = condition["access"]["country"]
+    country0 = text_dict[countries[0]]
+    country1 = text_dict[countries[1]]
+    return f"{country0} has granted military access to {country1}"
+
+def ai_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def alliance_cond_as_str(condition, text_dict, **kwargs):
+    countries = condition["alliance"]["country"]
+    country0 = text_dict[countries[0]]
+    country1 = text_dict[countries[1]]
+    return f"Alliance between {country0} and {country1}"
+
+def attack_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def atwar_cond_as_str(condition, text_dict, **kwargs):
+    if condition["atwar"].lower() == "yes":
+        return "Country is at war"
+    if condition["atwar"].lower() == "no":
+        return "Country is at peace"
+    raise Exception(f"MASSIVE ERROR=with atwar: {condition}")
+
+def axis_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def battlecruiser_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def battleship_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def belligerence_cond_as_str(condition, text_dict, **kwargs):
+    country = text_dict[condition["belligerence"]["country"]]
+    lower_value = condition["belligerence"]["value"]
+    return f"Belligerence of {country} is at least {lower_value}"
+
+def can_change_policy_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def carrier_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def cas_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def comintern_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def control_cond_as_str(condition, text_dict, **kwargs):
+    province_num = condition["control"]["province"]
+    province = get_province(province_num, text_dict)
+    country = text_dict[condition["control"]["data"]]
+    return f"{country} controls province {province} [{province_num}]"
+
+def country_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def day_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def destroyer_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def dissent_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def domestic_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def energy_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def escort_carrier_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def event_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def exists_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def flag_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def garrison_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def government_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def guarantee_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def headofgovernment_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def headofstate_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def hq_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def ic_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def ideology_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def incabinet_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def infantry_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def intel_diff_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def interceptor_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def is_tech_active_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def ispuppet_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def land_percentage_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def leader_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def light_armor_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def local_flag_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def lost_ic_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def lost_national_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def lost_vp_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def major_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def manpower_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def marine_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def mechanized_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def metal_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def minister_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def month_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def motorized_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def multi_role_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def naval_bomber_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def non_aggression_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def oil_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def owned_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def paratrooper_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def puppet_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def random_cond_as_str(condition, text_dict, **kwargs):
+    return f"Random: {list(condition.values())[0]} %"
+
+def rare_materials_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def relation_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def strategic_bomber_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def submarine_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def supplies_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def tactical_bomber_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def technology_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def transport_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def transport_plane_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def under_attack_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def vp_cond_as_str(condition, text_dict, **kwargs):
+    pass
+
+def war_cond_as_str(condition, text_dict, **kwargs):
+    countries = condition["war"]["country"]
+    country0 = text_dict[countries[0]]
+    country1 = text_dict[countries[1]]
+    return f"War between {country0} and {country1}"
+
+def year_cond_as_str(condition, text_dict, **kwargs):
+    pass
 
 
-def print_condition(condition, indent_num, indent_add, **kwargs):
+STR_FUNCTION_DICT_FOR_CONDITIONS = {
+    "access": access_cond_as_str,
+    "ai": ai_cond_as_str,
+    "alliance": alliance_cond_as_str,
+    "attack": attack_cond_as_str,
+    "atwar": atwar_cond_as_str,
+    "axis": axis_cond_as_str,
+    "battlecruiser": battlecruiser_cond_as_str,
+    "battleship": battleship_cond_as_str,
+    "belligerence": belligerence_cond_as_str,
+    "can_change_policy": can_change_policy_cond_as_str,
+    "carrier": carrier_cond_as_str,
+    "cas": cas_cond_as_str,
+    "comintern": comintern_cond_as_str,
+    "control": control_cond_as_str,
+    "country": country_cond_as_str,
+    "day": day_cond_as_str,
+    "destroyer": destroyer_cond_as_str,
+    "dissent": dissent_cond_as_str,
+    "domestic": domestic_cond_as_str,
+    "energy": energy_cond_as_str,
+    "escort_carrier": escort_carrier_cond_as_str,
+    "event": event_cond_as_str,
+    "exists": exists_cond_as_str,
+    "flag": flag_cond_as_str,
+    "garrison": garrison_cond_as_str,
+    "government": government_cond_as_str,
+    "guarantee": guarantee_cond_as_str,
+    "headofgovernment": headofgovernment_cond_as_str,
+    "headofstate": headofstate_cond_as_str,
+    "hq": hq_cond_as_str,
+    "ic": ic_cond_as_str,
+    "ideology": ideology_cond_as_str,
+    "incabinet": incabinet_cond_as_str,
+    "infantry": infantry_cond_as_str,
+    "intel_diff": intel_diff_cond_as_str,
+    "interceptor": interceptor_cond_as_str,
+    "is_tech_active": is_tech_active_cond_as_str,
+    "ispuppet": ispuppet_cond_as_str,
+    "land_percentage": land_percentage_cond_as_str,
+    "leader": leader_cond_as_str,
+    "light_armor": light_armor_cond_as_str,
+    "local_flag": local_flag_cond_as_str,
+    "lost_ic": lost_ic_cond_as_str,
+    "lost_national": lost_national_cond_as_str,
+    "lost_vp": lost_vp_cond_as_str,
+    "major": major_cond_as_str,
+    "manpower": manpower_cond_as_str,
+    "marine": marine_cond_as_str,
+    "mechanized": mechanized_cond_as_str,
+    "metal": metal_cond_as_str,
+    "minister": minister_cond_as_str,
+    "month": month_cond_as_str,
+    "motorized": motorized_cond_as_str,
+    "multi_role": multi_role_cond_as_str,
+    "naval_bomber": naval_bomber_cond_as_str,
+    "non_aggression": non_aggression_cond_as_str,
+    "oil": oil_cond_as_str,
+    "owned": owned_cond_as_str,
+    "paratrooper": paratrooper_cond_as_str,
+    "puppet": puppet_cond_as_str,
+    "random": random_cond_as_str,
+    "rare_materials": rare_materials_cond_as_str,
+    "relation": relation_cond_as_str,
+    "strategic_bomber": strategic_bomber_cond_as_str,
+    "submarine": submarine_cond_as_str,
+    "supplies": supplies_cond_as_str,
+    "tactical_bomber": tactical_bomber_cond_as_str,
+    "technology": technology_cond_as_str,
+    "transport": transport_cond_as_str,
+    "transport_plane": transport_plane_cond_as_str,
+    "under_attack": under_attack_cond_as_str,
+    "vp": vp_cond_as_str,
+    "war": war_cond_as_str,
+    "year": year_cond_as_str,
+}
+
+def condition_as_str(condition, text_dict, force_default=False, **kwargs):
+    if force_default:
+        return condition_as_str_default(condition, text_dict, **kwargs)
+    if len(condition.keys()) > 1:
+        print("PROBLEM: too many keys", f"({', '.join(condition.condition.keys())})")
+    the_key = list(condition.keys())[0].lower()
+    the_function = STR_FUNCTION_DICT_FOR_CONDITIONS[the_key]
+    if the_function is None:
+        print("PROBLEM:", the_key)
+    the_text = the_function(condition, text_dict, **kwargs)
+    if the_text:
+        return the_text
+    return condition_as_str_default(condition, text_dict, **kwargs)
+
+
+def print_condition(condition, indent_num, indent_add, text_dict, **kwargs):
     if condition.condition is not None:
         if condition.connective and condition.connective == condition.NOT_STR:
             print(indent_num * " ", f"{condition.NOT_STR} (", end=" ")
@@ -1559,10 +1892,12 @@ def print_condition(condition, indent_num, indent_add, **kwargs):
         first = True
         for key, value in condition.condition.items():
             if not first:
+                print("THIS SHOULD NOT BE HERE!!!! problem condition:", condition.condition)
                 print(", ", end="")
             else:
                 first = False
-            print(f"{key} = {value}", end="")
+            # print(f"{key} = {value}", end="")
+            print(condition_as_str(condition.condition, text_dict), end="")
         if condition.connective and condition.connective == condition.NOT_STR:
             print(" )", end="\n")
         else:
@@ -1570,19 +1905,22 @@ def print_condition(condition, indent_num, indent_add, **kwargs):
         return
     if condition.connective:
         print(indent_num * " ", condition.connective)
-        for condition in condition.child_conditions:
-            condition.print_condition(indent_num + indent_add, indent_add)
+        for cond in condition.child_conditions:
+            print_condition(cond, indent_num + indent_add, indent_add, text_dict)
+            # cond.print_condition(indent_num + indent_add, indent_add)
     else:
-        for condition in condition.child_conditions:
-            condition.print_condition(indent_num, indent_add)
+        for cond in condition.child_conditions:
+            print_condition(cond, indent_num + indent_add, indent_add, text_dict)
+            # cond.print_condition(indent_num, indent_add)
 
-def print_trigger(event, indent_num, indent_add, empty_trigger=True, **kwargs):
+def print_trigger(event, indent_num, indent_add, text_dict, empty_trigger=True, **kwargs):
     if not event.trigger.raw_conditions and empty_trigger:
         print(indent_num * " ", "-")
         return
     if not event.trigger.raw_conditions:
         return
-    event.trigger.print_condition(indent_num, 2 * indent_add)
+    print_condition(event.trigger, indent_num, 2 * indent_add, text_dict)
+    # event.trigger.print_condition(indent_num, 2 * indent_add)
 
 def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
     if action.name:
@@ -1639,7 +1977,7 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
             text_about_action = f"action '{trigger_event.actions[action_index].name}' [{trigger_event.actions[action_index].action_key}]"
             print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
     # event.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
-    print_trigger(event, indent_num + indent_add, indent_add, empty_trigger=trigger_empty, **kwargs)
+    print_trigger(event, indent_num + indent_add, indent_add, text_dict, empty_trigger=trigger_empty, **kwargs)
     print()
 
     if event.deactivated_by:
