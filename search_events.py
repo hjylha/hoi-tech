@@ -4,7 +4,7 @@ from file_paths import get_event_text_paths, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
 from scan_hoi_files import get_tech_dict
-from event import Trigger, get_actions, Event, suggest_events_based_on_search_words
+from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
 from print_effects_and_triggers import print_event
 
 
@@ -489,7 +489,7 @@ if __name__ == "__main__":
     if "d" in sys.argv:
         ask_to_search = False
 
-        from print_effects_and_triggers import effect_as_str
+        from print_effects_and_triggers import effect_as_str, condition_as_str
         def_effs = []
         for tech in tech_dict.values():
             for eff in tech.effects:
@@ -499,6 +499,8 @@ if __name__ == "__main__":
         
         evs_w_d_effs = []
         evs_w_issues = []
+        evs_w_d_conds = []
+        evs_w_t_issues = []
         for ev in ed.values():
             has_error = False
             has_default = False
@@ -516,7 +518,27 @@ if __name__ == "__main__":
                         has_error = True
                         evs_w_issues.append(ev)
                         break
+
+            conditions = get_conditions(ev.trigger, [])
+            conditions = [cond for cond, _ in conditions]
+            has_error = False
+            has_default = False
+            for cond in conditions:
+                if has_default or has_error:
+                    break
+                try:
+                    cond_str = condition_as_str(cond, text_dict_last, ed, tech_dict)
+                    if "=" in cond_str:
+                        evs_w_d_conds.append(ev)
+                        has_default = True
+                        break
+                except KeyError:
+                    has_error = True
+                    evs_w_t_issues.append(ev)
+                    break
+
         evs_w_d_effs = sorted(evs_w_d_effs, key=lambda ev: ev.event_id, reverse=True)
+        evs_w_d_conds = sorted(evs_w_d_conds, key=lambda ev: ev.event_id, reverse=True)
         # evs_w_d_effs.pop().print_event(AOD_PATH)
     
         def s_ee(keyword):
@@ -556,17 +578,32 @@ if __name__ == "__main__":
 
         event_eff_num = 0
         effect_types_in_events = set()
+        event_cond_num = 0
+        condition_types_in_events = set()
         for ev in ed.values():
             for action in ev.actions:
                 for eff in action.effects:
                     event_eff_num += 1
                     effect_types_in_events.add(eff.type)
+            conditions = get_conditions(ev.trigger, [])
+            conditions = [cond for cond, _ in conditions]
+            event_cond_num += len(conditions)
+            for cond in conditions:
+                keys = list(cond.keys())
+                if len(keys) > 1:
+                    print(f"BIG PROBLEM WITH event {ev.event_id}: TOO MANY KEYS IN CONDITION {cond}")
+                condition_types_in_events.add(keys[0])
         
         print(f"Events: {len(ed)}")
         print(f"Total number of event effects: {event_eff_num}")
         print(f"Total number of effect types in events: {len(effect_types_in_events)}")
         print(f"Events with KeyErrors: {len(evs_w_issues)}")
         print(f"Events with effects in default form: {len(evs_w_d_effs)}")
+        print()
+        print(f"Total number of event conditions: {event_cond_num}")
+        print(f"Total number of condition types in events: {len(condition_types_in_events)}")
+        print(f"Events with KeyErrors in conditions: {len(evs_w_t_issues)}")
+        print(f"Events with conditions in default form: {len(evs_w_d_conds)}")
         print()
 
         all_effect_types = set()
