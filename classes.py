@@ -523,3 +523,80 @@ class Idea(MinisterOrIdea):
 
 # class NationalCulture(Idea):
 #     pass
+
+
+class Leader:
+    # from hoi2.paradoxwikis.com/Leader_Traits
+    trait_list = [
+        "Logistics Wizard",
+        "Defensive Doctrine",
+        "Offensive Doctrine",
+        "Winter Specialist",
+        "Trickster",
+        "Engineer",
+        "Fortress Buster",
+        "Panzer Leader",
+        "Commando",
+        "Old Guard",
+        "Sea Wolf",
+        "Blockade Runner",
+        "Superior Tactician",
+        "Spotter",
+        "Tank Buster",
+        "Carpet Bomber",
+        "Night Flyer",
+        "Fleet Destroyer",
+        "Desert Fox",
+        "Jungle Rat",
+        "Urban Warfare Specialist",
+        "Ranger",
+        "Mountaineer",
+        "Hills Fighter",
+        "Counter Attacker",
+        "Assaulter",
+        "Encircler",
+        "Ambusher",
+        "Disciplined",
+        "Elastic Defence Specialist",
+        "Blitzer"
+    ]
+    
+    def get_traits_from_trait_num(self, trait_num):
+        if trait_num == 0:
+            return []
+        trait_indices = []
+        num_to_divide = trait_num
+        index_exponent = 4 * len(str(trait_num))
+        while num_to_divide >= 1:
+            divider = pow(2, index_exponent)
+            if divider <= num_to_divide:
+                trait_indices.append(index_exponent)
+                num_to_divide -= divider
+            index_exponent -= 1
+        return tuple([self.trait_list[i] for i in trait_indices[::-1]])
+
+    def __init__(self, leader_id, name, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year):
+        self.leader_id = leader_id
+        self.name = name
+        self.country_code = country_code
+        # TODO: change
+        self.country = country_code
+        self.skill = skill
+        self.max_skill = max_skill
+        try:
+            self.traits = self.get_traits_from_trait_num(trait_num)
+        except TypeError as e:
+            self.traits = []
+            print("TypeError detected with trait_num:")
+            print(f"{leader_id=}")
+            print(f"{name=}")
+            print(f"{country_code=}")
+            print(f"{trait_num=}")
+            raise TypeError(e)
+        self.land_naval_or_air = l_n_or_a
+        self.start_year = start_year
+        self.end_year = end_year
+        self.loyalty = loyalty
+        self.experience = exp
+        self.ideal_rank = ideal_rank
+        self.rank_years = [r0_year, r1_year, r2_year, r3_year]
