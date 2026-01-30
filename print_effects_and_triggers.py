@@ -1564,6 +1564,17 @@ def resource_cond_as_str(condition, text_dict, **kwargs):
     resource_name = get_resource_name(the_key, text_dict)
     return f"Country has at least {value} {resource_name}"
 
+def division_cond_as_str(condition, text_dict, **kwargs):
+    unit_key = list(condition.keys())[0]
+    unit_name = get_unit_name(unit_key, text_dict, do_short=False)
+    detail_dict = list(condition.values())[0]
+    country_key = "country"
+    value_key = "value"
+    country = get_country(detail_dict[country_key], text_dict)
+    value = detail_dict[value_key]
+    # TODO: is this actually what this means?
+    return f"{country} has at least {value} {unit_name}"
+
 def access_cond_as_str(condition, text_dict, **kwargs):
     countries = condition["access"]["country"]
     country0 = text_dict[countries[0]]
@@ -1642,7 +1653,10 @@ def control_cond_as_str(condition, text_dict, **kwargs):
     return f"{country} control province {province} [{province_num}]"
 
 def country_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    # TODO: what is this condition actually?
+    country_code = list(condition.values())[0]
+    country = get_country(country_code, text_dict)
+    return f"Country is {country}"
 
 def day_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1654,9 +1668,6 @@ def dissent_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def domestic_cond_as_str(condition, text_dict, **kwargs):
-    pass
-
-def energy_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def escort_carrier_cond_as_str(condition, text_dict, **kwargs):
@@ -1699,10 +1710,19 @@ def hq_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def ic_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    the_key = list(condition.keys())[0]
+    value = list(condition.values())[0]
+    # TODO: this is most likely 'at least'
+    return f"Country has at least (?) {value} {BUILDING_DICT[the_key]}"
 
 def ideology_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    the_key = list(condition.keys())[0]
+    ideology_type_key = list(condition.values())[0]
+    # exception
+    if ideology_type_key.startswith("na"):
+        ideology_type_key = "national_socialist"
+    ideology = text_dict[f"CATEGORY_{ideology_type_key.upper()}"]
+    f"{the_key.capitalize()} of the country is {ideology}"
 
 def incabinet_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1750,7 +1770,12 @@ def lost_vp_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def major_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    yes_or_no = list(condition.values())[0]
+    if yes_or_no.lower() == "yes":
+        return "Country is a major power (?)"
+    if yes_or_no.lower() == "no":
+        return "Country is not a major power (?)"
+    raise Exception(f"MASSIVE ERROR=with major: {condition}")
 
 def manpower_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1759,9 +1784,6 @@ def marine_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def mechanized_cond_as_str(condition, text_dict, **kwargs):
-    pass
-
-def metal_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def minister_cond_as_str(condition, text_dict, **kwargs):
@@ -1782,9 +1804,6 @@ def naval_bomber_cond_as_str(condition, text_dict, **kwargs):
 def non_aggression_cond_as_str(condition, text_dict, **kwargs):
     pass
 
-def oil_cond_as_str(condition, text_dict, **kwargs):
-    pass
-
 def owned_cond_as_str(condition, text_dict, **kwargs):
     province_key = "province"
     data_key = "data"
@@ -1802,13 +1821,13 @@ def paratrooper_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def puppet_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    countries = condition["puppet"]["country"]
+    country0 = get_country(countries[0], text_dict)
+    country1 = get_country(countries[1], text_dict)
+    return f"{country0} is a puppet of {country1}"
 
 def random_cond_as_str(condition, text_dict, **kwargs):
     return f"Random: {list(condition.values())[0]} %"
-
-def rare_materials_cond_as_str(condition, text_dict, **kwargs):
-    pass
 
 def relation_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1817,9 +1836,6 @@ def strategic_bomber_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def submarine_cond_as_str(condition, text_dict, **kwargs):
-    pass
-
-def supplies_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def tactical_bomber_cond_as_str(condition, text_dict, **kwargs):
@@ -1840,7 +1856,9 @@ def under_attack_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def vp_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    value = list(condition.values())[0]
+    # TODO: is this actually how this works?
+    return f"Country has at least {value} victory points"
 
 def war_cond_as_str(condition, text_dict, **kwargs):
     countries = condition["war"]["country"]
