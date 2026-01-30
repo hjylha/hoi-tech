@@ -1636,7 +1636,11 @@ def belligerence_cond_as_str(condition, text_dict, **kwargs):
     return f"Belligerence of {country} is at least {lower_value}"
 
 def can_change_policy_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    detail_dict = list(condition.values())[0]
+    slider_type_key = detail_dict["type"]
+    slider_name = SLIDER_DICT[slider_type_key][0]
+    value = detail_dict["value"]
+    return f"Country can change {slider_name} by {value}"
 
 def carrier_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1679,7 +1683,12 @@ def dissent_cond_as_str(condition, text_dict, **kwargs):
     return f"Country has at least {value} {dissent}"
 
 def domestic_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    detail_dict = list(condition.values())[0]
+    slider_type_key = detail_dict["type"]
+    slider_name = SLIDER_DICT[slider_type_key][0]
+    value = detail_dict["value"]
+    # TODO: is this correct?
+    return f"{slider_name} is at least {value}"
 
 def escort_carrier_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1700,7 +1709,21 @@ def flag_cond_as_str(condition, text_dict, **kwargs):
     return f"Flag: {value}"
 
 def garrison_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    detail_dict = list(condition.values())[0]
+    country_code = detail_dict["country"]
+    country = get_country(country_code, text_dict)
+    province_num = detail_dict["province"]
+    province = get_province(province_num, text_dict)
+    size = detail_dict["size"]
+    gar_type = detail_dict.get("type")
+    if gar_type:
+        gar_type += " "
+    division_type = "divisions"
+    is_area = detail_dict.get("area")
+    area = ""
+    if is_area:
+        area = f"area: {is_area}"
+    return f"{country} has at least {size} {gar_type}{division_type} in {province} [{province_num}] ({area})"
 
 def government_cond_as_str(condition, text_dict, **kwargs):
     government_type = list(condition.values())[0]
@@ -1766,7 +1789,11 @@ def ispuppet_cond_as_str(condition, text_dict, **kwargs):
     return f"{country} is a puppet country"
 
 def land_percentage_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    detail_dict = list(condition.values())[0]
+    country_code = detail_dict["country"]
+    country = get_country(country_code, text_dict)
+    value = detail_dict["value"]
+    return f"{country} has at least {value} land percentage [I don't know what this means]"
 
 def leader_cond_as_str(condition, text_dict, **kwargs):
     the_key, value = list(condition.items())[0]
@@ -1869,7 +1896,12 @@ def random_cond_as_str(condition, text_dict, **kwargs):
     return f"Random: {list(condition.values())[0]} %"
 
 def relation_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    detail_dict = list(condition.values())[0]
+    country_code = detail_dict["which"]
+    country = get_country(country_code, text_dict)
+    value = detail_dict["value"]
+    # TODO: this is probably correct
+    return f"Our relation with {country} is at least {value}"
 
 def strategic_bomber_cond_as_str(condition, text_dict, **kwargs):
     pass
