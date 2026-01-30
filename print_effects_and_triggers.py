@@ -391,6 +391,14 @@ def get_province(province_num, text_dict):
         return province
     return province_num
 
+def get_country(country_code, text_dict):
+    if isinstance(country_code, int):
+        return country_code
+    country = text_dict.get(country_code.upper())
+    if country is not None:
+        return country
+    return country_code
+
 def replace_string_and_number(original_text, replacement_text, replacement_number, percentage=False):
     pct = " %" if percentage else ""
     sign = "+" if replacement_number > 0 else ""
@@ -1562,22 +1570,29 @@ def ai_cond_as_str(condition, text_dict, **kwargs):
         return "Country is controlled by AI player"
     if yes_or_no.lower() == "no":
         return "Country is controlled by human player"
+    country = text_dict[yes_or_no.upper()]
+    if len(yes_or_no) == 3 and country:
+        return f"{country} is controlled by AI player" 
     raise Exception(f"MASSIVE ERROR=with ai: {condition}")
 
 def alliance_cond_as_str(condition, text_dict, **kwargs):
     countries = condition["alliance"]["country"]
-    country0 = text_dict[countries[0]]
-    country1 = text_dict[countries[1]]
+    country0 = get_country(countries[0], text_dict)
+    country1 = get_country(countries[1], text_dict)
     return f"Alliance between {country0} and {country1}"
 
 def attack_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def atwar_cond_as_str(condition, text_dict, **kwargs):
-    if condition["atwar"].lower() == "yes":
+    value = condition["atwar"].lower()
+    if value == "yes":
         return "Country is at war"
-    if condition["atwar"].lower() == "no":
+    if value == "no":
         return "Country is at peace"
+    country = text_dict.get(value.upper())
+    if len(value) == 3 and country:
+        return f"{country} is at war"
     raise Exception(f"MASSIVE ERROR=with atwar: {condition}")
 
 def axis_cond_as_str(condition, text_dict, **kwargs):
@@ -1590,7 +1605,8 @@ def battleship_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def belligerence_cond_as_str(condition, text_dict, **kwargs):
-    country = text_dict[condition["belligerence"]["country"]]
+    detail_dict = condition["belligerence"]
+    country = get_country(detail_dict["country"], text_dict)
     lower_value = condition["belligerence"]["value"]
     return f"Belligerence of {country} is at least {lower_value}"
 
@@ -1607,10 +1623,17 @@ def comintern_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def control_cond_as_str(condition, text_dict, **kwargs):
-    province_num = condition["control"]["province"]
+    province_key = "province"
+    data_key = "data"
+    detail_dict = list(condition.values())[0]
+    province_num = detail_dict[province_key]
     province = get_province(province_num, text_dict)
-    country = text_dict[condition["control"]["data"]]
-    return f"{country} controls province {province} [{province_num}]"
+    if data_key in detail_dict.keys():
+        country_code = detail_dict[data_key]
+        country = get_country(country_code, text_dict)
+    else:
+        country = "Country"
+    return f"{country} control province {province} [{province_num}]"
 
 def country_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1634,12 +1657,14 @@ def escort_carrier_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def event_cond_as_str(condition, text_dict, event_dict, **kwargs):
-    event_id = condition["event"]
-    event = event_dict[event_id]
-    return f"Event {event_id} '{event.name}' has happened"
+    event_id = list(condition.values())[0]
+    event = event_dict.get(event_id)
+    if event is not None:
+        return f"Event {event_id} '{event.name}' has happened"
+    return f"Event {event_id} has happened [BUT THIS EVENT DOES NOT EXIST]"
 
 def exists_cond_as_str(condition, text_dict, **kwargs):
-    country = text_dict[condition["exists"]]
+    country = get_country(condition["exists"], text_dict)
     return f"Country {country} exists"
 
 def flag_cond_as_str(condition, text_dict, **kwargs):
@@ -1747,9 +1772,16 @@ def oil_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def owned_cond_as_str(condition, text_dict, **kwargs):
-    province_num = condition["owned"]["province"]
+    province_key = "province"
+    data_key = "data"
+    detail_dict = list(condition.values())[0]
+    province_num = detail_dict[province_key]
     province = get_province(province_num, text_dict)
-    country = text_dict[condition["owned"]["data"]]
+    if data_key in detail_dict.keys():
+        country_code = detail_dict[data_key]
+        country = get_country(country_code, text_dict)
+    else:
+        country = "Country"
     return f"{country} owns province {province} [{province_num}]"
 
 def paratrooper_cond_as_str(condition, text_dict, **kwargs):
@@ -1798,8 +1830,8 @@ def vp_cond_as_str(condition, text_dict, **kwargs):
 
 def war_cond_as_str(condition, text_dict, **kwargs):
     countries = condition["war"]["country"]
-    country0 = text_dict[countries[0]]
-    country1 = text_dict[countries[1]]
+    country0 = get_country(countries[0], text_dict)
+    country1 = get_country(countries[1], text_dict)
     return f"War between {country0} and {country1}"
 
 def year_cond_as_str(condition, text_dict, **kwargs):
