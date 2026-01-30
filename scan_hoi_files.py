@@ -1,9 +1,10 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_province_rev_path, get_tech_files, get_tech_team_files
+from file_paths import get_leaders_files
 from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding
-from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam
+from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam, Leader
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality
 
 
@@ -393,6 +394,75 @@ def scan_policies_file():
                     "nationalculture": country_dict.get("nationalculture")
                 }
     return policy_dict
+
+
+def scan_leaders_file(filepath):
+    csv_content = read_csv_file(filepath)
+    leaders = []
+    country_code_from_file = None
+    for line_num, line in enumerate(csv_content):
+        if line_num == 0:
+            column_names = [item.lower() for item in line]
+            country_index = column_names.index("country")
+            if country_index != 2:
+                print(f"Country is not the third column in {filepath.name}")
+            continue
+        if country_code_from_file is None:
+            country_code_from_file = line[country_index]
+        if line[country_index] != country_code_from_file:
+            # raise Exception(f"Not all leaders are from the same country in {filepath}: {line[country_index]} != {country_code_from_file}")
+            print(f"Not all leaders are from the same country in {filepath}: {line[country_index]} != {country_code_from_file}")
+        leader_dict = {col_name: value for col_name, value in zip(column_names, line)}
+        leaders.append(Leader(
+            leader_dict["id"],
+            leader_dict["name"],
+            leader_dict["country"],
+            leader_dict["skill"],
+            leader_dict["max skill"],
+            leader_dict["traits"],
+            leader_dict["type"],
+            leader_dict["start year"],
+            leader_dict["end year"],
+            leader_dict["loyalty"],
+            leader_dict["experience"],
+            leader_dict["ideal rank"],
+            leader_dict["rank 3 year"],
+            leader_dict["rank 2 year"],
+            leader_dict["rank 1 year"],
+            leader_dict["rank 0 year"]
+        ))
+
+    return leaders
+
+def scan_all_leaders(check_unique_ids=False):
+    leader_dict = {}
+    all_leaders = []
+    leader_files = get_leaders_files(AOD_PATH)
+    for filepath in leader_files:
+        try:
+            leaders = scan_leaders_file(filepath)
+            for leader in leaders:
+                all_leaders.append(leader)
+            # for country_code, leader_list in leaders.items():
+            #     if country_code in leader_dict:
+            #         # raise Exception(f"Leaders from {country_code} already scanned before {filepath}")
+            #         print(f"Leaders from {country_code} already scanned before {filepath}")
+                # leader_dict[country_code] = leader_list
+        except KeyError:
+            print(f"KeyError IN FILE: {filepath}")
+        except IndexError:
+            print(f"IndexError IN FILE: {filepath}")
+        except TypeError:
+            print(f"TypeError IN FILE {filepath}")
+    if check_unique_ids:
+        for leader in all_leaders:
+            if leader_dict.get(leader.leader_id) is not None:
+                raise Exception(f"Leader id is not unique: {leader.leader_id}")
+            leader_dict[leader.leader_id] = leader
+        return leader_dict
+    for leader in all_leaders:
+        leader_dict[leader.leader_id] = leader
+    return leader_dict
 
 
 def scan_scenario_file(filepath):
