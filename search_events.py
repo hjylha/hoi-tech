@@ -558,9 +558,25 @@ if __name__ == "__main__":
         def s_ec(keyword):
             evs = []
             for ev in ed.values():
-                if ev.trigger.get_condition_keys([], keyword):
-                    evs.append(ev)
+                # if ev.trigger.get_condition_keys([], keyword):
+                #     evs.append(ev)
+                conditions = get_conditions(ev.trigger, [])
+                conditions = [cond for cond, _ in conditions]
+                for cond in conditions:
+                    if keyword in cond.keys():
+                        evs.append(ev)
+                        break
             return sorted(evs, key=lambda ev: ev.event_id, reverse=True)
+        
+        def s_c(keyword):
+            conditions = []
+            for ev in ed.values():
+                conds = get_conditions(ev.trigger, [])
+                conds = [cond for cond, _ in conds]
+                for cond in conds:
+                    if keyword in cond.keys():
+                        conditions.append(cond)
+            return conditions
         
         tech_eff_num = 0
         effect_types_in_tech = set()
