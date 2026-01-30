@@ -1558,6 +1558,12 @@ def condition_as_str_default(condition, text_dict, **kwargs):
     conditions_as_str = [f"{key}={value}" for key, value in condition.items()]
     return "  ".join(conditions_as_str)
 
+def resource_cond_as_str(condition, text_dict, **kwargs):
+    the_key = list(condition.keys())[0]
+    value = list(condition.values())[0]
+    resource_name = get_resource_name(the_key, text_dict)
+    return f"Country has at least {value} {resource_name}"
+
 def access_cond_as_str(condition, text_dict, **kwargs):
     countries = condition["access"]["country"]
     country0 = text_dict[countries[0]]
@@ -1674,10 +1680,14 @@ def garrison_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def government_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    government_type = list(condition.values())[0]
+    return f"Country has {government_type} government"
 
 def guarantee_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    countries = condition["guarantee"]["country"]
+    country0 = get_country(countries[0], text_dict)
+    country1 = get_country(countries[1], text_dict)
+    return f"{country0} aguarantees the independence of {country1}"
 
 def headofgovernment_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1701,7 +1711,9 @@ def infantry_cond_as_str(condition, text_dict, **kwargs):
     pass
 
 def intel_diff_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    value = condition["intel_diff"]
+    # TODO: at least or at most?
+    return f"Intel difference is at least (?) {value}"
 
 def interceptor_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1712,7 +1724,9 @@ def is_tech_active_cond_as_str(condition, text_dict, tech_dict, **kwargs):
     return f"Technology {tech_id} '{tech.name}' is not active"
 
 def ispuppet_cond_as_str(condition, text_dict, **kwargs):
-    pass
+    country_code = list(condition.values())[0]
+    country = get_country(country_code, text_dict)
+    return f"{country} is a puppet country"
 
 def land_percentage_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1858,7 +1872,7 @@ STR_FUNCTION_DICT_FOR_CONDITIONS = {
     "destroyer": destroyer_cond_as_str,
     "dissent": dissent_cond_as_str,
     "domestic": domestic_cond_as_str,
-    "energy": energy_cond_as_str,
+    "energy": resource_cond_as_str,
     "escort_carrier": escort_carrier_cond_as_str,
     "event": event_cond_as_str,
     "exists": exists_cond_as_str,
@@ -1885,26 +1899,26 @@ STR_FUNCTION_DICT_FOR_CONDITIONS = {
     "lost_national": lost_national_cond_as_str,
     "lost_vp": lost_vp_cond_as_str,
     "major": major_cond_as_str,
-    "manpower": manpower_cond_as_str,
+    "manpower": resource_cond_as_str,
     "marine": marine_cond_as_str,
     "mechanized": mechanized_cond_as_str,
-    "metal": metal_cond_as_str,
+    "metal": resource_cond_as_str,
     "minister": minister_cond_as_str,
     "month": month_cond_as_str,
     "motorized": motorized_cond_as_str,
     "multi_role": multi_role_cond_as_str,
     "naval_bomber": naval_bomber_cond_as_str,
     "non_aggression": non_aggression_cond_as_str,
-    "oil": oil_cond_as_str,
+    "oil": resource_cond_as_str,
     "owned": owned_cond_as_str,
     "paratrooper": paratrooper_cond_as_str,
     "puppet": puppet_cond_as_str,
     "random": random_cond_as_str,
-    "rare_materials": rare_materials_cond_as_str,
+    "rare_materials": resource_cond_as_str,
     "relation": relation_cond_as_str,
     "strategic_bomber": strategic_bomber_cond_as_str,
     "submarine": submarine_cond_as_str,
-    "supplies": supplies_cond_as_str,
+    "supplies": resource_cond_as_str,
     "tactical_bomber": tactical_bomber_cond_as_str,
     "technology": technology_cond_as_str,
     "transport": transport_cond_as_str,
