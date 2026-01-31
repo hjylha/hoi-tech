@@ -396,13 +396,19 @@ def scan_policies_file():
     return policy_dict
 
 
-def scan_leaders_file(filepath):
+def scan_leaders_file(filepath, column_names=None):
     csv_content = read_csv_file(filepath)
     leaders = []
     country_code_from_file = None
     for line_num, line in enumerate(csv_content):
         if line_num == 0:
-            column_names = [item.lower() for item in line]
+            column_names_in_file = [item.lower() for item in line]
+            if column_names is None:
+                column_names = column_names_in_file
+            elif column_names != column_names_in_file:
+                for col_name, col_name_f in zip(column_names, column_names_in_file):
+                    if col_name != col_name_f:
+                        print(f"Expected {col_name} = {col_name_f}, but this is not the case")
             country_index = column_names.index("country")
             if country_index != 2:
                 print(f"Country is not the third column in {filepath.name}")
@@ -416,6 +422,7 @@ def scan_leaders_file(filepath):
         leaders.append(Leader(
             leader_dict["id"],
             leader_dict["name"],
+            filepath,
             leader_dict["country"],
             leader_dict["skill"],
             leader_dict["max skill"],
@@ -435,12 +442,13 @@ def scan_leaders_file(filepath):
     return leaders
 
 def scan_all_leaders(check_unique_ids=False):
+    column_names = ["name", "id", "country", "rank 3 year", "rank 2 year", "rank 1 year", "rank 0 year", "ideal rank", "max skill", "traits", "skill", "experience", "loyalty", "type", "picture", "start year", "end year", "x"]
     leader_dict = {}
     all_leaders = []
     leader_files = get_leaders_files(AOD_PATH)
     for filepath in leader_files:
         try:
-            leaders = scan_leaders_file(filepath)
+            leaders = scan_leaders_file(filepath, column_names)
             for leader in leaders:
                 all_leaders.append(leader)
             # for country_code, leader_list in leaders.items():

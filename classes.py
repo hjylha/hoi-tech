@@ -575,9 +575,10 @@ class Leader:
             index_exponent -= 1
         return tuple([self.trait_list[i] for i in trait_indices[::-1]])
 
-    def __init__(self, leader_id, name, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year):
+    def __init__(self, leader_id, name, filepath, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year):
         self.leader_id = leader_id
         self.name = name
+        self.filepath = filepath
         self.country_code = country_code
         # TODO: change
         self.country = country_code
@@ -600,3 +601,6 @@ class Leader:
         self.experience = exp
         self.ideal_rank = ideal_rank
         self.rank_years = [r0_year, r1_year, r2_year, r3_year]
+    
+    def print_leader_info(self):
+        pass
