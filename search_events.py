@@ -629,6 +629,40 @@ if __name__ == "__main__":
             all_effect_types.add(eff_type)
         print(f"Total number of effect types: {len(all_effect_types)}")
         print()
+
+        all_text_duplicates = {key: value for key, value in text_dict.items() if len(value) > 1}
+        real_text_duplicates = dict()
+        files_w_duplicates = set()
+        for key, value in all_text_duplicates.items():
+            if not key:
+                continue
+            for text, filepath in value:
+                if text != value[0][0]:
+                    real_text_duplicates[key] = value
+                    files_w_duplicates.add(filepath.name)
+                    break
+        t_dup = dict()
+        for fn in files_w_duplicates:
+            t_dup[fn] = {}
+            for key, value in real_text_duplicates.items():
+                for text, fp in value:
+                    if fp.name == fn:
+                        t_dup[fn][key] = value
+
+        def show_dupl(*filenames):
+            if not filenames:
+                filenames = t_dup.keys()
+            for filename, t_dict in t_dup.items():
+                if filename not in filenames:
+                    continue
+                print()
+                print(f"###   {filename}   ###")
+                for key, duplicate_tuple in t_dict.items():
+                    print()
+                    print(key)
+                    for text, filepath in duplicate_tuple:
+                        print(f"  in {filepath.name}: ")
+                        print(text)
     
     if "raw" in sys.argv:
         force_default = True
