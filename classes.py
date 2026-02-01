@@ -480,7 +480,7 @@ class Minister:
 
     #     return modifiers
 
-    def __init__(self, minister_id, name, position, personality, start_year, ideology, loyalty, pic_path=None):
+    def __init__(self, minister_id, name, position, personality, start_year, ideology, loyalty, filepath, pic_path=None):
         self.m_id = minister_id
         self.name = name
         self.position = position
@@ -488,6 +488,7 @@ class Minister:
         self.start_year = start_year
         self.ideology = ideology
         self.loyalty = loyalty
+        self.filepath = filepath
         self.pic_path = pic_path
         if self.pic_path is None:
             self.pic_path = "gfx/interface/pics/Unknown.bmp"

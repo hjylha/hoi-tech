@@ -1,6 +1,6 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_province_rev_path, get_tech_files, get_tech_team_files
-from file_paths import get_leaders_files
+from file_paths import get_leaders_files, get_ministers_files
 from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding
@@ -368,7 +368,7 @@ def scan_minister_csv(filepath, minister_personalities):
         #     print(minister_personality_str)
         # minister_loyalty = line[6]
         # minister_pic = line[7]
-        ministers.append(Minister(minister_id, line[2], position, minister_personality, line[3], line[4], line[6], line[7]))
+        ministers.append(Minister(minister_id, line[2], position, minister_personality, line[3], line[4], line[6], filepath, line[7]))
     return {country_code_from_file: ministers}
 
 def scan_ministers_for_country(country_code):
@@ -378,6 +378,24 @@ def scan_ministers_for_country(country_code):
     minister_personalities = scan_minister_personalities()
     minister_dict = scan_minister_csv(ministers_path, minister_personalities)
     return minister_dict[country_code]
+
+
+def scan_all_ministers(check_unique_ids=False):
+    minister_list = []
+    minister_files = get_ministers_files(AOD_PATH)
+    minister_personalities = scan_minister_personalities()
+    for minister_file in minister_files:
+        ministers = list(scan_minister_csv(minister_file, minister_personalities).values())[0]
+        for minister in ministers:
+            minister_list.append(minister)
+    if check_unique_ids:
+        minister_dict = dict()
+        for minister in minister_list:
+            if minister_dict.get(minister.m_id) is not None:
+                print(f"Minister id {minister.m_id} ({minister.name}) is not unique: {minister.filepath.name}")
+            minister_dict[minister.m_id] = minister
+        return minister_dict
+    return {minister.m_id: minister for minister in minister_list}
 
 
 def scan_policies_file():
