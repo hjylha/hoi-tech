@@ -454,7 +454,8 @@ def scan_leaders_file(filepath, column_names=None):
             leader_dict["rank 3 year"],
             leader_dict["rank 2 year"],
             leader_dict["rank 1 year"],
-            leader_dict["rank 0 year"]
+            leader_dict["rank 0 year"],
+            leader_dict["picture"]
         ))
 
     return leaders

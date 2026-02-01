@@ -229,7 +229,9 @@ class TechTeam:
     def __init__(self, team_id, team_name, team_nation, skill, start_year, end_year, specialities, filepath, pic_path=None):
         self.team_id = team_id
         self.name = team_name
+        # TODO: changes needed
         self.nation = team_nation
+        self.country = team_nation
         self.skill = max(min(skill, self.MAX_SKILL), self.MIN_SKILL)
         self.start_year = start_year
         self.end_year = end_year
@@ -577,7 +579,7 @@ class Leader:
             index_exponent -= 1
         return tuple([self.trait_list[i] for i in trait_indices[::-1]])
 
-    def __init__(self, leader_id, name, filepath, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year):
+    def __init__(self, leader_id, name, filepath, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year, pic_path=None):
         self.leader_id = leader_id
         self.name = name
         self.filepath = filepath
@@ -603,6 +605,9 @@ class Leader:
         self.experience = exp
         self.ideal_rank = ideal_rank
         self.rank_years = [r0_year, r1_year, r2_year, r3_year]
+        self.pic_path = pic_path
+        if self.pic_path is None:
+            self.pic_path = "gfx/interface/pics/Unknown.bmp"
     
     def print_leader_info(self):
         pass
