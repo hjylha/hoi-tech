@@ -239,7 +239,7 @@ def scan_tech_team_file(filepath):
                         specialities.append(spec.lower())
                     else:
                         break
-                tech_teams.append(TechTeam(team_id, team_name, nation_key, skill, start_year, end_year, specialities, pic_path))
+                tech_teams.append(TechTeam(team_id, team_name, nation_key, skill, start_year, end_year, specialities, filepath, pic_path))
     
     return tech_teams
 

@@ -226,7 +226,7 @@ class TechTeam:
     MAX_SKILL = 10
     NUM_OF_DECIMALS = 6
 
-    def __init__(self, team_id, team_name, team_nation, skill, start_year, end_year, specialities, pic_path=None):
+    def __init__(self, team_id, team_name, team_nation, skill, start_year, end_year, specialities, filepath, pic_path=None):
         self.team_id = team_id
         self.name = team_name
         self.nation = team_nation
@@ -234,6 +234,7 @@ class TechTeam:
         self.start_year = start_year
         self.end_year = end_year
         self.specialities = specialities
+        self.filepath = filepath
         if pic_path is None:
             pic_path = "gfx/interface/tech/Team_noimage.bmp"
         self.pic_path = pic_path
