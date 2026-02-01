@@ -483,9 +483,11 @@ class Minister:
 
     #     return modifiers
 
-    def __init__(self, minister_id, name, position, personality, start_year, ideology, loyalty, filepath, pic_path=None):
+    def __init__(self, minister_id, name, country_code, position, personality, start_year, ideology, loyalty, filepath, pic_path=None):
         self.m_id = minister_id
         self.name = name
+        self.country_code = country_code
+        self.country = country_code
         self.position = position
         self.personality = personality
         self.start_year = start_year

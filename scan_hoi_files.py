@@ -368,7 +368,7 @@ def scan_minister_csv(filepath, minister_personalities):
         #     print(minister_personality_str)
         # minister_loyalty = line[6]
         # minister_pic = line[7]
-        ministers.append(Minister(minister_id, line[2], position, minister_personality, line[3], line[4], line[6], filepath, line[7]))
+        ministers.append(Minister(minister_id, line[2], country_code_from_file, position, minister_personality, line[3], line[4], line[6], filepath, line[7]))
     return {country_code_from_file: ministers}
 
 def scan_ministers_for_country(country_code):
@@ -426,10 +426,10 @@ def scan_leaders_file(filepath, column_names=None):
             elif column_names != column_names_in_file:
                 for col_name, col_name_f in zip(column_names, column_names_in_file):
                     if col_name != col_name_f:
-                        print(f"Expected {col_name} = {col_name_f}, but this is not the case")
+                        print(f"Expected {col_name} = {col_name_f}, but this is not the case in file {filepath.name}")
             country_index = column_names.index("country")
             if country_index != 2:
-                print(f"Country is not the third column in {filepath.name}")
+                print(f"Country is not the third column in file {filepath.name}")
             continue
         if country_code_from_file is None:
             country_code_from_file = line[country_index]
@@ -470,11 +470,6 @@ def scan_all_leaders(check_unique_ids=False):
             leaders = scan_leaders_file(filepath, column_names)
             for leader in leaders:
                 all_leaders.append(leader)
-            # for country_code, leader_list in leaders.items():
-            #     if country_code in leader_dict:
-            #         # raise Exception(f"Leaders from {country_code} already scanned before {filepath}")
-            #         print(f"Leaders from {country_code} already scanned before {filepath}")
-                # leader_dict[country_code] = leader_list
         except KeyError:
             print(f"KeyError IN FILE: {filepath}")
         except IndexError:
@@ -598,6 +593,18 @@ def find_tech_by_name(tech_name, list_of_techs):
             results.append(tech)
     # print(f"Tech named {tech_name} not found")
     return results
+
+
+class FileScanner:
+
+    def scan_main_scenario_file(self):
+        pass
+
+    def __init__(self, scenario_path):
+        self.scenario_path = scenario_path
+
+    def scan(self):
+        pass
         
 
 if __name__ == "__main__":
