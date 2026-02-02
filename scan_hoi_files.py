@@ -610,7 +610,7 @@ class FileScanner:
         "event"
     ]
 
-    def __init__(self, scenario_path, text_dict_w_duplicates=None, text_dict=None):
+    def __init__(self, scenario_path, text_dict_w_duplicates=None, text_dict=None, tech_dict=None, minister_dict=None, leader_dict=None):
         self.scenario_path = scenario_path
         self.text_dict_w_duplicates = text_dict_w_duplicates
         self.text_dict = text_dict
@@ -618,6 +618,12 @@ class FileScanner:
             self.text_dict_w_duplicates =  get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
         if self.text_dict is None:
             self.text_dict = get_texts_from_files(get_all_text_files_paths(AOD_PATH))
+        
+        self.tech_dict = tech_dict
+        self.minister_dict = minister_dict
+        self.leader_dict = leader_dict
+        # TODO: should these be scanned if None?
+        # TODO: how about tech teams?
 
     def scan_main_scenario_file(self):
         file_content = read_txt_file(self.scenario_path, False)
@@ -629,7 +635,15 @@ class FileScanner:
 
         self.scenario_pic_path = file_content["panel"]
 
-        self.selectable_countries = file_content["header"]["selectable"]
+        self.selectable_countries = file_content["header"].get("selectable")
+        if self.selectable_countries is None:
+            self.selectable_countries = []
+        self.selectable_countries = [country_code.upper() for country_code in self.selectable_countries]
+        for key in file_content["header"].keys():
+            if len(key) == 3 and self.text_dict.get(key.upper()) and key.upper() not in self.selectable_countries:
+                self.selectable_countries.append(key.upper())
+        
+        self.country_codes = self.selectable_countries.copy()
 
         # is this needed?
         # global_data = file_content["globaldata"]
@@ -638,9 +652,11 @@ class FileScanner:
         if isinstance(self.include_files, str):
             self.include_files = [self.include_files]
 
-        self.event_files = file_content["event"]
+        self.event_files = file_content.get("event")
         if isinstance(self.event_files, str):
             self.event_files = [self.event_files]
+        if self.event_files is None:
+            self.event_files = []
 
         self.happened_events = file_content.get("history")
         if self.happened_events is None:
@@ -653,8 +669,15 @@ class FileScanner:
         # map_stuff = file_content.get("map")
         # province_stuff = file_content.get("province")
 
-    def get_event_files(self):
+    def get_event_files(self, include_files=None, event_files=None):
+        if include_files:
+            self.include_files = include_files
+        if event_files:
+            self.event_files = event_files
+
+        include_key = self.scenario_file_keys[-2]
         event_key = self.scenario_file_keys[-1]
+
         self.event_file_paths = []
         for event_file_path_str in self.event_files:
             event_file_path = AOD_PATH / event_file_path_str.replace("\\", "/")
@@ -680,6 +703,19 @@ class FileScanner:
                 else:
                     print(f"Include file {include_event_file_path} does not exist")
 
+    def scan_events(self, already_scanned_event_files=None):
+        if already_scanned_event_files is None:
+            already_scanned_event_files = dict()
+        self.event_dict = dict()
+        
+        return already_scanned_event_files
+
+    def scan_scenario_files(self, already_scanned_scenario_files=None):
+        if already_scanned_scenario_files is None:
+            already_scanned_scenario_files = dict()
+
+        return already_scanned_scenario_files
+
     def scan(self):
         self.scan_main_scenario_file()
         self.get_event_files()
@@ -692,6 +728,14 @@ if __name__ == "__main__":
     tech_dict = {t.name: t for t in techs}
     teams = scan_tech_teams()
 
+    team_dict = dict()
+    for team in teams:
+        if team_dict.get(team.team_id) is not None:
+            print(f"Team id {team.team_id} already in use, before {team.name} [{team.nation}]")
+            continue
+        team_dict[team.team_id] = team
+        
+
     ideas = scan_ideas()
     minister_personalities = scan_minister_personalities()
 
@@ -700,6 +744,11 @@ if __name__ == "__main__":
     scen_p = sorted(get_scenarios(AOD_PATH), key=lambda p: p.name)
     scen_c = [read_txt_file(scenario_path) for scenario_path in scen_p]
 
+    def get_fss():
+        fss = [FileScanner(scenario_path) for scenario_path in scen_p]
+        for fs in fss:
+            fs.scan()
+        return fss
 
     fin_path = get_scenario_file_path_for_country("FIN")
     content = read_txt_file(fin_path, False)
