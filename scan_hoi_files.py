@@ -1,9 +1,9 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_province_rev_path, get_tech_files, get_tech_team_files
-from file_paths import get_leaders_files, get_ministers_files
+from file_paths import get_leaders_files, get_ministers_files, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
-from read_hoi_files import the_encoding, text_encoding, csv_encoding
+from read_hoi_files import the_encoding, text_encoding, csv_encoding, get_texts_from_files, get_texts_from_files_w_duplicates
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam, Leader
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality
 
@@ -595,25 +595,111 @@ def find_tech_by_name(tech_name, list_of_techs):
     return results
 
 
+# should this be called ScanScenario?
 class FileScanner:
+    scenario_file_keys = [
+        "name",
+        "panel",
+        "header",
+        "globaldata",
+        "history",
+        "map",
+        "province",
+        "sleepevent",
+        "include",
+        "event"
+    ]
+
+    def __init__(self, scenario_path, text_dict_w_duplicates=None, text_dict=None):
+        self.scenario_path = scenario_path
+        self.text_dict_w_duplicates = text_dict_w_duplicates
+        self.text_dict = text_dict
+        if self.text_dict_w_duplicates is None:
+            self.text_dict_w_duplicates =  get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
+        if self.text_dict is None:
+            self.text_dict = get_texts_from_files(get_all_text_files_paths(AOD_PATH))
 
     def scan_main_scenario_file(self):
-        pass
+        file_content = read_txt_file(self.scenario_path, False)
 
-    def __init__(self, scenario_path):
-        self.scenario_path = scenario_path
+        self.scenario_name_key = file_content["name"]
+        self.scenario_name = self.text_dict.get(self.scenario_name_key)
+        if self.scenario_name is None:
+            self.scenario_name = self.scenario_name_key
+
+        self.scenario_pic_path = file_content["panel"]
+
+        self.selectable_countries = file_content["header"]["selectable"]
+
+        # is this needed?
+        # global_data = file_content["globaldata"]
+
+        self.include_files = file_content["include"]
+        if isinstance(self.include_files, str):
+            self.include_files = [self.include_files]
+
+        self.event_files = file_content["event"]
+        if isinstance(self.event_files, str):
+            self.event_files = [self.event_files]
+
+        self.happened_events = file_content.get("history")
+        if self.happened_events is None:
+            self.happened_events = []
+        self.deactivated_events = file_content.get("sleepevent")
+        if self.deactivated_events is None:
+            self.deactivated_events = []
+        
+        # are these needed?
+        # map_stuff = file_content.get("map")
+        # province_stuff = file_content.get("province")
+
+    def get_event_files(self):
+        event_key = self.scenario_file_keys[-1]
+        self.event_file_paths = []
+        for event_file_path_str in self.event_files:
+            event_file_path = AOD_PATH / event_file_path_str.replace("\\", "/")
+            for event_filepath in event_file_path.parent.glob(event_file_path.name, case_sensitive=False):
+                if event_filepath.exists():
+                    self.event_file_paths.append(event_filepath)
+                    break
+            else:
+                print(f"File {str(event_file_path)} does not exist (key: {event_key})")
+        for path_str in self.include_files:
+            if event_key in path_str:
+                include_event_file_path = AOD_PATH / path_str.replace("\\", "/")
+                if include_event_file_path.exists():
+                    included_dict = read_txt_file(include_event_file_path)
+                    for event_file_path_str in included_dict[event_key]:
+                        event_file_path = AOD_PATH / event_file_path_str.replace("\\", "/")
+                        for event_filepath in event_file_path.parent.glob(event_file_path.name, case_sensitive=False):
+                            if event_filepath.exists():
+                                self.event_file_paths.append(event_filepath)
+                                break
+                        else:
+                            print(f"File {str(event_file_path)} does not exist (key: include)")
+                else:
+                    print(f"Include file {include_event_file_path} does not exist")
 
     def scan(self):
-        pass
+        self.scan_main_scenario_file()
+        self.get_event_files()
+        
         
 
 if __name__ == "__main__":
+    from file_paths import get_scenarios
     techs = scan_techs()
     tech_dict = {t.name: t for t in techs}
     teams = scan_tech_teams()
 
     ideas = scan_ideas()
     minister_personalities = scan_minister_personalities()
+
+    td = get_texts_from_files(get_all_text_files_paths(AOD_PATH))
+
+    scen_p = sorted(get_scenarios(AOD_PATH), key=lambda p: p.name)
+    scen_c = [read_txt_file(scenario_path) for scenario_path in scen_p]
+
 
     fin_path = get_scenario_file_path_for_country("FIN")
     content = read_txt_file(fin_path, False)
