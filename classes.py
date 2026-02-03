@@ -613,3 +613,45 @@ class Leader:
     
     def print_leader_info(self):
         pass
+
+
+class Model:
+    MODEL_KEYS = (
+        "cost",
+        "buildtime",
+        "manpower",
+        "maxspeed",
+        "defaultorganisation",
+        "morale",
+        "defensiveness",
+        "toughness",
+        "softness",
+        "suppression",
+        "airdefence",
+        "softattack",
+        "hardattack",
+        "airattack",
+        "transportweight",
+        "supplyconsumption",
+        "fuelconsumption",
+        "upgrade_time_factor",
+        "upgrade_cost_factor",
+        "max_supply_stock",
+        "max_oil_stock"
+    )
+
+    def __init__(self):
+        pass
+
+class Brigade:
+    def __init__(self, filepath):
+        self.filepath = filepath
+
+class Division:
+    def __init__(self, filepath, land_naval_or_air, allowed_brigades=None):
+        self.filepath = filepath
+        self.allowed_brigades = allowed_brigades
+        if self.allowed_brigades is None:
+            self.allowed_brigades = []
+
+
