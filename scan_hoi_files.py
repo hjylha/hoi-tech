@@ -753,13 +753,17 @@ class FileScanner:
             already_scanned_scenario_files = dict()
 
         return already_scanned_scenario_files
+    
+    def scan_brigades_and_divisions(self):
+        self.brigade_dict = scan_brigades(self.text_dict)
+        self.division_dict = scan_divisions(self.text_dict)
 
     def scan(self):
         self.scan_main_scenario_file()
         self.get_event_files()
+        self.scan_brigades_and_divisions()
         
         
-
 if __name__ == "__main__":
     from file_paths import get_scenarios
     techs = scan_techs()
