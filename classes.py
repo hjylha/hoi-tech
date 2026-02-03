@@ -615,43 +615,168 @@ class Leader:
         pass
 
 
+def get_unit_name(unit_key, text_dict, do_short=True):
+    if not do_short:
+        exceptions = {
+            "anti_air": "NAME_ANTIAIR",
+            "anti_tank": "NAME_ANTITANK",
+            "light_armor_brigade": "NAME_LIGHT_ARMOR_BRI",
+            "sp_rct_artillery": "NAME_SP_ROCKET_ARTILLERY",
+            "land": "WHICH_TYPE_LAND",
+            "air": "WHICH_TYPE_AIR",
+            "naval": "WHICH_TYPE_NAVAL"
+        }
+        the_key = exceptions.get(unit_key)
+        if the_key is None:
+            the_key = f"NAME_{unit_key.upper()}"
+        return text_dict[the_key]
+    exceptions = {
+        "anti_air": "SNAME_ANTIAIR",
+        "anti_tank": "SNAME_ANTITANK",
+        "light_armor_brigade": "SNAME_LIGHT_ARMOR_BRI",
+        "sp_rct_artillery": "SNAME_SP_ROCKET_ARTILLERY",
+        "land": "WHICH_TYPE_LAND",
+        "air": "WHICH_TYPE_AIR",
+        "naval": "WHICH_TYPE_NAVAL"
+    }
+    the_key = exceptions.get(unit_key)
+    if the_key is None:
+        the_key = f"SNAME_{unit_key.upper()}"
+    return text_dict[the_key]
+
+def get_model_name(unit_key, model_num, text_dict):
+    try:
+        model_key = f"MODEL_{DIVISION_NUMBERS[unit_key.lower()]}_{model_num}"
+    except KeyError:
+        model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[unit_key.lower()]}_{model_num}"
+    return text_dict[model_key]
+
+
 class Model:
     MODEL_KEYS = (
-        "cost",
-        "buildtime",
-        "manpower",
-        "maxspeed",
-        "defaultorganisation",
-        "morale",
-        "defensiveness",
-        "toughness",
-        "softness",
-        "suppression",
-        "airdefence",
-        "softattack",
-        "hardattack",
         "airattack",
-        "transportweight",
-        "supplyconsumption",
+        "airdefence",
+        "airdetectioncapability",
+        "artillery_bombardment",
+        "buildtime",
+        "convoyattack",
+        "cost",
+        "defaultorganisation",
+        "defensiveness",
+        "distance",
         "fuelconsumption",
-        "upgrade_time_factor",
-        "upgrade_cost_factor",
+        "hardattack",
+        "manpower",
+        "max_oil_stock",
         "max_supply_stock",
-        "max_oil_stock"
+        "maxspeed",
+        "morale",
+        "navalattack",
+        "range",
+        "seaattack",
+        "seadefence",
+        "shorebombardment",
+        "softattack",
+        "softness",
+        "speed_cap_aa",
+        "speed_cap_art",
+        "speed_cap_at",
+        "speed_cap_eng",
+        "strategicattack",
+        "subattack",
+        "subdetectioncapability",
+        "supplyconsumption",
+        "suppression",
+        "surfacedefence",
+        "surfacedetectioncapability",
+        "toughness",
+        "transportcapability"
+        "transportweight",
+        "upgrade_cost_factor",
+        "upgrade_time_factor",
+        "visibility",
     )
 
-    def __init__(self):
-        pass
+    def __init__(self, model_dict):
+        self.name = ""
+
+        self.build_time = model_dict["buildtime"]
+        self.cost = model_dict["cost"]
+        self.manpower = model_dict["manpower"]
+        self.upgrade_cost_factor = model_dict["upgrade_cost_factor"]
+        self.upgrade_time_factor = model_dict["upgrade_time_factor"]
+        
+        self.fuel_consumption = model_dict["fuelconsumption"]
+        self.supply_consumption = model_dict["supplyconsumption"]
+        self.max_oil_stock = model_dict["max_oil_stock"]
+        self.max_supply_stock = model_dict["max_supply_stock"]
+
+        self.default_organization = model_dict["defaultorganisation"]
+        self.morale = model_dict["morale"]
+
+        self.air_attack = model_dict.get("airattack")
+        self.air_defence = model_dict.get("airdefence")
+        self.air_detection_capability = model_dict.get("airdetectioncapability")
+        self.artillery_bombardment = model_dict.get("artillery_bombardment")
+        self.convoy_attack = model_dict["convoyattack"]
+        self.defensiveness = model_dict["defensiveness"]
+        self.distance = model_dict["distance"]
+        self.hard_attack = model_dict["hardattack"]
+        self.max_speed = model_dict["maxspeed"]
+        self.naval_attack = model_dict["navalattack"]
+        self.range = model_dict["range"]
+        self.sea_attack = model_dict["seaattack"]
+        self.sea_defence = model_dict["seadefence"]
+        self.shore_bombardment = model_dict["shorebombardment"]
+        self.soft_attack = model_dict["softattack"]
+        self.softness = model_dict["softness"]
+        self.speed_cap_aa = model_dict["speed_cap_aa"]
+        self.speed_cap_art = model_dict["speed_cap_art"]
+        self.speed_cap_at = model_dict["speed_cap_at"]
+        self.speed_cap_eng = model_dict["speed_cap_eng"]
+        self.strategic_attack = model_dict["strategicattack"]
+        self.sub_attack = model_dict["subattack"]
+        self.sub_detection_capability = model_dict["subdetectioncapability"]
+        self.suppression = model_dict["suppression"]
+        self.surface_defence = model_dict["surfacedefence"]
+        self.surface_detection_capability = model_dict["surfacedetectioncapability"]
+        self.toughness = model_dict["toughness"]
+        self.transport_capability = model_dict["transportcapability"]
+        self.transport_weight = model_dict["transportweight"]
+        self.visibility = model_dict["visibility"]
+        
 
 class Brigade:
-    def __init__(self, filepath):
+    def __init__(self, filepath, models, text_dict=None):
         self.filepath = filepath
+        self.name_key = filepath.stem
+        if text_dict:
+            self.name = get_unit_name(self.name_key, text_dict, do_short=False)
+            self.short_name = get_unit_name(self.name_key, text_dict, do_short=True)
+        
+        self.models = []
+        for i, model in enumerate(models):
+            if text_dict:
+                model.name = get_model_name(self.name_key, i, text_dict)
+            self.models.append(model)
 
-class Division:
-    def __init__(self, filepath, land_naval_or_air, allowed_brigades=None):
-        self.filepath = filepath
+class Division(Brigade):
+    LAND_NAVAL_OR_AIR = (
+        "land",
+        "naval",
+        "air"
+    )
+
+    def __init__(self, filepath, land_naval_or_air, models, allowed_brigades=None, max_speed_step=None, text_dict=None):
+        super().__init__(filepath, models, text_dict)
+        self.unit_type = land_naval_or_air
+
+        self.max_speed_step = max_speed_step
+
         self.allowed_brigades = allowed_brigades
         if self.allowed_brigades is None:
             self.allowed_brigades = []
 
 
+class UnitModifiers:
+    pass
