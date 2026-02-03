@@ -615,139 +615,6 @@ class Leader:
         pass
 
 
-DIVISION_NUMBERS = {
-    "infantry": 0,
-    "cavalry": 1,
-    "motorized": 2,
-    "mechanized": 3,
-    "light_armor": 4,
-    "armor": 5,
-    "paratrooper": 6,
-    "marine": 7,
-    "bergsjaeger": 8,
-    "garrison": 9,
-    "hq": 10,
-    "militia": 11,
-    "multi_role": 12,
-    "interceptor": 13,
-    "strategic_bomber": 14,
-    "tactical_bomber": 15,
-    "naval_bomber": 16,
-    "cas": 17,
-    "transport_plane": 18,
-    "flying_bomb": 19,
-    "flying_rocket": 20,
-    "battleship": 21,
-    "light_cruiser": 22,
-    "heavy_cruiser": 23,
-    "battlecruiser": 24,
-    "destroyer": 25,
-    "carrier": 26,
-    "escort_carrier": 27,
-    "submarine": 28,
-    "nuclear_submarine": 29,
-    "transport": 30
-}
-
-BRIGADE_NUMBERS = {
-    "artillery": 1,
-    "sp_artillery": 2,
-    "rocket_artillery": 3,
-    "sp_rct_artillery": 4,
-    "anti_tank": 5,
-    "tank_destroyer": 6,
-    "light_armor_brigade": 7,
-    "heavy_armor": 8,
-    "super_heavy_armor": 9,
-    "armored_car": 10,
-    "anti_air": 11,
-    "police": 12,
-    "engineer": 13,
-    "cag": 14,
-    "escort": 15,
-    "naval_asw": 16,
-    "naval_anti_air_s": 17,
-    "naval_radar_s": 18,
-    "naval_fire_controll_s": 19,
-    "naval_improved_hull_s": 20,
-    "naval_torpedoes_s": 21,
-    "naval_anti_air_l": 22,
-    "naval_radar_l": 23,
-    "naval_fire_controll_l": 24,
-    "naval_improved_hull_l": 25,
-    "naval_torpedoes_l": 26,
-    "naval_mines": 27,
-    "naval_sa_l": 28,
-    "naval_spotter_l": 29,
-    "naval_spotter_s": 30,
-    "b_u1": 31,
-    "b_u2": 32,
-    "b_u3": 33,
-    "b_u4": 34,
-    "b_u5": 35,
-    "b_u6": 36,
-    "b_u7": 37,
-    "b_u8": 38,
-    "b_u9": 39,
-    "b_u10": 40,
-    "b_u11": 41,
-    "b_u12": 42,
-    "b_u13": 43,
-    "b_u14": 44
-}
-
-def get_unit_name(unit_key, text_dict, do_short=True):
-    if unit_key == "none":
-        return
-    if not do_short:
-        exceptions = {
-            "anti_air": "NAME_ANTIAIR",
-            "anti_tank": "NAME_ANTITANK",
-            "light_armor_brigade": "NAME_LIGHT_ARMOR_BRI",
-            "sp_rct_artillery": "NAME_SP_ROCKET_ARTILLERY",
-            "land": "WHICH_TYPE_LAND",
-            "air": "WHICH_TYPE_AIR",
-            "naval": "WHICH_TYPE_NAVAL"
-        }
-        the_key = exceptions.get(unit_key)
-        if the_key is None:
-            the_key = f"NAME_{unit_key.upper()}"
-        if text_dict.get(the_key) is None:
-            print(f"no name found corresponding to {unit_key}")
-            return unit_key
-        return text_dict[the_key]
-    exceptions = {
-        "anti_air": "SNAME_ANTIAIR",
-        "anti_tank": "SNAME_ANTITANK",
-        "light_armor_brigade": "SNAME_LIGHT_ARMOR_BRI",
-        "sp_rct_artillery": "SNAME_SP_ROCKET_ARTILLERY",
-        "land": "WHICH_TYPE_LAND",
-        "air": "WHICH_TYPE_AIR",
-        "naval": "WHICH_TYPE_NAVAL"
-    }
-    the_key = exceptions.get(unit_key)
-    if the_key is None:
-        the_key = f"SNAME_{unit_key.upper()}"
-    if text_dict.get(the_key) is None:
-        print(f"No name found corresponding to {unit_key}")
-        return unit_key
-    return text_dict[the_key]
-
-def get_model_name(unit_key, model_num, text_dict):
-    if unit_key == "none":
-        return
-    try:
-        model_key = f"MODEL_{DIVISION_NUMBERS[unit_key.lower()]}_{model_num}"
-    except KeyError:
-        try:
-            model_key = f"BRIG_MODEL_{BRIGADE_NUMBERS[unit_key.lower()]}_{model_num}"
-        except KeyError:
-            print(f"No model name found corresponding to {unit_key} model {model_num}")
-            return f"{unit_key} {model_num}"
-    
-    return text_dict[model_key]
-
-
 class Model:
     MODEL_KEYS = (
         "airattack",
@@ -849,12 +716,145 @@ class Brigade:
         "air"
     )
 
+    DIVISION_NUMBERS = {
+        "infantry": 0,
+        "cavalry": 1,
+        "motorized": 2,
+        "mechanized": 3,
+        "light_armor": 4,
+        "armor": 5,
+        "paratrooper": 6,
+        "marine": 7,
+        "bergsjaeger": 8,
+        "garrison": 9,
+        "hq": 10,
+        "militia": 11,
+        "multi_role": 12,
+        "interceptor": 13,
+        "strategic_bomber": 14,
+        "tactical_bomber": 15,
+        "naval_bomber": 16,
+        "cas": 17,
+        "transport_plane": 18,
+        "flying_bomb": 19,
+        "flying_rocket": 20,
+        "battleship": 21,
+        "light_cruiser": 22,
+        "heavy_cruiser": 23,
+        "battlecruiser": 24,
+        "destroyer": 25,
+        "carrier": 26,
+        "escort_carrier": 27,
+        "submarine": 28,
+        "nuclear_submarine": 29,
+        "transport": 30
+    }
+
+    BRIGADE_NUMBERS = {
+        "artillery": 1,
+        "sp_artillery": 2,
+        "rocket_artillery": 3,
+        "sp_rct_artillery": 4,
+        "anti_tank": 5,
+        "tank_destroyer": 6,
+        "light_armor_brigade": 7,
+        "heavy_armor": 8,
+        "super_heavy_armor": 9,
+        "armored_car": 10,
+        "anti_air": 11,
+        "police": 12,
+        "engineer": 13,
+        "cag": 14,
+        "escort": 15,
+        "naval_asw": 16,
+        "naval_anti_air_s": 17,
+        "naval_radar_s": 18,
+        "naval_fire_controll_s": 19,
+        "naval_improved_hull_s": 20,
+        "naval_torpedoes_s": 21,
+        "naval_anti_air_l": 22,
+        "naval_radar_l": 23,
+        "naval_fire_controll_l": 24,
+        "naval_improved_hull_l": 25,
+        "naval_torpedoes_l": 26,
+        "naval_mines": 27,
+        "naval_sa_l": 28,
+        "naval_spotter_l": 29,
+        "naval_spotter_s": 30,
+        "b_u1": 31,
+        "b_u2": 32,
+        "b_u3": 33,
+        "b_u4": 34,
+        "b_u5": 35,
+        "b_u6": 36,
+        "b_u7": 37,
+        "b_u8": 38,
+        "b_u9": 39,
+        "b_u10": 40,
+        "b_u11": 41,
+        "b_u12": 42,
+        "b_u13": 43,
+        "b_u14": 44
+    }
+
+    def get_unit_name(self, unit_key, text_dict, do_short=True):
+        if unit_key == "none":
+            return
+        if not do_short:
+            exceptions = {
+                "anti_air": "NAME_ANTIAIR",
+                "anti_tank": "NAME_ANTITANK",
+                "light_armor_brigade": "NAME_LIGHT_ARMOR_BRI",
+                "sp_rct_artillery": "NAME_SP_ROCKET_ARTILLERY",
+                "land": "WHICH_TYPE_LAND",
+                "air": "WHICH_TYPE_AIR",
+                "naval": "WHICH_TYPE_NAVAL"
+            }
+            the_key = exceptions.get(unit_key)
+            if the_key is None:
+                the_key = f"NAME_{unit_key.upper()}"
+            if text_dict.get(the_key) is None:
+                print(f"no name found corresponding to {unit_key}")
+                return unit_key
+            return text_dict[the_key]
+        exceptions = {
+            "anti_air": "SNAME_ANTIAIR",
+            "anti_tank": "SNAME_ANTITANK",
+            "light_armor_brigade": "SNAME_LIGHT_ARMOR_BRI",
+            "sp_rct_artillery": "SNAME_SP_ROCKET_ARTILLERY",
+            "land": "WHICH_TYPE_LAND",
+            "air": "WHICH_TYPE_AIR",
+            "naval": "WHICH_TYPE_NAVAL"
+        }
+        the_key = exceptions.get(unit_key)
+        if the_key is None:
+            the_key = f"SNAME_{unit_key.upper()}"
+        if text_dict.get(the_key) is None:
+            print(f"No name found corresponding to {unit_key}")
+            return unit_key
+        return text_dict[the_key]
+
+    def get_model_name(self, unit_key, model_num, text_dict):
+        if unit_key == "none":
+            return
+        try:
+            model_key = f"MODEL_{self.DIVISION_NUMBERS[unit_key.lower()]}_{model_num}"
+        except KeyError:
+            try:
+                model_key = f"BRIG_MODEL_{self.BRIGADE_NUMBERS[unit_key.lower()]}_{model_num}"
+            except KeyError:
+                print(f"No model name found corresponding to {unit_key} model {model_num}")
+                return f"{unit_key} {model_num}"
+        
+        return text_dict[model_key]
+
+
     def __init__(self, filepath, land_naval_or_air, models, locked=None, text_dict=None):
         self.filepath = filepath
         self.name_key = filepath.stem
         if text_dict:
-            self.name = get_unit_name(self.name_key, text_dict, do_short=False)
-            self.short_name = get_unit_name(self.name_key, text_dict, do_short=True)
+            self.name = self.get_unit_name(self.name_key, text_dict, do_short=False)
+            self.short_name = self.get_unit_name(self.name_key, text_dict, do_short=True)
         
         self.unit_type = land_naval_or_air
         
@@ -863,7 +863,7 @@ class Brigade:
         self.models = []
         for i, model in enumerate(models):
             if text_dict:
-                model.name = get_model_name(self.name_key, i, text_dict)
+                model.name = self.get_model_name(self.name_key, i, text_dict)
             self.models.append(model)
 
 class Division(Brigade):
