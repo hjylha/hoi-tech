@@ -1,11 +1,11 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_province_rev_path, get_tech_files, get_tech_team_files
-from file_paths import get_leaders_files, get_ministers_files, get_all_text_files_paths
+from file_paths import get_leaders_files, get_ministers_files, get_all_text_files_paths, get_brigades_files, get_divisions_files
 from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding, get_texts_from_files, get_texts_from_files_w_duplicates
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam, Leader
-from classes import MinisterPersonality, Minister, Idea, get_minister_personality
+from classes import MinisterPersonality, Minister, Idea, get_minister_personality, Model, Brigade, Division
 
 
 def scan_tech_file(filepath, tech_names):
@@ -577,6 +577,44 @@ def scan_scenario_file(filepath):
 def scan_scenario_file_for_country(country_code):
     filepath = get_scenario_file_path_for_country(country_code)
     return scan_scenario_file(filepath)
+
+def scan_brigades(text_dict=None):
+    units = dict()
+    unit_types = ("land_unit_type", "naval_unit_type", "air_unit_type")
+    filepaths = get_brigades_files(AOD_PATH)
+    for filepath in filepaths:
+        content = read_txt_file(filepath)
+        for i, unit_type in enumerate(unit_types):
+            if content.get(unit_type) and content.get(unit_type) == 1:
+                l_n_or_a = i
+        models = []
+        if isinstance(content["model"], dict):
+            models.append(Model(content["model"]))
+            units[filepath.stem] = Brigade(filepath, Brigade.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("locked"), text_dict)
+            continue
+        for model_dict in content["model"]:
+            models.append(Model(model_dict))
+        units[filepath.stem] = Brigade(filepath, Brigade.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("locked"), text_dict)
+    return units
+
+def scan_divisions(text_dict=None):
+    units = dict()
+    unit_types = ("land_unit_type", "naval_unit_type", "air_unit_type")
+    filepaths = get_divisions_files(AOD_PATH)
+    for filepath in filepaths:
+        content = read_txt_file(filepath)
+        for i, unit_type in enumerate(unit_types):
+            if content.get(unit_type) and content.get(unit_type) == 1:
+                l_n_or_a = i
+        models = []
+        if isinstance(content["model"], dict):
+            models.append(Model(content["model"]))
+            units[filepath.stem] = Division(filepath, Division.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("allowed_brigades"), content.get("max_speed_step"), text_dict)
+            continue
+        for model_dict in content["model"]:
+            models.append(Model(model_dict))
+        units[filepath.stem] = Division(filepath, Division.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("allowed_brigades"), content.get("max_speed_step"), text_dict)
+    return units
 
 
 def get_tech_by_id(tech_id, list_of_techs):
