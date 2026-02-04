@@ -857,9 +857,10 @@ class FileScanner:
         self.leader_dict = scan_all_leaders()
 
     def scan(self, scan_everything=False):
-        self.scan_main_scenario_file()
-        self.get_event_files()
-        self.scan_events()
+        if self.event_dict is None:
+            self.scan_main_scenario_file()
+            self.get_event_files()
+            self.scan_events()
         self.scan_all_countries()
         self.scan_tech_teams()
         if scan_everything or self.tech_dict is None:
@@ -873,7 +874,9 @@ class FileScanner:
         
         
 if __name__ == "__main__":
+    import time
     from file_paths import get_scenarios
+    
     techs = scan_techs()
     # tech_dict = {t.name: t for t in techs}
     tech_dict = get_tech_dict()
@@ -902,9 +905,17 @@ if __name__ == "__main__":
     scen_c = [read_txt_file(scenario_path) for scenario_path in scen_p]
 
     def get_fss():
+        start_time = time.time()
         fss = [FileScanner(scenario_path, td_w_duplicates, td, tech_dict, md, ld, bd, dd) for scenario_path in scen_p]
+        already_scanned_event_files = None
         for fs in fss:
             fs.scan()
+            # fs.scan_main_scenario_file()
+            # fs.get_event_files()
+            # already_scanned_event_files = fs.scan_events()
+            # fs.scan_all_countries()
+            # fs.scan_tech_teams()
+        print(f"Time elapsed: {round(time.time() - start_time, 1)} seconds")
         return fss
 
     fin_path = get_scenario_file_path_for_country("FIN")
