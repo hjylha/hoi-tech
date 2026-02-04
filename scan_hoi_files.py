@@ -6,6 +6,7 @@ from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_sce
 from read_hoi_files import the_encoding, text_encoding, csv_encoding, get_texts_from_files, get_texts_from_files_w_duplicates
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam, Leader
 from classes import MinisterPersonality, Minister, Idea, get_minister_personality, Model, Brigade, Division
+from event import Event, get_event_from_raw_event
 
 
 def scan_tech_file(filepath, tech_names):
@@ -648,7 +649,18 @@ class FileScanner:
         "event"
     ]
 
-    def __init__(self, scenario_path, text_dict_w_duplicates=None, text_dict=None, tech_dict=None, minister_dict=None, leader_dict=None):
+    # def __init__(self, scenario_path, text_dict_w_duplicates=None, text_dict=None, tech_dict=None, minister_dict=None, leader_dict=None):
+    def __init__(
+        self,
+        scenario_path,
+        text_dict_w_duplicates=None,
+        text_dict=None,
+        tech_dict=None,
+        minister_dict=None,
+        leader_dict=None,
+        brigade_dict=None,
+        division_dict=None
+    ):
         self.scenario_path = scenario_path
         self.text_dict_w_duplicates = text_dict_w_duplicates
         self.text_dict = text_dict
@@ -660,8 +672,21 @@ class FileScanner:
         self.tech_dict = tech_dict
         self.minister_dict = minister_dict
         self.leader_dict = leader_dict
+        self.brigade_dict = brigade_dict
+        self.division_dict = division_dict
         # TODO: should these be scanned if None?
         # TODO: how about tech teams?
+
+        # TODO: is it useful to list these here?
+        self.scenario_name = None
+        self.selectable_countries = None
+        self.country_codes = None
+        self.include_files = None
+        self.event_files = None
+        self.event_file_paths = None
+
+        self.event_dict = None
+        self.country_dict = None
 
     def scan_main_scenario_file(self):
         file_content = read_txt_file(self.scenario_path, False)
@@ -741,10 +766,55 @@ class FileScanner:
                 else:
                     print(f"Include file {include_event_file_path} does not exist")
 
-    def scan_events(self, already_scanned_event_files=None):
+    def scan_events(self, already_scanned_event_files=None, show_empty_files=False, show_issues=False):
         if already_scanned_event_files is None:
             already_scanned_event_files = dict()
         self.event_dict = dict()
+        for filepath in self.event_file_paths:
+            events = already_scanned_event_files.get(filepath)
+            if events is not None:
+                for event_id, event in events.items():
+                    if self.event_dict.get(event_id) is not None:
+                        print(f"ERROR: Event ID already in use before: {event_id} {event.name} [{event.country}]")
+                        continue
+                    self.event_dict[event_id] = event
+                continue
+            content = read_txt_file(filepath)
+            if isinstance(content, list):
+                already_scanned_event_files[filepath] = []
+                if show_empty_files:
+                    print(f"No events in {filepath}")
+                continue
+            events_raw = content["event"]
+            if isinstance(events_raw, dict):
+                events_raw = [events_raw]
+            more_events = []
+            for event_raw in events_raw:
+                event_raw["path"] = filepath
+                event = get_event_from_raw_event(event_raw, filepath, self.text_dict)
+                more_events.append(event)
+                self.event_dict[event.event_id] = event
+            already_scanned_event_files[filepath] = more_events
+
+        for ev_id, ev in self.event_dict.items():
+            for i, action in enumerate(ev.actions):
+                for effect in action.effects:
+                    if effect.type and effect.type == "trigger":
+                        triggered_event_id = effect.which
+                        if self.event_dict.get(triggered_event_id) is None:
+                            name_text = ev.name if ev.name else "[no name]"
+                            if show_issues:
+                                print(f"Event {ev_id} [{ev.country_code}]: {name_text} triggers event {triggered_event_id}, which does not exist.")
+                            continue
+                        self.event_dict[triggered_event_id].triggered_by.append((ev, i))
+                    elif effect.type and effect.type == "sleepevent":
+                        deactivated_event_id = effect.which
+                        if self.event_dict.get(deactivated_event_id) is None:
+                            name_text = ev.name if ev.name else "[no name]"
+                            if show_issues:
+                                print(f"Event {ev_id} [{ev.country_code}]: {name_text} deactivates event {deactivated_event_id}, which does not exist.")
+                            continue
+                        self.event_dict[deactivated_event_id].deactivated_by.append((ev, i))
         
         return already_scanned_event_files
 
@@ -754,40 +824,85 @@ class FileScanner:
 
         return already_scanned_scenario_files
     
+    def scan_all_countries(self):
+        if self.country_codes is None:
+            self.scan_main_scenario_file()
+        if self.event_dict is None:
+            self.scan_events()
+        # TODO: are there countries that have no events and do not exist at the start?
+        for event in self.event_dict.values():
+            if event.country_code and event.country_code not in self.country_codes:
+                self.country_codes.append(event.country_code)
+        self.country_dict = {country_code.upper(): self.text_dict[country_code.upper()] for country_code in self.country_codes}
+
+    def scan_techs(self):
+        self.tech_dict = get_tech_dict()
+    
+    def scan_tech_teams(self, list_of_tech_teams=None):
+        if list_of_tech_teams is None:
+            list_of_tech_teams = scan_tech_teams()
+        self.techteam_dict = dict()
+        for techteam in list_of_tech_teams:
+            if techteam.nation in self.country_codes:
+                self.techteam_dict[techteam.team_id] = techteam
+    
     def scan_brigades_and_divisions(self):
         self.brigade_dict = scan_brigades(self.text_dict)
         self.division_dict = scan_divisions(self.text_dict)
+    
+    def scan_ministers(self):
+        self.minister_dict = scan_all_ministers()
+    
+    def scan_leaders(self):
+        self.leader_dict = scan_all_leaders()
 
-    def scan(self):
+    def scan(self, scan_everything=False):
         self.scan_main_scenario_file()
         self.get_event_files()
-        self.scan_brigades_and_divisions()
+        self.scan_events()
+        self.scan_all_countries()
+        self.scan_tech_teams()
+        if scan_everything or self.tech_dict is None:
+            self.scan_techs()
+        if scan_everything or self.brigade_dict is None or self.division_dict is None:
+            self.scan_brigades_and_divisions()
+        if scan_everything or self.minister_dict is None:
+            self.scan_ministers()
+        if scan_everything or self.leader_dict is None:
+            self.scan_leaders()
         
         
 if __name__ == "__main__":
     from file_paths import get_scenarios
     techs = scan_techs()
-    tech_dict = {t.name: t for t in techs}
+    # tech_dict = {t.name: t for t in techs}
+    tech_dict = get_tech_dict()
     teams = scan_tech_teams()
 
-    team_dict = dict()
-    for team in teams:
-        if team_dict.get(team.team_id) is not None:
-            print(f"Team id {team.team_id} already in use, before {team.name} [{team.nation}]")
-            continue
-        team_dict[team.team_id] = team
+    # team_dict = dict()
+    # for team in teams:
+    #     if team_dict.get(team.team_id) is not None:
+    #         print(f"Team id {team.team_id} already in use, before {team.name} [{team.nation}]")
+    #         continue
+    #     team_dict[team.team_id] = team
         
 
     ideas = scan_ideas()
     minister_personalities = scan_minister_personalities()
 
     td = get_texts_from_files(get_all_text_files_paths(AOD_PATH))
+    td_w_duplicates = get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
+
+    ld = scan_all_leaders()
+    md = scan_all_ministers()
+    bd = scan_brigades()
+    dd = scan_divisions()
 
     scen_p = sorted(get_scenarios(AOD_PATH), key=lambda p: p.name)
     scen_c = [read_txt_file(scenario_path) for scenario_path in scen_p]
 
     def get_fss():
-        fss = [FileScanner(scenario_path) for scenario_path in scen_p]
+        fss = [FileScanner(scenario_path, td_w_duplicates, td, tech_dict, md, ld, bd, dd) for scenario_path in scen_p]
         for fs in fss:
             fs.scan()
         return fss
