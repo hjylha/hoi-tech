@@ -62,7 +62,7 @@ def scan_tech_file(filepath, tech_names):
                     raise Exception(f"Effects messed up")
                 effect_tuple = Effect(*[effect.get(key) for key in EFFECT_ATTRIBUTES])
                 effects.append(effect_tuple)
-        techs.append(Tech(tech_id, tech_name, short_tech_name, tech_category, requirements, components, effects))
+        techs.append(Tech(tech_id, tech_name, short_tech_name, filepath, tech_category, requirements, components, effects))
 
     # with open(filepath, "r", encoding = "ISO-8859-1") as f:
     #     filtered_full_text = "\n".join([text.split("#")[0] for text in f.read().split("\n")])

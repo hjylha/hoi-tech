@@ -138,10 +138,11 @@ class Tech:
     COMPONENT_SIZE = 20
     NUM_OF_COMPONENTS = 5
 
-    def __init__(self, tech_id, tech_name, short_name, tech_category, requirements, components, effects, allows=None, deactivated_by=None, is_post_war=0):
+    def __init__(self, tech_id, tech_name, short_name, filepath, tech_category, requirements, components, effects, allows=None, deactivated_by=None, is_post_war=0):
         self.tech_id = tech_id
         self.name = tech_name
         self.short_name = short_name
+        self.filepath = filepath
         self.category = tech_category
         self.requirements = requirements
         self.components = components
