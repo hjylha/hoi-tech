@@ -344,6 +344,98 @@ class Event:
         for action in self.actions:
             action.print_action(indent_num + indent_add, indent_add)
 
+def get_event_from_raw_event(raw_event_dict, filepath, event_text_dict):    
+    notes = ""
+
+    trigger = raw_event_dict.get("trigger")
+    if trigger is None or not trigger:
+        trigger = dict()
+    # TODO: Trigger class?
+    name = event_text_dict.get(raw_event_dict["name"])
+    name = "" if name is None else name
+
+    desc_key = raw_event_dict.get("desc")
+    desc_key = "" if desc_key is None else desc_key
+    desc = event_text_dict.get(desc_key)
+    desc = "" if desc is None else desc
+
+    actions = []
+    # TODO: Action class
+    action_keys = []
+    for key in raw_event_dict.keys():
+        if "action" in key:
+            action_keys.append(key)
+    action_keys = sorted(action_keys)
+    action_key = "action_key"
+    if "action_a" not in action_keys:
+        notes += "action_a not a key\n"
+    for key in action_keys:
+        action = raw_event_dict[key]
+        if isinstance(action, list):
+            notes += f"{key} is a list"
+            for act in action:
+                act[action_key] = key
+                actions.append(act)
+            continue
+        action[action_key] = key
+        actions.append(action)
+    actions = get_actions(actions, event_text_dict)
+
+    is_random_str = raw_event_dict.get("random")
+    is_random_str = "no" if not is_random_str else is_random_str
+    is_random = True if is_random_str.lower() == "yes" else False
+
+    is_invention_str = raw_event_dict.get("invention")
+    is_invention_str = "no" if not is_invention_str else is_invention_str
+    is_invention = True if is_invention_str.lower() == "yes" else False
+
+    is_persistent_str = raw_event_dict.get("persistent")
+    is_persistent_str = "no" if not is_persistent_str else is_persistent_str
+    is_persistent = True if is_persistent_str.lower() == "yes" else False
+
+    country_code = raw_event_dict.get("country")
+    country_code = "" if country_code is None else country_code.upper()
+
+    country = event_text_dict.get(country_code)
+    country = "" if country is None else country
+
+    date = raw_event_dict.get("date")
+    date = dict() if date is None else date
+
+    offset = raw_event_dict.get("offset")
+
+    death_date = raw_event_dict.get("deathdate")
+    death_date = dict() if death_date is None else death_date
+
+    picture = raw_event_dict.get("picture")
+    picture = "" if picture is None else picture
+
+    style = raw_event_dict.get("style")
+    style = "" if style is None else style
+    
+    proper_event = Event(
+        raw_event_dict["path"],
+        raw_event_dict["id"],
+        raw_event_dict["name"],
+        name,
+        actions,
+        is_random,
+        is_invention,
+        country_code,
+        country,
+        Trigger(raw_event_dict["id"], trigger),
+        desc_key, 
+        desc,
+        style,
+        picture,
+        date,
+        offset,
+        death_date,
+        is_persistent,
+        notes
+    )
+    return proper_event
+
 
 def suggest_events_based_on_search_words(search_text, event_dict, country_code=None):
     exact_keyword = False
