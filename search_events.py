@@ -447,7 +447,9 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
 
 if __name__ == "__main__":
     SCENARIO_NAME = "1933.eug"
-    country_dict = get_country_names()
+
+    print("Gathering data from Iron Cross files...")
+    # country_dict = get_country_names()
     # event_text_files = get_event_text_paths(AOD_PATH)
     # texts = get_texts_from_files(event_text_files)
     # event_list = get_event_list(SCENARIO_NAME, AOD_PATH)
