@@ -7,6 +7,7 @@ this_files_directory = Path(__file__).parent
 gamepath_in = "aod_path.txt"
 gamepath_in_linux = "aod_path_linux.txt"
 scenario_file_paths_file = "scenario_file_paths.csv"
+countries_file = "countries_file.csv"
 
 DEFAULT_SCENARIO = "1933.eug"
 
