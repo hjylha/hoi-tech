@@ -1781,7 +1781,7 @@ def interceptor_cond_as_str(condition, text_dict, **kwargs):
 def is_tech_active_cond_as_str(condition, text_dict, tech_dict, **kwargs):
     tech_id = condition["is_tech_active"]
     tech = tech_dict[tech_id]
-    return f"Technology {tech_id} '{tech.name}' is not active"
+    return f"Technology {tech_id} '{tech.name}' is active"
 
 def ispuppet_cond_as_str(condition, text_dict, **kwargs):
     country_code = list(condition.values())[0]
