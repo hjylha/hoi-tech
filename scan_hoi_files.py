@@ -1,6 +1,7 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_province_rev_path, get_tech_files, get_tech_team_files
 from file_paths import get_leaders_files, get_ministers_files, get_all_text_files_paths, get_brigades_files, get_divisions_files
+from file_paths import this_files_directory, countries_file
 from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding, get_texts_from_files, get_texts_from_files_w_duplicates
@@ -694,6 +695,8 @@ class FileScanner:
         self.scenario_name_key = file_content["name"]
         self.scenario_name = self.text_dict.get(self.scenario_name_key)
         if self.scenario_name is None:
+            self.scenario_name = self.text_dict.get(self.scenario_name_key.upper())
+        if self.scenario_name is None:
             self.scenario_name = self.scenario_name_key
 
         self.scenario_pic_path = file_content["panel"]
@@ -742,6 +745,7 @@ class FileScanner:
         event_key = self.scenario_file_keys[-1]
 
         self.event_file_paths = []
+        self.other_files = []
         for event_file_path_str in self.event_files:
             event_file_path = AOD_PATH / event_file_path_str.replace("\\", "/")
             for event_filepath in event_file_path.parent.glob(event_file_path.name, case_sensitive=False):
@@ -765,6 +769,20 @@ class FileScanner:
                             print(f"File {str(event_file_path)} does not exist (key: include)")
                 else:
                     print(f"Include file {include_event_file_path} does not exist")
+            else:
+                file_found = False
+                other_file_path = AOD_PATH / path_str.replace("\\", "/")
+                if other_file_path.exists():
+                    self.other_files.append(other_file_path)
+                    file_found = True
+                    continue
+                for filepath in other_file_path.parent.glob(other_file_path.name, case_sensitive=False):
+                    if filepath.exists():
+                        self.other_files.append(filepath)
+                        file_found = True
+                        break
+                if not file_found:
+                    print(f"File {str(other_file_path)} does not exist")
 
     def scan_events(self, already_scanned_event_files=None, show_empty_files=False, show_issues=False):
         if already_scanned_event_files is None:
@@ -819,10 +837,35 @@ class FileScanner:
         return already_scanned_event_files
 
     def scan_scenario_files(self, already_scanned_scenario_files=None):
-        if already_scanned_scenario_files is None:
-            already_scanned_scenario_files = dict()
-
-        return already_scanned_scenario_files
+        # if already_scanned_scenario_files is None:
+        #     already_scanned_scenario_files = dict()
+        self.scenario_file_for_country = dict()
+        country_key = "country"
+        for filepath in self.other_files:
+            content = read_txt_file(filepath)
+            if country_key not in content.keys():
+                continue
+            country_data = content[country_key]
+            if isinstance(country_data, dict):
+                country_code = country_data["tag"].upper()
+                if (old_path := self.scenario_file_for_country.get(country_code)) is not None:
+                    print(f"Country {self.text_dict[country_code]} [{country_code}] already has something in {old_path}")
+                    print(f"Also has something in {filepath}")
+                    continue
+                self.scenario_file_for_country[country_code] = filepath
+            elif isinstance(country_data, list):
+                for country_dict in country_data:
+                    country_code = country_dict["tag"].upper()
+                    if self.scenario_file_for_country.get(country_code) is not None:
+                        print(f"Country {self.text_dict[country_code]} [{country_code}] already has something in {old_path}")
+                        print(f"Also has something in {filepath}")
+                        continue
+                    self.scenario_file_for_country[country_code] = filepath
+            else:
+                raise Exception(f"Country data in unexpected form in {filepath}")
+            # already_scanned_scenario_files.append(filepath)
+            
+        # return already_scanned_scenario_files
     
     def scan_all_countries(self):
         if self.country_codes is None:
@@ -862,6 +905,7 @@ class FileScanner:
             self.get_event_files()
             self.scan_events()
         self.scan_all_countries()
+        self.scan_scenario_files()
         self.scan_tech_teams()
         if scan_everything or self.tech_dict is None:
             self.scan_techs()
@@ -871,6 +915,40 @@ class FileScanner:
             self.scan_ministers()
         if scan_everything or self.leader_dict is None:
             self.scan_leaders()
+
+
+def get_country_data():
+    td = get_texts_from_files(get_all_text_files_paths(AOD_PATH))
+    td_w_duplicates = get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
+
+    ld = scan_all_leaders()
+    md = scan_all_ministers()
+    bd = scan_brigades()
+    dd = scan_divisions()
+
+    scen_p = sorted(get_scenarios(AOD_PATH), key=lambda p: p.name)
+    fss = [FileScanner(scenario_path, td_w_duplicates, td, tech_dict, md, ld, bd, dd) for scenario_path in scen_p]
+    for fs in fss:
+        fs.scan()
+    country_data = []
+    for i, fs in enumerate(fss):
+        for country_code in fs.country_codes:
+            # TODO: lots of stuff
+            scenario_file_for_country = fs.scenario_file_for_country.get(country_code)
+            # data_row = (scen_p[i].name, fs.name, country_code, td[country_code],)
+    return country_data
+
+# countries_file should have rows of form
+# scenario_filename;scenario_name;country_tag;country_name;country_inc_filepath;tech_teams_filepath;ministers_filepath
+def write_countries_file(countries_data):
+    filepath = this_files_directory / countries_file
+    column_names = ["scenario_filename", "scenario_name", "country_code", "country_name", "country_scenario_filepath", "techteam_filepath", "ministers_filepath"]
+    with open(filepath, "w") as f:
+        f.write(f"{';'.join(column_names)}\n")
+        for datarow in countries_data:
+            row_to_write = [str(item) for item in datarow]
+            f.write(f"{';'.join(row_to_write)}\n")
+
         
         
 if __name__ == "__main__":
@@ -909,6 +987,7 @@ if __name__ == "__main__":
         fss = [FileScanner(scenario_path, td_w_duplicates, td, tech_dict, md, ld, bd, dd) for scenario_path in scen_p]
         already_scanned_event_files = None
         for fs in fss:
+            print(fs.scenario_path)
             fs.scan()
             # fs.scan_main_scenario_file()
             # fs.get_event_files()

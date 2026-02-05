@@ -228,6 +228,7 @@ def get_scenario_file_path_for_country(country_code):
             except ValueError:
                 pass
 
+
 # def read_minister_modifiers():
 #     minister_modifier_file = get_minister_modifier_path()
 #     personalities_and_modifiers = dict()
@@ -350,12 +351,6 @@ def read_savefile_for_research_order(savefilepath):
         tech = tech.strip(" '.")
         tech_n_team_n_time.append((tech, team, time))
     return tech_n_team_n_time
-
-
-# countries_file should have rows of form
-# scenario_name;country_tag;country_name;tech_teams_filepath;ministers_filepath;country_inc_filepath
-def write_countries_file(countries_data):
-    pass
 
 
 def read_scenario_file_for_events(scenario_file_name, aod_path=AOD_PATH):
