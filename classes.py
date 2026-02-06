@@ -227,12 +227,12 @@ class TechTeam:
     MAX_SKILL = 10
     NUM_OF_DECIMALS = 6
 
-    def __init__(self, team_id, team_name, team_nation, skill, start_year, end_year, specialities, filepath, pic_path=None):
+    def __init__(self, team_id, team_name, country_code, skill, start_year, end_year, specialities, filepath, pic_path=None):
         self.team_id = team_id
         self.name = team_name
         # TODO: changes needed
-        self.nation = team_nation
-        self.country = team_nation
+        self.country_code = country_code
+        self.country = country_code
         self.skill = max(min(skill, self.MAX_SKILL), self.MIN_SKILL)
         self.start_year = start_year
         self.end_year = end_year
@@ -248,13 +248,13 @@ class TechTeam:
         # return f"{self.name} {self.nation}"
     
     def format_name_and_country(self):
-        return f"[{self.nation}] {self.name}"
+        return f"[{self.country_code}] {self.name}"
     
     def to_db_tuple(self):
         return (
             self.team_id,
             self.name,
-            self.nation,
+            self.country_code,
             self.skill,
             self.start_year,
             self.end_year,

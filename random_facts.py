@@ -297,7 +297,7 @@ def show_fastest_teams(num_of_teams=DEFAULT_NUM_TO_SHOW, research_speed=DEFAULT_
     sorted_teams = fastest_teams_to_do_all_tech(shf.scan_techs(), shf.scan_tech_teams(), research_speed)
     print(f"Fastest teams to research all tech (with research speed constantly at {research_speed}):")
     for team, days in sorted_teams[:num_of_teams]:
-        print(f"{days} \t {team.name} - {team.nation}")
+        print(f"{days} \t {team.name} - {team.country_code}")
     return sorted_teams[:num_of_teams]
 
 
@@ -453,7 +453,7 @@ def show_ranked_teams(num_of_teams=DEFAULT_NUM_TO_SHOW):
     ranking = rank_teams_by_specialization_and_skill(shf.scan_techs(), shf.scan_tech_teams())
     print("Tech teams that are expected to research all tech the fastest")
     for team, time_value in ranking[:num_of_teams]:
-        print(f"{time_value} \t {team.name} - {team.nation}")
+        print(f"{time_value} \t {team.name} - {team.country_code}")
     return ranking[:num_of_teams]
 
 

@@ -498,7 +498,7 @@ class TechteamScreen(BoxLayout):
             self.show_default_texts()
             return
         self.name_label.text = team.name
-        self.nation_and_id_label.text = f"{team.nation}  {team.team_id}"
+        self.nation_and_id_label.text = f"{team.country}  {team.team_id}"
         self.skill_label.text = f"Skill: {team.skill}"
         self.years_label.text = f"Years active: {team.start_year} - {team.end_year}"
         num_of_specs = len(team.specialities)

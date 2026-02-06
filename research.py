@@ -374,7 +374,7 @@ class Research:
     
     def remove_country(self, country_code):
         self.countries.remove(country_code)
-        self.all_teams = [team for team in self.all_teams if team.nation != country_code]
+        self.all_teams = [team for team in self.all_teams if team.country_code != country_code]
         if self.primary_country == country_code:
             self.primary_country = None
             self.clear_all_tech()
@@ -440,7 +440,7 @@ class Research:
     # this might not work
     def get_team_by_name_and_country(self, team_name, country_code):
         for team in self.teams:
-            if team.name == team_name and team.nation == country_code:
+            if team.name == team_name and team.country_code == country_code:
                 return team
     
     def get_vacant_research_slots(self):
