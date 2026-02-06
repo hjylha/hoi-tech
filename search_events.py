@@ -1,9 +1,9 @@
 
 import sys
-from file_paths import get_event_text_paths, get_all_text_files_paths
+from file_paths import get_scenarios_folder_path, get_event_text_paths, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
-from scan_hoi_files import get_tech_dict
+from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
 from print_effects_and_triggers import print_event
 
@@ -351,27 +351,27 @@ def search_events(event_dict):
     return True
 
 
-def search_events_w_class(event_dict, aod_path, text_dict, tech_dict, max_num_of_suggestions=999, force_default=False):
+def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, force_default=False):
     text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
     possible_country_code = text_input.split(" ")[0].upper()
     country_code = None
-    if text_dict.get(possible_country_code) is not None:
+    if filescanner.text_dict.get(possible_country_code) is not None:
         country_code = possible_country_code
         text_input = text_input[4:]
-    suggestions = suggest_events_based_on_search_words(text_input, event_dict, country_code)
+    suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code)
 
     indent_add = 2
     print()
     if country_code:
-        print(f" Searching restricted to events of {text_dict[country_code]} [{country_code}]\n")
+        print(f" Searching restricted to events of {filescanner.text_dict[country_code]} [{country_code}]\n")
     if not suggestions:
         print(" No matching events found.")
     elif len(suggestions) == 1:
         ev = suggestions[0]
         # ev.print_event(aod_path, 1, indent_add)
-        print_event(ev, aod_path, 1, indent_add, text_dict, event_dict, tech_dict, force_default=force_default)
+        print_event(ev, aod_path, 1, indent_add, filescanner.text_dict, filescanner.event_dict, filescanner.tech_dict, filescanner.leader_dict, filescanner.minister_dict, filescanner.techteam_dict, force_default=force_default)
     else:
         for event in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
@@ -447,6 +447,7 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
 
 if __name__ == "__main__":
     SCENARIO_NAME = "1933.eug"
+    scenario_path = get_scenarios_folder_path(AOD_PATH) / SCENARIO_NAME
 
     print("Gathering data from Iron Cross files...")
     # country_dict = get_country_names()
@@ -457,7 +458,10 @@ if __name__ == "__main__":
     # no_name, no_desc, no_action = missing_texts
     text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
     text_dict_last = {key: value[-1][0] for key, value in text_dict.items()}
-    tech_dict = get_tech_dict()
+    
+    fs = FileScanner(scenario_path)
+    fs.scan()
+
 
     def get_texts():
         event_text_files = get_event_text_paths(AOD_PATH)
@@ -469,7 +473,8 @@ if __name__ == "__main__":
     def ged(el, texts):
         return get_event_dict(el, texts)
 
-    ed = scan_events(SCENARIO_NAME, AOD_PATH)
+    # ed = scan_events(SCENARIO_NAME, AOD_PATH)
+    ed = fs.event_dict
 
     bad_event_ids = [308008, 336154]
     double_action = [319021]
@@ -490,12 +495,16 @@ if __name__ == "__main__":
 
     if "d" in sys.argv:
         ask_to_search = False
+        tech_dict = fs.tech_dict
+        leader_dict = fs.leader_dict
+        minister_dict = fs.minister_dict
+        techteam_dict = fs.techteam_dict
 
         from print_effects_and_triggers import effect_as_str, condition_as_str
         def_effs = []
         for tech in tech_dict.values():
             for eff in tech.effects:
-                eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict)
+                eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict, leader_dict, minister_dict, techteam_dict)
                 if "=" in eff_str:
                     def_effs.append(eff_str)
         
@@ -511,7 +520,7 @@ if __name__ == "__main__":
                     break
                 for eff in act.effects:
                     try:
-                        eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict)
+                        eff_str = effect_as_str(eff, text_dict_last, ed, tech_dict, leader_dict, minister_dict, techteam_dict)
                         if "=" in eff_str:
                             evs_w_d_effs.append(ev)
                             has_default = True
@@ -529,7 +538,7 @@ if __name__ == "__main__":
                 if has_default or has_error:
                     break
                 try:
-                    cond_str = condition_as_str(cond, text_dict_last, ed, tech_dict)
+                    cond_str = condition_as_str(cond, text_dict_last, ed, tech_dict, leader_dict, minister_dict, techteam_dict)
                     if "=" in cond_str:
                         evs_w_d_conds.append(ev)
                         has_default = True
@@ -679,5 +688,5 @@ if __name__ == "__main__":
         print(explanation)
     while ask_to_search:
         # ask_to_search = search_events(event_dict)
-        ask_to_search = search_events_w_class(ed, AOD_PATH, text_dict_last, tech_dict, force_default=force_default)
+        ask_to_search = search_events_w_class( AOD_PATH, fs, force_default=force_default)
     

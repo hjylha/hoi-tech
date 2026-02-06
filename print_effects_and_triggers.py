@@ -587,11 +587,14 @@ def allow_dig_in_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ALLOW_DIG_IN"
     return text_dict[the_key]
 
-def armamentminister_as_str(effect, text_dict, **kwargs):
+def armamentminister_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_ARMMIN"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
 def army_detection_as_str(effect, text_dict, **kwargs):
     the_key = "EE_ARMY_DETECTION"
@@ -663,29 +666,41 @@ def change_policy_as_str(effect, text_dict, current_value=None, **kwargs):
     part2 = text_dict[extra_key].replace("%d", current_value_str)
     return f"{part1} {part2}"
 
-def chiefofair_as_str(effect, text_dict, **kwargs):
+def chiefofair_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_CAIR"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
-def chiefofarmy_as_str(effect, text_dict, **kwargs):
+def chiefofarmy_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_CARMY"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
-def chiefofnavy_as_str(effect, text_dict, **kwargs):
+def chiefofnavy_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_CNAVY"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
-def chiefofstaff_as_str(effect, text_dict, **kwargs):
+def chiefofstaff_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_STAFF"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
 def civil_war_as_str(effect, text_dict, **kwargs):
     the_key = "EE_CIVIL_WAR"
@@ -840,11 +855,14 @@ def extra_tc_as_str(effect, text_dict, **kwargs):
     raw_text = change_as_str(effect, text_dict, **kwargs)
     return raw_text.replace("%s", "")
 
-def foreignminister_as_str(effect, text_dict, **kwargs):
+def foreignminister_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_FGNMIN"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
 def gain_tech_as_str(effect, text_dict, tech_dict=None, **kwargs):
     the_key = "EE_GAIN_TECH"
@@ -864,17 +882,23 @@ def guarantee_as_str(effect, text_dict, **kwargs):
     raw_text = text_dict[the_key].split("%s")
     return f"{raw_text[0]}{country1}{raw_text[1]}{country2}{raw_text[2]}"
 
-def headofgovernment_as_str(effect, text_dict, **kwargs):
+def headofgovernment_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_HOG"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
-def headofstate_as_str(effect, text_dict, **kwargs):
+def headofstate_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_HOS"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
 def hq_supply_eff_as_str(effect, text_dict, **kwargs):
     the_key = "EE_HQ_SUPPLY_EFF"
@@ -961,17 +985,23 @@ def min_positioning_as_str(effect, text_dict, **kwargs):
     unit_name = get_unit_name(effect.which, text_dict)
     return replace_string_and_number(raw_text, unit_name, effect.value)
 
-def ministerofintelligence_as_str(effect, text_dict, **kwargs):
+def ministerofintelligence_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_INTMIN"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
-def ministerofsecurity_as_str(effect, text_dict, **kwargs):
+def ministerofsecurity_as_str(effect, text_dict, minister_dict=None, **kwargs):
     the_key = "EE_SECMIN"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
 def money_as_str(effect, text_dict, **kwargs):
     the_key = "EE_MONEY"
@@ -1117,11 +1147,14 @@ def secedeprovince_as_str(effect, text_dict, **kwargs):
     country = text_dict[effect.which.upper()]
     return f"{raw_text[0]}{province_text}{raw_text[1]}{country}{raw_text[2]} (if possible)"
 
-def set_leader_skill_as_str(effect, text_dict, **kwargs):
-    # TODO: add leaders
-    leader_name = effect.which
+def set_leader_skill_as_str(effect, text_dict, leader_dict=None, **kwargs):
+    leader_id = effect.which
+    if leader_dict:
+        leader_name = leader_dict.get(leader_id).name if leader_dict.get(leader_id) else ""
+    else:
+        leader_name = ""
     new_skill = effect.value
-    return f"Skill of leader {leader_name} is set to {new_skill}"
+    return f"Skill of leader {leader_name} [{leader_id}] is set to {new_skill}"
 
 def set_relation_as_str(effect, text_dict, **kwargs):
     the_key = "EE_SET_RELATION"
@@ -1146,23 +1179,32 @@ def sleepevent_as_str(effect, text_dict, event_dict=None, **kwargs):
         return text_dict[the_key].replace("'%s' Event", f"Event {effect.which} [EVENT NOT FOUND]")
     
 
-def sleepleader_as_str(effect, text_dict, **kwargs):
+def sleepleader_as_str(effect, text_dict, leader_dict=None, **kwargs):
     the_key = "EE_SLEADER"
-    # TODO: get leader names
-    leader_name = str(effect.which)
-    return text_dict[the_key].replace("%s", leader_name)
+    leader_id = effect.which
+    if leader_dict:
+        leader_name = leader_dict.get(leader_id).name if leader_dict.get(leader_id) else ""
+    else:
+        leader_name = ""
+    return text_dict[the_key].replace("%s", f"{leader_name} [{leader_id}]")
 
-def sleepminister_as_str(effect, text_dict, **kwargs):
+def sleepminister_as_str(effect, text_dict, minister_dict, **kwargs):
     the_key = "EE_SMINISTER"
-    # TODO: get minister names
-    minister = str(effect.which)
-    return text_dict[the_key].replace("%s", minister)
+    minister_id = effect.which
+    if minister_dict:
+        minister_name = minister_dict.get(minister_id).name if minister_dict.get(minister_id) else ""
+    else:
+        minister_name = ""
+    return text_dict[the_key].replace("%s", f"{minister_name} [{minister_id}]")
 
-def sleepteam_as_str(effect, text_dict, **kwargs):
+def sleepteam_as_str(effect, text_dict, techteam_dict=None, **kwargs):
     the_key = "EE_STEAM"
-    # TODO: get tech team names
-    tech_team = str(effect.which)
-    return text_dict[the_key].replace("%s", tech_team)
+    team_id = effect.which
+    if techteam_dict:
+        team_name = techteam_dict.get(team_id).name if techteam_dict.get(team_id) else ""
+    else:
+        team_name = ""
+    return text_dict[the_key].replace("%s", f"{team_name} [{team_id}]")
 
 def steal_tech_as_str(effect, text_dict, **kwargs):
     the_key = "EE_STEAL_TECH"
@@ -1226,17 +1268,23 @@ def vp_as_str(effect, text_dict, **kwargs):
     sign = "+" if effect.value > 0 else ""
     return text_dict[the_key].replace("%s%d", f"{sign}{effect.value}")
 
-def wakeleader_as_str(effect, text_dict, **kwargs):
+def wakeleader_as_str(effect, text_dict, leader_dict=None, **kwargs):
     the_key = "EE_WAKE_LEADER"
-    # TODO: get leader names
-    leader_name = str(effect.which)
-    return text_dict[the_key].replace("%s", leader_name)
+    leader_id = effect.which
+    if leader_dict:
+        leader_name = leader_dict.get(leader_id).name if leader_dict.get(leader_id) else ""
+    else:
+        leader_name = ""
+    return text_dict[the_key].replace("%s", f"{leader_name} [{leader_id}]")
 
-def waketeam_as_str(effect, text_dict, **kwargs):
+def waketeam_as_str(effect, text_dict, techteam_dict, **kwargs):
     the_key = "EE_WTEAM"
-    # TODO: get tech team names
-    tech_team = str(effect.which)
-    return text_dict[the_key].replace("%s", tech_team)
+    team_id = effect.which
+    if techteam_dict:
+        team_name = techteam_dict.get(team_id).name if techteam_dict.get(team_id) else ""
+    else:
+        team_name = ""
+    return text_dict[the_key].replace("%s", f"{team_name} [{team_id}]")
 
 def war_as_str(effect, text_dict, **kwargs):
     the_key = "EE_WAR"
@@ -1454,7 +1502,7 @@ STR_FUNCTION_DICT_FOR_EFFECTS = {
 }
 
 
-def effect_as_str(effect, text_dict, event_dict=None, tech_dict=None, force_default=False, **kwargs):
+def effect_as_str(effect, text_dict, event_dict=None, tech_dict=None, leader_dict=None, minister_dict=None, techteam_dict=None, force_default=False, **kwargs):
     if force_default:
         return effect_as_str_default(effect)
     the_function = STR_FUNCTION_DICT_FOR_EFFECTS.get(effect.type.lower())
@@ -1462,15 +1510,15 @@ def effect_as_str(effect, text_dict, event_dict=None, tech_dict=None, force_defa
         print("PROBLEM:", effect.type)
     # if the_function is not None:
     #     the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, **kwargs)
-    the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
+    the_text = the_function(effect, text_dict=text_dict, event_dict=event_dict, tech_dict=tech_dict, leader_dict=leader_dict, minister_dict=minister_dict, techteam_dict=techteam_dict, **kwargs)
     if the_text:
         return the_text
     
     return effect_as_str_default(effect)
     
 
-def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None, force_default=False, **kwargs):
-    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs))
+def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None, leader_dict=None, minister_dict=None, techteam_dict=None, force_default=False, **kwargs):
+    print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=force_default, **kwargs))
     
 
 # Trigger keys: (AI/ai)
@@ -1735,15 +1783,21 @@ def guarantee_cond_as_str(condition, text_dict, **kwargs):
     country1 = get_country(countries[1], text_dict)
     return f"{country0} aguarantees the independence of {country1}"
 
-def headofgovernment_cond_as_str(condition, text_dict, **kwargs):
+def headofgovernment_cond_as_str(condition, text_dict, minister_dict=None, **kwargs):
     the_key, value = list(condition.items())[0]
-    # TODO: get minister names and stuff
-    return f"Head of Government: {value}"
+    if minister_dict:
+        minister_name = minister_dict.get(value).name if minister_dict.get(value) else ""
+    else:
+        minister_name = ""
+    return f"Head of Government: {minister_name} [{value}]"
 
-def headofstate_cond_as_str(condition, text_dict, **kwargs):
+def headofstate_cond_as_str(condition, text_dict, minister_dict=None, **kwargs):
     the_key, value = list(condition.items())[0]
-    # TODO: get minister names and stuff
-    return f"Head of State: {value}"
+    if minister_dict:
+        minister_name = minister_dict.get(value).name if minister_dict.get(value) else ""
+    else:
+        minister_name = ""
+    return f"Head of State: {minister_name} [{value}]"
 
 def hq_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1763,9 +1817,13 @@ def ideology_cond_as_str(condition, text_dict, **kwargs):
     ideology = text_dict[f"CATEGORY_{ideology_type_key.upper()}"]
     return f"{the_key.capitalize()} of the country is {ideology}"
 
-def incabinet_cond_as_str(condition, text_dict, **kwargs):
+def incabinet_cond_as_str(condition, text_dict, minister_dict=None, **kwargs):
     value = list(condition.values())[0]
-    return f"Minister {value} is in cabinet"
+    if minister_dict:
+        minister_name = minister_dict.get(value).name if minister_dict.get(value) else ""
+    else:
+        minister_name = ""
+    return f"Minister {minister_name} [{value}] is in cabinet"
 
 def infantry_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1795,10 +1853,13 @@ def land_percentage_cond_as_str(condition, text_dict, **kwargs):
     value = detail_dict["value"]
     return f"{country} has at least {value} land percentage [I don't know what this means]"
 
-def leader_cond_as_str(condition, text_dict, **kwargs):
+def leader_cond_as_str(condition, text_dict, leader_dict=None, **kwargs):
     the_key, value = list(condition.items())[0]
-    # TODO: get leader names and stuff
-    return f"Leader: {value}"
+    if leader_dict:
+        leader_name = leader_dict.get(value).name if leader_dict.get(value) else ""
+    else:
+        leader_name = ""
+    return f"Leader: {leader_name} [{value}]"
 
 def light_armor_cond_as_str(condition, text_dict, **kwargs):
     pass
@@ -1845,10 +1906,13 @@ def marine_cond_as_str(condition, text_dict, **kwargs):
 def mechanized_cond_as_str(condition, text_dict, **kwargs):
     pass
 
-def minister_cond_as_str(condition, text_dict, **kwargs):
+def minister_cond_as_str(condition, text_dict, minister_dict=None, **kwargs):
     the_key, value = list(condition.items())[0]
-    # TODO: get minister names and stuff
-    return f"Minister: {value}"
+    if minister_dict:
+        minister_name = minister_dict.get(value).name if minister_dict.get(value) else ""
+    else:
+        minister_name = ""
+    return f"Minister: {minister_name} [{value}]"
 
 def month_cond_as_str(condition, text_dict, **kwargs):
     value = list(condition.values())[0]
@@ -2022,7 +2086,7 @@ STR_FUNCTION_DICT_FOR_CONDITIONS = {
     "year": year_cond_as_str,
 }
 
-def condition_as_str(condition, text_dict, event_dict, tech_dict, force_default=False, **kwargs):
+def condition_as_str(condition, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=False, **kwargs):
     if force_default:
         return condition_as_str_default(condition, text_dict, **kwargs)
     if len(condition.keys()) > 1:
@@ -2031,13 +2095,13 @@ def condition_as_str(condition, text_dict, event_dict, tech_dict, force_default=
     the_function = STR_FUNCTION_DICT_FOR_CONDITIONS[the_key]
     if the_function is None:
         print("PROBLEM:", the_key)
-    the_text = the_function(condition, text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
+    the_text = the_function(condition, text_dict, event_dict=event_dict, tech_dict=tech_dict, leader_dict=leader_dict, minister_dict=minister_dict, techteam_dict=techteam_dict, **kwargs)
     if the_text:
         return the_text
     return condition_as_str_default(condition, text_dict, **kwargs)
 
 
-def print_condition(condition, indent_num, indent_add, text_dict, event_dict, tech_dict, **kwargs):
+def print_condition(condition, indent_num, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, **kwargs):
     if condition.condition is not None:
         if condition.connective and condition.connective == condition.NOT_STR:
             print(indent_num * " ", f"{condition.NOT_STR} (", end=" ")
@@ -2051,7 +2115,7 @@ def print_condition(condition, indent_num, indent_add, text_dict, event_dict, te
             else:
                 first = False
             # print(f"{key} = {value}", end="")
-            print(condition_as_str(condition.condition, text_dict, event_dict=event_dict, tech_dict=tech_dict), end="")
+            print(condition_as_str(condition.condition, text_dict, event_dict=event_dict, tech_dict=tech_dict, leader_dict=leader_dict, minister_dict=minister_dict, techteam_dict=techteam_dict), end="")
         if condition.connective and condition.connective == condition.NOT_STR:
             print(" )", end="\n")
         else:
@@ -2060,23 +2124,23 @@ def print_condition(condition, indent_num, indent_add, text_dict, event_dict, te
     if condition.connective:
         print(indent_num * " ", condition.connective)
         for cond in condition.child_conditions:
-            print_condition(cond, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict)
+            print_condition(cond, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict)
             # cond.print_condition(indent_num + indent_add, indent_add)
     else:
         for cond in condition.child_conditions:
-            print_condition(cond, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict)
+            print_condition(cond, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict)
             # cond.print_condition(indent_num, indent_add)
 
-def print_trigger(event, indent_num, indent_add, text_dict, event_dict, tech_dict, empty_trigger=True, **kwargs):
+def print_trigger(event, indent_num, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, empty_trigger=True, **kwargs):
     if not event.trigger.raw_conditions and empty_trigger:
         print(indent_num * " ", "-")
         return
     if not event.trigger.raw_conditions:
         return
-    print_condition(event.trigger, indent_num, 2 * indent_add, text_dict, event_dict=event_dict, tech_dict=tech_dict, **kwargs)
+    print_condition(event.trigger, indent_num, 2 * indent_add, text_dict, event_dict=event_dict, tech_dict=tech_dict, leader_dict=leader_dict, minister_dict=minister_dict, techteam_dict=techteam_dict, **kwargs)
     # event.trigger.print_condition(indent_num, 2 * indent_add)
 
-def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
+def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict=None, leader_dict=None, minister_dict=None, techteam_dict=None, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
     if action.name:
         print(indent_num * " ", f"({action.action_key})", action.name)
     elif action.name_key:
@@ -2094,7 +2158,7 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dic
         return
     print(indent_num * " ", f"Effects ({len(action.effects)}):")
     indent_num += indent_add
-    effects_as_str = [effect_as_str(effect, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs) for effect in action.effects]
+    effects_as_str = [effect_as_str(effect, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=force_default, **kwargs) for effect in action.effects]
     counts = Counter(effects_as_str)
     skip_duplicates = {key: False for key, num in counts.items() if num > max_num_of_duplicate_effects}
     for effect_str in effects_as_str:
@@ -2102,10 +2166,10 @@ def print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dic
             continue
         if effect_str in skip_duplicates:
             skip_duplicates[effect_str] = True
-            print(indent_num * " ", f"{counts[effect_str]} times the following:")
+            print(max(indent_num - 1, 0) * " ", f"{counts[effect_str]} times the following:")
         print(indent_num * " ", effect_str)
 
-def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, tech_dict, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
+def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=False, max_num_of_duplicate_effects=5, **kwargs):
     if event.name:
         print(f"{indent_num * ' '} {event.event_id}: {event.name}")
     else:
@@ -2131,7 +2195,7 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
             text_about_action = f"action '{trigger_event.actions[action_index].name}' [{trigger_event.actions[action_index].action_key}]"
             print((indent_num + 2 * indent_add) * " ", f"{text_about_event}, {text_about_action}")
     # event.trigger.print_trigger(indent_num + indent_add, indent_add, empty_trigger=trigger_empty)
-    print_trigger(event, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict, empty_trigger=trigger_empty, **kwargs)
+    print_trigger(event, indent_num + indent_add, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, empty_trigger=trigger_empty, **kwargs)
     print()
 
     if event.deactivated_by:
@@ -2166,7 +2230,7 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
     print(indent_num * ' ', "Possible Actions:")
     for action in event.actions:
         # action.print_action(indent_num + indent_add, indent_add)
-        print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict, force_default=force_default, **kwargs)
+        print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=force_default, **kwargs)
     
 
 def list_tech_effects(tech, text_dict, tech_dict, **kwargs):
