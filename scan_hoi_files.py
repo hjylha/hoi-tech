@@ -886,7 +886,7 @@ class FileScanner:
             list_of_tech_teams = scan_tech_teams()
         self.techteam_dict = dict()
         for techteam in list_of_tech_teams:
-            if techteam.nation in self.country_codes:
+            if techteam.country_code in self.country_codes:
                 self.techteam_dict[techteam.team_id] = techteam
     
     def scan_brigades_and_divisions(self):
@@ -963,7 +963,7 @@ if __name__ == "__main__":
     # team_dict = dict()
     # for team in teams:
     #     if team_dict.get(team.team_id) is not None:
-    #         print(f"Team id {team.team_id} already in use, before {team.name} [{team.nation}]")
+    #         print(f"Team id {team.team_id} already in use, before {team.name} [{team.country_code}]")
     #         continue
     #     team_dict[team.team_id] = team
         
