@@ -1710,7 +1710,7 @@ def control_cond_as_str(condition, text_dict, **kwargs):
         country = get_country(country_code, text_dict)
     else:
         country = "Country"
-    return f"{country} control province {province} [{province_num}]"
+    return f"{country} controls province {province} [{province_num}]"
 
 def country_cond_as_str(condition, text_dict, **kwargs):
     # TODO: what is this condition actually?
