@@ -586,17 +586,22 @@ def scan_brigades(text_dict=None):
     filepaths = get_brigades_files(AOD_PATH)
     for filepath in filepaths:
         content = read_txt_file(filepath)
+        l_n_or_a = None
         for i, unit_type in enumerate(unit_types):
             if content.get(unit_type) and content.get(unit_type) == 1:
                 l_n_or_a = i
+        if l_n_or_a is not None:
+            unit_type_str = Brigade.LAND_NAVAL_OR_AIR[l_n_or_a]
+        else:
+            unit_type_str = None
         models = []
         if isinstance(content["model"], dict):
             models.append(Model(content["model"]))
-            units[filepath.stem] = Brigade(filepath, Brigade.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("locked"), text_dict)
+            units[filepath.stem] = Brigade(filepath, unit_type_str, models, content.get("locked"), text_dict)
             continue
         for model_dict in content["model"]:
             models.append(Model(model_dict))
-        units[filepath.stem] = Brigade(filepath, Brigade.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("locked"), text_dict)
+        units[filepath.stem] = Brigade(filepath, unit_type_str, models, content.get("locked"), text_dict)
     return units
 
 def scan_divisions(text_dict=None):
@@ -605,17 +610,22 @@ def scan_divisions(text_dict=None):
     filepaths = get_divisions_files(AOD_PATH)
     for filepath in filepaths:
         content = read_txt_file(filepath)
+        l_n_or_a = None
         for i, unit_type in enumerate(unit_types):
             if content.get(unit_type) and content.get(unit_type) == 1:
                 l_n_or_a = i
+        if l_n_or_a is not None:
+            unit_type_str = Division.LAND_NAVAL_OR_AIR[l_n_or_a]
+        else:
+            unit_type_str = None
         models = []
         if isinstance(content["model"], dict):
             models.append(Model(content["model"]))
-            units[filepath.stem] = Division(filepath, Division.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("allowed_brigades"), content.get("max_speed_step"), text_dict)
+            units[filepath.stem] = Division(filepath, unit_type_str, models, content.get("allowed_brigades"), content.get("max_speed_step"), text_dict)
             continue
         for model_dict in content["model"]:
             models.append(Model(model_dict))
-        units[filepath.stem] = Division(filepath, Division.LAND_NAVAL_OR_AIR[l_n_or_a], models, content.get("allowed_brigades"), content.get("max_speed_step"), text_dict)
+        units[filepath.stem] = Division(filepath, unit_type_str, models, content.get("allowed_brigades"), content.get("max_speed_step"), text_dict)
     return units
 
 
