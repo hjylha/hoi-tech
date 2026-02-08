@@ -360,7 +360,10 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     if filescanner.text_dict.get(possible_country_code) is not None:
         country_code = possible_country_code
         text_input = text_input[4:]
-    suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code)
+    flag_keyword = ""
+    if "flag=" in text_input.lower():
+        flag_keyword = text_input[text_input.index("flag=") + 5:].split(" ")[0]
+    suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code, flag=flag_keyword)
 
     indent_add = 2
     print()

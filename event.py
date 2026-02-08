@@ -437,7 +437,7 @@ def get_event_from_raw_event(raw_event_dict, filepath, event_text_dict):
     return proper_event
 
 
-def suggest_events_based_on_search_words(search_text, event_dict, country_code=None):
+def suggest_events_based_on_search_words(search_text, event_dict, country_code=None, flag=""):
     exact_keyword = False
     try:
         event_id = int(search_text)
@@ -475,6 +475,8 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_code=N
     desc_starts = []
     desc_other = []
     action_things = []
+    if flag:
+        flag_things = []
     for event_id, event in event_dict.items():
         if country_code and event.country_code != country_code:
             continue
@@ -498,6 +500,18 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_code=N
             if search_text in action.name.lower():
                 action_things.append(event)
                 break
+            if flag:
+                found_flag = False
+                for effect in action.effects:
+                    if "flag" in effect.type.lower() and flag in effect.which.lower():
+                        flag_things.append(event)
+                        found_flag = True
+                        break
+                if found_flag:
+                    break
+
     suggestions = name_starts + name_other + desc_starts + desc_other + action_things
+    if flag:
+        suggestions += flag_things
     
     return suggestions
