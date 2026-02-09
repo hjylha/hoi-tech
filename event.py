@@ -54,10 +54,8 @@ class Condition:
         return list_of_condition_keys
     
     def is_keyword_in_condition(self, condition_type, keyword):
-        # if is_keyword_in:
-            # return True
         if self.condition:
-            if condition_type in list(self.condition.keys())[0] and keyword in str(self.condition):
+            if condition_type.lower() in list(self.condition.keys())[0].lower() and keyword.lower() in str(self.condition).lower():
                 return True
             return False
         for condition in self.child_conditions:
