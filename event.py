@@ -448,7 +448,7 @@ def get_event_from_raw_event(raw_event_dict, filepath, event_text_dict):
     return proper_event
 
 
-def suggest_events_based_on_search_words(search_text, event_dict, country_code=None, cond_or_effect_type="", cond_or_effect_keyword=""):
+def suggest_events_based_on_search_words(search_text, event_dict, country_codes=None, cond_or_effect_type="", cond_or_effect_keyword=""):
     exact_keyword = False
     try:
         event_id = int(search_text)
@@ -465,7 +465,7 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_code=N
     if exact_keyword:
         suggestions = []
         for event_id, event in event_dict.items():
-            if country_code and event.country_code != country_code:
+            if country_codes and event.country_code not in country_codes:
                 continue
             if event.name == search_text:
                 suggestions.append(event)
@@ -492,7 +492,7 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_code=N
     for event_id, event in event_dict.items():
         if cond_or_effect_type and event.trigger.is_keyword_in_condition(cond_or_effect_type, cond_or_effect_keyword):
             trigger_things.append(event)
-        if country_code and event.country_code != country_code:
+        if country_codes and event.country_code not in country_codes:
             continue
         if event.name.lower().startswith(search_text):
             name_starts.append(event)

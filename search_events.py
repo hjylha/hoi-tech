@@ -355,11 +355,30 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     text_input = input("Enter search term(s):\n")
     if not text_input:
         return False
-    possible_country_code = text_input.split(" ")[0].upper()
-    country_code = None
-    if filescanner.text_dict.get(possible_country_code) is not None:
-        country_code = possible_country_code
-        text_input = text_input[4:]
+    no_countries = False
+    if text_input.startswith("--nocc"):
+        no_countries = True
+        country_codes = [""]
+        text_input = text_input.replace("--nocc ", "")
+    elif " --nocc" in text_input:
+        no_countries = True
+        country_codes = [""]
+        text_input = text_input.replace(" --nocc", "")
+    found_country_codes = False
+    if not no_countries:
+        possible_country_codes = text_input.split(" ")[0].upper().split(",")
+        country_codes = []
+        for possible_country_code in possible_country_codes:
+            if filescanner.country_dict.get(possible_country_code) is not None:
+                country_codes.append(possible_country_code)
+                found_country_codes = True
+            elif found_country_codes:
+                print(f"{possible_country_code} is not a valid country code.")
+    start_length = 0
+    if found_country_codes:
+        start_length = len(",".join(possible_country_codes)) + 1
+    
+    text_input = text_input[start_length:]
     if " --all" in text_input:
         max_num_of_suggestions = 999_999
         text_input = text_input.replace(" --all", "")
@@ -376,15 +395,19 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     # if "flag=" in text_input.lower():
     #     flag_keyword = text_input[text_input.index("flag=") + 5:].split(" ")[0]
     if cond_or_effect_type:
-        suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code, cond_or_effect_type=cond_or_effect_type, cond_or_effect_keyword=cond_or_effect_keyword)
+        suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_codes, cond_or_effect_type=cond_or_effect_type, cond_or_effect_keyword=cond_or_effect_keyword)
     else:
         # suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code, flag=flag_keyword)
-        suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code)
+        suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_codes)
 
     indent_add = 2
+    # print(f"Search term: {text_input}, country_codes: {country_codes}")
     print()
-    if country_code:
-        print(f" Searching restricted to events of {filescanner.text_dict[country_code]} [{country_code}]\n")
+    if country_codes and not no_countries:
+        cc_texts = [f"{filescanner.country_dict[country_code]} [{country_code}]" for country_code in country_codes]
+        print(f" Searching restricted to events of {', '.join(cc_texts)}\n")
+    elif country_codes and no_countries:
+        print(f"Searching restricted to events without a country")
     if not suggestions:
         print(" No matching events found.")
     elif len(suggestions) == 1:
