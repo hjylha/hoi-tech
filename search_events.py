@@ -398,17 +398,17 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     if not suggestions:
         print(" No matching events found.")
     elif len(suggestions) == 1:
-        ev = suggestions[0]
+        ev = suggestions[0][0]
         # ev.print_event(aod_path, 1, indent_add)
         print_event(ev, aod_path, 1, indent_add, filescanner.text_dict, filescanner.event_dict, filescanner.tech_dict, filescanner.leader_dict, filescanner.minister_dict, filescanner.techteam_dict, force_default=force_default)
     else:
-        for event in suggestions[:max_num_of_suggestions]:
+        for event, score in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
             country_code = country_code.upper() if country_code else ""
             if event.name:
-                print(f" {event.event_id} [{country_code}]: {event.name}")
+                print(f" {event.event_id} [{country_code}]: {event.name} (score: {score})")
             else:
-                print(f" {event.event_id} [{country_code}]: {event.name_key}  [name in file]")
+                print(f" {event.event_id} [{country_code}]: {event.name_key}  [name in file] (score: {score})")
         if len(suggestions) > max_num_of_suggestions:
             print(f"\n  {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
     print("\n")

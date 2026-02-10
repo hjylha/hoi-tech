@@ -53,16 +53,46 @@ class Condition:
             list_of_condition_keys = condition.get_condition_keys(list_of_condition_keys, keyword)
         return list_of_condition_keys
     
-    def is_keyword_in_condition(self, condition_type, keyword):
+    def is_keyword_in_condition(self, condition_type, keyword, score=0, debug_thing=False):
         if self.condition:
-            if condition_type.lower() in list(self.condition.keys())[0].lower() and keyword.lower() in str(self.condition).lower():
-                return True
-            return False
+            condition_key = list(self.condition.keys())[0].lower()
+            condition_value = list(self.condition.values())[0]
+            condition_value_str = str(condition_value)
+            # if debug_thing:
+            #     print(f" {condition_key=} \n {condition_value=} \n {condition_value_str}")
+            #     print(f"{condition_type=}")
+            if condition_type in condition_key and keyword in condition_value_str:
+                if condition_type == condition_key:
+                    # if debug_thing:
+                    #     print(f"MATCH: {condition_key} = {condition_type}")
+                    multiplier = 100
+                elif condition_key.startswith(condition_type):
+                    # if debug_thing:
+                    #     print(f"NOT QUITE MATCH: {condition_key} != {condition_type}")
+                    multiplier = 10
+                else:
+                    multiplier = 1
+                if keyword == condition_value_str:
+                    # if debug_thing:
+                    #     print(self.condition)
+                    #     print(f"MATCH: {condition_value_str} = {keyword}")
+                    #     print(100 * multiplier)
+                    score += 100 * multiplier
+                elif condition_value_str.startswith(keyword):
+                    # if debug_thing:
+                    #     print(self.condition)
+                    #     print(f"NOT QUITE MATCH: {condition_value_str} != {keyword}")
+                    score += 10 * multiplier
+                else:
+                    # if debug_thing:
+                    #     print(self.condition)
+                    #     print(f"SOME MATCHING: {condition_value_str} != {keyword}")
+                    score += 1 * multiplier
+                return score
+            return score
         for condition in self.child_conditions:
-            is_keyword_in = condition.is_keyword_in_condition(condition_type, keyword)
-            if is_keyword_in:
-                return True
-        return False
+            score = condition.is_keyword_in_condition(condition_type, keyword, score, debug_thing)
+        return score
         
 
     def print_condition(self, indent_num, indent_add):
@@ -302,6 +332,12 @@ class Event:
     
     def __str__(self):
         return f"{self.event_id} [{self.country_code}]: {self.name}"
+    
+    def is_keyword_in_condition(self, condition_type, keyword, score=0, debug_thing=False):
+        # if debug_thing and self.event_id == 348:
+        #     print(f"DEBUGGING")
+        #     return self.trigger.is_keyword_in_condition(condition_type, keyword, score, debug_thing)
+        return self.trigger.is_keyword_in_condition(condition_type, keyword, score)
 
     def print_event(self, aod_path, indent_num=0, indent_add=2):
         if self.name:
@@ -453,7 +489,7 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
-            return [event_dict[event_id]]
+            return [[event_dict[event_id], 1]]
     except ValueError:
         pass
     keywords = []
@@ -502,60 +538,102 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
     #     return suggestions
     # search_text = search_text.lower()
     suggestions = []
+    scores = dict()
     for event_id, event in event_dict.items():
         if country_codes and event.country_code not in country_codes:
             continue
+        score = 0
         all_keywords_found = False
         for keyword in keywords:
-            if keyword in event.name.lower():
-                continue
+            keyword_score = 0
+            event_name = event.name.lower()
+            if keyword == event_name:
+                keyword_score +=10_000
+            elif event_name.startswith(keyword):
+                keyword_score += 500
+            elif keyword in event_name:
+                keyword_score += 10
+
             try:
-                if keyword in event.description.lower():
+                event_description = event.description.lower()
+                if keyword == event_description:
+                    keyword_score += 1000
+                    continue
+                if event_description.startswith(keyword):
+                    keyword_score += 100
+                    continue
+                if keyword in event_description:
+                    keyword_score += 1
                     continue
             except AttributeError:
                 pass
-            found_in_actions = False
+
             for action in event.actions:
                 if not action.name:
                     continue
-                if keyword in action.name.lower():
-                    found_in_actions = True
-                    break
-            if found_in_actions:
+                action_name = action.name.lower()
+                if keyword == action_name:
+                    keyword_score += 1000
+                if action_name.startswith(keyword):
+                    keyword_score += 100
+                if keyword in action_name:
+                    keyword_score += 5
+            if keyword_score > 0:
+                score += keyword_score
                 continue
             break
         else:
             all_keywords_found = True
         if not all_keywords_found:
             continue
-        all_type_value_pairs_found = False
+        # all_type_value_pairs_found = False
         for type_str, value_str in type_value_pairs.items():
-            if event.trigger.is_keyword_in_condition(type_str, value_str):
-                continue
-            if value_str in str(event.date.get(type_str)):
-                continue
-            found_in_effects = False
+            t_v_score = 0
+            trigger_score = event.is_keyword_in_condition(type_str, value_str, debug_thing=True)
+            t_v_score += trigger_score
+
+            if date_value := event.date.get(type_str):
+                date_value_str = str(date_value).lower()
+                if value_str == date_value_str:
+                    t_v_score += 1000
+                elif date_value_str.startswith(value_str):
+                    t_v_score += 100
+                elif value_str in date_value_str:
+                    t_v_score += 5
+            
+            # found_in_effects = False
             for action in event.actions:
                 for effect in action.effects:
-                    if type_str in effect.type.lower():
+                    effect_type_str = effect.type.lower()
+                    if type_str in effect_type_str:
+                        if type_str == effect_type_str:
+                            multiplier = 100
+                        elif effect_type_str.startswith(type_str):
+                            multiplier = 10
+                        else:
+                            multiplier = 1
                         for item in effect:
                             if item and value_str in str(item).lower():
-                                found_in_effects = True
-                                break
-                    if found_in_effects:
-                        break
-                if found_in_effects:
-                    break
-            if found_in_effects:
+                                item_str = str(item).lower()
+                                # TODO: should this check for highest score?
+                                if value_str == item_str:
+                                    t_v_score += 100 * multiplier
+                                if item_str.startswith(value_str):
+                                    t_v_score += 10 * multiplier
+                                t_v_score += 1 * multiplier
+            if t_v_score > 0:
+                score += t_v_score
                 continue
             break
         else:
-            all_type_value_pairs_found = True
+            # all_type_value_pairs_found = True
             suggestions.append(event)
+            scores[event_id] = score
             continue
 
     # suggestions = name_starts + name_other + desc_starts + desc_other + action_things
     # if cond_or_effect_type:
     #     suggestions += trigger_things + effect_things + date_things
-
-    return suggestions
+    suggestions_and_scores = [[ev, scores[ev.event_id]] for ev in suggestions]
+    return sorted(suggestions_and_scores, key=lambda pair: pair[1], reverse=True)
+    # return sorted(suggestions, key=lambda ev: scores[ev.event_id], reverse=True)
