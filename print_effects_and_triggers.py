@@ -1764,14 +1764,13 @@ def garrison_cond_as_str(condition, text_dict, **kwargs):
     province = get_province(province_num, text_dict)
     size = detail_dict["size"]
     gar_type = detail_dict.get("type")
-    if gar_type:
-        gar_type += " "
+    gar_type = f"{gar_type} " if gar_type else ""
     division_type = "divisions"
     is_area = detail_dict.get("area")
     area = ""
     if is_area:
-        area = f"area: {is_area}"
-    return f"{country} has at least {size} {gar_type}{division_type} in {province} [{province_num}] ({area})"
+        area = f" (area: {is_area})"
+    return f"{country} has at least {size} {gar_type}{division_type} in {province} [{province_num}]{area}"
 
 def government_cond_as_str(condition, text_dict, **kwargs):
     government_type = list(condition.values())[0]
