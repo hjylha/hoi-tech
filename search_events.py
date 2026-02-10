@@ -359,7 +359,10 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     if text_input.startswith("--nocc"):
         no_countries = True
         country_codes = [""]
-        text_input = text_input.replace("--nocc ", "")
+        if text_input == "--nocc":
+            text_input = ""
+        else:
+            text_input = text_input.replace("--nocc ", "")
     elif " --nocc" in text_input:
         no_countries = True
         country_codes = [""]
@@ -528,9 +531,18 @@ if __name__ == "__main__":
 
     ask_to_search = True
     force_default = False
-    explanation = """\n    You can filter by country by typing in country code first:
-    for example typing 'fin winter' looks for the word 'winter'
-    in event names and descriptions of Finnish events.
+    explanation = """\n    You can filter by country by typing in country code(s) (separated by ,) first, or,
+    if you want to restrict your search to events without a specified country, you can
+    start with '--nocc'. Additionally, you can use keywords of form 'type=value' to
+    look for certain trigger conditions or effects (or dates).
+      Some example searches:
+    fin,swe winter
+      looks for the word winter in event names and descriptions of Finnish and Swedish events.
+    nor year=1935
+      looks for Norwegian events that have year=1935 in their trigger conditions or dates.
+    --nocc research_mod=
+      looks for events that have no country specified and change research speed.
+
     Empty search i.e. pressing Enter quits the program.
     """
 
