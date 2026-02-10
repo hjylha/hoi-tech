@@ -489,9 +489,8 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
     if cond_or_effect_type:
         trigger_things = []
         effect_things = []
+        date_things = []
     for event_id, event in event_dict.items():
-        if cond_or_effect_type and event.trigger.is_keyword_in_condition(cond_or_effect_type, cond_or_effect_keyword):
-            trigger_things.append(event)
         if country_codes and event.country_code not in country_codes:
             continue
         if event.name.lower().startswith(search_text):
@@ -508,11 +507,13 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
         if search_text in event.description.lower():
             desc_other.append(event)
             continue
+        found_in_actions = False
         for action in event.actions:
             if not action.name:
                 continue
             if search_text in action.name.lower():
                 action_things.append(event)
+                found_in_actions = True
                 break
             if cond_or_effect_type:
                 found_cond_or_effect = False
@@ -521,13 +522,20 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                         for item in effect:
                             if item and cond_or_effect_keyword.lower() in str(item).lower():
                                 effect_things.append(event)
-                                found_cond_or_effect = True
+                                found_in_actions = True
                                 break
-                if found_cond_or_effect:
+                if found_in_actions:
                     break
+        if found_in_actions:
+            continue
+        if cond_or_effect_type and event.trigger.is_keyword_in_condition(cond_or_effect_type, cond_or_effect_keyword):
+            trigger_things.append(event)
+            continue
+        if cond_or_effect_type and cond_or_effect_keyword in str(event.date.get(cond_or_effect_type)):
+            date_things.append(event)
 
     suggestions = name_starts + name_other + desc_starts + desc_other + action_things
     if cond_or_effect_type:
-        suggestions += trigger_things + effect_things
+        suggestions += trigger_things + effect_things + date_things
 
     return suggestions
