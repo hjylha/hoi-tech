@@ -448,94 +448,114 @@ def get_event_from_raw_event(raw_event_dict, filepath, event_text_dict):
     return proper_event
 
 
-def suggest_events_based_on_search_words(search_text, event_dict, country_codes=None, cond_or_effect_type="", cond_or_effect_keyword=""):
-    exact_keyword = False
+def suggest_events_based_on_search_words(search_text, event_dict, country_codes=None):
+    # exact_keyword = False
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
             return [event_dict[event_id]]
     except ValueError:
         pass
-    try:
-        if search_text.strip()[0] == '"' and search_text.strip()[-1] == '"':
-            search_text = search_text.strip()[1:-1]
-            exact_keyword = True
-    except IndexError:
-        pass
-    if exact_keyword:
-        suggestions = []
-        for event_id, event in event_dict.items():
-            if country_codes and event.country_code not in country_codes:
-                continue
-            if event.name == search_text:
-                suggestions.append(event)
-                continue
-            if event.description == search_text:
-                suggestions.append(event)
-                continue
-            for action in event.actions:
-                if not action.name:
-                    continue
-                if action.name == search_text:
-                    suggestions.append(event)
-                    break
-        return suggestions
-    search_text = search_text.lower()
-    name_starts = []
-    name_other = []
-    desc_starts = []
-    desc_other = []
-    action_things = []
-    if cond_or_effect_type:
-        trigger_things = []
-        effect_things = []
-        date_things = []
+    keywords = []
+    type_value_pairs = dict()
+    search_text = search_text.strip()
+    if not search_text:
+        keywords = [""]
+    while search_text:
+        if search_text.startswith('"') and '"' in search_text[1:]:
+            end_index = search_text[1:].index('"') + 1
+            keywords.append(search_text[1:end_index].lower())
+            search_text = search_text[end_index + 1:].strip()
+            continue
+        possible_keyword = search_text.split(" ")[0].strip()
+        if "=" in possible_keyword[1:]:
+            type_str = possible_keyword.split("=")[0].lower()
+            value_str = possible_keyword[len(type_str) + 1:].lower()
+            type_value_pairs[type_str] = value_str
+            search_text = search_text[len(possible_keyword):].strip()
+            continue
+        keywords.append(possible_keyword.lower())
+        search_text = search_text[len(possible_keyword):].strip()
+    # try:
+    #     if search_text.strip()[0] == '"' and search_text.strip()[-1] == '"':
+    #         search_text = search_text.strip()[1:-1]
+    #         exact_keyword = True
+    # except IndexError:
+    #     pass
+    # if exact_keyword:
+    #     suggestions = []
+    #     for event_id, event in event_dict.items():
+    #         if country_codes and event.country_code not in country_codes:
+    #             continue
+    #         if event.name == search_text:
+    #             suggestions.append(event)
+    #             continue
+    #         if event.description == search_text:
+    #             suggestions.append(event)
+    #             continue
+    #         for action in event.actions:
+    #             if not action.name:
+    #                 continue
+    #             if action.name == search_text:
+    #                 suggestions.append(event)
+    #                 break
+    #     return suggestions
+    # search_text = search_text.lower()
+    suggestions = []
     for event_id, event in event_dict.items():
         if country_codes and event.country_code not in country_codes:
             continue
-        if event.name.lower().startswith(search_text):
-            name_starts.append(event)
-            continue
-        if search_text in event.name.lower():
-            name_other.append(event)
-            continue
-        if event.description is None:
-            continue
-        if event.description.lower().startswith(search_text):
-            desc_starts.append(event)
-            continue
-        if search_text in event.description.lower():
-            desc_other.append(event)
-            continue
-        found_in_actions = False
-        for action in event.actions:
-            if not action.name:
+        all_keywords_found = False
+        for keyword in keywords:
+            if keyword in event.name.lower():
                 continue
-            if search_text in action.name.lower():
-                action_things.append(event)
-                found_in_actions = True
-                break
-            if cond_or_effect_type:
-                found_cond_or_effect = False
-                for effect in action.effects:
-                    if cond_or_effect_type.lower() in effect.type.lower():
-                        for item in effect:
-                            if item and cond_or_effect_keyword.lower() in str(item).lower():
-                                effect_things.append(event)
-                                found_in_actions = True
-                                break
-                if found_in_actions:
+            try:
+                if keyword in event.description.lower():
+                    continue
+            except AttributeError:
+                pass
+            found_in_actions = False
+            for action in event.actions:
+                if not action.name:
+                    continue
+                if keyword in action.name.lower():
+                    found_in_actions = True
                     break
-        if found_in_actions:
+            if found_in_actions:
+                continue
+            break
+        else:
+            all_keywords_found = True
+        if not all_keywords_found:
             continue
-        if cond_or_effect_type and event.trigger.is_keyword_in_condition(cond_or_effect_type, cond_or_effect_keyword):
-            trigger_things.append(event)
+        all_type_value_pairs_found = False
+        for type_str, value_str in type_value_pairs.items():
+            if event.trigger.is_keyword_in_condition(type_str, value_str):
+                continue
+            if value_str in str(event.date.get(type_str)):
+                continue
+            found_in_effects = False
+            for action in event.actions:
+                for effect in action.effects:
+                    if type_str in effect.type.lower():
+                        for item in effect:
+                            if item and value_str in str(item).lower():
+                                found_in_effects = True
+                                break
+                    if found_in_effects:
+                        break
+                if found_in_effects:
+                    break
+            if found_in_effects:
+                continue
+            break
+        else:
+            all_type_value_pairs_found = True
+            suggestions.append(event)
             continue
-        if cond_or_effect_type and cond_or_effect_keyword in str(event.date.get(cond_or_effect_type)):
-            date_things.append(event)
 
-    suggestions = name_starts + name_other + desc_starts + desc_other + action_things
-    if cond_or_effect_type:
-        suggestions += trigger_things + effect_things + date_things
+    # suggestions = name_starts + name_other + desc_starts + desc_other + action_things
+    # if cond_or_effect_type:
+    #     suggestions += trigger_things + effect_things + date_things
 
     return suggestions

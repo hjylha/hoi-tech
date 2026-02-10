@@ -385,23 +385,7 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     if " --all" in text_input:
         max_num_of_suggestions = 999_999
         text_input = text_input.replace(" --all", "")
-    cond_or_effect_type = ""
-    if "=" in text_input:
-        for item in text_input.split(" "):
-            if "=" in item:
-                t_and_kw = item.split("=")
-                if len(t_and_kw) > 2:
-                    continue
-                cond_or_effect_type = t_and_kw[0]
-                cond_or_effect_keyword = t_and_kw[1]
-    # flag_keyword = ""
-    # if "flag=" in text_input.lower():
-    #     flag_keyword = text_input[text_input.index("flag=") + 5:].split(" ")[0]
-    if cond_or_effect_type:
-        suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_codes, cond_or_effect_type=cond_or_effect_type, cond_or_effect_keyword=cond_or_effect_keyword)
-    else:
-        # suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_code, flag=flag_keyword)
-        suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_codes)
+    suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_codes)
 
     indent_add = 2
     # print(f"Search term: {text_input}, country_codes: {country_codes}")
