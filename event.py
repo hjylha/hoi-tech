@@ -486,6 +486,7 @@ def get_event_from_raw_event(raw_event_dict, filepath, event_text_dict):
 
 def suggest_events_based_on_search_words(search_text, event_dict, country_codes=None):
     # exact_keyword = False
+    print(f"{search_text=} {country_codes=}")
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
@@ -558,13 +559,10 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                 event_description = event.description.lower()
                 if keyword == event_description:
                     keyword_score += 1000
-                    continue
                 if event_description.startswith(keyword):
                     keyword_score += 100
-                    continue
                 if keyword in event_description:
                     keyword_score += 1
-                    continue
             except AttributeError:
                 pass
 
@@ -589,7 +587,7 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
         # all_type_value_pairs_found = False
         for type_str, value_str in type_value_pairs.items():
             t_v_score = 0
-            trigger_score = event.is_keyword_in_condition(type_str, value_str, debug_thing=True)
+            trigger_score = event.is_keyword_in_condition(type_str, value_str, 0, debug_thing=True)
             t_v_score += trigger_score
 
             if date_value := event.date.get(type_str):
