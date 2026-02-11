@@ -2,6 +2,20 @@
 from classes import Effect
 
 
+def give_score_to_match(keyword, actual_text, score_triple):
+    if keyword == actual_text:
+        return score_triple[0]
+    if f"the {keyword}" == actual_text:
+        return int(0.9 * score_triple[0])
+    elif actual_text.startswith(keyword):
+        return score_triple[1]
+    elif actual_text.startswith(f"the {keyword}"):
+        return int(0.9 * score_triple[1])
+    elif keyword in actual_text:
+        return score_triple[2]
+    return 0
+
+
 class Condition:
     AND_STR = "AND"
     OR_STR = "OR"
@@ -548,29 +562,11 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
         for keyword in keywords:
             keyword_score = 0
             event_name = event.name.lower()
-            if keyword == event_name:
-                keyword_score +=10_000
-            elif f"the {keyword}" == event_name:
-                keyword_score += 9_000
-            elif event_name.startswith(keyword):
-                keyword_score += 500
-            elif event_name.startswith(f"the {keyword}"):
-                keyword_score += 450
-            elif keyword in event_name:
-                keyword_score += 10
+            keyword_score += give_score_to_match(keyword, event_name, (10_000, 500, 10))
 
             try:
                 event_description = event.description.lower()
-                if keyword == event_description:
-                    keyword_score += 1000
-                elif f"the {keyword}" == event_description:
-                    keyword_score += 900
-                elif event_description.startswith(keyword):
-                    keyword_score += 100
-                elif event_description.startswith(f"the {keyword}"):
-                    keyword_score += 90
-                elif keyword in event_description:
-                    keyword_score += 1
+                keyword_score += give_score_to_match(keyword, event_description, (1_000, 100, 1))
             except AttributeError:
                 pass
 
@@ -578,16 +574,7 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                 if not action.name:
                     continue
                 action_name = action.name.lower()
-                if keyword == action_name:
-                    keyword_score += 1000
-                elif f"the {keyword}" == action_name:
-                    keyword_score += 900
-                elif action_name.startswith(keyword):
-                    keyword_score += 100
-                elif action_name.startswith(f"the {keyword}"):
-                    keyword_score += 90
-                elif keyword in action_name:
-                    keyword_score += 5
+                keyword_score += give_score_to_match(keyword, action_name, (1_000, 100, 5))
             if keyword_score > 0:
                 score += keyword_score
                 continue
@@ -596,7 +583,7 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
             all_keywords_found = True
         if not all_keywords_found:
             continue
-        # all_type_value_pairs_found = False
+        
         for type_str, value_str in type_value_pairs.items():
             t_v_score = 0
             trigger_score = event.is_keyword_in_condition(type_str, value_str, 0, debug_thing=True)
@@ -611,7 +598,6 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                 elif value_str in date_value_str:
                     t_v_score += 5
             
-            # found_in_effects = False
             for action in event.actions:
                 for effect in action.effects:
                     effect_type_str = effect.type.lower()
@@ -625,7 +611,6 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                         for item in effect:
                             if item and value_str in str(item).lower():
                                 item_str = str(item).lower()
-                                # TODO: should this check for highest score?
                                 if value_str == item_str:
                                     t_v_score += 100 * multiplier
                                 if item_str.startswith(value_str):
@@ -636,7 +621,6 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                 continue
             break
         else:
-            # all_type_value_pairs_found = True
             suggestions.append(event)
             scores[event_id] = score
             continue
