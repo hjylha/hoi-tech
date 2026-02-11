@@ -486,7 +486,7 @@ def get_event_from_raw_event(raw_event_dict, filepath, event_text_dict):
 
 def suggest_events_based_on_search_words(search_text, event_dict, country_codes=None):
     # exact_keyword = False
-    print(f"{search_text=} {country_codes=}")
+    # print(f"{search_text=} {country_codes=}")
     try:
         event_id = int(search_text)
         if event_dict.get(event_id) is not None:
@@ -550,8 +550,12 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
             event_name = event.name.lower()
             if keyword == event_name:
                 keyword_score +=10_000
+            elif f"the {keyword}" == event_name:
+                keyword_score += 9_000
             elif event_name.startswith(keyword):
                 keyword_score += 500
+            elif event_name.startswith(f"the {keyword}"):
+                keyword_score += 450
             elif keyword in event_name:
                 keyword_score += 10
 
@@ -559,9 +563,13 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                 event_description = event.description.lower()
                 if keyword == event_description:
                     keyword_score += 1000
-                if event_description.startswith(keyword):
+                elif f"the {keyword}" == event_description:
+                    keyword_score += 900
+                elif event_description.startswith(keyword):
                     keyword_score += 100
-                if keyword in event_description:
+                elif event_description.startswith(f"the {keyword}"):
+                    keyword_score += 90
+                elif keyword in event_description:
                     keyword_score += 1
             except AttributeError:
                 pass
@@ -572,9 +580,13 @@ def suggest_events_based_on_search_words(search_text, event_dict, country_codes=
                 action_name = action.name.lower()
                 if keyword == action_name:
                     keyword_score += 1000
-                if action_name.startswith(keyword):
+                elif f"the {keyword}" == action_name:
+                    keyword_score += 900
+                elif action_name.startswith(keyword):
                     keyword_score += 100
-                if keyword in action_name:
+                elif action_name.startswith(f"the {keyword}"):
+                    keyword_score += 90
+                elif keyword in action_name:
                     keyword_score += 5
             if keyword_score > 0:
                 score += keyword_score
