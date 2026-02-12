@@ -518,14 +518,17 @@ if __name__ == "__main__":
     explanation = """\n    You can filter by country by typing in country code(s) (separated by ,) first, or,
     if you want to restrict your search to events without a specified country, you can
     start with '--nocc'. Additionally, you can use keywords of form 'type=value' to
-    look for certain trigger conditions or effects (or dates).
+    look for certain trigger conditions or effects (or dates). By default, each word is 
+    searched separately, but you can search phrases using quotation marks (").
       Some example searches:
     fin,swe winter
       looks for the word winter in event names and descriptions of Finnish and Swedish events.
-    nor year=1935
-      looks for Norwegian events that have year=1935 in their trigger conditions or dates.
+    chl year=1935
+      looks for Chilean events that have year=1935 in their trigger conditions or dates.
     --nocc research_mod=
       looks for events that have no country specified and change research speed.
+    "industrial planning" "paid off"
+      looks for phrases 'industrial planning' and 'paid off' in names and descriptions of all events.
 
     Empty search i.e. pressing Enter quits the program.
     """
