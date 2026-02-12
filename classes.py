@@ -583,6 +583,7 @@ class Leader:
         return tuple([self.trait_list[i] for i in trait_indices[::-1]])
 
     def __init__(self, leader_id, name, filepath, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year, pic_path=None):
+        self.issues = []
         self.leader_id = leader_id
         self.name = name
         self.filepath = filepath
@@ -595,11 +596,13 @@ class Leader:
             self.traits = self.get_traits_from_trait_num(trait_num)
         except TypeError as e:
             self.traits = []
-            print("TypeError detected with trait_num:")
-            print(f"{leader_id=}")
-            print(f"{name=}")
-            print(f"{country_code=}")
-            print(f"{trait_num=}")
+            issue_text = f"TypeError with trait_num: {leader_id=}, {name=}, {country_code=}, {trait_num=}, {filepath.name=}"
+            self.issues.append(issue_text)
+            # print("TypeError detected with trait_num:")
+            # print(f"{leader_id=}")
+            # print(f"{name=}")
+            # print(f"{country_code=}")
+            # print(f"{trait_num=}")
             raise TypeError(e)
         self.land_naval_or_air = l_n_or_a
         self.start_year = start_year
@@ -798,7 +801,7 @@ class Brigade:
         "b_u14": 44
     }
 
-    def get_unit_name(self, unit_key, text_dict, do_short=True):
+    def get_unit_name(self, unit_key, text_dict, do_short=True, show_issues=False):
         if unit_key == "none":
             return
         if not do_short:
@@ -815,7 +818,10 @@ class Brigade:
             if the_key is None:
                 the_key = f"NAME_{unit_key.upper()}"
             if text_dict.get(the_key) is None:
-                print(f"no name found corresponding to {unit_key}")
+                issue_text = f"no name found corresponding to {unit_key}"
+                self.issues.append(issue_text)
+                if show_issues:
+                    print(issue_text)
                 return unit_key
             return text_dict[the_key]
         exceptions = {
@@ -831,11 +837,14 @@ class Brigade:
         if the_key is None:
             the_key = f"SNAME_{unit_key.upper()}"
         if text_dict.get(the_key) is None:
-            print(f"No name found corresponding to {unit_key}")
+            issue_text = f"No name found corresponding to {unit_key}"
+            self.issues.append(issue_text)
+            if show_issues:
+                print(issue_text)
             return unit_key
         return text_dict[the_key]
 
-    def get_model_name(self, unit_key, model_num, text_dict):
+    def get_model_name(self, unit_key, model_num, text_dict, show_issues=False):
         if unit_key == "none":
             return
         try:
@@ -844,7 +853,10 @@ class Brigade:
             try:
                 model_key = f"BRIG_MODEL_{self.BRIGADE_NUMBERS[unit_key.lower()]}_{model_num}"
             except KeyError:
-                print(f"No model name found corresponding to {unit_key} model {model_num}")
+                issue_text = f"No model name found corresponding to {unit_key} model {model_num}"
+                self.issues.append(issue_text)
+                if show_issues:
+                    print(issue_text)
                 return f"{unit_key} {model_num}"
         
         return text_dict[model_key]
@@ -853,6 +865,7 @@ class Brigade:
     def __init__(self, filepath, land_naval_or_air, models, locked=None, text_dict=None):
         self.filepath = filepath
         self.name_key = filepath.stem
+        self.issues = []
         if text_dict:
             self.name = self.get_unit_name(self.name_key, text_dict, do_short=False)
             self.short_name = self.get_unit_name(self.name_key, text_dict, do_short=True)

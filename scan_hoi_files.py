@@ -416,7 +416,7 @@ def scan_policies_file():
     return policy_dict
 
 
-def scan_leaders_file(filepath, column_names=None):
+def scan_leaders_file(filepath, column_names=None, show_issues=False):
     csv_content = read_csv_file(filepath)
     leaders = []
     country_code_from_file = None
@@ -427,7 +427,8 @@ def scan_leaders_file(filepath, column_names=None):
                 column_names = column_names_in_file
             elif column_names != column_names_in_file:
                 for col_name, col_name_f in zip(column_names, column_names_in_file):
-                    if col_name != col_name_f:
+                    if col_name != col_name_f and show_issues:
+                        # TODO: show issue in FileScanner
                         print(f"Expected {col_name} = {col_name_f}, but this is not the case in file {filepath.name}")
             country_index = column_names.index("country")
             if country_index != 2:
@@ -437,7 +438,9 @@ def scan_leaders_file(filepath, column_names=None):
             country_code_from_file = line[country_index]
         if line[country_index] != country_code_from_file:
             # raise Exception(f"Not all leaders are from the same country in {filepath}: {line[country_index]} != {country_code_from_file}")
-            print(f"Not all leaders are from the same country in {filepath}: {line[country_index]} != {country_code_from_file}")
+            if show_issues:
+                # TODO: show issue in FileScanner
+                print(f"Not all leaders are from the same country in {filepath}: {line[country_index]} != {country_code_from_file}")
         leader_dict = {col_name: value for col_name, value in zip(column_names, line)}
         leaders.append(Leader(
             leader_dict["id"],
@@ -462,7 +465,7 @@ def scan_leaders_file(filepath, column_names=None):
 
     return leaders
 
-def scan_all_leaders(check_unique_ids=False):
+def scan_all_leaders(check_unique_ids=False, show_issues=False):
     column_names = ["name", "id", "country", "rank 3 year", "rank 2 year", "rank 1 year", "rank 0 year", "ideal rank", "max skill", "traits", "skill", "experience", "loyalty", "type", "picture", "start year", "end year", "x"]
     leader_dict = {}
     all_leaders = []
@@ -699,6 +702,8 @@ class FileScanner:
         self.event_dict = None
         self.country_dict = None
 
+        self.issues = []
+
     def scan_main_scenario_file(self):
         file_content = read_txt_file(self.scenario_path, False)
 
@@ -745,7 +750,7 @@ class FileScanner:
         # map_stuff = file_content.get("map")
         # province_stuff = file_content.get("province")
 
-    def get_event_files(self, include_files=None, event_files=None):
+    def get_event_files(self, include_files=None, event_files=None, show_issues=False):
         if include_files:
             self.include_files = include_files
         if event_files:
@@ -763,7 +768,10 @@ class FileScanner:
                     self.event_file_paths.append(event_filepath)
                     break
             else:
-                print(f"File {str(event_file_path)} does not exist (key: {event_key})")
+                issue_text = f"File {str(event_file_path)} does not exist (key: {event_key})"
+                self.issues.append(issue_text)
+                if show_issues:
+                    print(issue_text)
         for path_str in self.include_files:
             if event_key in path_str:
                 include_event_file_path = AOD_PATH / path_str.replace("\\", "/")
@@ -776,9 +784,15 @@ class FileScanner:
                                 self.event_file_paths.append(event_filepath)
                                 break
                         else:
-                            print(f"File {str(event_file_path)} does not exist (key: include)")
+                            issue_text = f"File {str(event_file_path)} does not exist (key: include)"
+                            self.issues.append(issue_text)
+                            if show_issues:
+                                print(issue_text)
                 else:
-                    print(f"Include file {include_event_file_path} does not exist")
+                    issue_text = f"Include file {include_event_file_path} does not exist"
+                    self.issues.append(issue_text)
+                    if show_issues:
+                        print(issue_text)
             else:
                 file_found = False
                 other_file_path = AOD_PATH / path_str.replace("\\", "/")
@@ -792,7 +806,10 @@ class FileScanner:
                         file_found = True
                         break
                 if not file_found:
-                    print(f"File {str(other_file_path)} does not exist")
+                    issue_text = f"File {str(other_file_path)} does not exist"
+                    self.issues.append(issue_text)
+                    if show_issues:
+                        print(issue_text)
 
     def scan_events(self, already_scanned_event_files=None, show_empty_files=False, show_issues=False):
         if already_scanned_event_files is None:
@@ -803,7 +820,10 @@ class FileScanner:
             if events is not None:
                 for event_id, event in events.items():
                     if self.event_dict.get(event_id) is not None:
-                        print(f"ERROR: Event ID already in use before: {event_id} {event.name} [{event.country}]")
+                        issue_text = f"ERROR: Event ID already in use before: {event_id} {event.name} [{event.country}]"
+                        self.issues.append(issue_text)
+                        if show_issues:
+                            print(issue_text)
                         continue
                     self.event_dict[event_id] = event
                 continue
@@ -831,22 +851,26 @@ class FileScanner:
                         triggered_event_id = effect.which
                         if self.event_dict.get(triggered_event_id) is None:
                             name_text = ev.name if ev.name else "[no name]"
+                            issue_text = f"Event {ev_id} [{ev.country_code}]: {name_text} triggers event {triggered_event_id}, which does not exist."
+                            self.issues.append(issue_text)
                             if show_issues:
-                                print(f"Event {ev_id} [{ev.country_code}]: {name_text} triggers event {triggered_event_id}, which does not exist.")
+                                print(issue_text)
                             continue
                         self.event_dict[triggered_event_id].triggered_by.append((ev, i))
                     elif effect.type and effect.type == "sleepevent":
                         deactivated_event_id = effect.which
                         if self.event_dict.get(deactivated_event_id) is None:
                             name_text = ev.name if ev.name else "[no name]"
+                            issue_text = f"Event {ev_id} [{ev.country_code}]: {name_text} deactivates event {deactivated_event_id}, which does not exist."
+                            self.issues.append(issue_text)
                             if show_issues:
-                                print(f"Event {ev_id} [{ev.country_code}]: {name_text} deactivates event {deactivated_event_id}, which does not exist.")
+                                print(issue_text)
                             continue
                         self.event_dict[deactivated_event_id].deactivated_by.append((ev, i))
         
         return already_scanned_event_files
 
-    def scan_scenario_files(self, already_scanned_scenario_files=None):
+    def scan_scenario_files(self, already_scanned_scenario_files=None, show_issues=False):
         # if already_scanned_scenario_files is None:
         #     already_scanned_scenario_files = dict()
         self.scenario_file_for_country = dict()
@@ -859,16 +883,20 @@ class FileScanner:
             if isinstance(country_data, dict):
                 country_code = country_data["tag"].upper()
                 if (old_path := self.scenario_file_for_country.get(country_code)) is not None:
-                    print(f"Country {self.text_dict[country_code]} [{country_code}] already has something in {old_path}")
-                    print(f"Also has something in {filepath}")
+                    issue_text = f"Country {self.text_dict[country_code]} [{country_code}] already has something in {old_path}. Also has something in {filepath}"
+                    self.issues.append(issue_text)
+                    if show_issues:
+                        print(issue_text)
                     continue
                 self.scenario_file_for_country[country_code] = filepath
             elif isinstance(country_data, list):
                 for country_dict in country_data:
                     country_code = country_dict["tag"].upper()
                     if self.scenario_file_for_country.get(country_code) is not None:
-                        print(f"Country {self.text_dict[country_code]} [{country_code}] already has something in {old_path}")
-                        print(f"Also has something in {filepath}")
+                        issue_text = f"Country {self.text_dict[country_code]} [{country_code}] already has something in {old_path}. Also has something in {filepath}"
+                        self.issues.append(issue_text)
+                        if show_issues:
+                            print(issue_text)
                         continue
                     self.scenario_file_for_country[country_code] = filepath
             else:
@@ -896,18 +924,61 @@ class FileScanner:
             list_of_tech_teams = scan_tech_teams()
         self.techteam_dict = dict()
         for techteam in list_of_tech_teams:
-            if techteam.country_code in self.country_codes:
+            country = self.country_dict.get(techteam.country_code)
+            if country:
                 self.techteam_dict[techteam.team_id] = techteam
+                self.techteam_dict[techteam.team_id].country = country
     
     def scan_brigades_and_divisions(self):
         self.brigade_dict = scan_brigades(self.text_dict)
+        for key, brigade in self.brigade_dict.items():
+            for issue_text in brigade.issues:
+                self.issues.append(issue_text)
         self.division_dict = scan_divisions(self.text_dict)
+        for key, division in self.division_dict.items():
+            for issue_text in division.issues:
+                self.issues.append(issue_text)
     
     def scan_ministers(self):
         self.minister_dict = scan_all_ministers()
+
+    def scan_leaders(self, check_unique_ids=False, show_issues=False):
+        column_names = ["name", "id", "country", "rank 3 year", "rank 2 year", "rank 1 year", "rank 0 year", "ideal rank", "max skill", "traits", "skill", "experience", "loyalty", "type", "picture", "start year", "end year", "x"]
+        leader_dict = {}
+        all_leaders = []
+        leader_files = get_leaders_files(AOD_PATH)
+        for filepath in leader_files:
+            try:
+                leaders = scan_leaders_file(filepath, column_names)
+                for leader in leaders:
+                    leader.country = self.country_dict.get(leader.country_code)
+                    all_leaders.append(leader)
+            except KeyError:
+                issue_text = f"KeyError IN FILE: {filepath}"
+                self.issues.append(issue_text)
+                if show_issues:
+                    print(issue_text)
+            except IndexError:
+                issue_text = f"IndexError IN FILE: {filepath}"
+                self.issues.append(issue_text)
+                if show_issues:
+                    print(issue_text)
+            except TypeError:
+                issue_text = f"TypeError IN FILE {filepath}"
+                self.issues.append(issue_text)
+                if show_issues:
+                    print(issue_text)
+        if check_unique_ids:
+            for leader in all_leaders:
+                if leader_dict.get(leader.leader_id) is not None:
+                    raise Exception(f"Leader id is not unique: {leader.leader_id}")
+                leader_dict[leader.leader_id] = leader
+            return leader_dict
+        for leader in all_leaders:
+            leader_dict[leader.leader_id] = leader
     
-    def scan_leaders(self):
-        self.leader_dict = scan_all_leaders()
+    # def scan_leaders(self):
+    #     self.leader_dict = scan_all_leaders()
 
     def scan(self, scan_everything=False):
         if self.event_dict is None:
