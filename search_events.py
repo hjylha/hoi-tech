@@ -527,8 +527,8 @@ if __name__ == "__main__":
       looks for Chilean events that have year=1935 in their trigger conditions or dates.
     --nocc research_mod=
       looks for events that have no country specified and change research speed.
-    "industrial planning" "paid off"
-      looks for phrases 'industrial planning' and 'paid off' in names and descriptions of all events.
+    "trade agreement" "american president"
+      looks for phrases 'trade agreement' and 'american president' in names and descriptions of all events.
 
     Empty search i.e. pressing Enter quits the program.
     """
