@@ -941,6 +941,8 @@ class FileScanner:
     
     def scan_ministers(self):
         self.minister_dict = scan_all_ministers()
+        for minister in self.minister_dict.values():
+            minister.country = self.country_dict.get(minister.country_code)
 
     def scan_leaders(self, check_unique_ids=False, show_issues=False):
         column_names = ["name", "id", "country", "rank 3 year", "rank 2 year", "rank 1 year", "rank 0 year", "ideal rank", "max skill", "traits", "skill", "experience", "loyalty", "type", "picture", "start year", "end year", "x"]
