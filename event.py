@@ -255,12 +255,26 @@ def get_actions(list_of_action_dicts, text_dict):
     key_to_ai_chance = "ai_chance"
     key_to_effects = "command"
     for action in list_of_action_dicts:
-        action_key = action[key_to_action_key]
-        name_key = action.get(key_to_name_key)
-        name = text_dict.get(name_key)
-        name = "" if name is None else name
-        ai_chance = action.get(key_to_ai_chance)
-        effects = action.get(key_to_effects)
+        action_key = None
+        name_key = None
+        name = None
+        ai_chance = None
+        effects = None
+        for key, value in action.items():
+            key_lowered = key.lower()
+            if key_lowered == key_to_action_key:
+                action_key = value
+                continue
+            if key_lowered == key_to_name_key:
+                name_key = value
+                name = text_dict.get(name_key)
+                name = "" if name is None else name
+                continue
+            if key_lowered == key_to_ai_chance:
+                ai_chance = value
+                continue
+            if key_lowered == key_to_effects:
+                effects = value
         actions.append(Action(action_key, name_key, name, ai_chance, effects))
     return actions
 
