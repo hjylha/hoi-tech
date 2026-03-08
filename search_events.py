@@ -385,6 +385,10 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     if " --all" in text_input:
         max_num_of_suggestions = 999_999
         text_input = text_input.replace(" --all", "")
+    print_all = False
+    if " --printall" in text_input:
+        print_all = True
+        text_input = text_input.replace(" --printall", "")
     suggestions = suggest_events_based_on_search_words(text_input, filescanner.event_dict, country_codes)
 
     indent_add = 2
@@ -401,6 +405,16 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
         ev = suggestions[0][0]
         # ev.print_event(aod_path, 1, indent_add)
         print_event(ev, aod_path, 1, indent_add, filescanner.text_dict, filescanner.event_dict, filescanner.tech_dict, filescanner.leader_dict, filescanner.minister_dict, filescanner.techteam_dict, force_default=force_default)
+    elif print_all:
+        ordinal_num = 0
+        for event, score in suggestions[:max_num_of_suggestions]:
+            ordinal_num += 1
+            print("#" * 30)
+            print(f" Result {ordinal_num}: score {score}")
+            print("#" * 30)
+            print()
+            print_event(event, aod_path, 1, indent_add, filescanner.text_dict, filescanner.event_dict, filescanner.tech_dict, filescanner.leader_dict, filescanner.minister_dict, filescanner.techteam_dict, force_default=force_default)
+            print()
     else:
         for event, score in suggestions[:max_num_of_suggestions]:
             country_code = event.country_code
