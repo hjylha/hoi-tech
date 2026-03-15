@@ -248,8 +248,26 @@ class ICCalc:
                 all_cumulative_ic_balances[(base_ic, base_infra_num)] = cumulative_ic_balances
 
         return all_cumulative_ic_balances
-
     
+    def get_cumulative_ic_balances_and_write_them_to_file(self, max_ic_at_start=20, num_of_days=None, filepath=None):
+        num_of_days = num_of_days if num_of_days else 2 * self.MAX_DAYS
+        all_ic_balances = self.get_cumulative_ic_balances(max_ic_at_start, num_of_days)
+
+        if filepath is None:
+            filepath = Path(__file__).parent / "db" / f"ic_balance_for_{num_of_days}_days__ic_t_{self.IC_TIME}__infra_t_{self.INFRA_TIME}.csv"
+        
+        with open(filepath, "w") as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=";")
+            header_row = ["starting_ic", "starting_infra", "ic_to_add", "infra_to_add"] + [f"day_{num + 1}" for num in range(num_of_days)]
+            csv_writer.writerow(header_row)
+            for starting_ic_n_infra, ic_balances in all_ic_balances.items():
+                starting_ic, starting_infra = starting_ic_n_infra
+                for ic_n_infra_to_add, ic_balance in ic_balances.items():
+                    ic_to_add, infra_to_add = ic_n_infra_to_add
+                    datarow = [str(starting_ic), str(starting_infra * 5), str(ic_to_add), str(infra_to_add)] + [str(ic) for ic in ic_balance]
+                    csv_writer.writerow(datarow)
+    
+
     def get_optimal_ic_usage(self, base_ic, base_infra_num, last_day):
         MAX_IC_TO_BUILD = LAST_DAY // self.IC_TIME
         MAX_INFRA_TO_BUILD = LAST_DAY // self.INFRA_TIME
@@ -416,6 +434,14 @@ if __name__ == "__main__":
     end_time = time.time()
 
     print(f"Calculated ic progress and saved to file in {round(end_time - start_time, 3)} seconds")
+
+    start_time = time.time()
+
+    ic_calc.get_cumulative_ic_balances_and_write_them_to_file(max_ic_at_start=30, num_of_days=400)
+
+    end_time = time.time()
+
+    print(f"Calculated ic balances and saved to file in {round(end_time - start_time, 3)} seconds")
 
 
 
