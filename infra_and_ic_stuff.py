@@ -103,6 +103,59 @@ class ICCalc:
         start_date_to_build_ic = (self.min_infra_for_ic_production - base_infra_num) * self.INFRA_TIME
         ic_building_ends_before = start_date_to_build_ic + days_to_build_ic
         return infra_build_days, (start_date_to_build_ic, ic_building_ends_before)
+
+    def get_all_key_days(self, num_of_days=None):
+        num_of_days = num_of_days if num_of_days else 2 * self.MAX_DAYS
+
+        max_ic_to_build = num_of_days // self.IC_TIME
+        max_infra_to_build = min(num_of_days // self.INFRA_TIME, self.MAX_INFRA_NUM)
+
+        key_days = [infra_num * self.INFRA_TIME for infra_num in range(max_infra_to_build + 1)]
+
+        for infra_num in range(1, self.min_infra_for_ic_production + 1):
+            for ic in range(max_ic_to_build + 1):
+                key_day = key_days[infra_num] + ic * self.IC_TIME
+                if key_day <= num_of_days and key_day not in key_days:
+                    key_days.append(key_day)
+
+        for ic in range(max_ic_to_build + 1):
+            key_day = ic * self.IC_TIME
+            if key_day not in key_days:
+                key_days.append(key_day)
+        
+        return sorted(key_days)
+    
+    def get_ic_for_almost_every_day(self, base_ic, base_infra_num, ic_to_add, infra_to_add, last_day=None):
+        last_day = last_day + 1 if last_day else self.MAX_DAYS
+        # should this be checked somewhere else?
+        infra_to_add = min(infra_to_add, self.MAX_INFRA_NUM - base_infra_num)
+
+        build_days = self.get_build_days_for_ic_and_infra(base_infra_num, ic_to_add, infra_to_add)
+        days_to_build_infra = build_days[0][1]
+        start_date_to_build_ic, ic_building_ends_before = build_days[1]
+
+        current_base_ic = base_ic
+        current_infra_num = base_infra_num
+        current_ic = self.get_ic(current_base_ic, current_infra_num)
+        ic_for_almost_every_day = []
+        # ic_for_almost_every_day = [(0, current_ic)]
+        for day in range(last_day):
+
+            recalculate_current_ic = False
+            if day % self.INFRA_TIME == 0 and day <= days_to_build_infra:
+                infra_num_add = day // self.INFRA_TIME
+                current_infra_num = base_infra_num + infra_num_add
+                recalculate_current_ic = True
+            if (day - start_date_to_build_ic) % self.IC_TIME == 0 and day >= start_date_to_build_ic and day <= ic_building_ends_before:
+                ic_add = (day - start_date_to_build_ic) // self.IC_TIME
+                current_base_ic = base_ic + ic_add
+                recalculate_current_ic = True
+
+            if recalculate_current_ic and current_base_ic > 0:
+                current_ic = self.get_ic(current_base_ic, current_infra_num)
+                ic_for_almost_every_day.append((day, round(current_ic, 3)))
+
+        return ic_for_almost_every_day
     
     def get_ic_for_every_day(self, base_ic, base_infra_num, ic_to_add, infra_to_add, last_day=None):
         last_day = last_day + 1 if last_day else self.MAX_DAYS
@@ -149,7 +202,7 @@ class ICCalc:
                 ic_progress = dict()
                 for infra_add in range(max_infra + 1):
                     for ic_add in range(max_ic_to_build + 1):
-                        ic_progress[(ic_add, infra_add)] = self.get_ic_for_every_day(base_ic, base_infra_num, ic_add, infra_add, num_of_days - 1)
+                        ic_progress[(ic_add, infra_add)] = self.get_ic_for_almost_every_day(base_ic, base_infra_num, ic_add, infra_add, num_of_days - 1)
                 all_ic_progress[(base_ic, base_infra_num)] = ic_progress
 
         return all_ic_progress
@@ -169,9 +222,119 @@ class ICCalc:
                 starting_ic, starting_infra = starting_ic_n_infra
                 for ic_n_infra_to_add, ic_progress in ic_progress_dict.items():
                     ic_to_add, infra_to_add = ic_n_infra_to_add
-                    datarow = [str(starting_ic), str(starting_infra * 5), str(ic_to_add), str(infra_to_add)] + [str(ic) for ic in ic_progress]
+                    datarow = [str(starting_ic), str(starting_infra * 5), str(ic_to_add), str(infra_to_add)] + [f"{str(ic[0])},{ic[1]}" for ic in ic_progress]
                     csv_writer.writerow(datarow)
 
+    def get_ic_and_balance_and_write_them_to_files(self, max_ic_at_start=30, num_of_days=None, filepath_ic=None, filepath_balance=None):
+        num_of_days = num_of_days if num_of_days else 2 * self.MAX_DAYS
+        if filepath_ic is None:
+            filepath_ic = Path(__file__).parent / "db" / f"ic_progress_for_{num_of_days}_days__ic_t_{self.IC_TIME}__infra_t_{self.INFRA_TIME}.csv"
+        if filepath_balance is None:
+            filepath_balance = Path(__file__).parent / "db" / f"ic_balance_for_{num_of_days}_days__ic_t_{self.IC_TIME}__infra_t_{self.INFRA_TIME}.csv"
+        
+        # max_ic_to_build = num_of_days // self.IC_TIME
+        max_infra_to_build = min(num_of_days // self.INFRA_TIME, self.MAX_INFRA_NUM)
+
+        important_days = self.get_all_key_days(num_of_days)
+
+        all_ic_progress = dict()
+        all_ic_balances = dict()
+        
+        for starting_infra in range(self.MAX_INFRA_NUM + 1):
+            max_infra = min(max_infra_to_build, self.MAX_INFRA_NUM - starting_infra)
+            ic_production_starts = max(0, self.min_infra_for_ic_production - starting_infra) * self.INFRA_TIME
+            max_ic_to_build = (num_of_days - max(0, self.min_infra_for_ic_production - starting_infra) * self.INFRA_TIME) // self.IC_TIME
+            for starting_base_ic in range(max_ic_at_start + 1):
+                ic_progresses = dict()
+                ic_balances = dict()
+                for infra_add in range(max_infra + 1):
+                    infra_build_time = infra_add * self.INFRA_TIME
+                    if starting_infra + infra_add < self.min_infra_for_ic_production:
+                        max_ic_to_build = 0
+                    else:
+                        max_ic_to_build = (num_of_days - max(0, self.min_infra_for_ic_production - starting_infra) * self.INFRA_TIME) // self.IC_TIME
+                    # if starting_infra == 0:
+                    #     print(0, infra_add, max_ic_to_build)
+                    for ic_add in range(max_ic_to_build + 1):
+                        ic_production_ends = ic_production_starts + ic_add * self.IC_TIME
+
+                        ic_progress = dict()
+                        ic_balance = dict()
+
+                        current_base_ic = starting_base_ic
+                        current_infra_num = starting_infra
+                        previous_ic = None
+                        previous_balance = None
+
+                        for day in important_days:
+                            update_things = False
+                            if day <= infra_build_time and day % self.INFRA_TIME == 0:
+                                current_infra_num = starting_infra + day // self.INFRA_TIME
+                                update_things = True
+                            if day > ic_production_starts and day <= ic_production_ends and (day - ic_production_starts) % self.IC_TIME == 0:
+                                current_base_ic = starting_base_ic + (day - ic_production_starts) // self.IC_TIME
+                                update_things = True
+                            if previous_ic is None or previous_balance is None:
+                                update_things = True
+                            if update_things:
+                                balance = 0
+                                current_ic = round(self.get_ic(current_base_ic, current_infra_num), 3)
+                                if previous_ic is None or current_ic != previous_ic:
+                                    ic_progress[day] = current_ic
+                                    previous_ic = current_ic
+                                balance += current_ic
+                                if day < infra_build_time:
+                                    balance -= self.INFRA_COST
+                                if day >= ic_production_starts and day < ic_production_ends:
+                                    balance -= self.IC_COST
+                                balance = round(balance, 3)
+                                if previous_balance is None or balance != previous_balance:
+                                    ic_balance[day] = balance
+                                    previous_balance = balance
+                        
+                        ic_progresses[(ic_add, infra_add)] = ic_progress
+                        ic_balances[(ic_add, infra_add)] = ic_balance
+                
+                all_ic_progress[(starting_base_ic, starting_infra)] = ic_progresses
+                all_ic_balances[(starting_base_ic, starting_infra)] = ic_balances
+        
+        with open(filepath_ic, "w") as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=";")
+            header_row = ["starting_ic", "starting_infra", "ic_to_add", "infra_to_add"] + [f"day_{date}" for date in important_days]
+            csv_writer.writerow(header_row)
+            for starting_ic_n_infra, ic_balance_dict in all_ic_progress.items():
+                starting_ic, starting_infra = starting_ic_n_infra
+                for ic_n_infra_to_add, ic_balance in ic_balance_dict.items():
+                    ic_to_add, infra_to_add = ic_n_infra_to_add
+                    datarow = [str(starting_ic), str(starting_infra * 5), str(ic_to_add), str(infra_to_add)]
+                    datarow_more = []
+                    for date in important_days:
+                        if ic_balance.get(date) is None:
+                            datarow_more.append("")
+                        else:
+                            datarow_more.append(str(ic_balance[date]))
+                    datarow = datarow + datarow_more
+                    csv_writer.writerow(datarow)
+        
+        with open(filepath_balance, "w") as csv_file:
+            csv_writer = csv.writer(csv_file, delimiter=";")
+            header_row = ["starting_ic", "starting_infra", "ic_to_add", "infra_to_add"] + [f"day_{date}" for date in important_days]
+            csv_writer.writerow(header_row)
+            for starting_ic_n_infra, ic_balance_dict in all_ic_balances.items():
+                starting_ic, starting_infra = starting_ic_n_infra
+                for ic_n_infra_to_add, ic_balance in ic_balance_dict.items():
+                    ic_to_add, infra_to_add = ic_n_infra_to_add
+                    datarow = [str(starting_ic), str(starting_infra * 5), str(ic_to_add), str(infra_to_add)]
+                    datarow_more = []
+                    for date in important_days:
+                        if ic_balance.get(date) is None:
+                            datarow_more.append("")
+                        else:
+                            datarow_more.append(str(ic_balance[date]))
+                    datarow = datarow + datarow_more
+                    csv_writer.writerow(datarow)
+
+        
     
     def get_cumulative_ic_balance(self, base_ic, base_infra_num, ic_to_add, infra_to_add, last_day=None):
         last_day = last_day + 1 if last_day else self.MAX_DAYS
@@ -427,21 +590,37 @@ if __name__ == "__main__":
     # for key, value in best_ic_and_infra_add.items():
     #     print(f" {key[0]}\t{key[1] * 5}\t\t{value[0]}\t{value[1]}")
 
+
+
+    # DANGEROUS MEMORY WASTE
+
+    # start_time = time.time()
+
+    # ic_calc.get_ic_progress_and_write_it_to_file(max_ic_at_start=30, num_of_days=2000)
+    # ic_calc.get_ic_progress_and_write_it_to_file(max_ic_at_start=30)
+
+    # end_time = time.time()
+
+    # print(f"Calculated ic progress and saved to file in {round(end_time - start_time, 3)} seconds")
+
+    # start_time = time.time()
+
+    # ic_calc.get_cumulative_ic_balances_and_write_them_to_file(max_ic_at_start=30, num_of_days=400)
+
+    # end_time = time.time()
+
+    # print(f"Calculated ic balances and saved to file in {round(end_time - start_time, 3)} seconds")
+
+
     start_time = time.time()
 
-    ic_calc.get_ic_progress_and_write_it_to_file(max_ic_at_start=30, num_of_days=400)
+    ic_calc.get_ic_and_balance_and_write_them_to_files(max_ic_at_start=30, num_of_days=2000)
+    # ic_calc.get_ic_and_balance_and_write_them_to_files(max_ic_at_start=30)
 
     end_time = time.time()
 
-    print(f"Calculated ic progress and saved to file in {round(end_time - start_time, 3)} seconds")
+    print(f"Calculated ic progress and balance and saved to file in {round(end_time - start_time, 3)} seconds")
 
-    start_time = time.time()
-
-    ic_calc.get_cumulative_ic_balances_and_write_them_to_file(max_ic_at_start=30, num_of_days=400)
-
-    end_time = time.time()
-
-    print(f"Calculated ic balances and saved to file in {round(end_time - start_time, 3)} seconds")
 
 
 
