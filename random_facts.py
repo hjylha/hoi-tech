@@ -8,6 +8,7 @@ import scan_hoi_files as shf
 from research import Research
 
 
+DEFAULT_START_YEAR = 1933
 DEFAULT_END_YEAR = 1937
 DEFAULT_LEVEL = 3
 DEFAULT_DIFFICULTY = "VERYHARD"
@@ -76,7 +77,7 @@ def get_doctrines_to_check_for_exploits(research, categories=(6, 8, 9), level=DE
     return doctrines
         
 
-def get_best_exploits_for_country(research, categories=(6, 8, 9), year_range=(1933, DEFAULT_END_YEAR), level=DEFAULT_LEVEL, difficulty=DEFAULT_DIFFICULTY):
+def get_best_exploits_for_country(research, categories=(6, 8, 9), year_range=(DEFAULT_START_YEAR, DEFAULT_END_YEAR), level=DEFAULT_LEVEL, difficulty=DEFAULT_DIFFICULTY):
     # r = Research(countries=[country_code])
     # for country in research.countries:
     #     research.remove_country(country)
@@ -208,6 +209,13 @@ def run_exploit_test(num_to_show=DEFAULT_NUM_TO_SHOW):
     if ccs:
         for cc in ccs:
             r.add_country(cc)
+        cc = ", ".join(ccs)
+
+    start_year = input(f"Start year for exploits [default={DEFAULT_START_YEAR}]: ")
+    try:
+        start_year = int(start_year)
+    except ValueError:
+        start_year = DEFAULT_START_YEAR
 
     end_year = input(f"End year for exploits [default={DEFAULT_END_YEAR}]: ")
     try:
@@ -241,9 +249,9 @@ def run_exploit_test(num_to_show=DEFAULT_NUM_TO_SHOW):
             pass
 
     if exact_calc:
-        res6 = get_best_exploits_for_country(r, categories=(6, ), year_range=(1933, end_year), level=requested_level)
-        res8 = get_best_exploits_for_country(r, categories=(8, ), year_range=(1933, end_year), level=requested_level)
-        res9 = get_best_exploits_for_country(r, categories=(9, ), year_range=(1933, end_year), level=requested_level)
+        res6 = get_best_exploits_for_country(r, categories=(6, ), year_range=(start_year, end_year), level=requested_level)
+        res8 = get_best_exploits_for_country(r, categories=(8, ), year_range=(start_year, end_year), level=requested_level)
+        res9 = get_best_exploits_for_country(r, categories=(9, ), year_range=(start_year, end_year), level=requested_level)
 
         print(f"Best land doctrine exploits for {cc}:")
         print_exploits(res6[:num_to_show])
@@ -257,9 +265,9 @@ def run_exploit_test(num_to_show=DEFAULT_NUM_TO_SHOW):
         print_exploits(res9[:num_to_show])
     else:
         print("No exact calculation")
-        res6 = get_best_approx_exploits_for_country(r, categories=(6, ), year_range=(1933, end_year), level=requested_level)
-        res8 = get_best_approx_exploits_for_country(r, categories=(8, ), year_range=(1933, end_year), level=requested_level)
-        res9 = get_best_approx_exploits_for_country(r, categories=(9, ), year_range=(1933, end_year), level=requested_level)
+        res6 = get_best_approx_exploits_for_country(r, categories=(6, ), year_range=(start_year, end_year), level=requested_level)
+        res8 = get_best_approx_exploits_for_country(r, categories=(8, ), year_range=(start_year, end_year), level=requested_level)
+        res9 = get_best_approx_exploits_for_country(r, categories=(9, ), year_range=(start_year, end_year), level=requested_level)
 
         print(f"Best land doctrine exploits for {cc}:")
         print_approx_exploits(res6[:num_to_show])
