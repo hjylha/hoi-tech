@@ -429,6 +429,43 @@ def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, for
     return True
 
 
+def find_matching_text(search_term, text_dict, exact_keyword=False):
+    if exact_keyword:
+        suggestions = []
+        for k, v_list in text_dict.items():
+            if k == search_term:
+                for t, p in v_list:
+                    suggestions.append((k, t, p))
+                continue
+            for t, p in v_list:
+                if t == search_term:
+                    suggestions.append((k, t, p))
+        return suggestions
+    
+    search_term = search_term.lower()
+    starts = []
+    others = []
+    for k, v_list in text_dict.items():
+        if k.lower().startswith(search_term):
+            for t, p in v_list:
+                starts.append((k, t, p))
+            continue
+        if search_term in k.lower():
+            for t, p in v_list:
+                others.append((k, t, p))
+        for t, p in v_list:
+            if t.lower().startswith(search_term):
+                starts.append((k, t, p))
+                continue
+            if search_term in t.lower():
+                others.append((k, t, p))
+    suggestions = starts
+    for triple in others:
+        if triple not in suggestions:
+            suggestions.append(triple)
+    return suggestions
+
+
 def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
     exact_keyword = False
     text_input = input("Enter search term(s):\n")
@@ -440,38 +477,8 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
             exact_keyword = True
     except IndexError:
         pass
-    if exact_keyword:
-        suggestions = []
-        for k, v_list in text_dict.items():
-            if k == text_input:
-                for t, p in v_list:
-                    suggestions.append((k, t, p))
-                continue
-            for t, p in v_list:
-                if t == text_input:
-                    suggestions.append((k, t, p))
-    else:
-        text_input = text_input.lower()
-        starts = []
-        others = []
-        for k, v_list in text_dict.items():
-            if k.lower().startswith(text_input):
-                for t, p in v_list:
-                    starts.append((k, t, p))
-                continue
-            if text_input in k.lower():
-                for t, p in v_list:
-                    others.append((k, t, p))
-            for t, p in v_list:
-                if t.lower().startswith(text_input):
-                    starts.append((k, t, p))
-                    continue
-                if text_input in t.lower():
-                    others.append((k, t, p))
-        suggestions = starts
-        for triple in others:
-            if triple not in suggestions:
-                suggestions.append(triple)
+    
+    suggestions = find_matching_text(text_input, text_dict, exact_keyword)
     
     print()
     if not suggestions:
