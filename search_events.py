@@ -494,21 +494,201 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
     
     suggestions = find_matching_text(text_input, text_dict, exact_keyword)
     
-    print()
-    if not suggestions:
-        print("Nothing found")
-    if len(suggestions) == 1:
-        key, text, path = suggestions[0]
-        print(key)
-        print(text)
-        print(f"[{path.name}]")
-    else:
-        for key, text, path in suggestions[:max_num_of_suggestions]:
-            text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
-            print(key, text_to_print, f"[{path.name}]")
-    print("\n")
+    print_text_suggestions(suggestions, max_num_of_suggestions, max_text_length)
 
     return True
+
+
+def find_and_remove_text_w_space(full_text, text_to_find_and_remove):
+    if full_text == text_to_find_and_remove:
+        return ""
+    text_at_start = f"{text_to_find_and_remove} "
+    if full_text.startswith(text_at_start):
+        return full_text.replace(text_at_start, "")
+    text_elsewhere = f" {text_to_find_and_remove}"
+    return full_text.replace(text_elsewhere, "")
+
+
+class Search:
+
+    DEFAULT_SUBJECT = "--E"
+
+    def search_text(self, text_input):
+        if not text_input:
+            return
+        exact_keyword = False
+        try:
+            if text_input.strip()[0] == '"' and text_input.strip()[-1] == '"':
+                text_input = text_input.strip()[1:-1]
+                exact_keyword = True
+        except IndexError:
+            pass
+
+        suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
+        print_text_suggestions(suggestions, self.max_num_of_suggestions, self.max_text_length)
+
+    def search_events(self, text_input):
+        if not text_input:
+            return
+        no_countries = False
+        if text_input.startswith("--nocc"):
+            no_countries = True
+            country_codes = [""]
+            if text_input == "--nocc":
+                text_input = ""
+            else:
+                text_input = text_input.replace("--nocc ", "")
+        elif " --nocc" in text_input:
+            no_countries = True
+            country_codes = [""]
+            text_input = text_input.replace(" --nocc", "")
+        found_country_codes = False
+        if not no_countries:
+            possible_country_codes = text_input.split(" ")[0].upper().split(",")
+            country_codes = []
+            for possible_country_code in possible_country_codes:
+                if self.files.country_dict.get(possible_country_code) is not None:
+                    country_codes.append(possible_country_code)
+                    found_country_codes = True
+                elif found_country_codes:
+                    print(f"{possible_country_code} is not a valid country code.")
+        start_length = 0
+        if found_country_codes:
+            start_length = len(",".join(possible_country_codes)) + 1
+        
+        text_input = text_input[start_length:]
+
+        if " --all" in text_input:
+            max_num_of_suggestions = 999_999
+            text_input = text_input.replace(" --all", "")
+        print_all = False
+        if " --printall" in text_input:
+            print_all = True
+            text_input = text_input.replace(" --printall", "")
+        
+        suggestions = suggest_events_based_on_search_words(text_input, self.files.event_dict, country_codes)
+
+        indent_add = 2
+        # print(f"Search term: {text_input}, country_codes: {country_codes}")
+        print()
+        if country_codes and not no_countries:
+            cc_texts = [f"{self.files.country_dict[country_code]} [{country_code}]" for country_code in country_codes]
+            print(f" Searching restricted to events of {', '.join(cc_texts)}\n")
+        elif country_codes and no_countries:
+            print(f"Searching restricted to events without a country")
+        if not suggestions:
+            print(" No matching events found.")
+        elif len(suggestions) == 1:
+            ev = suggestions[0][0]
+            # ev.print_event(aod_path, 1, indent_add)
+            print_event(ev, self.aod_path, 1, indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
+        elif print_all:
+            ordinal_num = 0
+            for event, score in suggestions[:self.max_num_of_suggestions]:
+                ordinal_num += 1
+                print("#" * 30)
+                print(f" Result {ordinal_num}: score {score}")
+                print("#" * 30)
+                print()
+                print_event(event, self.aod_path, 1, indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
+                print()
+        else:
+            for event, score in suggestions[:self.max_num_of_suggestions]:
+                country_code = event.country_code
+                country_code = country_code.upper() if country_code else ""
+                if event.name:
+                    print(f" {event.event_id} [{country_code}]: {event.name} (score: {score})")
+                else:
+                    print(f" {event.event_id} [{country_code}]: {event.name_key}  [name in file] (score: {score})")
+            if len(suggestions) > self.max_num_of_suggestions:
+                print(f"\n  {self.max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
+        print("\n")
+
+    def search_tech(self, text_input):
+        if not text_input:
+            return
+
+    def search_leaders(self, text_input):
+        if not text_input:
+            return
+
+    def search_ministers(self, text_input):
+        if not text_input:
+            return
+
+    def search_tech_teams(self, text_input):
+        if not text_input:
+            return
+    
+    def search_countries(self, text_input):
+        if not text_input:
+            return
+        exact_keyword = False
+        try:
+            if text_input.strip()[0] == '"' and text_input.strip()[-1] == '"':
+                text_input = text_input.strip()[1:-1]
+                exact_keyword = True
+        except IndexError:
+            pass
+        text_input = text_input.lower()
+
+        matches = []
+        other_suggestions = []
+        suggestions = []
+        
+        for country_code, country_name in self.files.country_dict.items():
+            if country_code.lower() == text_input or country_name.lower() == text_input:
+                if exact_keyword:
+                    suggestions = [(country_code, country_name)]
+                    break
+                matches.append((country_code, country_name))
+            elif text_input in country_code.lower() or text_input in country_name.lower():
+                other_suggestions.append((country_code, country_name))
+        
+        if not suggestions:
+            suggestions = matches + other_suggestions
+        
+        print()
+        if not suggestions:
+            print("  Nothing found")
+        else:
+            for country_code, country_name in suggestions[:self.max_num_of_suggestions]:
+                print(f"  [{country_code}] {country_name}")
+        print("\n")
+
+
+    def __init__(self, aod_path, filescanner, max_num_of_suggestions=10, max_text_length=50, force_default=False):
+        self.aod_path = aod_path
+        self.files = filescanner
+        self.subjects = {
+            "--E": (self.search_events, "events"),
+            "--t": (self.search_text, "text"), 
+            "--T": (self.search_tech, "technologies"),
+            "--TT": (self.search_tech_teams, "tech teams"), 
+            "--L": (self.search_leaders, "leaders"),
+            "--M": (self.search_ministers, "ministers"),
+            "--C": (self.search_countries, "countries")
+        }
+        self.current_subject = self.DEFAULT_SUBJECT
+        self.max_num_of_suggestions = max_num_of_suggestions
+        self.max_text_length = max_text_length
+        self.force_default = force_default
+    
+    
+    def search(self):
+        while True:
+            text_input = input(f"Enter search term(s) [current subject: {self.subjects[self.current_subject][1]}]:\n")
+            if not text_input:
+                return
+            for key, func_n_text in self.subjects.items():
+                new_text_input = find_and_remove_text_w_space(text_input, key)
+                if new_text_input != text_input:
+                    self.current_subject = key
+                    func_n_text[0](new_text_input)
+                    break
+            else:
+                self.current_subject = self.DEFAULT_SUBJECT
+                self.search_events(text_input)
 
 
 if __name__ == "__main__":
