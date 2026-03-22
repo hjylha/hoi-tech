@@ -465,19 +465,26 @@ def find_matching_text(search_term, text_dict, exact_keyword=False):
             suggestions.append(triple)
     return suggestions
 
-def print_text_suggestions(suggestions, max_num_of_suggestions=99, max_text_length=50):
+def print_text_suggestions(suggestions, max_num_of_suggestions=99, max_text_length=50, indent_num=2):
     print()
     if not suggestions:
-        print("Nothing found")
+        print(" " * indent_num, "Nothing found\n")
+        return
     if len(suggestions) == 1:
         key, text, path = suggestions[0]
-        print(key)
-        print(text)
-        print(f"[{path.name}]")
-    else:
-        for key, text, path in suggestions[:max_num_of_suggestions]:
-            text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
-            print(key, text_to_print, f"[{path.name}]")
+        print(" " * indent_num, key)
+        print(" " * indent_num, text)
+        print(" " * indent_num, f"[{path.name}]")
+        print("\n")
+        return
+    for key, text, path in suggestions[:max_num_of_suggestions]:
+        key_to_print = key[:max_text_length]
+        key_to_print = key_to_print + (" " * (max_text_length- len(key_to_print)))
+        text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
+        text_to_print = text_to_print + (" " * (max_text_length + 5 - len(text_to_print)))
+        print(" " * indent_num, key_to_print, text_to_print, " ", f"[{path.name}]")
+    if len(suggestions) > max_num_of_suggestions:
+            print(f"\n{' ' * indent_num} {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
     print("\n")
 
 def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
@@ -494,7 +501,7 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
     
     suggestions = find_matching_text(text_input, text_dict, exact_keyword)
     
-    print_text_suggestions(suggestions, max_num_of_suggestions, max_text_length)
+    print_text_suggestions(suggestions, max_num_of_suggestions, max_text_length, indent_num=1)
 
     return True
 
@@ -522,7 +529,7 @@ class Search:
     def change_subject_in_search(self, text_input, current_subject):
         if not text_input:
             self.current_subject = current_subject
-            print(f"\n  Switching subject to {self.subjects[self.current_subject][1]}\n")
+            print(f"\n{' ' * self.indent_num} Switching subject to {self.subjects[self.current_subject][1]}\n")
             return True
         return False
 
@@ -540,7 +547,7 @@ class Search:
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
         suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
-        print_text_suggestions(suggestions, max_num_of_suggestions, self.max_text_length)
+        print_text_suggestions(suggestions, max_num_of_suggestions, self.max_text_length, self.indent_num)
 
     def search_events(self, text_input, current_subject, show_all=False, print_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
@@ -566,7 +573,7 @@ class Search:
                     country_codes.append(possible_country_code)
                     found_country_codes = True
                 elif found_country_codes:
-                    print(f"{possible_country_code} is not a valid country code.")
+                    print(" " * self.indent_num, f"{possible_country_code} is not a valid country code.")
         start_length = 0
         if found_country_codes:
             start_length = len(",".join(possible_country_codes)) + 1
@@ -585,40 +592,43 @@ class Search:
         
         suggestions = suggest_events_based_on_search_words(text_input, self.files.event_dict, country_codes)
 
-        indent_add = 2
+        # indent_add = 2
         # print(f"Search term: {text_input}, country_codes: {country_codes}")
         print()
         if country_codes and not no_countries:
             cc_texts = [f"{self.files.country_dict[country_code]} [{country_code}]" for country_code in country_codes]
-            print(f" Searching restricted to events of {', '.join(cc_texts)}\n")
+            print(" " * self.indent_num, f"Searching restricted to events of {', '.join(cc_texts)}\n")
         elif country_codes and no_countries:
-            print(f"Searching restricted to events without a country")
+            print(" " * self.indent_num, f"Searching restricted to events without a country")
         if not suggestions:
-            print(" No matching events found.")
-        elif len(suggestions) == 1:
+            print(" " * self.indent_num, "No matching events found.\n")
+            return
+        if len(suggestions) == 1:
             ev = suggestions[0][0]
             # ev.print_event(aod_path, 1, indent_add)
-            print_event(ev, self.aod_path, 1, indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
-        elif print_all:
+            print_event(ev, self.aod_path, self.indent_num, self.indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
+            print()
+            return
+        if print_all:
             ordinal_num = 0
             for event, score in suggestions[:max_num_of_suggestions]:
                 ordinal_num += 1
                 print("#" * 30)
-                print(f" Result {ordinal_num}: score {score}")
+                print(" " * self.indent_num, f"Result {ordinal_num}: score {score}")
                 print("#" * 30)
                 print()
-                print_event(event, self.aod_path, 1, indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
+                print_event(event, self.aod_path, self.indent_num, self.indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
                 print()
-        else:
-            for event, score in suggestions[:max_num_of_suggestions]:
-                country_code = event.country_code
-                country_code = country_code.upper() if country_code else ""
-                if event.name:
-                    print(f" {event.event_id} [{country_code}]: {event.name} (score: {score})")
-                else:
-                    print(f" {event.event_id} [{country_code}]: {event.name_key}  [name in file] (score: {score})")
-            if len(suggestions) > max_num_of_suggestions:
-                print(f"\n  {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
+            return
+        for event, score in suggestions[:max_num_of_suggestions]:
+            country_code = event.country_code
+            country_code = country_code.upper() if country_code else ""
+            if event.name:
+                print(" " * self.indent_num, f"{event.event_id} [{country_code}]: {event.name} (score: {score})")
+            else:
+                print(" " * self.indent_num, f"{event.event_id} [{country_code}]: {event.name_key}  [name in file] (score: {score})")
+        if len(suggestions) > max_num_of_suggestions:
+            print(f"\n{' ' * self.indent_num} {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
         print("\n")
 
     def search_tech(self, text_input, current_subject, **kwargs):
@@ -673,10 +683,10 @@ class Search:
 
         print()
         if not suggestions:
-            print("  Nothing found")
-        else:
-            for country_code, country_name in suggestions[:max_num_of_suggestions]:
-                print(f"  [{country_code}] {country_name}")
+            print(" " * self.indent_num, "Nothing found\n")
+            return
+        for country_code, country_name in suggestions[:max_num_of_suggestions]:
+            print(f"  [{country_code}] {country_name}")
         print("\n")
 
     def search_provinces(self, text_input, current_subject, **kwargs):
@@ -703,15 +713,14 @@ class Search:
 
         print()
         if not suggestions:
-            print("  Nothing found")
-        else:
-            for province_num, province_name in suggestions[:self.max_num_of_suggestions]:
-                print(f"  [{province_num}] {province_name}")
+            print(" " * self.indent_num, "Nothing found\n")
+            return
+        for province_num, province_name in suggestions[:self.max_num_of_suggestions]:
+            print(f"  [{province_num}] {province_name}")
         print("\n")
-        # print(self.NOT_IMPLEMENTED_TEXT)
 
 
-    def __init__(self, aod_path, filescanner, max_num_of_suggestions=10, max_text_length=50, force_default=False):
+    def __init__(self, aod_path, filescanner, max_num_of_suggestions=10, max_text_length=50, indent_num=1, indent_add=2, force_default=False):
         self.aod_path = aod_path
         self.files = filescanner
         self.subjects = {
@@ -727,6 +736,8 @@ class Search:
         self.current_subject = self.DEFAULT_SUBJECT
         self.max_num_of_suggestions = max_num_of_suggestions
         self.max_text_length = max_text_length
+        self.indent_num = indent_num
+        self.indent_add = indent_add
         self.force_default = force_default
     
     
