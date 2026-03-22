@@ -351,6 +351,10 @@ def search_events(event_dict):
     return True
 
 
+def print_too_many_to_show_message(suggestions, max_num_of_suggestions, indent_num, the_command="--all"):
+    if len(suggestions) > max_num_of_suggestions:
+        print(f"\n{' ' * indent_num} {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add {the_command} to search keywords.")
+
 def search_events_w_class(aod_path, filescanner, max_num_of_suggestions=999, force_default=False):
     text_input = input("Enter search term(s):\n")
     if not text_input:
@@ -465,7 +469,7 @@ def find_matching_text(search_term, text_dict, exact_keyword=False):
             suggestions.append(triple)
     return suggestions
 
-def print_text_suggestions(suggestions, max_num_of_suggestions=99, max_text_length=50, indent_num=2):
+def print_text_suggestions(suggestions, max_num_of_suggestions=99, max_text_length=50, indent_num=2, the_command="--all"):
     print()
     if not suggestions:
         print(" " * indent_num, "Nothing found\n")
@@ -483,11 +487,11 @@ def print_text_suggestions(suggestions, max_num_of_suggestions=99, max_text_leng
         text_to_print = text if len(text) <= max_text_length else text[:max_text_length] + "[...]"
         text_to_print = text_to_print + (" " * (max_text_length + 5 - len(text_to_print)))
         print(" " * indent_num, key_to_print, text_to_print, " ", f"[{path.name}]")
-    if len(suggestions) > max_num_of_suggestions:
-            print(f"\n{' ' * indent_num} {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
+    if the_command:
+        print_too_many_to_show_message(suggestions, max_num_of_suggestions, indent_num, the_command)
     print("\n")
 
-def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
+def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50, the_command=""):
     exact_keyword = False
     text_input = input("Enter search term(s):\n")
     if not text_input:
@@ -501,7 +505,7 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50):
     
     suggestions = find_matching_text(text_input, text_dict, exact_keyword)
     
-    print_text_suggestions(suggestions, max_num_of_suggestions, max_text_length, indent_num=1)
+    print_text_suggestions(suggestions, max_num_of_suggestions, max_text_length, indent_num=1, the_command=the_command)
 
     return True
 
@@ -521,10 +525,16 @@ class Search:
     DEFAULT_SUBJECT = "--E"
     THE_MAX_NUM_OF_SUGGESTIONS = 999_999
 
+    ALL_FLAG = "--all"
+    PRINTALL_FLAG = "--printall"
+
     NOT_IMPLEMENTED_TEXT = "\n  This feature has not been implemented yet.\n"
 
     # def change_subject(self, current_subject):
     #     self.current_subject = current_subject
+
+    def print_too_many_to_show_message(self, suggestions, max_num_of_suggestions):
+        print_too_many_to_show_message(suggestions, max_num_of_suggestions, self.indent_num, the_command=self.ALL_FLAG)
 
     def change_subject_in_search(self, text_input, current_subject):
         if not text_input:
@@ -547,7 +557,7 @@ class Search:
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
         suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
-        print_text_suggestions(suggestions, max_num_of_suggestions, self.max_text_length, self.indent_num)
+        print_text_suggestions(suggestions, max_num_of_suggestions, self.max_text_length, self.indent_num, the_command=self.ALL_FLAG)
 
     def search_events(self, text_input, current_subject, show_all=False, print_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
@@ -581,14 +591,6 @@ class Search:
         text_input = text_input[start_length:]
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
-        # max_num_of_suggestions = self.max_num_of_suggestions
-        # if " --all" in text_input:
-        #     max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS
-        #     text_input = text_input.replace(" --all", "")
-        # print_all = False
-        # if " --printall" in text_input:
-        #     print_all = True
-        #     text_input = text_input.replace(" --printall", "")
         
         suggestions = suggest_events_based_on_search_words(text_input, self.files.event_dict, country_codes)
 
@@ -627,8 +629,8 @@ class Search:
                 print(" " * self.indent_num, f"{event.event_id} [{country_code}]: {event.name} (score: {score})")
             else:
                 print(" " * self.indent_num, f"{event.event_id} [{country_code}]: {event.name_key}  [name in file] (score: {score})")
-        if len(suggestions) > max_num_of_suggestions:
-            print(f"\n{' ' * self.indent_num} {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
+        
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
 
     def search_tech(self, text_input, current_subject, **kwargs):
@@ -687,6 +689,7 @@ class Search:
             return
         for country_code, country_name in suggestions[:max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{country_code}] {country_name}")
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
 
     def search_provinces(self, text_input, current_subject, **kwargs):
@@ -717,6 +720,7 @@ class Search:
             return
         for province_num, province_name in suggestions[:self.max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{province_num}] {province_name}")
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
 
 
@@ -748,13 +752,15 @@ class Search:
                 return
             show_all = False
             print_all = False
-            if " --all" in text_input:
+            all_flag = f" {self.ALL_FLAG}"
+            if all_flag in text_input:
                 show_all = True
-                text_input = text_input.replace(" --all", "")
-            if " --printall" in text_input:
+                text_input = text_input.replace(all_flag, "")
+            print_all_flag = f" {self.PRINTALL_FLAG}"
+            if print_all_flag in text_input:
                 show_all = True
                 print_all = True
-                text_input = text_input.replace(" --printall", "")
+                text_input = text_input.replace(print_all_flag, "")
             for key, func_n_text in self.subjects.items():
                 new_text_input = find_and_remove_text_w_space(text_input, key)
                 if new_text_input != text_input:
@@ -1017,8 +1023,10 @@ if __name__ == "__main__":
         ask_to_search = False
 
     if ask_to_search:
+        TheSearch = Search(AOD_PATH, fs, max_num_of_suggestions=20, max_text_length=50, force_default=force_default)
         print(explanation)
-    while ask_to_search:
-        # ask_to_search = search_events(event_dict)
-        ask_to_search = search_events_w_class(AOD_PATH, fs, max_num_of_suggestions=20, force_default=force_default)
+        TheSearch.search()
+    # while ask_to_search:
+    #     # ask_to_search = search_events(event_dict)
+    #     ask_to_search = search_events_w_class(AOD_PATH, fs, max_num_of_suggestions=20, force_default=force_default)
     
