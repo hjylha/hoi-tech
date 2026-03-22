@@ -513,8 +513,20 @@ class Search:
 
     DEFAULT_SUBJECT = "--E"
 
-    def search_text(self, text_input):
+    NOT_IMPLEMENTED_TEXT = "\n  This feature has not been implemented yet.\n"
+
+    # def change_subject(self, current_subject):
+    #     self.current_subject = current_subject
+
+    def change_subject_in_search(self, text_input, current_subject):
         if not text_input:
+            self.current_subject = current_subject
+            print(f"\n  Switching subject to {self.subjects[self.current_subject][1]}\n")
+            return True
+        return False
+
+    def search_text(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
         exact_keyword = False
         try:
@@ -527,8 +539,8 @@ class Search:
         suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
         print_text_suggestions(suggestions, self.max_num_of_suggestions, self.max_text_length)
 
-    def search_events(self, text_input):
-        if not text_input:
+    def search_events(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
         no_countries = False
         if text_input.startswith("--nocc"):
@@ -604,24 +616,28 @@ class Search:
                 print(f"\n  {self.max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
         print("\n")
 
-    def search_tech(self, text_input):
-        if not text_input:
+    def search_tech(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
+        print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_leaders(self, text_input):
-        if not text_input:
+    def search_leaders(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
+        print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_ministers(self, text_input):
-        if not text_input:
+    def search_ministers(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
+        print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_tech_teams(self, text_input):
-        if not text_input:
+    def search_tech_teams(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
-    
-    def search_countries(self, text_input):
-        if not text_input:
+        print(self.NOT_IMPLEMENTED_TEXT)
+
+    def search_countries(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
             return
         exact_keyword = False
         try:
@@ -683,12 +699,13 @@ class Search:
             for key, func_n_text in self.subjects.items():
                 new_text_input = find_and_remove_text_w_space(text_input, key)
                 if new_text_input != text_input:
-                    self.current_subject = key
-                    func_n_text[0](new_text_input)
+                    # self.current_subject = key
+                    func_n_text[0](new_text_input, current_subject=key)
                     break
             else:
-                self.current_subject = self.DEFAULT_SUBJECT
-                self.search_events(text_input)
+                self.subjects[self.current_subject][0](text_input, current_subject=self.current_subject)
+                # self.current_subject = self.DEFAULT_SUBJECT
+                # self.search_events(text_input, current_subject=self.DEFAULT_SUBJECT)
 
 
 if __name__ == "__main__":
