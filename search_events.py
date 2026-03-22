@@ -686,7 +686,7 @@ class Search:
             print(" " * self.indent_num, "Nothing found\n")
             return
         for country_code, country_name in suggestions[:max_num_of_suggestions]:
-            print(f"  [{country_code}] {country_name}")
+            print(" " * self.indent_num, f"[{country_code}] {country_name}")
         print("\n")
 
     def search_provinces(self, text_input, current_subject, **kwargs):
@@ -697,7 +697,7 @@ class Search:
             province_num = int(text_input)
             province_name = self.files.text_dict.get(f"PROV{province_num}")
             if province_name:
-                print(f"\n  [{province_num}] {province_name}")
+                print("\n", " " * self.indent_num, f"[{province_num}] {province_name}")
                 return
         except ValueError:
             pass
@@ -716,7 +716,7 @@ class Search:
             print(" " * self.indent_num, "Nothing found\n")
             return
         for province_num, province_name in suggestions[:self.max_num_of_suggestions]:
-            print(f"  [{province_num}] {province_name}")
+            print(" " * self.indent_num, f"[{province_num}] {province_name}")
         print("\n")
 
 
