@@ -587,6 +587,32 @@ class Leader:
                 num_to_divide -= divider
             index_exponent -= 1
         return tuple([self.trait_list[i] for i in trait_indices[::-1]])
+    
+    def get_rank(self, rank_num, land_naval_or_air):
+        if land_naval_or_air == 0:
+            ranks = {
+                0: "Field Marshal",
+                1: "General",
+                2: "Lt. General",
+                3: "Mj. General"
+            }
+            return ranks[rank_num]
+        if land_naval_or_air == 1:
+            ranks = {
+                0: "Grand Admiral",
+                1: "Admiral",
+                2: "Vice Admiral",
+                3: "Rear Admiral"
+            }
+            return ranks[rank_num]
+        if land_naval_or_air == 2:
+            ranks = {
+                0: "Air Marshal",
+                1: "Air General",
+                2: "Lt. General",
+                3: "Mj. General"
+            }
+            return ranks[rank_num]
 
     def __init__(self, leader_id, name, filepath, country_code, skill, max_skill, trait_num, l_n_or_a, start_year, end_year, loyalty, exp, ideal_rank, r3_year, r2_year, r1_year, r0_year, pic_path=None):
         self.issues = []
@@ -642,15 +668,16 @@ class Leader:
     def print_leader_info(self, indent_num, indent_add):
         print(" " * indent_num, f"{self.leader_id}: {self.name}")
         print(" " * indent_num, f"Country: {self.country}")
-        print(" " * indent_num, f"Skill {self.skill}  {self.land_naval_or_air} leader with max skill {self.max_skill}")
+        print(" " * indent_num, f"Skill {self.skill}  {self.TYPES[self.land_naval_or_air]} leader with max skill {self.max_skill}")
         print(" " * indent_num, "Traits:")
         if not self.traits:
             print(" " * (indent_num + indent_add), "-")
         for trait in self.traits:
             print(" " * (indent_num + indent_add), trait)
         print(" " * indent_num, f"Start year: {self.start_year}  End year: {self.end_year}")
-        print(" " * indent_num, f"Ideal rank: {self.ideal_rank}")
-        print(" " * indent_num, f"Rank years: {', '.join(self.rank_years)}")
+        print(" " * indent_num, f"Ideal rank: {self.get_rank(self.ideal_rank, self.land_naval_or_air)}")
+        rank_years_as_str = [f"{self.get_rank(len(self.rank_years) - 1 - i, self.land_naval_or_air)}: {year}" for i, year in enumerate(self.rank_years[::-1])]
+        print(" " * indent_num, f"Rank years: {', '.join(rank_years_as_str)}")
         print(" " * indent_num, f"Loyalty: {self.loyalty}")
         print(" " * indent_num, f"In file: {self.filepath}")
 

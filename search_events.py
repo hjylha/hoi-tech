@@ -658,7 +658,7 @@ class Search:
             return
 
         for leader in suggestions[:max_num_of_suggestions]:
-            print(" " * self.indent_num, f"[{leader.leader_id}] {leader.name} [{leader.country_code}] skill: {leader.skill}")
+            print(" " * self.indent_num, f"[{leader.leader_id}] {leader.name} [{leader.country_code}] skill: {leader.skill} ({leader.TYPES[leader.land_naval_or_air]})")
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
