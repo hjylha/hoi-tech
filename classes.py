@@ -483,6 +483,18 @@ class Minister:
     #     modifiers = []
 
     #     return modifiers
+    readable_positions = {
+        "headofstate": "Head of State",
+        "headofgovernment": "Head of Government",
+        "foreignminister": "Foreign Minister",
+        "ministerofarmament": "Armaments Minister",
+        "ministerofsecurity": "Minister of Security",
+        "headofmilitaryintelligence": "Head of Intelligence",
+        "chiefofstaff": "Chief of Staff",
+        "chiefofarmy": "Chief of the Army",
+        "chiefofnavy": "Chief of the Navy",
+        "chiefofairforce": "Chief of the Air Force"
+    }
 
     def __init__(self, minister_id, name, country_code, position, personality, start_year, ideology, loyalty, filepath, pic_path=None):
         self.m_id = minister_id
@@ -508,20 +520,23 @@ class Minister:
     def print_minister_info(self, indent_num, indent_add):
         print(" " * indent_num, f"{self.m_id}: {self.name}")
         print(" " * indent_num, f"Country: {self.country}")
-        print(" " * indent_num, f"Position: {self.position}")
+        print(" " * indent_num, f"Position: {self.readable_positions[self.position]}")
 
         print(" " * indent_num, f"Personality:", end=" ")
         if self.personality is None:
             print("-")
         else:
             print(self.personality.public_name)
+            for modifier in self.personality.modifiers:
+                modifier_str = " ".join([f"{mod}={value}" for mod, value in zip(MODIFIER_ATTRIBUTES, modifier) if value is not None])
+                print(" " * (indent_num + 2 * indent_add), modifier_str)
         print(" " * indent_num, f"Start year: {self.start_year}")
         print(" " * indent_num, f"Ideology: {self.ideology}")
         print(" " * indent_num, f"Loyalty: {self.loyalty}")
         print(" " * indent_num, f"Filepath: {self.filepath}")
 
 
-def find_ministers(search_terms, minister_dict):
+def find_ministers(search_terms, minister_dict, country_codes=None):
     try:
         return [minister_dict[int(search_terms)]]
     except ValueError:
@@ -535,6 +550,8 @@ def find_ministers(search_terms, minister_dict):
     starts = []
     other_suggestions = []
     for _, minister in minister_dict.items():
+        if country_codes and minister.country_code not in country_codes:
+            continue
         minister_name = minister.name.lower()
         if search_terms == minister_name:
             matches.append(minister)
@@ -723,7 +740,7 @@ class Leader:
         print(" " * indent_num, f"In file: {self.filepath}")
 
 
-def find_leaders(search_terms, leader_dict):
+def find_leaders(search_terms, leader_dict, country_codes=None):
     try:
         return [leader_dict[int(search_terms)]]
     except ValueError:
@@ -737,6 +754,8 @@ def find_leaders(search_terms, leader_dict):
     starts = []
     other_suggestions = []
     for _, leader in leader_dict.items():
+        if country_codes and leader.country_code not in country_codes:
+            continue
         leader_name = leader.name.lower()
         if search_terms == leader_name:
             matches.append(leader)
