@@ -528,6 +528,7 @@ class Search:
 
     ALL_FLAG = "--all"
     PRINTALL_FLAG = "--printall"
+    NO_COUNTRY_FLAG = "--nocc"
 
     NOT_IMPLEMENTED_TEXT = "\n  This feature has not been implemented yet.\n"
 
@@ -536,6 +537,29 @@ class Search:
 
     def print_too_many_to_show_message(self, suggestions, max_num_of_suggestions):
         print_too_many_to_show_message(suggestions, max_num_of_suggestions, self.indent_num, the_command=self.ALL_FLAG)
+
+    def get_countries_at_start_of_text(self, text):
+        # no_countries = False
+        new_text = find_and_remove_text_w_space(text, self.NO_COUNTRY_FLAG)
+        if new_text != text:
+            return new_text, None
+
+        found_country_codes = False
+        # if not no_countries:
+        possible_country_codes = text.split(" ")[0].upper().split(",")
+        country_codes = []
+        for possible_country_code in possible_country_codes:
+            if self.files.country_dict.get(possible_country_code) is not None:
+                country_codes.append(possible_country_code)
+                found_country_codes = True
+            elif found_country_codes:
+                print(" " * self.indent_num, f"{possible_country_code} is not a valid country code.")
+        start_length = 0
+        if found_country_codes:
+            start_length = len(",".join(possible_country_codes)) + 1
+
+        text = text[start_length:]
+        return text, country_codes
 
     def change_subject_in_search(self, text_input, current_subject):
         if not text_input:
@@ -639,11 +663,20 @@ class Search:
             return
         print(self.NOT_IMPLEMENTED_TEXT)
 
+    # def get_leader_rank(self, land_naval_or_air, rank_num):
+    #     letter = {0: "", 1: "N", 2: "A"}
+    #     key = f"RANKNAME_{letter[land_naval_or_air]}{rank_num + 1}"
+    #     return self.files.text_dict[key]
+
     def search_leaders(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
 
-        suggestions = find_leaders(text_input, self.files.leader_dict)
+        text_input, country_codes = self.get_countries_at_start_of_text(text_input)
+        if country_codes is None:
+            print(" " * self.indent_num, f"Leaders have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
+
+        suggestions = find_leaders(text_input, self.files.leader_dict, country_codes)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
@@ -666,7 +699,11 @@ class Search:
         if self.change_subject_in_search(text_input, current_subject):
             return
 
-        suggestions = find_ministers(text_input, self.files.minister_dict)
+        text_input, country_codes = self.get_countries_at_start_of_text(text_input)
+        if country_codes is None:
+            print(" " * self.indent_num, f"Ministers have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
+
+        suggestions = find_ministers(text_input, self.files.minister_dict, country_codes)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
