@@ -690,11 +690,22 @@ def find_leaders(search_terms, leader_dict):
     except KeyError:
         return []
 
-    suggestions = []
+    search_terms = search_terms.lower()
+
+    matches = []
+    starts = []
+    other_suggestions = []
     for _, leader in leader_dict.items():
-        if search_terms.lower() in leader.name.lower():
-            suggestions.append(leader)
-    return suggestions
+        leader_name = leader.name.lower()
+        if search_terms == leader_name:
+            matches.append(leader)
+            continue
+        if leader_name.startswith(search_terms):
+            starts.append(leader)
+            continue
+        if search_terms in leader_name:
+            other_suggestions.append(leader)
+    return matches + other_suggestions
 
 
 class Model:
