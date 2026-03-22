@@ -946,7 +946,7 @@ class FileScanner:
 
     def scan_leaders(self, check_unique_ids=False, show_issues=False):
         column_names = ["name", "id", "country", "rank 3 year", "rank 2 year", "rank 1 year", "rank 0 year", "ideal rank", "max skill", "traits", "skill", "experience", "loyalty", "type", "picture", "start year", "end year", "x"]
-        leader_dict = {}
+        self.leader_dict = {}
         all_leaders = []
         leader_files = get_leaders_files(AOD_PATH)
         for filepath in leader_files:
@@ -974,10 +974,11 @@ class FileScanner:
             for leader in all_leaders:
                 if leader_dict.get(leader.leader_id) is not None:
                     raise Exception(f"Leader id is not unique: {leader.leader_id}")
-                leader_dict[leader.leader_id] = leader
-            return leader_dict
+                self.leader_dict[leader.leader_id] = leader
+            return self.leader_dict
         for leader in all_leaders:
-            leader_dict[leader.leader_id] = leader
+            self.leader_dict[leader.leader_id] = leader
+        return self.leader_dict
     
     # def scan_leaders(self):
     #     self.leader_dict = scan_all_leaders()
