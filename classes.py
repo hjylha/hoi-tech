@@ -567,6 +567,12 @@ class Leader:
         "Elastic Defence Specialist",
         "Blitzer"
     ]
+
+    TYPES = {
+        0: "land",
+        1: "naval",
+        2: "air"
+    }
     
     def get_traits_from_trait_num(self, trait_num):
         if trait_num == 0:
@@ -614,9 +620,54 @@ class Leader:
         self.pic_path = pic_path
         if self.pic_path is None:
             self.pic_path = "gfx/interface/pics/Unknown.bmp"
+        self.search_dict = {
+            "id": self.leader_id,
+            "name": self.name,
+            "filepath": self.filepath,
+            "country_code": self.country_code,
+            "country": self.country,
+            "skill": self.skill,
+            "max_skill": self.max_skill,
+            "traits": self.traits,
+            "start_year": self.start_year,
+            "end_year": self.end_year,
+            "loyalty": self.loyalty,
+            "ideal_rank": self.ideal_rank,
+            "experience": self.experience,
+            "rank_years": self.rank_years,
+            "type": self.land_naval_or_air,
+            "pic_path": self.pic_path
+        }
     
-    def print_leader_info(self):
+    def print_leader_info(self, indent_num, indent_add):
+        print(" " * indent_num, f"{self.leader_id}: {self.name}")
+        print(" " * indent_num, f"Country: {self.country}")
+        print(" " * indent_num, f"Skill {self.skill}  {self.land_naval_or_air} leader with max skill {self.max_skill}")
+        print(" " * indent_num, "Traits:")
+        if not self.traits:
+            print(" " * (indent_num + indent_add), "-")
+        for trait in self.traits:
+            print(" " * (indent_num + indent_add), trait)
+        print(" " * indent_num, f"Start year: {self.start_year}  End year: {self.end_year}")
+        print(" " * indent_num, f"Ideal rank: {self.ideal_rank}")
+        print(" " * indent_num, f"Rank years: {', '.join(self.rank_years)}")
+        print(" " * indent_num, f"Loyalty: {self.loyalty}")
+        print(" " * indent_num, f"In file: {self.filepath}")
+
+
+def find_leaders(search_terms, leader_dict):
+    try:
+        return [leader_dict[int(search_terms)]]
+    except ValueError:
         pass
+    except KeyError:
+        return []
+
+    suggestions = []
+    for _, leader in leader_dict.items():
+        if search_terms.lower() in leader.name.lower():
+            suggestions.append(leader)
+    return suggestions
 
 
 class Model:
