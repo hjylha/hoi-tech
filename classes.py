@@ -505,6 +505,47 @@ class Minister:
             return dict()
         return self.personality.get_research_bonus()
 
+    def print_minister_info(self, indent_num, indent_add):
+        print(" " * indent_num, f"{self.m_id}: {self.name}")
+        print(" " * indent_num, f"Country: {self.country}")
+        print(" " * indent_num, f"Position: {self.position}")
+
+        print(" " * indent_num, f"Personality:", end=" ")
+        if self.personality is None:
+            print("-")
+        else:
+            print(self.personality.public_name)
+        print(" " * indent_num, f"Start year: {self.start_year}")
+        print(" " * indent_num, f"Ideology: {self.ideology}")
+        print(" " * indent_num, f"Loyalty: {self.loyalty}")
+        print(" " * indent_num, f"Filepath: {self.filepath}")
+
+
+def find_ministers(search_terms, minister_dict):
+    try:
+        return [minister_dict[int(search_terms)]]
+    except ValueError:
+        pass
+    except KeyError:
+        return []
+
+    search_terms = search_terms.lower()
+
+    matches = []
+    starts = []
+    other_suggestions = []
+    for _, minister in minister_dict.items():
+        minister_name = minister.name.lower()
+        if search_terms == minister_name:
+            matches.append(minister)
+            continue
+        if minister_name.startswith(search_terms):
+            starts.append(minister)
+            continue
+        if search_terms in minister_name:
+            other_suggestions.append(minister)
+    return matches + other_suggestions
+
 
 class Idea(MinisterOrIdea):
     def __init__(self, *args, gov_types=None):
