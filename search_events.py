@@ -672,6 +672,37 @@ class Search:
                 print(f"  [{country_code}] {country_name}")
         print("\n")
 
+    def search_provinces(self, text_input, current_subject):
+        if self.change_subject_in_search(text_input, current_subject):
+            return
+        # exact_keyword = False
+        try:
+            province_num = int(text_input)
+            province_name = self.files.text_dict.get(f"PROV{province_num}")
+            if province_name:
+                print(f"\n  [{province_num}] {province_name}")
+                return
+        except ValueError:
+            pass
+
+        text_input = text_input.lower()
+
+        suggestions = []
+        for key, text in self.files.text_dict.items():
+            if not key.upper().startswith("PROV"):
+                continue
+            if text_input in key.lower() or text_input in text.lower():
+                suggestions.append((key[4:], text))
+
+        print()
+        if not suggestions:
+            print("  Nothing found")
+        else:
+            for province_num, province_name in suggestions[:self.max_num_of_suggestions]:
+                print(f"  [{province_num}] {province_name}")
+        print("\n")
+        # print(self.NOT_IMPLEMENTED_TEXT)
+
 
     def __init__(self, aod_path, filescanner, max_num_of_suggestions=10, max_text_length=50, force_default=False):
         self.aod_path = aod_path
@@ -683,7 +714,8 @@ class Search:
             "--TT": (self.search_tech_teams, "tech teams"), 
             "--L": (self.search_leaders, "leaders"),
             "--M": (self.search_ministers, "ministers"),
-            "--C": (self.search_countries, "countries")
+            "--C": (self.search_countries, "countries"),
+            "--P": (self.search_provinces, "provinces")
         }
         self.current_subject = self.DEFAULT_SUBJECT
         self.max_num_of_suggestions = max_num_of_suggestions
