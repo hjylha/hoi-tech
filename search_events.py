@@ -512,6 +512,7 @@ def find_and_remove_text_w_space(full_text, text_to_find_and_remove):
 class Search:
 
     DEFAULT_SUBJECT = "--E"
+    THE_MAX_NUM_OF_SUGGESTIONS = 999_999
 
     NOT_IMPLEMENTED_TEXT = "\n  This feature has not been implemented yet.\n"
 
@@ -525,7 +526,7 @@ class Search:
             return True
         return False
 
-    def search_text(self, text_input, current_subject):
+    def search_text(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         exact_keyword = False
@@ -536,10 +537,12 @@ class Search:
         except IndexError:
             pass
 
-        suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
-        print_text_suggestions(suggestions, self.max_num_of_suggestions, self.max_text_length)
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
-    def search_events(self, text_input, current_subject):
+        suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
+        print_text_suggestions(suggestions, max_num_of_suggestions, self.max_text_length)
+
+    def search_events(self, text_input, current_subject, show_all=False, print_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         no_countries = False
@@ -570,13 +573,15 @@ class Search:
         
         text_input = text_input[start_length:]
 
-        if " --all" in text_input:
-            max_num_of_suggestions = 999_999
-            text_input = text_input.replace(" --all", "")
-        print_all = False
-        if " --printall" in text_input:
-            print_all = True
-            text_input = text_input.replace(" --printall", "")
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+        # max_num_of_suggestions = self.max_num_of_suggestions
+        # if " --all" in text_input:
+        #     max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS
+        #     text_input = text_input.replace(" --all", "")
+        # print_all = False
+        # if " --printall" in text_input:
+        #     print_all = True
+        #     text_input = text_input.replace(" --printall", "")
         
         suggestions = suggest_events_based_on_search_words(text_input, self.files.event_dict, country_codes)
 
@@ -596,7 +601,7 @@ class Search:
             print_event(ev, self.aod_path, 1, indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
         elif print_all:
             ordinal_num = 0
-            for event, score in suggestions[:self.max_num_of_suggestions]:
+            for event, score in suggestions[:max_num_of_suggestions]:
                 ordinal_num += 1
                 print("#" * 30)
                 print(f" Result {ordinal_num}: score {score}")
@@ -605,38 +610,38 @@ class Search:
                 print_event(event, self.aod_path, 1, indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
                 print()
         else:
-            for event, score in suggestions[:self.max_num_of_suggestions]:
+            for event, score in suggestions[:max_num_of_suggestions]:
                 country_code = event.country_code
                 country_code = country_code.upper() if country_code else ""
                 if event.name:
                     print(f" {event.event_id} [{country_code}]: {event.name} (score: {score})")
                 else:
                     print(f" {event.event_id} [{country_code}]: {event.name_key}  [name in file] (score: {score})")
-            if len(suggestions) > self.max_num_of_suggestions:
-                print(f"\n  {self.max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
+            if len(suggestions) > max_num_of_suggestions:
+                print(f"\n  {max_num_of_suggestions} out of {len(suggestions)} search results shown. If you want to see them all, add --all to search keyword(s).")
         print("\n")
 
-    def search_tech(self, text_input, current_subject):
+    def search_tech(self, text_input, current_subject, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_leaders(self, text_input, current_subject):
+    def search_leaders(self, text_input, current_subject, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_ministers(self, text_input, current_subject):
+    def search_ministers(self, text_input, current_subject, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_tech_teams(self, text_input, current_subject):
+    def search_tech_teams(self, text_input, current_subject, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         print(self.NOT_IMPLEMENTED_TEXT)
 
-    def search_countries(self, text_input, current_subject):
+    def search_countries(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         exact_keyword = False
@@ -664,15 +669,17 @@ class Search:
         if not suggestions:
             suggestions = matches + other_suggestions
         
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+
         print()
         if not suggestions:
             print("  Nothing found")
         else:
-            for country_code, country_name in suggestions[:self.max_num_of_suggestions]:
+            for country_code, country_name in suggestions[:max_num_of_suggestions]:
                 print(f"  [{country_code}] {country_name}")
         print("\n")
 
-    def search_provinces(self, text_input, current_subject):
+    def search_provinces(self, text_input, current_subject, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         # exact_keyword = False
@@ -728,16 +735,23 @@ class Search:
             text_input = input(f"Enter search term(s) [current subject: {self.subjects[self.current_subject][1]}]:\n")
             if not text_input:
                 return
+            show_all = False
+            print_all = False
+            if " --all" in text_input:
+                show_all = True
+                text_input = text_input.replace(" --all", "")
+            if " --printall" in text_input:
+                show_all = True
+                print_all = True
+                text_input = text_input.replace(" --printall", "")
             for key, func_n_text in self.subjects.items():
                 new_text_input = find_and_remove_text_w_space(text_input, key)
                 if new_text_input != text_input:
                     # self.current_subject = key
-                    func_n_text[0](new_text_input, current_subject=key)
+                    func_n_text[0](new_text_input, current_subject=key, show_all=show_all, print_all=print_all)
                     break
             else:
-                self.subjects[self.current_subject][0](text_input, current_subject=self.current_subject)
-                # self.current_subject = self.DEFAULT_SUBJECT
-                # self.search_events(text_input, current_subject=self.DEFAULT_SUBJECT)
+                self.subjects[self.current_subject][0](text_input, current_subject=self.current_subject, show_all=show_all, print_all=print_all)
 
 
 if __name__ == "__main__":
