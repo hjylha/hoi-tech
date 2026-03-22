@@ -3,7 +3,7 @@ import sys
 from file_paths import get_scenarios_folder_path, get_event_text_paths, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
-from classes import find_leaders
+from classes import find_ministers, find_leaders
 from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
 from print_effects_and_triggers import print_event
@@ -662,10 +662,29 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
-    def search_ministers(self, text_input, current_subject, **kwargs):
+    def search_ministers(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
-        print(self.NOT_IMPLEMENTED_TEXT)
+
+        suggestions = find_ministers(text_input, self.files.minister_dict)
+
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+
+        print()
+        if not suggestions:
+            print(" " * self.indent_num, "Nothing found\n")
+            return
+
+        if len(suggestions) == 1:
+            suggestions[0].print_minister_info(self.indent_num, self.indent_add)
+            print()
+            return
+
+        for minister in suggestions[:max_num_of_suggestions]:
+            personality = "-" if minister.personality is None else minister.personality.public_name
+            print(" " * self.indent_num, f"[{minister.m_id}] {minister.name} [{minister.country_code}] position: {minister.position} ({personality})")
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
+        print()
 
     def search_tech_teams(self, text_input, current_subject, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
