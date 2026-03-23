@@ -419,6 +419,46 @@ class TechTeam:
             results.append(tuple(component_result))
         return tuple(results)
 
+    def print_tech_team_info(self, indent_num, indent_add):
+        print(" " * indent_num, f"{self.team_id}: {self.name}")
+        print(" " * indent_num, f"Country: {self.country}")
+        print(" " * indent_num, f"Skill {self.skill}")
+        print(" " * indent_num, "Specialities:")
+        if not self.specialities:
+            print(" " * (indent_num + indent_add), "-")
+        for speciality in self.specialities:
+            print(" " * (indent_num + indent_add), speciality)
+        print(" " * indent_num, f"Start year: {self.start_year}  End year: {self.end_year}")
+        print(" " * indent_num, f"In file: {self.filepath}")
+
+
+def find_tech_teams(search_terms, techteam_dict, country_codes=None):
+    try:
+        return [techteam_dict[int(search_terms)]]
+    except ValueError:
+        pass
+    except KeyError:
+        return []
+
+    search_terms = search_terms.lower()
+
+    matches = []
+    starts = []
+    other_suggestions = []
+    for _, tech_team in techteam_dict.items():
+        if country_codes and tech_team.country_code not in country_codes:
+            continue
+        team_name = tech_team.name.lower()
+        if search_terms == team_name:
+            matches.append(tech_team)
+            continue
+        if team_name.startswith(search_terms):
+            starts.append(tech_team)
+            continue
+        if search_terms in team_name:
+            other_suggestions.append(tech_team)
+    return matches + other_suggestions
+
 
 class MinisterOrIdea:
     def __init__(self, name, public_name, position, modifiers):
