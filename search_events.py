@@ -664,9 +664,10 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
 
-    def search_tech(self, text_input, current_subject, **kwargs):
+    def search_tech(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
+        # print(f"Searching tech with seach term {text_input}")
         print(self.NOT_IMPLEMENTED_TEXT)
 
     # def get_leader_rank(self, land_naval_or_air, rank_num):
@@ -729,10 +730,32 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
-    def search_tech_teams(self, text_input, current_subject, **kwargs):
+    def search_tech_teams(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
-        print(self.NOT_IMPLEMENTED_TEXT)
+
+        text_input, country_codes = self.get_countries_at_start_of_text(text_input)
+        if country_codes is None:
+            print(" " * self.indent_num, f"Tech teams have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
+
+        suggestions = find_ministers(text_input, self.files.techteam_dict, country_codes)
+
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+
+        print()
+        if not suggestions:
+            print(" " * self.indent_num, "Nothing found\n")
+            return
+
+        if len(suggestions) == 1:
+            suggestions[0].print_tech_team_info(self.indent_num, self.indent_add)
+            print()
+            return
+
+        for tech_team in suggestions[:max_num_of_suggestions]:
+            print(" " * self.indent_num, f"[{tech_team.team_id}] {tech_team.name} [{tech_team.country_code}] skill: {tech_team.skill}")
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
+        print()
 
     def search_countries(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
