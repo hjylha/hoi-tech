@@ -221,6 +221,51 @@ class Tech:
         # return max(1 / 20, 9 * research_speed_modifier / (self.components[self.current_component].difficulty + 2) / 9)
         return self.calculate_component_difficulty_multiplier(self.current_component, research_speed_modifier, game_difficulty, total_extra_bonus)
 
+    def print_tech_info(self, indent_num, indent_add):
+        print(" " * indent_num, f"{self.tech_id}: {self.name}")
+        print(" " * indent_num, f"Category: {self.category}")
+        print(" " * indent_num, "Components:")
+        for component in self.components:
+            print(" " * (indent_num + indent_add), component)
+
+        print(" " * indent_num, "Requirements:")
+        if not self.requirements:
+            print(" " * (indent_num + indent_add), "-")
+        for requirement in self.requirements:
+            print(" " * (indent_num + indent_add), requirement)
+
+        print(" " * indent_num, "Effects:")
+        for effect in self.effects:
+            effect_str = " ".join([f"{eff}={value}" for eff, value in zip(EFFECT_ATTRIBUTES, effect) if value is not None])
+            print(" " * (indent_num + 2 * indent_add), effect_str)
+        print(" " * indent_num, f"In file: {self.filepath}")
+
+
+def find_tech(search_terms, tech_dict):
+    try:
+        return [tech_dict[int(search_terms)]]
+    except ValueError:
+        pass
+    except KeyError:
+        return []
+
+    search_terms = search_terms.lower()
+
+    matches = []
+    starts = []
+    other_suggestions = []
+    for _, tech in tech_dict.items():
+        tech_name = tech.name.lower()
+        if search_terms == tech_name:
+            matches.append(tech)
+            continue
+        if tech_name.startswith(search_terms):
+            starts.append(tech)
+            continue
+        if search_terms in tech_name:
+            other_suggestions.append(tech)
+    return matches + starts + other_suggestions
+
 
 class TechTeam:
     MIN_SKILL = 1

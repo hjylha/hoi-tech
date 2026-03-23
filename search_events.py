@@ -3,7 +3,7 @@ import sys
 from file_paths import get_scenarios_folder_path, get_event_text_paths, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
-from classes import find_ministers, find_leaders
+from classes import find_tech, find_tech_teams, find_ministers, find_leaders
 from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
 from print_effects_and_triggers import print_event
@@ -667,8 +667,25 @@ class Search:
     def search_tech(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
-        # print(f"Searching tech with seach term {text_input}")
-        print(self.NOT_IMPLEMENTED_TEXT)
+
+        suggestions = find_tech(text_input, self.files.tech_dict)
+
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+
+        print()
+        if not suggestions:
+            print(" " * self.indent_num, "Nothing found\n")
+            return
+
+        if len(suggestions) == 1:
+            suggestions[0].print_tech_info(self.indent_num, self.indent_add)
+            print()
+            return
+
+        for tech in suggestions[:max_num_of_suggestions]:
+            print(" " * self.indent_num, f"[{tech.tech_id}] {tech.name}")
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
+        print()
 
     # def get_leader_rank(self, land_naval_or_air, rank_num):
     #     letter = {0: "", 1: "N", 2: "A"}
@@ -738,7 +755,7 @@ class Search:
         if country_codes is None:
             print(" " * self.indent_num, f"Tech teams have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
 
-        suggestions = find_ministers(text_input, self.files.techteam_dict, country_codes)
+        suggestions = find_tech_teams(text_input, self.files.techteam_dict, country_codes)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
