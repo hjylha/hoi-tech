@@ -13,7 +13,7 @@ BLUEPRINT_BONUS, RESEARCH_SPEED_CONSTANT = get_blueprint_bonus_and_tech_speed_mo
 Component = namedtuple("Component", ["type", "difficulty"])
 EFFECT_ATTRIBUTES = ["type", "which", "value", "when", "where"]
 Effect = namedtuple("Effect", EFFECT_ATTRIBUTES)
-MODIFIER_ATTRIBUTES = ["type", "value", "option", "extra", "modifier_effect"]
+MODIFIER_ATTRIBUTES = ["type", "value", "option", "extra", "modifier_effect", "option1", "option2", "division"]
 Modifier = namedtuple("Modifier", MODIFIER_ATTRIBUTES)
 
 

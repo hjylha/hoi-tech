@@ -268,13 +268,13 @@ def get_correct_modifiers(modifier_dict):
     for mod_key in MODIFIER_ATTRIBUTES:
         if modifier_dict.get(mod_key) is not None:
             modifiers.append(modifier_dict[mod_key])
+        # else:
+        #     for key in modifier_dict.keys():
+        #         if key.startswith(mod_key):
+        #             modifiers.append(modifier_dict[key])
+        #             break
         else:
-            for key in modifier_dict.keys():
-                if key.startswith(mod_key):
-                    modifiers.append(modifier_dict[key])
-                    break
-            else:
-                modifiers.append(None)
+            modifiers.append(None)
     return Modifier(*modifiers)
 
 def ensure_lists_are_lists(should_be_list):
