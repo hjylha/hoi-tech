@@ -512,13 +512,19 @@ def search_texts(text_dict, max_num_of_suggestions=99, max_text_length=50, the_c
 
 
 def find_and_remove_text_w_space(full_text, text_to_find_and_remove):
-    if full_text == text_to_find_and_remove:
-        return ""
-    text_at_start = f"{text_to_find_and_remove} "
-    if full_text.startswith(text_at_start):
-        return full_text.replace(text_at_start, "")
-    text_elsewhere = f" {text_to_find_and_remove}"
-    return full_text.replace(text_elsewhere, "")
+    new_text_parts = []
+    for part in full_text.split(" "):
+        if part == text_to_find_and_remove:
+            continue
+        new_text_parts.append(part)
+    return " ".join(new_text_parts)
+    # if full_text == text_to_find_and_remove:
+    #     return ""
+    # text_at_start = f"{text_to_find_and_remove} "
+    # if full_text.startswith(text_at_start):
+    #     return full_text.replace(text_at_start, "")
+    # text_elsewhere = f" {text_to_find_and_remove}"
+    # return full_text.replace(text_elsewhere, "")
 
 
 class Search:
