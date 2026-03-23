@@ -457,7 +457,7 @@ def find_tech_teams(search_terms, techteam_dict, country_codes=None):
             continue
         if search_terms in team_name:
             other_suggestions.append(tech_team)
-    return matches + other_suggestions
+    return matches + starts + other_suggestions
 
 
 class MinisterOrIdea:
@@ -601,7 +601,7 @@ def find_ministers(search_terms, minister_dict, country_codes=None):
             continue
         if search_terms in minister_name:
             other_suggestions.append(minister)
-    return matches + other_suggestions
+    return matches + starts + other_suggestions
 
 
 class Idea(MinisterOrIdea):
@@ -805,7 +805,7 @@ def find_leaders(search_terms, leader_dict, country_codes=None):
             continue
         if search_terms in leader_name:
             other_suggestions.append(leader)
-    return matches + other_suggestions
+    return matches + starts + other_suggestions
 
 
 class Model:
