@@ -6,7 +6,7 @@ from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_tex
 from classes import find_tech, find_tech_teams, find_ministers, find_leaders
 from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
-from print_effects_and_triggers import print_event
+from print_effects_and_triggers import print_event, print_tech, print_tech_team, print_minister
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -678,7 +678,8 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            suggestions[0].print_tech_info(self.indent_num, self.indent_add)
+            # suggestions[0].print_tech_info(self.indent_num, self.indent_add)
+            print_tech(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, self.files.tech_dict)
             print()
             return
 
@@ -737,7 +738,8 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            suggestions[0].print_minister_info(self.indent_num, self.indent_add)
+            print_minister(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict)
+            # suggestions[0].print_minister_info(self.indent_num, self.indent_add)
             print()
             return
 
@@ -765,7 +767,8 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            suggestions[0].print_tech_team_info(self.indent_num, self.indent_add)
+            print_tech_team(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict)
+            # suggestions[0].print_tech_team_info(self.indent_num, self.indent_add)
             print()
             return
 

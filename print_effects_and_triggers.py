@@ -1519,7 +1519,43 @@ def effect_as_str(effect, text_dict, event_dict=None, tech_dict=None, leader_dic
 
 def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None, leader_dict=None, minister_dict=None, techteam_dict=None, force_default=False, **kwargs):
     print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=force_default, **kwargs))
+
+
+STR_FUNCTION_DICT_FOR_MODIFERS = {
     
+}
+
+def modifer_as_str_default(modifier, **kwargs):
+    text_parts = []
+    type_part = f"type = {modifier.type}" if modifier.type is not None else ""
+    text_parts.append(type_part)
+    value_part = f"value = {modifier.value}" if modifier.value is not None else ""
+    text_parts.append(value_part)
+    option_part = f"option = {modifier.option}" if modifier.option is not None else ""
+    text_parts.append(option_part)
+    extraa_part = f"extra = {modifier.extra}" if modifier.extra is not None else ""
+    text_parts.append(extraa_part)
+    modifier_effect_part = f"modifier_effect = {modifier.modifier_effect}" if modifier.modifier_effect is not None else ""
+    text_parts.append(modifier_effect_part)
+    option1_part = f"option1 = {modifier.option1}" if modifier.option1 is not None else ""
+    text_parts.append(option1_part)
+    option2_part = f"option2 = {modifier.option2}" if modifier.option2 is not None else ""
+    text_parts.append(option2_part)
+    division_part = f"division = {modifier.division}" if modifier.division is not None else ""
+    text_parts = [t for t in text_parts if t]
+    # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
+    return ", ".join(text_parts)
+
+def modifier_as_str(modifier, text_dict, force_default=False, **kwargs):
+    if force_default:
+        return modifer_as_str_default(modifier)
+    the_function = STR_FUNCTION_DICT_FOR_MODIFERS.get(modifier.type.lower())
+    if the_function is None:
+        return modifer_as_str_default(modifier)
+    return the_function(modifier, text_dict, **kwargs)
+
+def print_modifier(modifier, indent_num, text_dict, force_default=False, **kwargs):
+    print(" " * indent_num, modifier_as_str(modifier, text_dict, force_default=force_default, **kwargs))
 
 # Trigger keys: (AI/ai)
 # AI
@@ -2243,3 +2279,83 @@ def list_tech_effects(tech, text_dict, tech_dict, **kwargs):
         for eff_str in effect_str.split("\n"):
             effect_strs.append(eff_str)
     return research_speed_change + effect_strs
+
+def get_component_name(component_type, text_dict):
+    key = f"RT_{component_type.upper()}"
+    return text_dict[key]
+
+def print_tech(tech, indent_num, indent_add, text_dict, tech_dict):
+    print(" " * indent_num, f"{tech.tech_id}: {tech.name}")
+    print(" " * indent_num, f"Category: {tech.category}")
+    print(" " * indent_num, "Components:")
+    for component in tech.components:
+        print(" " * (indent_num + indent_add), get_component_name(component.type, text_dict), f"(Difficulty: {component.difficulty})")
+
+    print(" " * indent_num, "Requirements:")
+    if not tech.requirements:
+        print(" " * (indent_num + indent_add), "-")
+    for requirement in tech.requirements:
+        if isinstance(requirement, int):
+            print(" " * (indent_num + indent_add), f"[{requirement}] {tech_dict[requirement].name}")
+            continue
+        print(" " * (indent_num + indent_add), "One of the following:")
+        for option in requirement:
+            print(" " * (indent_num + 2 * indent_add), f"[{requirement}] {tech_dict[requirement].name}")
+
+    print(" " * indent_num, "Allows:")
+    if not tech.allows:
+        print(" " * (indent_num + indent_add), "-")
+    for tech_id in tech.allows:
+        print(" " * (indent_num + indent_add), f"[{tech_id}] {tech_dict[tech_id].name}")
+
+    print(" " * indent_num, "Deactivated by:")
+    if not tech.deactivated_by:
+        print(" " * (indent_num + indent_add), "-")
+    for tech_id in tech.deactivated_by:
+        print(" " * (indent_num + indent_add), f"[{tech_id}] {tech_dict[tech_id].name}")
+
+    print(" " * indent_num, "Effects:")
+    list_of_effects = list_tech_effects(tech, text_dict, tech_dict)
+    for effect_str in list_of_effects:
+        print(" " * (indent_num + 2 * indent_add), effect_str)
+    # for effect in tech.effects:
+    #     effect_str = " ".join([f"{eff}={value}" for eff, value in zip(EFFECT_ATTRIBUTES, effect) if value is not None])
+    #     print(" " * (indent_num + 2 * indent_add), effect_str)
+    print(" " * indent_num, f"In file: {tech.filepath}")
+
+
+def print_tech_team(techteam, indent_num, indent_add, text_dict):
+    print(" " * indent_num, f"{techteam.team_id}: {techteam.name}")
+    print(" " * indent_num, f"Country: {techteam.country}")
+    print(" " * indent_num, f"Skill {techteam.skill}")
+    print(" " * indent_num, "Specialities:")
+    if not techteam.specialities:
+        print(" " * (indent_num + indent_add), "-")
+    for speciality in techteam.specialities:
+        print(" " * (indent_num + indent_add), get_component_name(speciality, text_dict))
+    print(" " * indent_num, f"Start year: {techteam.start_year}  End year: {techteam.end_year}")
+    print(" " * indent_num, f"In file: {techteam.filepath}")
+
+
+def print_minister(minister, indent_num, indent_add, text_dict):
+    print(" " * indent_num, f"{minister.m_id}: {minister.name}")
+    print(" " * indent_num, f"Country: {minister.country}")
+    print(" " * indent_num, f"Position: {minister.readable_positions[minister.position]}")
+
+    print(" " * indent_num, f"Personality:", end=" ")
+    if minister.personality is None:
+        print("-")
+    else:
+        print(minister.personality.public_name)
+        indent_num += 2 * indent_add
+        print(" " * indent_num, "Modifiers:")
+        indent_num += indent_add
+        for modifier in minister.personality.modifiers:
+            print_modifier(modifier, indent_num, text_dict)
+            # modifier_str = " ".join([f"{mod}={value}" for mod, value in zip(MODIFIER_ATTRIBUTES, modifier) if value is not None])
+            # print(" " * (indent_num + 2 * indent_add), modifier_str)
+        indent_num -= 3 * indent_add
+    print(" " * indent_num, f"Start year: {minister.start_year}")
+    print(" " * indent_num, f"Ideology: {minister.ideology}")
+    print(" " * indent_num, f"Loyalty: {minister.loyalty}")
+    print(" " * indent_num, f"Filepath: {minister.filepath}")
