@@ -1521,11 +1521,38 @@ def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None,
     print(indent_num * " ", effect_as_str(effect, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=force_default, **kwargs))
 
 
-STR_FUNCTION_DICT_FOR_MODIFERS = {
-    
-}
+# Minister personality (and policy and idea) modifiers
+# accept_alliance_mod
+# combat_mod
+# defend_land_mod
+# detect_convoy_mod
+# detect_fleet_mod
+# diplomatic_action_mod
+# diplomatic_cost_mod
+# dissent_mod
+# division_extra_mod
+# division_type_mod
+# do_war_bell_mod
+# foreign_ic_mod
+# foreign_mp_mod
+# intel_diff_mod
+# intelligence_mod
+# morale_mod
+# mp_growth_mod
+# org_mod
+# peace_bell_rate_mod
+# production_category_mod
+# province_project_mod
+# resource_mod
+# retooling_time_mod
+# supply_consumption_mod
+# tc_mod
+# tech_group_mod
+# unit_intel_mod
+# unit_speed_mod
+# war_bell_rate_mod
 
-def modifer_as_str_default(modifier, **kwargs):
+def modifer_as_str_default(modifier, text_dict=None, **kwargs):
     text_parts = []
     type_part = f"type = {modifier.type}" if modifier.type is not None else ""
     text_parts.append(type_part)
@@ -1546,13 +1573,138 @@ def modifer_as_str_default(modifier, **kwargs):
     # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
     return ", ".join(text_parts)
 
+def accept_alliance_mod_as_str(modifier, text_dict):
+    pass
+
+def combat_mod_as_str(modifier, text_dict):
+    pass
+
+def defend_land_mod_as_str(modifier, text_dict):
+    pass
+
+def detect_convoy_mod_as_str(modifier, text_dict):
+    pass
+
+def detect_fleet_mod_as_str(modifier, text_dict):
+    pass
+
+def diplomatic_action_mod_as_str(modifier, text_dict):
+    pass
+
+def diplomatic_cost_mod_as_str(modifier, text_dict):
+    pass
+
+def dissent_mod_as_str(modifier, text_dict):
+    pass
+
+def division_extra_mod_as_str(modifier, text_dict):
+    pass
+
+def division_type_mod_as_str(modifier, text_dict):
+    pass
+
+def do_war_bell_mod_as_str(modifier, text_dict):
+    the_key = f"DOW_BELLIGERENCE"
+    sign = "+" if modifier.modifier_effect > 0 else "-"
+    return text_dict[the_key].replace("%s%d\\%%\\n", f"{sign}{modifier.modifier_effect}")
+
+def foreign_ic_mod_as_str(modifier, text_dict):
+    pass
+
+def foreign_mp_mod_as_str(modifier, text_dict):
+    pass
+
+def intel_diff_mod_as_str(modifier, text_dict):
+    pass
+
+def intelligence_mod_as_str(modifier, text_dict):
+    pass
+
+def morale_mod_as_str(modifier, text_dict):
+    pass
+
+def mp_growth_mod_as_str(modifier, text_dict):
+    pass
+
+def org_mod_as_str(modifier, text_dict):
+    pass
+
+def peace_bell_rate_mod_as_str(modifier, text_dict):
+    pass
+
+def production_category_mod_as_str(modifier, text_dict):
+    pass
+
+def province_project_mod_as_str(modifier, text_dict):
+    pass
+
+def resource_mod_as_str(modifier, text_dict):
+    pass
+
+def retooling_time_mod_as_str(modifier, text_dict):
+    pass
+
+def supply_consumption_mod_as_str(modifier, text_dict):
+    pass
+
+def tc_mod_as_str(modifier, text_dict):
+    pass
+
+def tech_group_mod_as_str(modifier, text_dict):
+    pass
+
+def unit_intel_mod_as_str(modifier, text_dict):
+    pass
+
+def unit_speed_mod_as_str(modifier, text_dict):
+    pass
+
+def war_bell_rate_mod_as_str(modifier, text_dict):
+    pass
+
+STR_FUNCTION_DICT_FOR_MODIFERS = {
+    "accept_alliance_mod": accept_alliance_mod_as_str,
+    "combat_mod": combat_mod_as_str,
+    "defend_land_mod": defend_land_mod_as_str,
+    "detect_convoy_mod": detect_convoy_mod_as_str,
+    "detect_fleet_mod": detect_fleet_mod_as_str,
+    "diplomatic_action_mod": diplomatic_action_mod_as_str,
+    "diplomatic_cost_mod": diplomatic_cost_mod_as_str,
+    "dissent_mod": dissent_mod_as_str,
+    "division_extra_mod": division_extra_mod_as_str,
+    "division_type_mod": division_type_mod_as_str,
+    "do_war_bell_mod": do_war_bell_mod_as_str,
+    "foreign_ic_mod": foreign_ic_mod_as_str,
+    "foreign_mp_mod": foreign_mp_mod_as_str,
+    "intel_diff_mod": intel_diff_mod_as_str,
+    "intelligence_mod": intelligence_mod_as_str,
+    "morale_mod": morale_mod_as_str,
+    "mp_growth_mod": mp_growth_mod_as_str,
+    "org_mod": org_mod_as_str,
+    "peace_bell_rate_mod": peace_bell_rate_mod_as_str,
+    "production_category_mod": production_category_mod_as_str,
+    "province_project_mod": province_project_mod_as_str,
+    "resource_mod": resource_mod_as_str,
+    "retooling_time_mod": retooling_time_mod_as_str,
+    "supply_consumption_mod": supply_consumption_mod_as_str,
+    "tc_mod": tc_mod_as_str,
+    "tech_group_mod": tech_group_mod_as_str,
+    "unit_intel_mod": unit_intel_mod_as_str,
+    "unit_speed_mod": unit_speed_mod_as_str,
+    "war_bell_rate_mod": war_bell_rate_mod_as_str
+}
+
 def modifier_as_str(modifier, text_dict, force_default=False, **kwargs):
     if force_default:
         return modifer_as_str_default(modifier)
-    the_function = STR_FUNCTION_DICT_FOR_MODIFERS.get(modifier.type.lower())
+    the_function = STR_FUNCTION_DICT_FOR_MODIFERS.get(modifier.type.lower(), text_dict)
     if the_function is None:
+        print("PROBLEM with modifier type:", modifier.type)
         return modifer_as_str_default(modifier)
-    return the_function(modifier, text_dict, **kwargs)
+    modifier_str = the_function(modifier, text_dict, **kwargs)
+    if modifier_str is None:
+        return modifer_as_str_default(modifier)
+    return modifier_str
 
 def print_modifier(modifier, indent_num, text_dict, force_default=False, **kwargs):
     print(" " * indent_num, modifier_as_str(modifier, text_dict, force_default=force_default, **kwargs))
