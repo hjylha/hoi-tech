@@ -1552,6 +1552,14 @@ def print_effect(effect, indent_num, text_dict, event_dict=None, tech_dict=None,
 # unit_speed_mod
 # war_bell_rate_mod
 
+def get_pct_effect_str(modifier):
+    effect = int(modifier.modifier_effect * 100)
+    sign = "+" if effect > 0 else ""
+    return f"{sign}{effect} %"
+
+def mod_pct_change_as_str(key, modifier, text_dict, text_to_replace="%s%d\\%%\\n"):
+    return text_dict[key].replace(text_to_replace, get_pct_effect_str(modifier))
+
 def modifer_as_str_default(modifier, text_dict=None, **kwargs):
     text_parts = []
     type_part = f"type = {modifier.type}" if modifier.type is not None else ""
@@ -1592,27 +1600,52 @@ def diplomatic_action_mod_as_str(modifier, text_dict):
     pass
 
 def diplomatic_cost_mod_as_str(modifier, text_dict):
-    pass
+    # TODO: lots of other possibilities
+    if modifier.value is None:
+        the_key = "DIPLO_COST"
+        return mod_pct_change_as_str(the_key, modifier, text_dict)
+    the_key = f"DIP_{modifier.value.upper()}"
+    gov_text = ""
+    if modifier.option1 is not None:
+        gov_text = f" ({text_dict['GOV_SAME']})" if modifier.option1 == 1 else f" ({text_dict['GOV_OTHER']})"
+    effect = modifier.modifer_effect
+    sign = "+" if effect > 0 else ""
+    return f"- {text_dict[the_key]}{gov_text}: {sign}{int(effect * 100)} %"
 
 def dissent_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "DISSENT_GROWTH"
+    return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def division_extra_mod_as_str(modifier, text_dict):
     pass
 
 def division_type_mod_as_str(modifier, text_dict):
-    pass
+    if modifier.value is None and modifier.extra is None:
+        the_key = "UNIT_COST"
+        return mod_pct_change_as_str(the_key, modifier, text_dict)
+    the_key = "T_CONSTRUCTION"
+    if modifier.value is not None:
+        division_name = get_unit_name(modifier.value, text_dict, do_short=False)
+    elif modifier.extra is not None:
+        division_name = get_unit_name(modifier.extra, text_dict, do_short=False)
+    effect = int(modifier.modifier_effect * 100)
+    sign = "+" if effect > 0 else ""
+    return f"- {division_name} {text_dict[the_key]}: {sign}{effect} %"
 
 def do_war_bell_mod_as_str(modifier, text_dict):
     the_key = f"DOW_BELLIGERENCE"
-    sign = "+" if modifier.modifier_effect > 0 else "-"
-    return text_dict[the_key].replace("%s%d\\%%\\n", f"{sign}{modifier.modifier_effect}")
+    # sign = "+" if modifier.modifier_effect > 0 else ""
+    # effect = int(modifier.modifier_effect * 100)
+    # return text_dict[the_key].replace("%s%d\\%%\\n", f"{sign}{effect} %")
+    return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def foreign_ic_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_FOREIGN_IC_USE"
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def foreign_mp_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_FOREIGN_MANPOWER_USE"
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def intel_diff_mod_as_str(modifier, text_dict):
     pass
@@ -1624,7 +1657,11 @@ def morale_mod_as_str(modifier, text_dict):
     pass
 
 def mp_growth_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "MANPOWER_GROWTH"
+    effect = int(modifier.modifier_effect * 100) - 100
+    sign = "+" if effect > 0 else ""
+    effect_str = f"{sign}{effect} %"
+    return f"- {text_dict[the_key]}: {effect_str} [Value in file: {modifier.modifier_effect}]"
 
 def org_mod_as_str(modifier, text_dict):
     pass
@@ -1633,16 +1670,29 @@ def peace_bell_rate_mod_as_str(modifier, text_dict):
     pass
 
 def production_category_mod_as_str(modifier, text_dict):
+    # THIS WILL HAVE PROBLEMS
     pass
 
 def province_project_mod_as_str(modifier, text_dict):
     pass
 
 def resource_mod_as_str(modifier, text_dict):
-    pass
+    # TODO:
+    the_key = ""
+    if modifier.value == "money":
+        the_key = "MONEY_PRODUCTION"
+    else:
+        return
+
+    sign = "+" if modifier.modifier_effect > 0 else ""
+    effect = int(modifier.modifier_effect * 100)
+    return text_dict[the_key].replace("%s%d\\%%\\n", f"{sign}{effect} %")
 
 def retooling_time_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_RETOOLING_TIME"
+    effect = int(modifier.modifier_effect * 100)
+    sign = "+" if effect > 0 else ""
+    return f"- {text_dict[the_key]}: {sign}{effect} %"
 
 def supply_consumption_mod_as_str(modifier, text_dict):
     pass
