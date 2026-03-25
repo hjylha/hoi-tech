@@ -1708,12 +1708,11 @@ def resource_mod_as_str(modifier, text_dict):
 
 def retooling_time_mod_as_str(modifier, text_dict):
     the_key = "T_RETOOLING_TIME"
-    effect = int(modifier.modifier_effect * 100)
-    sign = "+" if effect > 0 else ""
-    return f"- {text_dict[the_key]}: {sign}{effect} %"
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def supply_consumption_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "EE_SUPPLY_CONSUMPTION"
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def tc_mod_as_str(modifier, text_dict):
     pass
