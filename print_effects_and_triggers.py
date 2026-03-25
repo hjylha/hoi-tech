@@ -330,6 +330,13 @@ BRIGADE_NUMBERS = {
     "b_u14": 44
 }
 
+def get_tech_category_name(category, text_dict):
+    if "doctrine" in category:
+        the_key = f"TECH_{category[0].upper()}D_NAME"
+    else:
+        the_key = f"TECH_{category.upper()}_NAME"
+    return text_dict[the_key]
+
 def get_resource_name(resource, text_dict):
     if resource == "supplies":
         the_key = "RESOURCE_SUPPLY"
@@ -1586,10 +1593,16 @@ def accept_alliance_mod_as_str(modifier, text_dict):
     pass
 
 def combat_mod_as_str(modifier, text_dict):
-    pass
+    if modifier.division is not None:
+        division_name = get_unit_name(modifier.division, text_dict, do_short=False)
+    elif modifier.extra is not None:
+        division_name = get_unit_name(modifier.extra, text_dict, do_short=False)
+    the_key = "OFF_COMBAT_MODIFIER" if modifier.option1 == 1 else "DEF_COMBAT_MODIFIER"
+    return f"- {division_name} {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def defend_land_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "DEF_COMBAT_MODIFIER"
+    return f"- {text_dict[the_key]} (Land): {get_pct_effect_str(modifier)}"
 
 def detect_convoy_mod_as_str(modifier, text_dict):
     pass
@@ -1618,7 +1631,12 @@ def dissent_mod_as_str(modifier, text_dict):
     return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def division_extra_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_CONSTRUCTION"
+    if modifier.value is not None:
+        division_name = get_unit_name(modifier.value, text_dict, do_short=False)
+    elif modifier.extra is not None:
+        division_name = get_unit_name(modifier.extra, text_dict, do_short=False)
+    return f"- {division_name} {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def division_type_mod_as_str(modifier, text_dict):
     if modifier.value is None and modifier.extra is None:
@@ -1629,9 +1647,7 @@ def division_type_mod_as_str(modifier, text_dict):
         division_name = get_unit_name(modifier.value, text_dict, do_short=False)
     elif modifier.extra is not None:
         division_name = get_unit_name(modifier.extra, text_dict, do_short=False)
-    effect = int(modifier.modifier_effect * 100)
-    sign = "+" if effect > 0 else ""
-    return f"- {division_name} {text_dict[the_key]}: {sign}{effect} %"
+    return f"- {division_name} {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def do_war_bell_mod_as_str(modifier, text_dict):
     the_key = f"DOW_BELLIGERENCE"
@@ -1675,7 +1691,8 @@ def production_category_mod_as_str(modifier, text_dict):
     pass
 
 def province_project_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_CONSTRUCTION"
+    return f"- {BUILDING_DICT[modifier.value]} {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def resource_mod_as_str(modifier, text_dict):
     # TODO:
@@ -1702,10 +1719,17 @@ def tc_mod_as_str(modifier, text_dict):
     pass
 
 def tech_group_mod_as_str(modifier, text_dict):
-    pass
+    category = ""
+    if modifier.value is not None:
+        category = f"{get_tech_category_name(modifier.value, text_dict)} "
+    research_str = "research"
+    if not category:
+        research_str = research_str.capitalize()
+    return f"- {category}{research_str}: {get_pct_effect_str(modifier)}"
 
 def unit_intel_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_ARMY_INTELLIGENCE"
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def unit_speed_mod_as_str(modifier, text_dict):
     pass
