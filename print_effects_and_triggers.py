@@ -331,8 +331,11 @@ BRIGADE_NUMBERS = {
 }
 
 def get_tech_category_name(category, text_dict):
-    if "doctrine" in category:
-        the_key = f"TECH_{category[0].upper()}D_NAME"
+    if "_" in category:
+        category_str = "".join([i[0] for i in category.split("_")])
+        the_key = f"TECH_{category_str.upper()}_NAME"
+    # if "doctrine" in category:
+    #     the_key = f"TECH_{category[0].upper()}D_NAME"
     else:
         the_key = f"TECH_{category.upper()}_NAME"
     return text_dict[the_key]
@@ -1567,6 +1570,9 @@ def get_pct_effect_str(modifier):
 def mod_pct_change_as_str(key, modifier, text_dict, text_to_replace="%s%d\\%%\\n"):
     return text_dict[key].replace(text_to_replace, get_pct_effect_str(modifier))
 
+def get_text_and_pct(key, modifier, text_dict):
+    return f"- {text_dict[key]}: {get_pct_effect_str(modifier)}"
+
 def modifier_as_str_default(modifier, text_dict=None, **kwargs):
     text_parts = []
     type_part = f"type = {modifier.type}" if modifier.type is not None else ""
@@ -1590,7 +1596,29 @@ def modifier_as_str_default(modifier, text_dict=None, **kwargs):
     return ", ".join(text_parts)
 
 def accept_alliance_mod_as_str(modifier, text_dict):
-    pass
+    # TODO: Check this
+    the_key = None
+    if modifier.value is not None:
+        key_dict = {
+            # 0: "ALLIANCE_W_ALL",
+            # 1: "ALLIANCE_W_CLOSE_DICTATORSHIPS",
+            # 2: "ALLIANCE_W_CLOSE_DEMOCRACIES",
+            # this should be correct
+            3: "ALLIANCE_W_CLOSE_IDEOLOGY"
+        }
+        the_key = key_dict.get(modifier.value)
+        if the_key is None:
+            the_key = modifier_as_str_default(modifier)
+        
+    elif modifier.option1 is not None:
+        key_dict = {
+            0: "ALLIANCE_W_DICTATORSHIPS",
+            1: "ALLIANCE_W_DEMOCRACIES"
+        }
+        the_key = key_dict[modifier.option1]
+    if the_key is None:
+        the_key = "ALLIANCE_W_ALL"
+    return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def combat_mod_as_str(modifier, text_dict):
     if modifier.division is not None:
@@ -1605,26 +1633,34 @@ def defend_land_mod_as_str(modifier, text_dict):
     return f"- {text_dict[the_key]} (Land): {get_pct_effect_str(modifier)}"
 
 def detect_convoy_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "NAVAL_DETECTION"
+    the_key2 = "PRODIW_CO"
+    return f"- {text_dict[the_key]} ({text_dict[the_key2]}): {get_pct_effect_str(modifier)}"
 
 def detect_fleet_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "NAVAL_DETECTION"
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def diplomatic_action_mod_as_str(modifier, text_dict):
-    pass
+    the_key = f"DIP_{modifier.value.upper()}"
+    chance_str = text_dict["T_CHANCE"]
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)} {chance_str}"
 
 def diplomatic_cost_mod_as_str(modifier, text_dict):
     # TODO: lots of other possibilities
     if modifier.value is None:
         the_key = "DIPLO_COST"
         return mod_pct_change_as_str(the_key, modifier, text_dict)
-    the_key = f"DIP_{modifier.value.upper()}"
+    exceptions = {
+        "offer_trade_agreement": "DIP_OFFER_TA"
+    }
+    the_key = exceptions.get(modifier.value)
+    if the_key is None:
+        the_key = f"DIP_{modifier.value.upper()}"
     gov_text = ""
     if modifier.option1 is not None:
         gov_text = f" ({text_dict['GOV_SAME']})" if modifier.option1 == 1 else f" ({text_dict['GOV_OTHER']})"
-    effect = modifier.modifier_effect
-    sign = "+" if effect > 0 else ""
-    return f"- {text_dict[the_key]}{gov_text}: {sign}{int(effect * 100)} %"
+    return f"- {text_dict[the_key]}{gov_text}: {get_pct_effect_str(modifier)}"
 
 def dissent_mod_as_str(modifier, text_dict):
     the_key = "DISSENT_GROWTH"
@@ -1655,20 +1691,39 @@ def do_war_bell_mod_as_str(modifier, text_dict):
 
 def foreign_ic_mod_as_str(modifier, text_dict):
     the_key = "T_FOREIGN_IC_USE"
-    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def foreign_mp_mod_as_str(modifier, text_dict):
     the_key = "T_FOREIGN_MANPOWER_USE"
-    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def intel_diff_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_INTEL_DIFF"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def intelligence_mod_as_str(modifier, text_dict):
-    pass
+    exceptions = {
+        "send_spy": "SPY_INCREASE_INTELLIGENCE_FOUNDING",
+        "steal_blueprint": "SPY_STEAL_TECH"
+    }
+    the_key = exceptions.get(modifier.value)
+    if the_key is None:
+        the_key = f"SPY_{modifier.value.upper()}"
+    chance_str = text_dict["T_CHANCE"]
+    try:
+        operation = text_dict[the_key]
+    except KeyError as e:
+        print(modifier)
+        raise e
+    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)} {chance_str}"
 
 def morale_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "ORG_REGAIN"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def mp_growth_mod_as_str(modifier, text_dict):
     the_key = "MANPOWER_GROWTH"
@@ -1678,14 +1733,22 @@ def mp_growth_mod_as_str(modifier, text_dict):
     return f"- {text_dict[the_key]}: {effect_str} [Value in file: {modifier.modifier_effect}]"
 
 def org_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "UNIT_ORG"
+    return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def peace_bell_rate_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "PEACE_BELLIGERENCE"
+    sign = "+" if modifier.modifier_effect > 0 else ""
+    return text_dict[the_key].replace("%s%.1f", f"{sign}{modifier.modifier_effect}").replace("\\n", "")
 
 def production_category_mod_as_str(modifier, text_dict):
     # THIS WILL HAVE PROBLEMS
-    pass
+    value_dict = {
+        "production": "T_IC",
+        "supply": "EE_SUPPLIES",
+        "consumer": "CG_NEED"
+    }
+    return f"- {text_dict[value_dict[modifier.value]]}: {get_pct_effect_str(modifier)}"
 
 def province_project_mod_as_str(modifier, text_dict):
     the_key = "T_CONSTRUCTION"
@@ -1693,26 +1756,29 @@ def province_project_mod_as_str(modifier, text_dict):
 
 def resource_mod_as_str(modifier, text_dict):
     # TODO:
+    # print(modifier)
     the_key = ""
     if modifier.value == "money":
         the_key = "MONEY_PRODUCTION"
+    elif modifier.value == "oil":
+        the_key = "OIL_PRODUCTION"
     else:
         return
-
-    sign = "+" if modifier.modifier_effect > 0 else ""
-    effect = int(modifier.modifier_effect * 100)
-    return text_dict[the_key].replace("%s%d\\%%\\n", f"{sign}{effect} %")
+    return text_dict[the_key].replace("%s%d\\%%\\n", str(get_pct_effect_str(modifier)))
 
 def retooling_time_mod_as_str(modifier, text_dict):
     the_key = "T_RETOOLING_TIME"
-    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def supply_consumption_mod_as_str(modifier, text_dict):
     the_key = "EE_SUPPLY_CONSUMPTION"
-    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def tc_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "TC_BONUS"
+    return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def tech_group_mod_as_str(modifier, text_dict):
     category = ""
@@ -1721,17 +1787,22 @@ def tech_group_mod_as_str(modifier, text_dict):
     research_str = "research"
     if not category:
         research_str = research_str.capitalize()
-    return f"- {category}{research_str}: {get_pct_effect_str(modifier)}"
+    return f"- {category}{research_str}: {get_pct_effect_str(modifier)} [Note: negative is faster]"
 
 def unit_intel_mod_as_str(modifier, text_dict):
     the_key = "T_ARMY_INTELLIGENCE"
-    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def unit_speed_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "LAND_UNIT_SPEED"
+    return get_text_and_pct(the_key, modifier, text_dict)
+    # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def war_bell_rate_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "WAR_BELLIGERENCE"
+    sign = "+" if modifier.modifier_effect > 0 else ""
+    return text_dict[the_key].replace("%s%.1f", f"{sign}{modifier.modifier_effect}").replace("\\n", "")
 
 STR_FUNCTION_DICT_FOR_MODIFERS = {
     "accept_alliance_mod": accept_alliance_mod_as_str,
