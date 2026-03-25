@@ -1622,7 +1622,7 @@ def diplomatic_cost_mod_as_str(modifier, text_dict):
     gov_text = ""
     if modifier.option1 is not None:
         gov_text = f" ({text_dict['GOV_SAME']})" if modifier.option1 == 1 else f" ({text_dict['GOV_OTHER']})"
-    effect = modifier.modifer_effect
+    effect = modifier.modifier_effect
     sign = "+" if effect > 0 else ""
     return f"- {text_dict[the_key]}{gov_text}: {sign}{int(effect * 100)} %"
 
@@ -1651,9 +1651,6 @@ def division_type_mod_as_str(modifier, text_dict):
 
 def do_war_bell_mod_as_str(modifier, text_dict):
     the_key = f"DOW_BELLIGERENCE"
-    # sign = "+" if modifier.modifier_effect > 0 else ""
-    # effect = int(modifier.modifier_effect * 100)
-    # return text_dict[the_key].replace("%s%d\\%%\\n", f"{sign}{effect} %")
     return mod_pct_change_as_str(the_key, modifier, text_dict)
 
 def foreign_ic_mod_as_str(modifier, text_dict):
