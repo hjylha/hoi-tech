@@ -964,7 +964,7 @@ if __name__ == "__main__":
         minister_dict = fs.minister_dict
         techteam_dict = fs.techteam_dict
 
-        from print_effects_and_triggers import effect_as_str, condition_as_str
+        from print_effects_and_triggers import effect_as_str, condition_as_str, modifier_as_str
         def_effs = []
         for tech in tech_dict.values():
             for eff in tech.effects:
@@ -1053,6 +1053,44 @@ if __name__ == "__main__":
                         conditions.append(cond)
             return conditions
         
+        minister_mod_num = 0
+        mod_types = set()
+        def_mods = []
+        mins_w_issues = []
+        mins_w_ULEs = []
+        mins_w_d_mods = []
+        for minister in minister_dict.values():
+            has_error = False
+            has_ULE = False
+            has_default = False
+            if minister.personality is None:
+                continue
+            for modifier in minister.personality.modifiers:
+                minister_mod_num += 1
+                mod_types.add(modifier.type)
+                try:
+                    mod_str = modifier_as_str(modifier, text_dict_last)
+                    if "=" in mod_str:
+                        def_mods.append(mod_str)
+                        has_default = True
+                except KeyError:
+                    has_error = True
+                    # mins_w_issues.append(minister)
+                    continue
+                except UnboundLocalError:
+                    has_ULE = True
+                    continue
+            if has_error:
+                mins_w_issues.append(minister)
+            if has_ULE:
+                mins_w_ULEs.append(minister)
+            if has_default:
+                mins_w_d_mods.append(minister)
+        mins_w_ULEs = sorted(mins_w_ULEs, key=lambda m: m.m_id)
+        mins_w_issues = sorted(mins_w_issues, key=lambda m: m.m_id)
+        mins_w_d_mods = sorted(mins_w_d_mods, key=lambda m: m.m_id)
+
+
         tech_eff_num = 0
         effect_types_in_tech = set()
         for tech in tech_dict.values():
@@ -1103,6 +1141,14 @@ if __name__ == "__main__":
         for eff_type in effect_types_in_tech:
             all_effect_types.add(eff_type)
         print(f"Total number of effect types: {len(all_effect_types)}")
+        print()
+
+        print(f"Ministers: {len(minister_dict)}")
+        print(f"Total number of minister modifiers: {minister_mod_num}")
+        print(f"Total number of modifier types: {len(mod_types)}")
+        print(f"Ministers with KeyErrors: {len(mins_w_issues)}")
+        print(f"Ministers with UnboundLocalErrors: {len(mins_w_ULEs)}")
+        print(f"Ministers with modifiers in default form: {len(mins_w_d_mods)}")
         print()
 
         all_text_duplicates = {key: value for key, value in text_dict.items() if len(value) > 1}
