@@ -1560,7 +1560,7 @@ def get_pct_effect_str(modifier):
 def mod_pct_change_as_str(key, modifier, text_dict, text_to_replace="%s%d\\%%\\n"):
     return text_dict[key].replace(text_to_replace, get_pct_effect_str(modifier))
 
-def modifer_as_str_default(modifier, text_dict=None, **kwargs):
+def modifier_as_str_default(modifier, text_dict=None, **kwargs):
     text_parts = []
     type_part = f"type = {modifier.type}" if modifier.type is not None else ""
     text_parts.append(type_part)
@@ -1577,6 +1577,7 @@ def modifer_as_str_default(modifier, text_dict=None, **kwargs):
     option2_part = f"option2 = {modifier.option2}" if modifier.option2 is not None else ""
     text_parts.append(option2_part)
     division_part = f"division = {modifier.division}" if modifier.division is not None else ""
+    text_parts.append(division_part)
     text_parts = [t for t in text_parts if t]
     # effect_line = f"{type_part}, {which_part}, {value_part}, {when_part}, {where_part}"
     return ", ".join(text_parts)
@@ -1746,14 +1747,14 @@ STR_FUNCTION_DICT_FOR_MODIFERS = {
 
 def modifier_as_str(modifier, text_dict, force_default=False, **kwargs):
     if force_default:
-        return modifer_as_str_default(modifier)
+        return modifier_as_str_default(modifier)
     the_function = STR_FUNCTION_DICT_FOR_MODIFERS.get(modifier.type.lower(), text_dict)
     if the_function is None:
         print("PROBLEM with modifier type:", modifier.type)
-        return modifer_as_str_default(modifier)
+        return modifier_as_str_default(modifier)
     modifier_str = the_function(modifier, text_dict, **kwargs)
     if modifier_str is None:
-        return modifer_as_str_default(modifier)
+        return modifier_as_str_default(modifier)
     return modifier_str
 
 def print_modifier(modifier, indent_num, text_dict, force_default=False, **kwargs):
