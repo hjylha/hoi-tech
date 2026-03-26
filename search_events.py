@@ -853,7 +853,7 @@ class Search:
         self.files = filescanner
         self.subjects = {
             "--E": (self.search_events, "events"),
-            "--t": (self.search_text, "text"), 
+            "--t": (self.search_text, "(English) text"),
             "--T": (self.search_tech, "technologies"),
             "--TT": (self.search_tech_teams, "tech teams"), 
             "--L": (self.search_leaders, "leaders"),
@@ -870,6 +870,14 @@ class Search:
     
     
     def search(self):
+        print(f"\n{' ' * self.indent_num}Welcome to search!\n{' ' * self.indent_num}Subject can be changed with commands:")
+        for key, value in self.subjects.items():
+            text = f"{value[1]} [default]" if key == self.DEFAULT_SUBJECT else value[1]
+            random_whitespace = " " * (6 - len(key))
+            print(" " * (self.indent_num + self.indent_add), f"{key}{random_whitespace}{text}")
+        print()
+        print(" " * self.indent_num, "Empty search i.e. pressing Enter quits the program.\n")
+
         while True:
             text_input = input(f"Enter search term(s) [current subject: {self.subjects[self.current_subject][1]}]:\n")
             if not text_input:
@@ -1196,7 +1204,7 @@ if __name__ == "__main__":
 
     if ask_to_search:
         TheSearch = Search(AOD_PATH, fs, max_num_of_suggestions=20, max_text_length=50, force_default=force_default)
-        print(explanation)
+        # print(explanation)
         TheSearch.search()
     # while ask_to_search:
     #     # ask_to_search = search_events(event_dict)
