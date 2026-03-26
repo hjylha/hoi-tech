@@ -239,6 +239,19 @@ BUILDING_DICT = {
     "rocket_test": "Rocket Test Site"
 }
 
+IDEOLOGY_DICT = {
+    "FA": "CATEGORY_FASCIST",
+    "ML": "CATEGORY_MARKET_LIBERAL",
+    "PA": "CATEGORY_PATERNAL_AUTOCRAT",
+    "NS": "CATEGORY_NATIONAL_SOCIALIST",
+    "LE": "CATEGORY_LENINIST",
+    "ST": "CATEGORY_STALINIST",
+    "SD": "CATEGORY_SOCIAL_DEMOCRAT",
+    "SC": "CATEGORY_SOCIAL_CONSERVATIVE",
+    "SL": "CATEGORY_SOCIAL_LIBERAL",
+    "LWR": "CATEGORY_LEFT_WING_RADICAL"
+}
+
 SLIDER_DICT = {
     "democratic": ["DOMNAME_DEM_L", "DOMNAME_DEM_R"],
     "political_left": ["DOMNAME_POL_L", "DOMNAME_POL_R"],
@@ -2562,54 +2575,71 @@ def print_event(event, aod_path, indent_num, indent_add, text_dict, event_dict, 
         print_action(action, indent_num, indent_add, text_dict, event_dict, tech_dict, leader_dict, minister_dict, techteam_dict, force_default=force_default, **kwargs)
     
 
-def list_tech_effects(tech, text_dict, tech_dict, **kwargs):
+def list_tech_effects(tech, text_dict, tech_dict, force_default=False, **kwargs):
     effect_strs = []
     research_speed_change = []
     for effect in tech.effects:
         if effect.type == "research_mod":
-            research_speed_change.append(effect_as_str(effect, text_dict))
+            research_speed_change.append(effect_as_str(effect, text_dict, force_default=force_default))
             continue
-        effect_str = effect_as_str(effect, text_dict, tech_dict=tech_dict)
+        effect_str = effect_as_str(effect, text_dict, tech_dict=tech_dict, force_default=force_default)
         for eff_str in effect_str.split("\n"):
             effect_strs.append(eff_str)
     return research_speed_change + effect_strs
 
-def get_component_name(component_type, text_dict):
+def get_component_name(component_type, text_dict, force_default=False):
+    if force_default:
+        return component_type
     key = f"RT_{component_type.upper()}"
     return text_dict[key]
 
-def print_tech(tech, indent_num, indent_add, text_dict, tech_dict):
+def print_tech(tech, indent_num, indent_add, text_dict, tech_dict, force_default=False):
     print(" " * indent_num, f"{tech.tech_id}: {tech.name}")
-    print(" " * indent_num, f"Category: {tech.category}")
+    if force_default:
+        print(" " * indent_num, f"Category: {tech.category}")
+    else:
+        print(" " * indent_num, f"Category: {get_tech_category_name(tech.category, text_dict)}")
     print(" " * indent_num, "Components:")
     for component in tech.components:
-        print(" " * (indent_num + indent_add), get_component_name(component.type, text_dict), f"(Difficulty: {component.difficulty})")
+        print(" " * (indent_num + indent_add), get_component_name(component.type, text_dict, force_default=force_default), f"(Difficulty: {component.difficulty})")
 
     print(" " * indent_num, "Requirements:")
     if not tech.requirements:
         print(" " * (indent_num + indent_add), "-")
     for requirement in tech.requirements:
         if isinstance(requirement, int):
+            if force_default:
+                print(" " * (indent_num + indent_add), requirement)
+                continue
             print(" " * (indent_num + indent_add), f"[{requirement}] {tech_dict[requirement].name}")
             continue
         print(" " * (indent_num + indent_add), "One of the following:")
         for option in requirement:
-            print(" " * (indent_num + 2 * indent_add), f"[{requirement}] {tech_dict[requirement].name}")
+            if force_default:
+                print(" " * (indent_num + indent_add), option)
+                continue
+            print(" " * (indent_num + 2 * indent_add), f"[{option}] {tech_dict[option].name}")
 
     print(" " * indent_num, "Allows:")
     if not tech.allows:
         print(" " * (indent_num + indent_add), "-")
     for tech_id in tech.allows:
+        if force_default:
+            print(" " * (indent_num + indent_add), tech_id)
+            continue
         print(" " * (indent_num + indent_add), f"[{tech_id}] {tech_dict[tech_id].name}")
 
     print(" " * indent_num, "Deactivated by:")
     if not tech.deactivated_by:
         print(" " * (indent_num + indent_add), "-")
     for tech_id in tech.deactivated_by:
+        if force_default:
+            print(" " * (indent_num + indent_add), tech_id)
+            continue
         print(" " * (indent_num + indent_add), f"[{tech_id}] {tech_dict[tech_id].name}")
 
     print(" " * indent_num, "Effects:")
-    list_of_effects = list_tech_effects(tech, text_dict, tech_dict)
+    list_of_effects = list_tech_effects(tech, text_dict, tech_dict, force_default=force_default)
     for effect_str in list_of_effects:
         print(" " * (indent_num + 2 * indent_add), effect_str)
     # for effect in tech.effects:
@@ -2618,7 +2648,7 @@ def print_tech(tech, indent_num, indent_add, text_dict, tech_dict):
     print(" " * indent_num, f"In file: {tech.filepath}")
 
 
-def print_tech_team(techteam, indent_num, indent_add, text_dict):
+def print_tech_team(techteam, indent_num, indent_add, text_dict, force_default=False):
     print(" " * indent_num, f"{techteam.team_id}: {techteam.name}")
     print(" " * indent_num, f"Country: {techteam.country}")
     print(" " * indent_num, f"Skill {techteam.skill}")
@@ -2626,12 +2656,12 @@ def print_tech_team(techteam, indent_num, indent_add, text_dict):
     if not techteam.specialities:
         print(" " * (indent_num + indent_add), "-")
     for speciality in techteam.specialities:
-        print(" " * (indent_num + indent_add), get_component_name(speciality, text_dict))
+        print(" " * (indent_num + indent_add), get_component_name(speciality, text_dict, force_default=force_default))
     print(" " * indent_num, f"Start year: {techteam.start_year}  End year: {techteam.end_year}")
     print(" " * indent_num, f"In file: {techteam.filepath}")
 
 
-def print_minister(minister, indent_num, indent_add, text_dict):
+def print_minister(minister, indent_num, indent_add, text_dict, force_default=False):
     print(" " * indent_num, f"{minister.m_id}: {minister.name}")
     print(" " * indent_num, f"Country: {minister.country}")
     print(" " * indent_num, f"Position: {minister.readable_positions[minister.position]}")
@@ -2645,11 +2675,14 @@ def print_minister(minister, indent_num, indent_add, text_dict):
         print(" " * indent_num, "Modifiers:")
         indent_num += indent_add
         for modifier in minister.personality.modifiers:
-            print_modifier(modifier, indent_num, text_dict)
+            print_modifier(modifier, indent_num, text_dict, force_default=force_default)
             # modifier_str = " ".join([f"{mod}={value}" for mod, value in zip(MODIFIER_ATTRIBUTES, modifier) if value is not None])
             # print(" " * (indent_num + 2 * indent_add), modifier_str)
         indent_num -= 3 * indent_add
     print(" " * indent_num, f"Start year: {minister.start_year}")
-    print(" " * indent_num, f"Ideology: {minister.ideology}")
+    if force_default:
+        print(" " * indent_num, f"Ideology: {ideology}")
+    else:
+        print(" " * indent_num, f"Ideology: {text_dict[IDEOLOGY_DICT[minister.ideology]]}")
     print(" " * indent_num, f"Loyalty: {minister.loyalty}")
     print(" " * indent_num, f"Filepath: {minister.filepath}")

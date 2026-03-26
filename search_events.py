@@ -535,6 +535,7 @@ class Search:
     ALL_FLAG = "--all"
     PRINTALL_FLAG = "--printall"
     NO_COUNTRY_FLAG = "--nocc"
+    FORCE_DEFAULT_FLAG = "--FD"
 
     NOT_IMPLEMENTED_TEXT = "\n  This feature has not been implemented yet.\n"
 
@@ -590,7 +591,7 @@ class Search:
         suggestions = find_matching_text(text_input, self.files.text_dict_w_duplicates, exact_keyword)
         print_text_suggestions(suggestions, max_num_of_suggestions, self.max_text_length, self.indent_num, the_command=self.ALL_FLAG)
 
-    def search_events(self, text_input, current_subject, show_all=False, print_all=False, **kwargs):
+    def search_events(self, text_input, current_subject, show_all=False, print_all=False, force_default=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         no_countries = False
@@ -639,7 +640,7 @@ class Search:
         if len(suggestions) == 1:
             ev = suggestions[0][0]
             # ev.print_event(aod_path, 1, indent_add)
-            print_event(ev, self.aod_path, self.indent_num, self.indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
+            print_event(ev, self.aod_path, self.indent_num, self.indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=force_default)
             print()
             return
         if print_all:
@@ -650,7 +651,7 @@ class Search:
                 print(" " * self.indent_num, f"Result {ordinal_num}: score {score}")
                 print("#" * 30)
                 print()
-                print_event(event, self.aod_path, self.indent_num, self.indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=self.force_default)
+                print_event(event, self.aod_path, self.indent_num, self.indent_add, self.files.text_dict, self.files.event_dict, self.files.tech_dict, self.files.leader_dict, self.files.minister_dict, self.files.techteam_dict, force_default=force_default)
                 print()
             return
         for event, score in suggestions[:max_num_of_suggestions]:
@@ -664,7 +665,7 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
 
-    def search_tech(self, text_input, current_subject, show_all=False, **kwargs):
+    def search_tech(self, text_input, current_subject, show_all=False, force_default=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
 
@@ -679,7 +680,7 @@ class Search:
 
         if len(suggestions) == 1:
             # suggestions[0].print_tech_info(self.indent_num, self.indent_add)
-            print_tech(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, self.files.tech_dict)
+            print_tech(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, self.files.tech_dict, force_default=force_default)
             print()
             return
 
@@ -720,7 +721,7 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
-    def search_ministers(self, text_input, current_subject, show_all=False, **kwargs):
+    def search_ministers(self, text_input, current_subject, show_all=False, force_default=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
 
@@ -738,7 +739,7 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            print_minister(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict)
+            print_minister(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
             # suggestions[0].print_minister_info(self.indent_num, self.indent_add)
             print()
             return
@@ -749,7 +750,7 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
-    def search_tech_teams(self, text_input, current_subject, show_all=False, **kwargs):
+    def search_tech_teams(self, text_input, current_subject, show_all=False, force_default=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
 
@@ -767,7 +768,7 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            print_tech_team(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict)
+            print_tech_team(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
             # suggestions[0].print_tech_team_info(self.indent_num, self.indent_add)
             print()
             return
@@ -891,24 +892,32 @@ class Search:
 
             show_all = False
             print_all = False
+            force_default = self.force_default
+
             all_flag = f" {self.ALL_FLAG}"
             if all_flag in text_input:
                 show_all = True
                 text_input = text_input.replace(all_flag, "")
+
             print_all_flag = f" {self.PRINTALL_FLAG}"
             if print_all_flag in text_input:
                 show_all = True
                 print_all = True
                 text_input = text_input.replace(print_all_flag, "")
 
+            new_text_input = find_and_remove_text_w_space(text_input, self.FORCE_DEFAULT_FLAG)
+            if new_text_input != text_input:
+                text_input = new_text_input
+                force_default = True
+
             for key, func_n_text in self.subjects.items():
                 new_text_input = find_and_remove_text_w_space(text_input, key)
                 if new_text_input != text_input:
                     # self.current_subject = key
-                    func_n_text[0](new_text_input, current_subject=key, show_all=show_all, print_all=print_all)
+                    func_n_text[0](new_text_input, current_subject=key, show_all=show_all, print_all=print_all, force_default=force_default)
                     break
             else:
-                self.subjects[self.current_subject][0](text_input, current_subject=self.current_subject, show_all=show_all, print_all=print_all)
+                self.subjects[self.current_subject][0](text_input, current_subject=self.current_subject, show_all=show_all, print_all=print_all, force_default=force_default)
 
 
 if __name__ == "__main__":
