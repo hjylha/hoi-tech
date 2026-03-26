@@ -872,7 +872,11 @@ class Search:
     
     
     def search(self):
-        print(f"\n{' ' * self.indent_num}Welcome to search!\n{' ' * self.indent_num}Subject can be changed with commands:")
+        print(f"\n{' ' * self.indent_num}Welcome to search!")
+        print()
+        print(" " * self.indent_num, f"Current scenario: {self.files.scenario_name} [{self.files.scenario_path.name}]")
+        print()
+        print(" " * self.indent_num, f"Subject can be changed with commands:")
         for key, value in self.subjects.items():
             text = f"{value[1]} [default]" if key == self.DEFAULT_SUBJECT else value[1]
             random_whitespace = " " * (6 - len(key))
