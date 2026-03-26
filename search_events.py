@@ -816,7 +816,7 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
 
-    def search_provinces(self, text_input, current_subject, **kwargs):
+    def search_provinces(self, text_input, current_subject, show_all=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
         # exact_keyword = False
@@ -838,11 +838,13 @@ class Search:
             if text_input in key.lower() or text_input in text.lower():
                 suggestions.append((key[4:], text))
 
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+
         print()
         if not suggestions:
             print(" " * self.indent_num, "Nothing found\n")
             return
-        for province_num, province_name in suggestions[:self.max_num_of_suggestions]:
+        for province_num, province_name in suggestions[:max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{province_num}] {province_name}")
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print("\n")
