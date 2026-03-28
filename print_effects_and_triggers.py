@@ -1852,7 +1852,7 @@ STR_FUNCTION_DICT_FOR_MODIFERS = {
 def modifier_as_str(modifier, text_dict, force_default=False, **kwargs):
     if force_default:
         return modifier_as_str_default(modifier)
-    the_function = STR_FUNCTION_DICT_FOR_MODIFERS.get(modifier.type.lower(), text_dict)
+    the_function = STR_FUNCTION_DICT_FOR_MODIFERS.get(modifier.type.lower())
     if the_function is None:
         print("PROBLEM with modifier type:", modifier.type)
         return modifier_as_str_default(modifier)
