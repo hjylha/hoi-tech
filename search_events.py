@@ -3,10 +3,10 @@ import sys
 from file_paths import get_scenarios_folder_path, get_event_text_paths, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
-from classes import find_tech, find_tech_teams, find_ministers, find_leaders
+from classes import find_tech, find_tech_teams, find_ministers, find_ideas, find_leaders
 from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
-from print_effects_and_triggers import print_event, print_tech, print_tech_team, print_minister
+from print_effects_and_triggers import print_event, print_tech, print_tech_team, print_minister, print_idea
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -750,6 +750,30 @@ class Search:
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
+    def search_ideas(self, text_input, current_subject, show_all=False, force_default=False, **kwargs):
+        if self.change_subject_in_search(text_input, current_subject):
+            return
+
+        suggestions = find_ideas(text_input, self.files.ideas)
+
+        max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
+
+        print()
+        if not suggestions:
+            print(" " * self.indent_num, "Nothing found\n")
+            return
+
+        if len(suggestions) == 1:
+            print_idea(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
+            # suggestions[0].print_minister_info(self.indent_num, self.indent_add)
+            print()
+            return
+
+        for idea in suggestions[:max_num_of_suggestions]:
+            print(" " * self.indent_num, f"{idea.public_name} (position: {idea.position})")
+        self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
+        print()
+
     def search_tech_teams(self, text_input, current_subject, show_all=False, force_default=False, **kwargs):
         if self.change_subject_in_search(text_input, current_subject):
             return
@@ -861,6 +885,7 @@ class Search:
             "--TT": (self.search_tech_teams, "tech teams"), 
             "--L": (self.search_leaders, "leaders"),
             "--M": (self.search_ministers, "ministers"),
+            "--I": (self.search_ideas, "policies and ideas"),
             "--C": (self.search_countries, "countries"),
             "--P": (self.search_provinces, "provinces")
         }
