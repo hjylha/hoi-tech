@@ -1025,6 +1025,7 @@ if __name__ == "__main__":
         tech_dict = fs.tech_dict
         leader_dict = fs.leader_dict
         minister_dict = fs.minister_dict
+        ideas = fs.ideas
         techteam_dict = fs.techteam_dict
 
         from print_effects_and_triggers import effect_as_str, condition_as_str, modifier_as_str
@@ -1153,6 +1154,28 @@ if __name__ == "__main__":
         mins_w_issues = sorted(mins_w_issues, key=lambda m: m.m_id)
         mins_w_d_mods = sorted(mins_w_d_mods, key=lambda m: m.m_id)
 
+        idea_mod_num = 0
+        ideas_w_issues = []
+        ideas_w_d_mods = []
+        for idea in ideas:
+            has_error = False
+            has_default = False
+            for modifier in idea.modifiers:
+                idea_mod_num += 1
+                mod_types.add(modifier.type)
+                try:
+                    mod_str = modifier_as_str(modifier, text_dict_last)
+                    if "=" in mod_str:
+                        def_mods.append(mod_str)
+                        has_default = True
+                except KeyError:
+                    has_error = True
+                    continue
+            if has_error:
+                ideas_w_issues.append(idea)
+            if has_default:
+                ideas_w_d_mods.append(idea)
+
 
         tech_eff_num = 0
         effect_types_in_tech = set()
@@ -1208,10 +1231,13 @@ if __name__ == "__main__":
 
         print(f"Ministers: {len(minister_dict)}")
         print(f"Total number of minister modifiers: {minister_mod_num}")
+        print(f"Total number of idea and policy modifiers: {minister_mod_num}")
         print(f"Total number of modifier types: {len(mod_types)}")
         print(f"Ministers with KeyErrors: {len(mins_w_issues)}")
         print(f"Ministers with UnboundLocalErrors: {len(mins_w_ULEs)}")
         print(f"Ministers with modifiers in default form: {len(mins_w_d_mods)}")
+        print(f"Ideas with KeyErrors: {len(ideas_w_issues)}")
+        print(f"Ideas with modifiers in default form: {len(ideas_w_d_mods)}")
         print()
 
         all_text_duplicates = {key: value for key, value in text_dict.items() if len(value) > 1}
