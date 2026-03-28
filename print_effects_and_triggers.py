@@ -1633,6 +1633,14 @@ def accept_alliance_mod_as_str(modifier, text_dict):
         the_key = "ALLIANCE_W_ALL"
     return mod_pct_change_as_str(the_key, modifier, text_dict)
 
+def colonial_ic_mod_as_str(modifier, text_dict):
+    the_key = "T_COLONIAL_IC"
+    return get_text_and_pct(the_key, modifier, text_dict)
+
+def colonial_mp_mod_as_str(modifier, text_dict):
+    the_key = "T_COLONIAL_MP"
+    return get_text_and_pct(the_key, modifier, text_dict)
+
 def combat_mod_as_str(modifier, text_dict):
     if modifier.division is not None:
         division_name = get_unit_name(modifier.division, text_dict, do_short=False)
@@ -1655,9 +1663,19 @@ def detect_fleet_mod_as_str(modifier, text_dict):
     return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def diplomatic_action_mod_as_str(modifier, text_dict):
-    the_key = f"DIP_{modifier.value.upper()}"
+    # TODO: option1 ???
+    if modifier.value is not None:
+        exceptions = {
+            "offer_trade_agreement": "DIP_OFFER_TA"
+        }
+        the_key = exceptions.get(modifier.value)
+        if the_key is None:
+            the_key = f"DIP_{modifier.value.upper()}"
+        action_text = text_dict[the_key]
+    else:
+        action_text = "Diplomatic actions"
     chance_str = text_dict["T_CHANCE"]
-    return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)} {chance_str}"
+    return f"- {action_text}: {get_pct_effect_str(modifier)} {chance_str}"
 
 def diplomatic_cost_mod_as_str(modifier, text_dict):
     # TODO: lots of other possibilities
@@ -1733,6 +1751,14 @@ def intelligence_mod_as_str(modifier, text_dict):
         raise e
     return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)} {chance_str}"
 
+def leader_xp_mod_as_str(modifier, text_dict):
+    the_key = "T_LEADER_XP"
+    return get_text_and_pct(the_key, modifier, text_dict)
+
+def military_salaries_mod_as_str(modifier, text_dict):
+    the_key = "T_MILITARY_SALARIES"
+    return get_text_and_pct(the_key, modifier, text_dict)
+
 def morale_mod_as_str(modifier, text_dict):
     the_key = "ORG_REGAIN"
     return get_text_and_pct(the_key, modifier, text_dict)
@@ -1759,7 +1785,9 @@ def production_category_mod_as_str(modifier, text_dict):
     value_dict = {
         "production": "T_IC",
         "supply": "EE_SUPPLIES",
-        "consumer": "CG_NEED"
+        "consumer": "CG_NEED",
+        "upgrade": "UPGRADE_COST",
+        "infrastructure": "INFRA_REBUILD_COST"
     }
     return f"- {text_dict[value_dict[modifier.value]]}: {get_pct_effect_str(modifier)}"
 
@@ -1767,22 +1795,31 @@ def province_project_mod_as_str(modifier, text_dict):
     the_key = "T_CONSTRUCTION"
     return f"- {BUILDING_DICT[modifier.value]} {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
+def remote_placement_min_ic_mod_as_str(modifier, text_dict):
+    pass
+
 def resource_mod_as_str(modifier, text_dict):
     # TODO:
     # print(modifier)
-    the_key = ""
-    if modifier.value == "money":
-        the_key = "MONEY_PRODUCTION"
-    elif modifier.value == "oil":
-        the_key = "OIL_PRODUCTION"
-    else:
-        return
-    return text_dict[the_key].replace("%s%d\\%%\\n", str(get_pct_effect_str(modifier)))
+    if modifier.value is not None:
+        the_key = f"{modifier.value.upper()}_PRODUCTION"
+        return text_dict[the_key].replace("%s%d\\%%\\n", str(get_pct_effect_str(modifier)))
+    return f"- Resources: {get_pct_effect_str(modifier)}"
+    # if modifier.value == "money":
+    #     the_key = "MONEY_PRODUCTION"
+    # elif modifier.value == "oil":
+    #     the_key = "OIL_PRODUCTION"
+    # else:
+    #     return
 
 def retooling_time_mod_as_str(modifier, text_dict):
     the_key = "T_RETOOLING_TIME"
     return get_text_and_pct(the_key, modifier, text_dict)
     # return f"- {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
+
+def stand_ground_dissent_mod_as_str(modifier, text_dict):
+    the_key = "T_STAND_GROUND_DISSENT"
+    return get_text_and_pct(the_key, modifier, text_dict)
 
 def supply_consumption_mod_as_str(modifier, text_dict):
     the_key = "EE_SUPPLY_CONSUMPTION"
@@ -1819,6 +1856,8 @@ def war_bell_rate_mod_as_str(modifier, text_dict):
 
 STR_FUNCTION_DICT_FOR_MODIFERS = {
     "accept_alliance_mod": accept_alliance_mod_as_str,
+    "colonial_ic_mod": colonial_ic_mod_as_str,
+    "colonial_mp_mod": colonial_mp_mod_as_str,
     "combat_mod": combat_mod_as_str,
     "defend_land_mod": defend_land_mod_as_str,
     "detect_convoy_mod": detect_convoy_mod_as_str,
@@ -1833,14 +1872,18 @@ STR_FUNCTION_DICT_FOR_MODIFERS = {
     "foreign_mp_mod": foreign_mp_mod_as_str,
     "intel_diff_mod": intel_diff_mod_as_str,
     "intelligence_mod": intelligence_mod_as_str,
+    "leader_xp_mod": leader_xp_mod_as_str,
+    "military_salaries_mod": military_salaries_mod_as_str,
     "morale_mod": morale_mod_as_str,
     "mp_growth_mod": mp_growth_mod_as_str,
     "org_mod": org_mod_as_str,
     "peace_bell_rate_mod": peace_bell_rate_mod_as_str,
     "production_category_mod": production_category_mod_as_str,
     "province_project_mod": province_project_mod_as_str,
+    "remote_placement_min_ic_mod": remote_placement_min_ic_mod_as_str,
     "resource_mod": resource_mod_as_str,
     "retooling_time_mod": retooling_time_mod_as_str,
+    "stand_ground_dissent_mod": stand_ground_dissent_mod_as_str,
     "supply_consumption_mod": supply_consumption_mod_as_str,
     "tc_mod": tc_mod_as_str,
     "tech_group_mod": tech_group_mod_as_str,
