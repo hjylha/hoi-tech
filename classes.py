@@ -221,7 +221,7 @@ class Tech:
         # return max(1 / 20, 9 * research_speed_modifier / (self.components[self.current_component].difficulty + 2) / 9)
         return self.calculate_component_difficulty_multiplier(self.current_component, research_speed_modifier, game_difficulty, total_extra_bonus)
 
-    def print_tech_info(self, indent_num, indent_add):
+    def print_tech_info(self, indent_num=2, indent_add=2):
         print(" " * indent_num, f"{self.tech_id}: {self.name}")
         print(" " * indent_num, f"Category: {self.category}")
         print(" " * indent_num, "Components:")
@@ -464,7 +464,7 @@ class TechTeam:
             results.append(tuple(component_result))
         return tuple(results)
 
-    def print_tech_team_info(self, indent_num, indent_add):
+    def print_tech_team_info(self, indent_num=2, indent_add=2):
         print(" " * indent_num, f"{self.team_id}: {self.name}")
         print(" " * indent_num, f"Country: {self.country}")
         print(" " * indent_num, f"Skill {self.skill}")
@@ -602,7 +602,7 @@ class Minister:
             return dict()
         return self.personality.get_research_bonus()
 
-    def print_minister_info(self, indent_num, indent_add):
+    def print_minister_info(self, indent_num=2, indent_add=2):
         print(" " * indent_num, f"{self.m_id}: {self.name}")
         print(" " * indent_num, f"Country: {self.country}")
         print(" " * indent_num, f"Position: {self.readable_positions[self.position]}")
@@ -673,6 +673,25 @@ class Idea(MinisterOrIdea):
 
 # class NationalCulture(Idea):
 #     pass
+
+
+def find_ideas(search_terms, idea_list):
+    search_terms = search_terms.lower()
+
+    matches = []
+    starts = []
+    other_suggestions = []
+    for idea in idea_list:
+        idea_name = idea.public_name.lower()
+        if search_terms == idea_name:
+            matches.append(idea)
+            continue
+        if idea_name.startswith(search_terms):
+            starts.append(idea)
+            continue
+        if search_terms in idea_name:
+            other_suggestions.append(idea)
+    return matches + starts + other_suggestions
 
 
 class Leader:
@@ -808,7 +827,7 @@ class Leader:
             "pic_path": self.pic_path
         }
     
-    def print_leader_info(self, indent_num, indent_add):
+    def print_leader_info(self, indent_num=2, indent_add=2):
         print(" " * indent_num, f"{self.leader_id}: {self.name}")
         print(" " * indent_num, f"Country: {self.country}")
         print(" " * indent_num, f"Skill {self.skill}  {self.TYPES[self.land_naval_or_air]} leader with max skill {self.max_skill}")
