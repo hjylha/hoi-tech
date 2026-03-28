@@ -754,6 +754,16 @@ class Search:
         if self.change_subject_in_search(text_input, current_subject):
             return
 
+        try:
+            index_choice = int(text_input) - 1
+            print_idea(self.old_suggestions[index_choice], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
+            print()
+            return
+        except ValueError:
+            pass
+        except IndexError:
+            pass
+
         suggestions = find_ideas(text_input, self.files.ideas)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
@@ -761,16 +771,19 @@ class Search:
         print()
         if not suggestions:
             print(" " * self.indent_num, "Nothing found\n")
+            self.old_suggestions = []
             return
 
         if len(suggestions) == 1:
             print_idea(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
             # suggestions[0].print_minister_info(self.indent_num, self.indent_add)
             print()
+            self.old_suggestions = []
             return
 
-        for idea in suggestions[:max_num_of_suggestions]:
-            print(" " * self.indent_num, f"{idea.public_name} (position: {idea.position})")
+        self.old_suggestions = suggestions
+        for i, idea in enumerate(suggestions[:max_num_of_suggestions]):
+            print(" " * self.indent_num, f"{i + 1}. {idea.public_name} (position: {idea.position})")
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
@@ -895,6 +908,8 @@ class Search:
         self.indent_num = indent_num
         self.indent_add = indent_add
         self.force_default = force_default
+
+        self.old_suggestions = []
     
     
     def search(self):
