@@ -673,7 +673,8 @@ class FileScanner:
         minister_dict=None,
         leader_dict=None,
         brigade_dict=None,
-        division_dict=None
+        division_dict=None,
+        ideas_and_policies=None
     ):
         self.scenario_path = scenario_path
         self.text_dict_w_duplicates = text_dict_w_duplicates
@@ -688,6 +689,7 @@ class FileScanner:
         self.leader_dict = leader_dict
         self.brigade_dict = brigade_dict
         self.division_dict = division_dict
+        self.ideas = ideas_and_policies
         # TODO: should these be scanned if None?
         # TODO: how about tech teams?
 
@@ -944,6 +946,9 @@ class FileScanner:
         for minister in self.minister_dict.values():
             minister.country = self.country_dict.get(minister.country_code)
 
+    def scan_ideas(self):
+        self.ideas = scan_ideas()
+
     def scan_leaders(self, check_unique_ids=False, show_issues=False):
         column_names = ["name", "id", "country", "rank 3 year", "rank 2 year", "rank 1 year", "rank 0 year", "ideal rank", "max skill", "traits", "skill", "experience", "loyalty", "type", "picture", "start year", "end year", "x"]
         self.leader_dict = {}
@@ -997,6 +1002,8 @@ class FileScanner:
             self.scan_brigades_and_divisions()
         if scan_everything or self.minister_dict is None:
             self.scan_ministers()
+        if scan_everything or self.ideas is None:
+            self.scan_ideas()
         if scan_everything or self.leader_dict is None:
             self.scan_leaders()
 
