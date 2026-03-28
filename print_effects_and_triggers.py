@@ -2593,7 +2593,9 @@ def get_component_name(component_type, text_dict, force_default=False):
     key = f"RT_{component_type.upper()}"
     return text_dict[key]
 
-def print_tech(tech, indent_num, indent_add, text_dict, tech_dict, force_default=False):
+def print_tech(tech, indent_num=2, indent_add=2, text_dict=None, tech_dict=None, force_default=False):
+    if text_dict is None or tech_dict is None:
+        force_default = True
     print(" " * indent_num, f"{tech.tech_id}: {tech.name}")
     if force_default:
         print(" " * indent_num, f"Category: {tech.category}")
@@ -2648,7 +2650,9 @@ def print_tech(tech, indent_num, indent_add, text_dict, tech_dict, force_default
     print(" " * indent_num, f"In file: {tech.filepath}")
 
 
-def print_tech_team(techteam, indent_num, indent_add, text_dict, force_default=False):
+def print_tech_team(techteam, indent_num=2, indent_add=2, text_dict=None, force_default=False):
+    if text_dict is None:
+        force_default = True
     print(" " * indent_num, f"{techteam.team_id}: {techteam.name}")
     print(" " * indent_num, f"Country: {techteam.country}")
     print(" " * indent_num, f"Skill {techteam.skill}")
@@ -2661,7 +2665,9 @@ def print_tech_team(techteam, indent_num, indent_add, text_dict, force_default=F
     print(" " * indent_num, f"In file: {techteam.filepath}")
 
 
-def print_minister(minister, indent_num, indent_add, text_dict, force_default=False):
+def print_minister(minister, indent_num=2, indent_add=2, text_dict=None, force_default=False):
+    if text_dict is None:
+        force_default = True
     print(" " * indent_num, f"{minister.m_id}: {minister.name}")
     print(" " * indent_num, f"Country: {minister.country}")
     print(" " * indent_num, f"Position: {minister.readable_positions[minister.position]}")
@@ -2686,3 +2692,21 @@ def print_minister(minister, indent_num, indent_add, text_dict, force_default=Fa
         print(" " * indent_num, f"Ideology: {text_dict[IDEOLOGY_DICT[minister.ideology]]}")
     print(" " * indent_num, f"Loyalty: {minister.loyalty}")
     print(" " * indent_num, f"Filepath: {minister.filepath}")
+
+
+def print_idea(idea, indent_num=2, indent_add=2, text_dict=None, force_default=False):
+    if text_dict is None:
+        force_default = True
+    print(" " * indent_num, f"{idea.public_name}")
+    print(" " * indent_num, f"Position: {idea.position}")
+    print(" " * indent_num, "Modifiers:")
+    indent_num += indent_add
+    if not idea.modifiers:
+        print(" " * indent_num, "-")
+    for modifier in idea.modifiers:
+        print_modifier(modifier, indent_num, text_dict, force_default=force_default)
+    indent_num -= indent_add
+    print(" " * indent_num, "Government types:")
+    indent_num += indent_add
+    for gov_type in idea.gov_types:
+        print(" " * indent_num, gov_type)
