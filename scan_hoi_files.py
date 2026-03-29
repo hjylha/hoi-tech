@@ -1,12 +1,12 @@
 
 from file_paths import get_tech_path, get_minister_modifier_path, get_ideas_path, get_ministers_path, get_province_rev_path, get_tech_files, get_tech_team_files
 from file_paths import get_leaders_files, get_ministers_files, get_all_text_files_paths, get_brigades_files, get_divisions_files
-from file_paths import this_files_directory, countries_file
+from file_paths import this_files_directory, countries_file, get_province_csv_path
 from check_file_paths import AOD_PATH
 from read_hoi_files import get_tech_names, read_csv_file, read_txt_file, get_scenario_file_path_for_country, get_minister_and_policy_names, get_government_titles, get_idea_titles
 from read_hoi_files import the_encoding, text_encoding, csv_encoding, get_texts_from_files, get_texts_from_files_w_duplicates
 from classes import Component, EFFECT_ATTRIBUTES, Effect, MODIFIER_ATTRIBUTES, Modifier, Tech, TechTeam, Leader
-from classes import MinisterPersonality, Minister, Idea, get_minister_personality, Model, Brigade, Division
+from classes import MinisterPersonality, Minister, Idea, get_minister_personality, Model, Brigade, Division, Province
 from event import Event, get_event_from_raw_event
 
 
@@ -705,6 +705,7 @@ class FileScanner:
 
         self.event_dict = None
         self.country_dict = None
+        self.province_dict = None
 
         self.issues = []
 
@@ -990,6 +991,109 @@ class FileScanner:
     # def scan_leaders(self):
     #     self.leader_dict = scan_all_leaders()
 
+    def scan_provinces(self, check_unique_ids=False, show_issues=False):
+        # Id
+        # Name
+        # Area
+        # Region
+        # Continent
+        # Climate
+        # Terrain
+        # SizeModifier
+        # AirCapacity
+        # Infrastructure
+        # City
+        # Beaches
+        # Port Allowed
+        # Port Seazone
+        # IC
+        # Manpower
+        # Oil
+        # Metal
+        # Energy
+        # Rare Materials
+        # City XPos
+        # City YPos
+        # Army XPos
+        # Army YPos
+        # Port XPos
+        # Port YPos
+        # Beach XPos
+        # Beach YPos
+        # Beach Icon
+        # Fort XPos
+        # Fort YPos
+        # AA XPos
+        # AA YPos
+        # Counter x
+        # Counter Y
+        # Terrain variant
+        # Terrain x
+        # Terrain Y
+        # Terrain variant
+        # Terrain x
+        # Terrain Y
+        # Terrain variant
+        # Terrain x
+        # Terrain Y
+        # Terrain variant
+        # Fill coord X
+        # Fill coord Y
+        province_file_path = get_province_csv_path(self.aod_path)
+        csv_content = read_csv_file(province_file_path)
+
+        keys = csv_content[0]
+        id_index = keys.index("Id")
+        name_index = keys.index("Name")
+        area_index = keys.index("Area")
+        region_index = keys.index("Region")
+        continent_index = keys.index("Continent")
+        climate_index = keys.index("Climate")
+        terrain_index = keys.index("Terrain")
+        beaches_index = keys.index("Beaches")
+        port_allowed_index = keys.index("Port Allowed")
+        port_seazone_index = keys.index("Port Seazone")
+        infra_index = keys.index("Infrastructure")
+        ic_index = keys.index("IC")
+        mp_index = keys.index("Manpower")
+        oil_index = keys.index("Oil")
+        metal_index = keys.index("Metal")
+        energy_index = keys.index("Energy")
+        rares_index = keys.index("Rare Materials")
+
+
+        self.province_dict = dict()
+        for i, row in enumerate(csv_content):
+            if i == 0:
+                continue
+            name_key = row[name_index]
+            province_name = self.text_dict.get(name_key)
+            if province_name is None:
+                province_name = ""
+            province = Province(
+                row[id_index],
+                name_key,
+                row[area_index],
+                row[region_index],
+                row[continent_index],
+                row[climate_index],
+                row[terrain_index],
+                row[infra_index],
+                row[beaches_index],
+                row[port_allowed_index],
+                row[port_seazone_index],
+                row[ic_index],
+                row[mp_index],
+                row[oil_index],
+                row[metal_index],
+                row[energy_index],
+                row[rares_index],
+                province_name
+            )
+            self.province_dict[row[id_index]] = province
+
+
+
     def scan(self, scan_everything=False):
         if self.event_dict is None:
             self.scan_main_scenario_file()
@@ -1008,6 +1112,8 @@ class FileScanner:
             self.scan_ideas()
         if scan_everything or self.leader_dict is None:
             self.scan_leaders()
+        if scan_everything or self.province_dict is None:
+            self.scan_provinces()
 
 
 def get_country_data():
