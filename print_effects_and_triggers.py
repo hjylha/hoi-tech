@@ -2754,3 +2754,16 @@ def print_idea(idea, indent_num=2, indent_add=2, text_dict=None, force_default=F
     indent_num += indent_add
     for gov_type in idea.gov_types:
         print(" " * indent_num, gov_type)
+
+
+def print_province(province, indent_num=2, indent_add=2, force_default=False):
+    name_text = "[NO NAME]" if not province.name else province.name
+    print(" " * indent_num, f"{province.prov_id}: {name_text}")
+    print()
+    print(" " * indent_num, f"Infrastructure: {province.infra}")
+    print(" " * indent_num, f"Manpower: {province.mp}")
+    print(" " * indent_num, f"Industrial Capacity: {province.ic}")
+    print(" " * indent_num, f"Energy: {province.energy}")
+    print(" " * indent_num, f"Metal: {province.metal}")
+    print(" " * indent_num, f"Rare Materials: {province.rares}")
+    print(" " * indent_num, f"Oil: {province.oil}")
