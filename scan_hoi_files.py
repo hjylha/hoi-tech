@@ -666,6 +666,7 @@ class FileScanner:
     # def __init__(self, scenario_path, text_dict_w_duplicates=None, text_dict=None, tech_dict=None, minister_dict=None, leader_dict=None):
     def __init__(
         self,
+        aod_path,
         scenario_path,
         text_dict_w_duplicates=None,
         text_dict=None,
@@ -676,6 +677,7 @@ class FileScanner:
         division_dict=None,
         ideas_and_policies=None
     ):
+        self.aod_path = aod_path
         self.scenario_path = scenario_path
         self.text_dict_w_duplicates = text_dict_w_duplicates
         self.text_dict = text_dict
@@ -1075,7 +1077,7 @@ if __name__ == "__main__":
 
     def get_fss():
         start_time = time.time()
-        fss = [FileScanner(scenario_path, td_w_duplicates, td, tech_dict, md, ld, bd, dd) for scenario_path in scen_p]
+        fss = [FileScanner(AOD_PATH, scenario_path, td_w_duplicates, td, tech_dict, md, ld, bd, dd) for scenario_path in scen_p]
         already_scanned_event_files = None
         for fs in fss:
             print(fs.scenario_path)
