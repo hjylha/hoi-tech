@@ -6,7 +6,7 @@ from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_tex
 from classes import find_tech, find_tech_teams, find_ministers, find_ideas, find_leaders
 from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
-from print_effects_and_triggers import print_event, print_tech, print_tech_team, print_minister, print_idea
+from print_effects_and_triggers import print_event, print_tech, print_tech_team, print_minister, print_idea, print_province
 
 
 def get_event_list(scenario_name, aod_path, show_empty_files=False):
@@ -860,10 +860,13 @@ class Search:
         # exact_keyword = False
         try:
             province_num = int(text_input)
-            province_name = self.files.text_dict.get(f"PROV{province_num}")
-            if province_name:
-                print("\n", " " * self.indent_num, f"[{province_num}] {province_name}")
-                return
+            print_province(self.files.province_dict[province_num], self.indent_num)
+            print()
+            return
+            # province_name = self.files.text_dict.get(f"PROV{province_num}")
+            # if province_name:
+            #     print("\n", " " * self.indent_num, f"[{province_num}] {province_name}")
+            #     return
         except ValueError:
             pass
 
@@ -881,6 +884,11 @@ class Search:
         print()
         if not suggestions:
             print(" " * self.indent_num, "Nothing found\n")
+            return
+
+        if len(suggestions) == 1:
+            print_province(self.files.province_dict[int(suggestions[0][0])], self.indent_num)
+            print()
             return
         for province_num, province_name in suggestions[:max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{province_num}] {province_name}")
