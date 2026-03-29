@@ -1066,12 +1066,16 @@ class FileScanner:
         for i, row in enumerate(csv_content):
             if i == 0:
                 continue
+            province_id = row[id_index]
+            if province_id == -1:
+                return
+
             name_key = row[name_index]
             province_name = self.text_dict.get(name_key)
             if province_name is None:
                 province_name = ""
             province = Province(
-                row[id_index],
+                province_id,
                 name_key,
                 row[area_index],
                 row[region_index],
