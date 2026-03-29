@@ -974,7 +974,7 @@ if __name__ == "__main__":
     text_dict = get_texts_from_files_w_duplicates(get_all_text_files_paths(AOD_PATH))
     text_dict_last = {key: value[-1][0] for key, value in text_dict.items()}
     
-    fs = FileScanner(scenario_path)
+    fs = FileScanner(AOD_PATH, scenario_path)
     fs.scan(scan_everything=True)
 
 
