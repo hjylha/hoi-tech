@@ -38,6 +38,8 @@ def is_aod_filepath_ok(aod_filepath):
         return False
     if not fp.get_province_rev_path(aod_filepath).exists():
         return False
+    if not fp.get_province_csv_path(aod_filepath).exists():
+        return False
     if not fp.get_tech_names_path(aod_filepath).exists():
         return False
     return True

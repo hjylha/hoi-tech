@@ -82,6 +82,9 @@ def get_ministers_files(aod_path):
 def get_province_rev_path(aod_path):
     return get_db_folder_path(aod_path) / "province_rev.inc"
 
+def get_province_csv_path(aod_path):
+    return get_db_folder_path(aod_path) / "province.csv"
+
 def get_leaders_folder_path(aod_path):
     return get_db_folder_path(aod_path) / "leaders"
 

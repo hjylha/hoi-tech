@@ -105,6 +105,11 @@ def test_get_province_rev_path(aod_path):
         assert fp.get_province_rev_path(aod_path).exists()
 
 
+def text_get_province_csv_path(aod_path):
+    if aod_path.exists():
+        assert fp.get_province_csv_path(aod_path).exists()
+
+
 def test_get_leaders_folder_path(aod_path):
     if aod_path.exists():
         assert fp.get_leaders_folder_path(aod_path).exists()
