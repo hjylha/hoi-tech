@@ -194,11 +194,11 @@ def test_calculate_1_day_progress_from_multipliers(game_constants, skill_multipl
 
 
 @pytest.mark.parametrize(
-    "m_type, m_value, m_option, m_extra, m_modifier_effect, result", [
-        ("tech_group_mod", "industry", None, None, -0.1000, ("industry", -0.1)),
-        ("diplomatic_cost_mod", "bring_to_alliance", 0, None, -0.5000, None)
+    "m_type, m_value, m_option, m_extra, m_modifier_effect, m_option1, m_option2, m_division, result", [
+        ("tech_group_mod", "industry", None, None, -0.1000, None, None, None, ("industry", -0.1)),
+        ("diplomatic_cost_mod", "bring_to_alliance", 0, None, -0.5000, None, None, None, None)
     ]
 )
-def test_get_modifiers_tech_effects(m_type, m_value, m_option, m_extra, m_modifier_effect, result):
-    modifier = classes.Modifier(m_type, m_value, m_option, m_extra, m_modifier_effect)
+def test_get_modifiers_tech_effects(m_type, m_value, m_option, m_extra, m_modifier_effect, m_option1, m_option2, m_division, result):
+    modifier = classes.Modifier(m_type, m_value, m_option, m_extra, m_modifier_effect, m_option1, m_option2, m_division)
     assert classes.get_modifiers_tech_effects(modifier) == result
