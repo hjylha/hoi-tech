@@ -1147,3 +1147,95 @@ class Division(Brigade):
 
 class UnitModifiers:
     pass
+
+
+class Province:
+    # Id
+    # Name
+    # Area
+    # Region
+    # Continent
+    # Climate
+    # Terrain
+    # SizeModifier
+    # AirCapacity
+    # Infrastructure
+    # City
+    # Beaches
+    # Port Allowed
+    # Port Seazone
+    # IC
+    # Manpower
+    # Oil
+    # Metal
+    # Energy
+    # Rare Materials
+    # City XPos
+    # City YPos
+    # Army XPos
+    # Army YPos
+    # Port XPos
+    # Port YPos
+    # Beach XPos
+    # Beach YPos
+    # Beach Icon
+    # Fort XPos
+    # Fort YPos
+    # AA XPos
+    # AA YPos
+    # Counter x
+    # Counter Y
+    # Terrain variant
+    # Terrain x
+    # Terrain Y
+    # Terrain variant
+    # Terrain x
+    # Terrain Y
+    # Terrain variant
+    # Terrain x
+    # Terrain Y
+    # Terrain variant
+    # Fill coord X
+    # Fill coord Y
+    def __init__(
+        self,
+        province_id,
+        name_key,
+        area,
+        region,
+        continent,
+        climate,
+        terrain,
+        infrastructure,
+        beaches,
+        port_allowed,
+        port_seazone,
+        ic,
+        manpower,
+        oil,
+        metal,
+        energy,
+        rare_materials,
+        name=""
+    ):
+        self.prov_id = province_id
+        self.name_key = name_key
+        self.name = name
+
+        self.area = area
+        self.region = region
+        self.continent = continent
+
+        self.climate = climate
+        self.terrain = terrain
+        self.has_beaches = beaches
+        self.port_allowed = port_allowed
+        self.port_seazone = port_seazone
+
+        self.infra = infrastructure
+        self.ic = ic
+        self.mp = manpower
+        self.oil = oil
+        self.metal = metal
+        self.energy = energy
+        self.rares = rare_materials
