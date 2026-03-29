@@ -1796,7 +1796,8 @@ def province_project_mod_as_str(modifier, text_dict):
     return f"- {BUILDING_DICT[modifier.value]} {text_dict[the_key]}: {get_pct_effect_str(modifier)}"
 
 def remote_placement_min_ic_mod_as_str(modifier, text_dict):
-    pass
+    the_key = "T_REMOTE_PLACEMENT_MIN_IC"
+    return get_text_and_pct(the_key, modifier, text_dict)
 
 def resource_mod_as_str(modifier, text_dict):
     # TODO:
