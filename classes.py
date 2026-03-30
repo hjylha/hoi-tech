@@ -1246,7 +1246,7 @@ class Province:
         self.rares = rare_materials
 
     def get_efficiency(self, revolt_risk=0):
-        infra_eff = self.BASE_EFFICIENCY + self.MULTIPLIER * self.infra // self.INFRA_SIZE
+        infra_eff = self.BASE_EFFICIENCY + self.MULTIPLIER * (self.infra // self.INFRA_SIZE)
         return infra_eff * (1 + self.ic * self.MULTIPLIER) * (1 - 2 * revolt_risk * self.MULTIPLIER)
 
     def get_ic(self, revolt_risk=0):
