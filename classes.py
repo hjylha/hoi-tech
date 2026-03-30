@@ -1150,6 +1150,11 @@ class UnitModifiers:
 
 
 class Province:
+    BASE_EFFICIENCY = 0.9
+
+    MULTIPLIER = 0.005
+
+    INFRA_SIZE = 5
     # Id
     # Name
     # Area
@@ -1239,3 +1244,26 @@ class Province:
         self.metal = metal
         self.energy = energy
         self.rares = rare_materials
+
+    def get_efficiency(self, revolt_risk=0):
+        infra_eff = self.BASE_EFFICIENCY + self.MULTIPLIER * self.infra // self.INFRA_SIZE
+        return infra_eff * (1 + self.ic * self.MULTIPLIER) * (1 - 2 * revolt_risk * self.MULTIPLIER)
+
+    def get_ic(self, revolt_risk=0):
+        return self.get_efficiency(revolt_risk) * self.ic
+        # return (self.BASE_EFFICIENCY + self.MULTIPLIER * self.infra // self.INFRA_SIZE) * self.ic * (1 + self.MULTIPLIER * self.ic)
+
+    def get_resource(self, base_resource, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_efficiency(revolt_risk) * base_resource * (1 + 2 * tech_effect * self.MULTIPLIER) * peacetime_multiplier * (1 + policy_effect)
+
+    def get_energy(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource(self.energy, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_metal(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource(self.metal, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_rares(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource(self.rares, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_oil(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource(self.oil, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
