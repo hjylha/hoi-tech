@@ -860,7 +860,7 @@ class Search:
         # exact_keyword = False
         try:
             province_num = int(text_input)
-            print_province(self.files.province_dict[province_num], self.indent_num)
+            print_province(self.files.province_dict[province_num], self.indent_num, text_dict=self.files.text_dict)
             print()
             return
             # province_name = self.files.text_dict.get(f"PROV{province_num}")
@@ -887,7 +887,7 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            print_province(self.files.province_dict[int(suggestions[0][0])], self.indent_num)
+            print_province(self.files.province_dict[int(suggestions[0][0])], self.indent_num, text_dict=self.files.text_dict)
             print()
             return
         for province_num, province_name in suggestions[:max_num_of_suggestions]:

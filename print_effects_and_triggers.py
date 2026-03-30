@@ -2756,14 +2756,31 @@ def print_idea(idea, indent_num=2, indent_add=2, text_dict=None, force_default=F
         print(" " * indent_num, gov_type)
 
 
-def print_province(province, indent_num=2, indent_add=2, force_default=False):
+def print_province(province, indent_num=2, indent_add=2, text_dict=None, force_default=False):
     name_text = "[NO NAME]" if not province.name else province.name
     print(" " * indent_num, f"{province.prov_id}: {name_text}")
     print()
-    print(" " * indent_num, f"Infrastructure: {province.infra}")
-    print(" " * indent_num, f"Manpower: {province.mp}")
-    print(" " * indent_num, f"Industrial Capacity: {province.ic}")
-    print(" " * indent_num, f"Energy: {province.energy}")
-    print(" " * indent_num, f"Metal: {province.metal}")
-    print(" " * indent_num, f"Rare Materials: {province.rares}")
-    print(" " * indent_num, f"Oil: {province.oil}")
+    print(" " * indent_num, f"Area: {province.area}")
+    print(" " * indent_num, f"Region: {province.region}")
+    print(" " * indent_num, f"Continent: {province.continent}")
+    print()
+    has_beaches = "Yes" if province.has_beaches == 1 else "No"
+    print(" " * indent_num, f"Has beaches: {has_beaches}")
+    port_allowed = "Yes" if province.port_allowed == 1 else "No"
+    print(" " * indent_num, f"Can have a port: {port_allowed}")
+    if province.port_allowed == 1:
+        port_seazone = text_dict.get(f"PROV{province.port_seazone}")
+        port_seazone_str = "" if port_seazone is None else f" {port_seazone}"
+        print(" " * indent_num, f"Port seazone: [{province.port_seazone}]{port_seazone_str}")
+    print()
+    print(" " * indent_num, "Stats based on province.csv (ignoring revolt risk, tech, peacetime and policy effects):")
+    things = ["Infrastructure", "Manpower", "Province efficiency", "Industrial Capacity", "Energy", "Metal", "Rare Materials", "Oil"]
+    wordlength = 20
+    print(" " * indent_num, f"{things[0]}:{' ' * (wordlength - len(things[0]))} {province.infra}")
+    print(" " * indent_num, f"{things[1]}:{' ' * (wordlength - len(things[1]))} {province.mp}")
+    print(" " * indent_num, f"{things[2]}:{' ' * (wordlength - len(things[2]))} {round(province.get_efficiency() * 100, 2)} %")
+    print(" " * indent_num, f"{things[3]}:{' ' * (wordlength - len(things[3]))} {round(province.get_ic(), 2)} \t[Base value: {province.ic}]")
+    print(" " * indent_num, f"{things[4]}:{' ' * (wordlength - len(things[4]))} {round(province.get_energy(), 2)} \t[Base value: {province.energy}]")
+    print(" " * indent_num, f"{things[5]}:{' ' * (wordlength - len(things[5]))} {round(province.get_metal(), 2)} \t[Base value: {province.metal}]")
+    print(" " * indent_num, f"{things[6]}:{' ' * (wordlength - len(things[6]))} {round(province.get_rares(), 2)} \t[Base value: {province.rares}]")
+    print(" " * indent_num, f"{things[7]}:{' ' * (wordlength - len(things[7]))} {round(province.get_oil(), 2)} \t[Base value: {province.oil}]")
