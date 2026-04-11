@@ -1155,6 +1155,7 @@ class Province:
     MULTIPLIER = 0.005
 
     INFRA_SIZE = 5
+    MAX_INFRA = 200
     # Id
     # Name
     # Area
@@ -1249,12 +1250,22 @@ class Province:
         infra_eff = self.BASE_EFFICIENCY + self.MULTIPLIER * (self.infra // self.INFRA_SIZE)
         return infra_eff * (1 + self.ic * self.MULTIPLIER) * (1 - 2 * revolt_risk * self.MULTIPLIER)
 
+    def get_custom_efficiency(self, ic, infra, revolt_risk=0):
+        infra_eff = self.BASE_EFFICIENCY + self.MULTIPLIER * (infra // self.INFRA_SIZE)
+        return infra_eff * (1 + ic * self.MULTIPLIER) * (1 - 2 * revolt_risk * self.MULTIPLIER)
+
     def get_ic(self, revolt_risk=0):
         return self.get_efficiency(revolt_risk) * self.ic
         # return (self.BASE_EFFICIENCY + self.MULTIPLIER * self.infra // self.INFRA_SIZE) * self.ic * (1 + self.MULTIPLIER * self.ic)
 
+    def get_ic_w_max_infra(self, revolt_risk=0):
+        return self.get_custom_efficiency(self.ic, self.MAX_INFRA, revolt_risk) * self.ic
+
     def get_resource(self, base_resource, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
         return self.get_efficiency(revolt_risk) * base_resource * (1 + 2 * tech_effect * self.MULTIPLIER) * peacetime_multiplier * (1 + policy_effect)
+
+    def get_resource_w_max_infra(self, base_resource, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_custom_efficiency(self.ic, self.MAX_INFRA, revolt_risk) * base_resource * (1 + 2 * tech_effect * self.MULTIPLIER) * peacetime_multiplier * (1 + policy_effect)
 
     def get_energy(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
         return self.get_resource(self.energy, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
@@ -1267,3 +1278,15 @@ class Province:
 
     def get_oil(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
         return self.get_resource(self.oil, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_energy_w_max_infra(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource_w_max_infra(self.energy, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_metal_w_max_infra(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource_w_max_infra(self.metal, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_rares_w_max_infra(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource_w_max_infra(self.rares, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+    def get_oil_w_max_infra(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
+        return self.get_resource_w_max_infra(self.oil, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
