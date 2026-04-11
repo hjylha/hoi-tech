@@ -2779,8 +2779,25 @@ def print_province(province, indent_num=2, indent_add=2, text_dict=None, force_d
     print(" " * indent_num, f"{things[0]}:{' ' * (wordlength - len(things[0]))} {province.infra}")
     print(" " * indent_num, f"{things[1]}:{' ' * (wordlength - len(things[1]))} {province.mp}")
     print(" " * indent_num, f"{things[2]}:{' ' * (wordlength - len(things[2]))} {round(province.get_efficiency() * 100, 2)} %")
-    print(" " * indent_num, f"{things[3]}:{' ' * (wordlength - len(things[3]))} {round(province.get_ic(), 2)} \t[Base value: {province.ic}]")
-    print(" " * indent_num, f"{things[4]}:{' ' * (wordlength - len(things[4]))} {round(province.get_energy(), 2)} \t[Base value: {province.energy}]")
-    print(" " * indent_num, f"{things[5]}:{' ' * (wordlength - len(things[5]))} {round(province.get_metal(), 2)} \t[Base value: {province.metal}]")
-    print(" " * indent_num, f"{things[6]}:{' ' * (wordlength - len(things[6]))} {round(province.get_rares(), 2)} \t[Base value: {province.rares}]")
-    print(" " * indent_num, f"{things[7]}:{' ' * (wordlength - len(things[7]))} {round(province.get_oil(), 2)} \t[Base value: {province.oil}]")
+    values = [
+        (province.get_ic(), province.ic, province.get_ic_w_max_infra()),
+        (province.get_energy(), province.energy, province.get_energy_w_max_infra()),
+        (province.get_metal(), province.metal, province.get_metal_w_max_infra()),
+        (province.get_rares(), province.rares, province.get_rares_w_max_infra()),
+        (province.get_oil(), province.oil, province.get_oil_w_max_infra())
+    ]
+    value_lengths = (6, 18, 23)
+    for thing_name, value in zip(things[3:], values):
+        some_text = f"{thing_name}:{' ' * (wordlength - len(thing_name))}"
+        value_text = f"{round(value[0], 2)}"
+        value_text = value_text + " " * (value_lengths[0] - len(value_text))
+        base_text = f"[Base value: {value[1]}]"
+        # base_text = base_text + " " * (value_lengths[1] - len(base_text))
+        max_text = f"({round(value[2], 2)} with 200 infra)"
+        max_text = max_text + " " * (value_lengths[2] - len(max_text))
+        print(" " * indent_num, f"{some_text} {value_text} {max_text} {base_text}")
+    # print(" " * indent_num, f"{things[3]}:{' ' * (wordlength - len(things[3]))} {round(province.get_ic(), 2)} \t[Base value: {province.ic}]")
+    # print(" " * indent_num, f"{things[4]}:{' ' * (wordlength - len(things[4]))} {round(province.get_energy(), 2)} \t[Base value: {province.energy}]")
+    # print(" " * indent_num, f"{things[5]}:{' ' * (wordlength - len(things[5]))} {round(province.get_metal(), 2)} \t[Base value: {province.metal}]")
+    # print(" " * indent_num, f"{things[6]}:{' ' * (wordlength - len(things[6]))} {round(province.get_rares(), 2)} \t[Base value: {province.rares}]")
+    # print(" " * indent_num, f"{things[7]}:{' ' * (wordlength - len(things[7]))} {round(province.get_oil(), 2)} \t[Base value: {province.oil}]")
