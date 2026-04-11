@@ -155,7 +155,21 @@ class Tech:
         self.researched = 0
         self.deactivated = 0
         self.active = 0
-    
+
+        self.search_dict = {
+            "id": self.tech_id,
+            "name": self.name,
+            "short_name": self.short_name,
+            "path": self.filepath,
+            "category": self.category,
+            "requirements": self.requirements,
+            "components": self.components,
+            "effects": self.effects,
+            "allows": self.allows,
+            "deactivated_by": self.deactivated_by,
+            "post-war": self.is_post_war,
+        }
+
     def __str__(self):
         return f"{self.tech_id} {self.name}"
     
@@ -287,6 +301,18 @@ class TechTeam:
             pic_path = "gfx/interface/tech/Team_noimage.bmp"
         self.pic_path = pic_path
         self.researching = 0
+
+        self.search_dict = {
+            "id": self.team_id,
+            "name": self.name,
+            "country_code": self.country_code,
+            "country": self.country,
+            "skill": self.skill,
+            "start_year": self.start_year,
+            "end_year": self.end_year,
+            "specialities": self.specialities,
+            "path": self.filepath
+        }
 
     def __str__(self):
         return self.name
@@ -525,6 +551,9 @@ class MinisterOrIdea:
                 research_bonus_dict[category] += value
         return research_bonus_dict
 
+    def __str__(self):
+        return self.public_name
+
 
 class MinisterPersonality(MinisterOrIdea):
     def __init__(self, *args):
@@ -596,6 +625,19 @@ class Minister:
         if self.pic_path is None:
             self.pic_path = "gfx/interface/pics/Unknown.bmp"
         # self.modifiers = self.get_modifiers()
+
+        self.search_dict = {
+            "id": self.m_id,
+            "name": self.name,
+            "country_code": self.country_code,
+            "country": self.country,
+            "position": self.position,
+            "personality": self.personality,
+            "start_year": self.start_year,
+            "ideology": self.ideology,
+            "loyalty": self.loyalty,
+            "path": self.filepath
+        }
     
     def get_research_bonus(self):
         if self.personality is None:
@@ -811,7 +853,7 @@ class Leader:
         self.search_dict = {
             "id": self.leader_id,
             "name": self.name,
-            "filepath": self.filepath,
+            "path": self.filepath,
             "country_code": self.country_code,
             "country": self.country,
             "skill": self.skill,
@@ -1246,6 +1288,26 @@ class Province:
         self.energy = energy
         self.rares = rare_materials
 
+        self.search_dict = {
+            "id": self.prov_id,
+            "name": self.name,
+            "area": self.area,
+            "region": self.region,
+            "continent": self.continent,
+            "climate": self.climate,
+            "terrain": self.terrain,
+            "has_beaches": self.has_beaches,
+            "port_allowed": self.port_allowed,
+            "port_seazone": self.port_seazone,
+            "infrastructure": self.infra,
+            "ic": self.ic,
+            "manpower": self.mp,
+            "energy": self.energy,
+            "metal": self.metal,
+            "rares": self.rares,
+            "oil": self.oil
+        }
+
     def get_efficiency(self, revolt_risk=0):
         infra_eff = self.BASE_EFFICIENCY + self.MULTIPLIER * (self.infra // self.INFRA_SIZE)
         return infra_eff * (1 + self.ic * self.MULTIPLIER) * (1 - 2 * revolt_risk * self.MULTIPLIER)
@@ -1290,3 +1352,31 @@ class Province:
 
     def get_oil_w_max_infra(self, revolt_risk=0, tech_effect=0, peacetime_multiplier=1, policy_effect=0):
         return self.get_resource_w_max_infra(self.oil, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
+
+
+def find_things(search_terms, dict_to_search, country_codes=None):
+    try:
+        return [dict_to_search[int(search_terms)]]
+    except ValueError:
+        pass
+    except KeyError:
+        return []
+
+    search_terms = search_terms.lower()
+
+    matches = []
+    starts = []
+    other_suggestions = []
+    for _, thing in dict_to_search.items():
+        if country_codes and thing.country_code not in country_codes:
+            continue
+        thing_name = thing.name.lower()
+        if search_terms == thing_name:
+            matches.append(thing)
+            continue
+        if thing_name.startswith(search_terms):
+            starts.append(thing)
+            continue
+        if search_terms in thing_name:
+            other_suggestions.append(thing)
+    return matches + starts + other_suggestions
