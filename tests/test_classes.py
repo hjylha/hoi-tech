@@ -202,3 +202,20 @@ def test_calculate_1_day_progress_from_multipliers(game_constants, skill_multipl
 def test_get_modifiers_tech_effects(m_type, m_value, m_option, m_extra, m_modifier_effect, m_option1, m_option2, m_division, result):
     modifier = classes.Modifier(m_type, m_value, m_option, m_extra, m_modifier_effect, m_option1, m_option2, m_division)
     assert classes.get_modifiers_tech_effects(modifier) == result
+
+
+@pytest.mark.parametrize(
+    "search_text, expected_keywords, expected_type_value_pairs", [
+        ("", [""], dict()),
+        ("a b c", ["a", "b", "c"], dict()),
+        ("name=abc", [], {"name": "abc"}),
+        ('"a b"=c', [], {"a b": "c"}),
+        ('a="b c"', [], {"a": "b c"}),
+        ('"a b"="c d" stuff t1=1 t2=2', ["stuff"], {"a b": "c d", "t1": "1", "t2": "2"}),
+        ('"A b C=12" CaSes', ["a b c=12", "cases"], dict())
+    ]
+)
+def test_get_keywords_and_type_value_pairs(search_text, expected_keywords, expected_type_value_pairs):
+    keywords, type_value_pairs = classes.get_keywords_and_type_value_pairs(search_text)
+    assert keywords == expected_keywords
+    assert type_value_pairs == expected_type_value_pairs

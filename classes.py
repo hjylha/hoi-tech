@@ -1354,6 +1354,61 @@ class Province:
         return self.get_resource_w_max_infra(self.oil, revolt_risk, tech_effect, peacetime_multiplier, policy_effect)
 
 
+def get_keywords_and_type_value_pairs(search_text):
+    keywords = []
+    type_value_pairs = dict()
+    search_text = search_text.strip()
+    if not search_text:
+        keywords = [""]
+    key = None
+    while search_text:
+        if search_text.startswith('"') and '"' in search_text[1:]:
+            end_index = search_text[1:].index('"') + 1
+            try:
+                next_char = search_text[end_index + 1]
+                if next_char == "=":
+                    key = search_text[1:end_index].lower()
+                    search_text = search_text[end_index + 2:].strip()
+                    continue
+                if next_char == " " and key:
+                    type_value_pairs[key] = search_text[1:end_index].lower()
+                    search_text = search_text[end_index + 1:].strip()
+                    key = None
+                    continue
+                if next_char == " ":
+                    keywords.append(search_text[1:end_index].lower())
+                    search_text = search_text[end_index + 1:].strip()
+                    continue
+            except IndexError:
+                if key:
+                    type_value_pairs[key] = search_text[1:end_index].lower()
+                    search_text = search_text[end_index + 1:].strip()
+                    key = None
+                    continue
+                keywords.append(search_text[1:end_index].lower())
+                search_text = search_text[end_index + 1:].strip()
+                continue
+        possible_keyword = search_text.split(" ")[0].strip()
+        if "=" in possible_keyword[1:] and key:
+            type_value_pairs[key] = possible_keyword.lower()
+            search_text = search_text[len(possible_keyword):].strip()
+            key = None
+            continue
+        if "=" in possible_keyword[1:]:
+            end_index = possible_keyword[1:].index("=") + 1
+            key = possible_keyword[:end_index]
+            search_text = search_text[end_index + 1:]
+            continue
+        if key:
+            type_value_pairs[key] = possible_keyword.lower()
+            search_text = search_text[len(possible_keyword):].strip()
+            key = None
+            continue
+        keywords.append(possible_keyword.lower())
+        search_text = search_text[len(possible_keyword):].strip()
+    return keywords, type_value_pairs
+
+
 def find_things(search_terms, dict_to_search, country_codes=None):
     try:
         return [dict_to_search[int(search_terms)]]
