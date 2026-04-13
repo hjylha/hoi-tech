@@ -3,7 +3,7 @@ import sys
 from file_paths import get_scenarios_folder_path, get_event_text_paths, get_all_text_files_paths
 from check_file_paths import AOD_PATH
 from read_hoi_files import read_scenario_file_for_events, read_txt_file, get_texts_from_files, get_country_names, get_texts_from_files_w_duplicates
-from classes import find_tech, find_tech_teams, find_ministers, find_ideas, find_leaders
+from classes import find_tech, find_tech_teams, find_ministers, find_ideas, find_leaders, find_things
 from scan_hoi_files import get_tech_dict, FileScanner
 from event import Trigger, get_actions, Event, suggest_events_based_on_search_words, get_conditions
 from print_effects_and_triggers import print_event, print_tech, print_tech_team, print_minister, print_idea, print_province
@@ -702,7 +702,8 @@ class Search:
         if country_codes is None:
             print(" " * self.indent_num, f"Leaders have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
 
-        suggestions = find_leaders(text_input, self.files.leader_dict, country_codes)
+        # suggestions = find_leaders(text_input, self.files.leader_dict, country_codes)
+        suggestions = find_things(text_input, self.files.leader_dict, country_codes)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
@@ -712,11 +713,11 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            suggestions[0].print_leader_info(self.indent_num, self.indent_add)
+            suggestions[0][0].print_leader_info(self.indent_num, self.indent_add)
             print()
             return
 
-        for leader in suggestions[:max_num_of_suggestions]:
+        for leader, score in suggestions[:max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{leader.leader_id}] {leader.name} [{leader.country_code}] skill: {leader.skill} ({leader.TYPES[leader.land_naval_or_air]})")
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
@@ -729,7 +730,8 @@ class Search:
         if country_codes is None:
             print(" " * self.indent_num, f"Ministers have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
 
-        suggestions = find_ministers(text_input, self.files.minister_dict, country_codes)
+        # suggestions = find_ministers(text_input, self.files.minister_dict, country_codes)
+        suggestions = find_things(text_input, self.files.minister_dict, country_codes)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
@@ -739,12 +741,12 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            print_minister(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
+            print_minister(suggestions[0][0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
             # suggestions[0].print_minister_info(self.indent_num, self.indent_add)
             print()
             return
 
-        for minister in suggestions[:max_num_of_suggestions]:
+        for minister, score in suggestions[:max_num_of_suggestions]:
             personality = "-" if minister.personality is None else minister.personality.public_name
             print(" " * self.indent_num, f"[{minister.m_id}] {minister.name} [{minister.country_code}] position: {minister.position} ({personality})")
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
@@ -795,7 +797,8 @@ class Search:
         if country_codes is None:
             print(" " * self.indent_num, f"Tech teams have to have a country, {self.NO_COUNTRY_FLAG} is ignored.")
 
-        suggestions = find_tech_teams(text_input, self.files.techteam_dict, country_codes)
+        # suggestions = find_tech_teams(text_input, self.files.techteam_dict, country_codes)
+        suggestions = find_things(text_input, self.files.techteam_dict, country_codes)
 
         max_num_of_suggestions = self.THE_MAX_NUM_OF_SUGGESTIONS if show_all else self.max_num_of_suggestions
 
@@ -805,13 +808,13 @@ class Search:
             return
 
         if len(suggestions) == 1:
-            print_tech_team(suggestions[0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
+            print_tech_team(suggestions[0][0], self.indent_num, self.indent_add, self.files.text_dict, force_default=force_default)
             # suggestions[0].print_tech_team_info(self.indent_num, self.indent_add)
             print()
             return
 
-        for tech_team in suggestions[:max_num_of_suggestions]:
-            print(" " * self.indent_num, f"[{tech_team.team_id}] {tech_team.name} [{tech_team.country_code}] skill: {tech_team.skill}")
+        for tech_team, score in suggestions[:max_num_of_suggestions]:
+            print(" " * self.indent_num, f"[{tech_team.team_id}] {tech_team.name} [{tech_team.country_code}] skill: {tech_team.skill} (score: {score})")
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
