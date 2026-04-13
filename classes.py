@@ -1409,29 +1409,80 @@ def get_keywords_and_type_value_pairs(search_text):
     return keywords, type_value_pairs
 
 
-def find_things(search_terms, dict_to_search, country_codes=None):
+def give_score_to_match(keyword, actual_text, score_triple):
+    if keyword == actual_text:
+        return score_triple[0]
+    if f"the {keyword}" == actual_text:
+        return int(0.9 * score_triple[0])
+    elif actual_text.startswith(keyword):
+        return score_triple[1]
+    elif actual_text.startswith(f"the {keyword}"):
+        return int(0.9 * score_triple[1])
+    elif keyword in actual_text:
+        return score_triple[2]
+    return 0
+
+
+def find_things(search_terms, dict_to_search, country_codes=None, where_to_search_keywords=("name",)):
     try:
-        return [dict_to_search[int(search_terms)]]
+        return [[dict_to_search[int(search_terms)], 1]]
     except ValueError:
         pass
     except KeyError:
         return []
 
-    search_terms = search_terms.lower()
+    keywords, type_value_pairs = get_keywords_and_type_value_pairs(search_terms)
 
-    matches = []
-    starts = []
-    other_suggestions = []
-    for _, thing in dict_to_search.items():
+    # print(f"{country_codes=}")
+    # print(f"{keywords=}")
+    # print(f"{type_value_pairs=}")
+
+    # search_terms = search_terms.lower()
+
+    suggestions = []
+    scores = dict()
+    score_triple = (1_000, 200, 5)
+
+    for thing_id, thing in dict_to_search.items():
         if country_codes and thing.country_code not in country_codes:
             continue
-        thing_name = thing.name.lower()
-        if search_terms == thing_name:
-            matches.append(thing)
+
+        score = 0
+
+        all_keywords_found = False
+        for keyword in keywords:
+            keyword_score = 0
+            for key in where_to_search_keywords:
+                try:
+                    thing_text = thing.search_dict[key].lower()
+                    # if keyword in thing_text:
+                    #     print(f"Found {keyword} in {thing_text}")
+                    keyword_score += give_score_to_match(keyword, thing_text, score_triple)
+                except KeyError:
+                    print(f"Error: {key} is not a key in search_dict of {type(thing)}")
+            if keyword_score > 0:
+                score += keyword_score
+                continue
+            break
+        else:
+            all_keywords_found = True
+        if not all_keywords_found:
             continue
-        if thing_name.startswith(search_terms):
-            starts.append(thing)
-            continue
-        if search_terms in thing_name:
-            other_suggestions.append(thing)
-    return matches + starts + other_suggestions
+
+        for type_str, value_str in type_value_pairs.items():
+            t_v_score = 0
+            for key, value in thing.search_dict.items():
+                key_score = give_score_to_match(type_str, key, score_triple)
+                value_score = give_score_to_match(value_str, str(value), score_triple)
+                if key_score > 0 and value_score > 0:
+                    t_v_score += key_score + value_score
+            if t_v_score > 0:
+                score += t_v_score
+                continue
+            break
+        else:
+            suggestions.append(thing)
+            scores[thing_id] = score
+
+    suggestions_and_scores = [[thing, scores[thing.search_dict["id"]]] for thing in suggestions]
+    return sorted(suggestions_and_scores, key=lambda pair: pair[1], reverse=True)
