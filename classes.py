@@ -1472,8 +1472,8 @@ def find_things(search_terms, dict_to_search, country_codes=None, where_to_searc
         for type_str, value_str in type_value_pairs.items():
             t_v_score = 0
             for key, value in thing.search_dict.items():
-                key_score = give_score_to_match(type_str, key, score_triple)
-                value_score = give_score_to_match(value_str, str(value), score_triple)
+                key_score = give_score_to_match(type_str, key.lower(), score_triple)
+                value_score = give_score_to_match(value_str, str(value).lower(), score_triple)
                 if key_score > 0 and value_score > 0:
                     t_v_score += key_score + value_score
             if t_v_score > 0:
