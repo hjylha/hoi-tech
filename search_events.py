@@ -717,8 +717,10 @@ class Search:
             print()
             return
 
-        for leader, score in suggestions[:max_num_of_suggestions]:
+        for leader, score, example_lines in suggestions[:max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{leader.leader_id}] {leader.name} [{leader.country_code}] skill: {leader.skill} ({leader.TYPES[leader.land_naval_or_air]})")
+            for line in example_lines:
+                print(" " * (self.indent_num + self.indent_add), line)
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
@@ -746,9 +748,11 @@ class Search:
             print()
             return
 
-        for minister, score in suggestions[:max_num_of_suggestions]:
+        for minister, score, example_lines in suggestions[:max_num_of_suggestions]:
             personality = "-" if minister.personality is None else minister.personality.public_name
             print(" " * self.indent_num, f"[{minister.m_id}] {minister.name} [{minister.country_code}] position: {minister.position} ({personality})")
+            for line in example_lines:
+                print(" " * (self.indent_num + self.indent_add), line)
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 
@@ -813,8 +817,10 @@ class Search:
             print()
             return
 
-        for tech_team, score in suggestions[:max_num_of_suggestions]:
+        for tech_team, score, example_lines in suggestions[:max_num_of_suggestions]:
             print(" " * self.indent_num, f"[{tech_team.team_id}] {tech_team.name} [{tech_team.country_code}] skill: {tech_team.skill} (score: {score})")
+            for line in example_lines:
+                print(" " * (self.indent_num + self.indent_add), line)
         self.print_too_many_to_show_message(suggestions, max_num_of_suggestions)
         print()
 

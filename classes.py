@@ -1421,18 +1421,22 @@ def get_keywords_and_type_value_pairs(search_text):
     return keywords, type_value_pairs
 
 
-def give_score_to_match(keyword, actual_text, score_triple):
-    if keyword == actual_text:
-        return score_triple[0]
-    if f"the {keyword}" == actual_text:
-        return int(0.9 * score_triple[0])
-    elif actual_text.startswith(keyword):
-        return score_triple[1]
-    elif actual_text.startswith(f"the {keyword}"):
-        return int(0.9 * score_triple[1])
-    elif keyword in actual_text:
-        return score_triple[2]
-    return 0
+def give_score_to_match(keyword, actual_text, score_triple, extra_chars_to_add=10):
+    actual_text_l = actual_text.lower()
+    if keyword == actual_text_l:
+        return score_triple[0], actual_text
+    if f"the {keyword}" == actual_text_l:
+        return int(0.9 * score_triple[0]), actual_text
+    elif actual_text_l.startswith(keyword):
+        return score_triple[1], actual_text[:len(keyword) + extra_chars_to_add]
+    elif actual_text_l.startswith(f"the {keyword}"):
+        return int(0.9 * score_triple[1]), actual_text[:len(keyword) + 4 + extra_chars_to_add]
+    elif keyword in actual_text_l:
+        some_index = actual_text_l.index(keyword)
+        start_index = max(0, some_index - extra_chars_to_add)
+        end_index = some_index + len(keyword) + extra_chars_to_add
+        return score_triple[2], actual_text[start_index:end_index]
+    return 0, ""
 
 
 def find_things(search_terms, dict_to_search, country_codes=None, where_to_search_keywords=("name",)):
@@ -1453,6 +1457,7 @@ def find_things(search_terms, dict_to_search, country_codes=None, where_to_searc
 
     suggestions = []
     scores = dict()
+    example_lines = dict()
     score_triple = (1_000, 200, 5)
 
     for thing_id, thing in dict_to_search.items():
@@ -1466,10 +1471,16 @@ def find_things(search_terms, dict_to_search, country_codes=None, where_to_searc
             keyword_score = 0
             for key in where_to_search_keywords:
                 try:
-                    thing_text = thing.search_dict[key].lower()
+                    thing_text = thing.search_dict[key]
                     # if keyword in thing_text:
                     #     print(f"Found {keyword} in {thing_text}")
-                    keyword_score += give_score_to_match(keyword, thing_text, score_triple)
+                    # keyword_score += give_score_to_match(keyword, thing_text, score_triple)
+                    score, example_text = give_score_to_match(keyword, thing_text, score_triple)
+                    keyword_score += score
+                    if example_lines.get(thing_id) is None:
+                        example_lines[thing_id] = [example_text]
+                    else:
+                        example_lines[thing_id].append(example_text)
                 except KeyError:
                     print(f"Error: {key} is not a key in search_dict of {type(thing)}")
             if keyword_score > 0:
@@ -1484,10 +1495,14 @@ def find_things(search_terms, dict_to_search, country_codes=None, where_to_searc
         for type_str, value_str in type_value_pairs.items():
             t_v_score = 0
             for key, value in thing.search_dict.items():
-                key_score = give_score_to_match(type_str, key.lower(), score_triple)
-                value_score = give_score_to_match(value_str, str(value).lower(), score_triple)
+                key_score, example_text_k = give_score_to_match(type_str, key, score_triple)
+                value_score, example_text_v = give_score_to_match(value_str, str(value), score_triple)
                 if key_score > 0 and value_score > 0:
                     t_v_score += key_score + value_score
+                    if example_lines.get(thing_id) is None:
+                        example_lines[thing_id] = [f"{example_text_k} : {example_text_v}"]
+                    else:
+                        example_lines[thing_id].append(f"{example_text_k} : {example_text_v}")
             if t_v_score > 0:
                 score += t_v_score
                 continue
@@ -1496,5 +1511,5 @@ def find_things(search_terms, dict_to_search, country_codes=None, where_to_searc
             suggestions.append(thing)
             scores[thing_id] = score
 
-    suggestions_and_scores = [[thing, scores[thing.search_dict["id"]]] for thing in suggestions]
+    suggestions_and_scores = [[thing, scores[thing.search_dict["id"]], example_lines[thing.search_dict["id"]]] for thing in suggestions]
     return sorted(suggestions_and_scores, key=lambda pair: pair[1], reverse=True)
