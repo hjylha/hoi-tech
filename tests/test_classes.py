@@ -212,7 +212,11 @@ def test_get_modifiers_tech_effects(m_type, m_value, m_option, m_extra, m_modifi
         ('"a b"=c', [], {"a b": "c"}),
         ('a="b c"', [], {"a": "b c"}),
         ('"a b"="c d" stuff t1=1 t2=2', ["stuff"], {"a b": "c d", "t1": "1", "t2": "2"}),
-        ('"A b C=12" CaSes', ["a b c=12", "cases"], dict())
+        ('"A b C=12" CaSes', ["a b c=12", "cases"], dict()),
+        ("abc=", [], {"abc": ""}),
+        ("abc= stuff", ["stuff"], {"abc": ""}),
+        ('"a b c"=', [], {"a b c": ""}),
+        ('abc= stuff another_thing "a b c "=', ["stuff", "another_thing"], {"abc": "", "a b c ": ""})
     ]
 )
 def test_get_keywords_and_type_value_pairs(search_text, expected_keywords, expected_type_value_pairs):

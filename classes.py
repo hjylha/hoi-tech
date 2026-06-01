@@ -1368,6 +1368,12 @@ def get_keywords_and_type_value_pairs(search_text):
                 next_char = search_text[end_index + 1]
                 if next_char == "=":
                     key = search_text[1:end_index].lower()
+                    try:
+                        if search_text[end_index + 2] == " ":
+                            type_value_pairs[key] = ""
+                            key = None
+                    except IndexError:
+                        type_value_pairs[key] = ""
                     search_text = search_text[end_index + 2:].strip()
                     continue
                 if next_char == " " and key:
@@ -1397,6 +1403,12 @@ def get_keywords_and_type_value_pairs(search_text):
         if "=" in possible_keyword[1:]:
             end_index = possible_keyword[1:].index("=") + 1
             key = possible_keyword[:end_index]
+            try:
+                if possible_keyword[end_index + 1] == " ":
+                    type_value_pairs[key] = ""
+                    key = None
+            except IndexError:
+                type_value_pairs[key] = ""
             search_text = search_text[end_index + 1:]
             continue
         if key:
